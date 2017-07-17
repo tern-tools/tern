@@ -1,0 +1,4 @@
+deb http://deb.debian.org/debian jessie main
+deb http://deb.debian.org/debian jessie-updates main
+deb http://security.debian.org jessie/updates main
+deb-src http://deb.debian.org/debian jessie main

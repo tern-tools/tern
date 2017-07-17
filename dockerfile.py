@@ -66,7 +66,7 @@ def clean_command(command):
     '''Given a command string, clean out all whitespaces, tabs and line
     indentations
     Leave && alone'''
-    return re.sub(cleaning, '', command)
+    return re.sub(cleaning, '', command).strip()
 
 
 def get_directive(line):

@@ -1,0 +1,12 @@
+# Trusted base images
+debian:
+  latest: jessie
+  tags:
+    - jessie
+    - jessie-backports
+
+ubuntu:
+  latest: 16.04
+  tags:
+    - 16.04
+    - 12.04
