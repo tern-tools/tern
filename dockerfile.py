@@ -1,12 +1,10 @@
 import re
 '''
-1. Read a provided Dockerfile and retrieve commands that would have
-run during 'docker build' to create the docker image
-2. For the docker directive RUN, retrieve the shell commands that were run
-3. For the docker directive ENV, retrieve all the environment variables
+Dockerfile parser and information retrieval
 '''
 
 directives = ['FROM',
+              'ARG',
               'RUN',
               'ENV',
               'COPY',
@@ -23,6 +21,10 @@ tabs = re.compile('\t')
 
 # regex strings
 cleaning = '[\t\\\\]'
+bash_var = '[\$\{\}]'
+
+# strings
+tag_separator = ':'
 
 
 def get_command_list(dockerfile_name):
@@ -84,3 +86,70 @@ def get_directive_list(command_list):
     for command in command_list:
         directive_list.append(get_directive(clean_command(command)))
     return directive_list
+
+
+def get_base_instructions(instructions):
+    '''Given a list of docker build instructions get a list of instructions
+    related to the base instructions
+    Possible docker instructions related to the base image:
+        FROM <base image>
+
+        FROM <image:tag>
+
+        ARG <key value pair>
+        FROM <key>
+
+    Dockerfile rules say that the only instruction that can precede FROM is
+    ARG'''
+    base_instructions = []
+    # check if the first instruction is FROM
+    if instructions[0][0] == 'FROM':
+        base_instructions.append(instructions[0])
+    # check if the first instruction is ARG
+    if instructions[0][0] == 'ARG':
+        # collect all ARGS until FROM
+        count = 0
+        while instructions[count][0] != 'FROM':
+            base_instructions.append(instructions[count])
+            count = count + 1
+        # get the form statement
+        base_instructions.append(instructions[count])
+    return base_instructions
+
+
+def get_base_image_tag(base_instructions):
+    '''Given the base docker instructions, return the base image and tag
+    as a tuple
+    This involves finding the ARG key value pair and then replacing it
+    if it occurs in the image part
+    NOTE: Dockerfile rules say that if no --build-arg is passed during
+    docker build and ARG has no default, the build will fail. We assume
+    for now that we will not be passing build arguments in which case
+    if there is no default ARG, we will raise an exception indicating that
+    since the build arguments are determined by the user we will not
+    be able to determine what the user wanted
+    TODO: accept build arguments'''
+    # get all the ARG key-value pairs
+    build_args = {}
+    from_instruction = ''
+    for instruction in base_instructions:
+        if instruction[0] == 'FROM':
+            from_instruction = instruction[1]
+        else:
+            key_value = instruction[1].split('=')
+            # raise error if there is no default value
+            if len(key_value) == 1:
+                raise ValueError('No ARG default value.'
+                                 ' Unable to determine base image')
+            build_args.update({key_value[0]: key_value[1]})
+    # replace any variables in FROM with value
+    from_instruction = re.sub(bash_var, '', from_instruction)
+    for key in build_args.keys():
+        from_instruction = from_instruction.replace(key, build_args[key])
+    # check if the base image has a tag
+    image_tag_list = from_instruction.split(tag_separator)
+    if len(image_tag_list) == 1:
+        # TODO: do we want to be restrictive?
+        print('No tag specified in the base image. Falling back on latest')
+        image_tag_list.append('latest')
+    return tuple(image_tag_list)
