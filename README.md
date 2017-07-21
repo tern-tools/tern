@@ -1,3 +1,18 @@
+### Requirements
+- Python 3.5
+
+### Usage
+```
+$ pyvenv testenv
+$ cd testenv
+$ git clone ssh://git@git.eng.vmware.com/ostc/docker-compliance.git
+$ source bin/activate
+$ cd docker-compliance
+$ pip install -r requirements.txt
+$ python demo.py '/path/to/dockerfile'
+```
+
+
 ### TODO
 - Move modules into a file called dockercommands.py. This is where the library of invokable shell commands via docker exec and other docker commands can live
 - Move the pieces to extract sources for packages and versions from here
