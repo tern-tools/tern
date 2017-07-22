@@ -1,7 +1,7 @@
-'''
-Functions specific to Docker FROM
-'''
 import yaml
+'''
+Docker image and package compliance checks
+'''
 
 # trusted images dictionary
 trusted_file = 'trusted_base.yml'
@@ -33,16 +33,3 @@ def check_trusted(image, tag='latest'):
     else:
         raise NameError('Not a trusted Docker image: ' + image)
     return ret_string
-
-
-def parse_image_tag(from_string):
-    '''Given the predicate of Docker FROM directive, return a tuple
-    containing the image and tag'''
-    image = ''
-    tag = 'latest'
-    image_tag_list = from_string.split(':')
-    image = image_tag_list[0].strip()
-    if len(image_tag_list) != 1:
-        # there is a tag
-        tag = image_tag_list[1].strip()
-    return (image, tag)

@@ -1,0 +1,16 @@
+apt-get:
+  package:
+    - name: '*' # all packages
+      version: '*' # all versions
+      url: '' # not applicable
+      retrieval:
+        container:
+          copy:
+            - from: 'config/{image}/{tag}/sources.list'
+              to: '/etc/apt/sources.list'
+            - from: 'config/image/apt_get_sources.sh'
+              to: '/'
+          invoke:
+            1:
+              command: './apt_get_sources.sh'
+              args: '*'
