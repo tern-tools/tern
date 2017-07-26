@@ -153,12 +153,3 @@ def get_base_image_tag(base_instructions):
         print('No tag specified in the base image. Falling back on latest')
         image_tag_list.append('latest')
     return tuple(image_tag_list)
-
-
-def get_shell_commands(run_comm):
-    '''Given a RUN command return a list of shell commands to be run'''
-    comm_list = run_comm.split('&&')
-    cleaned_list = []
-    for comm in comm_list:
-        cleaned_list.append(comm.strip())
-    return cleaned_list

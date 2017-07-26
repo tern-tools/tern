@@ -1,9 +1,14 @@
 apt-get:
-  package:
+  packages:
     - name: '*' # all packages
       version: '*' # all versions
-      url: '' # not applicable
-      retrieval:
+      url_retrieval:
+        container:
+          invoke:
+            1:
+              command: 'apt-get download --print-uris'
+              args: True
+      src_retrieval:
         container:
           copy:
             - from: 'config/{image}/{tag}/sources.list'
@@ -13,4 +18,4 @@ apt-get:
           invoke:
             1:
               command: './apt_get_sources.sh'
-              args: '*'
+              args: True

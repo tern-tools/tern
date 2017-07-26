@@ -14,7 +14,6 @@ $ python demo.py '/path/to/dockerfile'
 
 
 ### TODO
-- Move the pieces to extract sources for packages and versions from here
 - Make a module called report.py to handle reporting functions
 - Add a module to dockerfile.py to make subsections of docker instructions to handle multistage docker builds
 - Accept arguments for --build-args
