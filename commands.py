@@ -9,8 +9,10 @@ from contextlib import contextmanager
 Shell and docker command parser, information retrieval and invoking
 '''
 # docker commands
+check_images = ['docker', 'images']
 build = ['docker', 'build']
 run = ['docker', 'run', '-td']
+check_running = ['docker', 'ps', '-a']
 copy = ['docker', 'cp']
 execute = ['docker', 'exec']
 stop = ['docker', 'stop']
@@ -61,6 +63,8 @@ def docker_command(command, sudo=True, *extra):
     # check if sudo
     # TODO: need some way of checking if the user is added to the
     # docker group so they already have privileges
+    # TODO: Figure out how to resolve the container when a docker command
+    # fails
     if sudo:
         full_cmd.append('sudo')
     full_cmd.extend(command)
@@ -70,9 +74,10 @@ def docker_command(command, sudo=True, *extra):
     try:
         print("Running command: " + ' '.join(full_cmd))
         result = subprocess.check_output(full_cmd)
+        print("Completed: " + ' '.join(full_cmd))
+        return result
     except subprocess.CalledProcessError as error:
-        print("Error calling: " + error.cmd)
-    return result
+        print(error)
 
 
 def parse_command(command):
@@ -130,7 +135,11 @@ def get_packages(docker_commands):
     '''Given the docker commands in a dockerfile,  get a dictionary of
     packages that are in the command library of retrievable sources
     If it does not exist in the library then record them under
-    unrecognized packages'''
+    unrecognized packages
+    the dict looks like this:
+        recognized:{ <command name>: [list of packages installed with it]}
+        unrecognized: {<command name>: [list of packages installed with it]}
+    '''
     pkg_dict = {}
     pkg_dict.update({'recognized': {}, 'unrecognized': {}})
     shell_commands = []
@@ -176,6 +185,27 @@ def remove_uninstalled(pkg_dict):
     return pkg_dict
 
 
+def check_container():
+    '''Check if a container exists'''
+    is_container = False
+    keyvalue = 'name=' + container
+    result = docker_command(check_running, True, '--filter', keyvalue)
+    result_lines = result.decode('utf-8').split('\n')
+    if len(result_lines) > 2:
+        is_container = True
+    return is_container
+
+
+def check_image(image_tag_string):
+    '''Check if image exists'''
+    is_image = False
+    result = docker_command(check_images, True, image_tag_string)
+    result_lines = result.decode('utf-8').split('\n')
+    if len(result_lines) > 2:
+        is_image = True
+    return is_image
+
+
 def start_container(dockerfile, image_tag_string):
     '''Invoke docker command to build a given docker image and start it
     Assumptions: Docker is installed and the docker daemon is running
@@ -186,28 +216,45 @@ def start_container(dockerfile, image_tag_string):
     with pushd(path):
         docker_command(build, True, '-t', image_tag_string, '-f',
                        os.path.basename(dockerfile), '.')
+    if check_container():
+        remove_container()
     docker_command(run, True, '--name', container, image_tag_string)
 
 
-def cleanup(image_tag_string):
-    '''Clean up running container'''
-    # stop container
+def remove_container():
+    '''Remove a running container'''
     docker_command(stop, True, container)
-    # remove the container
     docker_command(remove, True, container)
-    # delete the image
-    docker_command(delete, True, image_tag_string)
 
 
-def invoke_in_container(invoke_dict, package):
+def remove_image(image_tag_string):
+    '''Remove an image'''
+    if check_container():
+        remove_container()
+    if check_image(image_tag_string):
+        docker_command(delete, True, image_tag_string)
+
+
+def check_all_pkgs(command):
+    '''Check if a command directives in the command library applies
+    to all packages installed by the command'''
+    is_all_pkgs = False
+    if len(command_lib[command]['packages']) == 1:
+        if command_lib[command]['packages'][0]['name'] == all_pkgs:
+            is_all_pkgs = True
+    return is_all_pkgs
+
+
+def invoke_in_container(invoke_dict, package, image_tag_string):
     '''Invoke the commands from the invoke dictionary within a running
     container. The invoke dictionary looks like:
         <step>:
             command: <the command to invoke>
             args: <True/False>
     update this dict with the result from each command invoked'''
-    count = invoke_dict.keys()
-    for step in range(1, count):
+    count = len(invoke_dict.keys())
+    result = ''
+    for step in range(1, count + 1):
         full_cmd = ''
         command = invoke_dict[step]['command']
         # check if there are any arg rules
@@ -217,9 +264,8 @@ def invoke_in_container(invoke_dict, package):
             else:
                 full_cmd = command
             try:
-                result = docker_command(execute, True, container, '/bin/bash',
-                                        '-c', full_cmd)
-                invoke_dict[step].update({'result': result})
+                result = docker_command(execute, True, container,
+                                        '/bin/bash', '-c', full_cmd)
             except:
                 print("Error executing command inside the container")
                 break
@@ -227,4 +273,4 @@ def invoke_in_container(invoke_dict, package):
             print("Please specify if the package name should be an argument"
                   " for this command")
             break
-    return invoke_dict
+    return result

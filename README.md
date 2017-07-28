@@ -11,10 +11,15 @@ $ cd docker-compliance
 $ pip install -r requirements.txt
 $ python demo.py '/path/to/dockerfile'
 ```
-
-
 ### TODO
-- Make a module called report.py to handle reporting functions
+#### Immediate:
+1. Update this README with a problem statement and high level design
+2. Clean up reporting
+3. Add back the retrieval bit
+4. Test with a variety of docker images and file the bugs here
+#### Later:
 - Add a module to dockerfile.py to make subsections of docker instructions to handle multistage docker builds
 - Accept arguments for --build-args
-- Update this README
+
+### Bugs:
+1. Script assumes user is not in the docker group
