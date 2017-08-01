@@ -23,3 +23,7 @@ $ python demo.py '/path/to/dockerfile'
 
 ### Bugs:
 1. Script assumes user is not in the docker group
+2. When a command fails within a container that package should be moved over to 'unrecognized'
+3. For reporting purposes - parse ENV
+4. Report should have 3 sections: confirmed, unconfirmed, unrecognized
+5. Add ability to parse image tarfiles
