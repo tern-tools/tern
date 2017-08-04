@@ -12,18 +12,18 @@ $ pip install -r requirements.txt
 $ python demo.py '/path/to/dockerfile'
 ```
 ### TODO
-#### Immediate:
-1. Update this README with a problem statement and high level design
-2. Clean up reporting
-3. Add back the retrieval bit
-4. Test with a variety of docker images and file the bugs here
-#### Later:
-- Add a module to dockerfile.py to make subsections of docker instructions to handle multistage docker builds
-- Accept arguments for --build-args
+
+#### Phase 2:
+
+1. Knowledge base: Each layer hash should come with a list of known packages that are installed in that layer
+2. Package details: version, license, source url either remote or local
+3. Allow for exceptions or additions for the command library
+4. In the reporting do not ignore packages that may be installed in the docker image - see bug 4
+4. Harden for testing within VMware's docker community
 
 ### Bugs:
 1. Script assumes user is not in the docker group
 2. When a command fails within a container that package should be moved over to 'unrecognized'
 3. For reporting purposes - parse ENV
 4. Report should have 3 sections: confirmed, unconfirmed, unrecognized
-5. Add ability to parse image tarfiles
+5. docker-command should raise exceptions that can be caught in demo for exiting
