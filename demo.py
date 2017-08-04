@@ -8,8 +8,8 @@ Objectives for first pass:
 
 import argparse
 
-import dockerfile as df
-import commands as cmds
+from utils import dockerfile as df
+from utils import commands as cmds
 import report as r
 
 
