@@ -11,6 +11,17 @@ $ cd docker-compliance
 $ pip install -r requirements.txt
 $ python demo.py '/path/to/dockerfile'
 ```
+
+### To run a test
+```
+$ cd testenv
+$ source bin/activate
+$ git clone ssh://git@git.eng.vmware.com/ostc/docker-compliance.git
+$ cd docker-compliance
+$ export PYTHONPATH=`pwd`
+$ python tests/<test file>.py
+```
+
 ### TODO
 
 #### Phase 2:
