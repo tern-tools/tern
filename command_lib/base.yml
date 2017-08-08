@@ -1,0 +1,40 @@
+# Known package listing steps for base images
+debian:
+  latest: jessie
+  tags:
+    jessie:
+        names:
+          container:
+            invoke:
+              1: "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
+        versions:
+          container:
+            invoke:
+              # versions are mandatory so we could compare with the above but in this way
+              # we can match the package names with the versions when creating our list
+              1: "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+              2: "for p in $pkgs; do echo $p; dpkg -l $p | awk 'NR>5 {print $3}'; echo END; done"
+        licenses:
+          container:
+            invoke:
+              # licenses are optional so the copyright file may not exist
+              1: "pkgs=`dpkg --get-selections | cut -f1 -d":" | awk '{print $1}'`"
+              2: "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done" 
+    jessie-backports:
+        names:
+          container:
+            invoke:
+              1: "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
+        versions:
+          container:
+            invoke:
+              # versions are mandatory so we could compare with the above but in this way
+              # we can match the package names with the versions when creating our list
+              1: "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+              2: "for p in $pkgs; do echo $p; dpkg -l $p | awk 'NR>5 {print $3}'; echo END; done"
+        licenses:
+          container:
+            invoke:
+              # licenses are optional so the copyright file may not exist
+              1: "pkgs=`dpkg --get-selections | cut -f1 -d":" | awk '{print $1}'`"
+              2: "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done" 

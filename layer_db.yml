@@ -1,0 +1,10 @@
+# The layer database akin to Docker's layerdb
+# This stores the sha of the image layer and the list of packages that came with it
+# This is a temporary cache implementation - perhaps a nosql database implementation later
+#layers:
+#  - sha: '123abc'
+#    packages:
+#        - name:
+#          version:
+#          src_url:
+#          license: 

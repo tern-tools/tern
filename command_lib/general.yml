@@ -1,0 +1,25 @@
+# general commands to be invoked when retrieving package information
+# Key-Value substitutions:
+# package: the package name
+# image: the image name that the tool uses
+# tag: the image tag name that the tool uses
+apt-get:
+  packages:
+    - name: default
+      version:
+        container:
+          invoke:
+            1: "dpkg -l {package} | awk 'NR>5 {print $3}"
+      src_url:
+        container:
+          invoke:
+            1: "apt-get download --print-uris {package}"
+      src:
+        container:
+          copy:
+            - from: 'config/{image}/{tag}/sources.list'
+              to: '/etc/apt/sources.list'
+            - from: 'config/image/apt_get_sources.sh'
+              to: '/'
+          invoke:
+            1: './apt_get_sources.sh {package}'
