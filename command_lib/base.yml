@@ -18,7 +18,7 @@ debian:
           container:
             invoke:
               # licenses are optional so the copyright file may not exist
-              1: "pkgs=`dpkg --get-selections | cut -f1 -d":" | awk '{print $1}'`"
+              1: "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
               2: "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done" 
     jessie-backports:
         names:
@@ -36,5 +36,5 @@ debian:
           container:
             invoke:
               # licenses are optional so the copyright file may not exist
-              1: "pkgs=`dpkg --get-selections | cut -f1 -d":" | awk '{print $1}'`"
+              1: "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
               2: "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done" 

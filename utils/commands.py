@@ -6,7 +6,8 @@ import yaml
 from contextlib import contextmanager
 
 '''
-Shell and docker command parser, information retrieval and invoking
+Shell and docker command parser and invoking of commands
+within and outside a docker container
 '''
 # docker commands
 check_images = ['docker', 'images']
@@ -25,11 +26,11 @@ image = 'doctective'
 container = 'doc-working'
 
 
-# sources library
-cmd_lib_file = 'command_library.yml'
-command_lib = {}
-with open(cmd_lib_file) as f:
-    command_lib = yaml.safe_load(f)
+# general snippets in command library
+snippet_file = 'command_lib/general.yml'
+snippets = {}
+with open(os.path.abspath(snippet_file)) as f:
+    snippets = yaml.safe_load(f)
 
 # package rules
 all_pkgs = '*'

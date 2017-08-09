@@ -26,11 +26,11 @@ $ python tests/<test file>.py
 
 #### Phase 2:
 
-1. Knowledge base: Each layer hash should come with a list of known packages that are installed in that layer
-2. Package details: version, license, source url either remote or local
+1. Replace the docker commands with docker API
+2. Knowledge base: Each layer hash should come with a list of known packages that are installed in that layer
 3. Allow for exceptions or additions for the command library
 4. In the reporting do not ignore packages that may be installed in the docker image - see bug 4
-4. Harden for testing within VMware's docker community
+5. Harden for testing within VMware's docker community
 
 ### Bugs:
 1. Script assumes user is not in the docker group

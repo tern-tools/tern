@@ -1,13 +1,14 @@
+import os
 import yaml
 '''
-Docker image and package compliance checks
+Docker image and layer related modules
 '''
 
-# trusted images dictionary
-trusted_file = 'trusted_base.yml'
-trusted = {}
-with open(trusted_file) as f:
-    trusted = yaml.safe_load(f)
+# known layer database
+layer_db_file = 'layer_db.yml'
+layer_db = {}
+with open(os.path.abspath(layer_db_file)) as f:
+    layer_db = yaml.safe_load(f)
 
 
 def check_trusted(image, tag='latest'):
