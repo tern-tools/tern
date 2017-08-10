@@ -26,11 +26,10 @@ $ python tests/<test file>.py
 
 #### Phase 2:
 
-1. Replace the docker commands with docker API
-2. Knowledge base: Each layer hash should come with a list of known packages that are installed in that layer
-3. Allow for exceptions or additions for the command library
-4. In the reporting do not ignore packages that may be installed in the docker image - see bug 4
-5. Harden for testing within VMware's docker community
+1. Knowledge base: Each layer hash should come with a list of known packages that are installed in that layer
+2. Allow for exceptions or additions for the command library
+3. In the reporting do not ignore packages that may be installed in the docker image - see bug 4
+4. Harden for testing within VMware's docker community
 
 ### Bugs:
 1. Script assumes user is not in the docker group
@@ -38,3 +37,7 @@ $ python tests/<test file>.py
 3. For reporting purposes - parse ENV
 4. Report should have 3 sections: confirmed, unconfirmed, unrecognized
 5. docker-command should raise exceptions that can be caught in demo for exiting
+
+### Upstream potential:
+1. Docker API assumes user is in docker group and hence can run docker commands without sudo
+2. Docker has no ability to step through docker history

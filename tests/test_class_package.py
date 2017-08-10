@@ -35,6 +35,16 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.package.license, 'Apache 2.0')
         self.assertEqual(self.package.src_url, 'github.com')
 
+    def testToDict(self):
+        self.package.version = 1.0
+        self.package.license = 'Apache 2.0'
+        self.package.src_url = 'github.com'
+        a_dict = self.package.to_dict()
+        self.assertEqual(a_dict['name'], 'x')
+        self.assertEqual(a_dict['version'], 1.0)
+        self.assertEqual(a_dict['license'], 'Apache 2.0')
+        self.assertEqual(a_dict['src_url'], 'github.com')
+
 
 if __name__ == '__main__':
     unittest.main()

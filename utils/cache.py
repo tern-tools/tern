@@ -2,35 +2,61 @@ import os
 import yaml
 '''
 Docker image and layer related modules
+NOTE: the cache contains base image information
+currently there is no way to step through docker history
+So the assumption is that the base image is a flat image (which it is not)
+For now we will run commands within the whole base image based on the
+Dockerfile, but ideally we need to step through the base image history and
+find the actual base image
 '''
 
-# known layer database
-layer_db_file = 'layer_db.yml'
-layer_db = {}
-with open(os.path.abspath(layer_db_file)) as f:
-    layer_db = yaml.safe_load(f)
+# known base image database
+cache_file = 'cache.yml'
+cache = {}
 
 
-def check_trusted(image, tag='latest'):
-    '''Check to see if the given image is trusted
-    Return a string: 'image:tag'
-    Else raise a NameError
-    WARNING: if a Dockerfile does not specify a tag, Docker will pull down
-    the tag marked 'latest'. The list of trusted images should be kept up to
-    date on the tag 'latest' is pointing to. We assume that the images
-    being produced from the Dockerfile pulling from the 'latest' tag are
-    taken care of by the maintainer of the images'''
-    ret_string = ''
-    # list of trusted images
-    images = trusted.keys()
-    if image in images:
-        # list of trusted tags
-        if tag == 'latest':
-            ret_string = image + ':' + trusted[image]['latest']
-        elif tag in trusted[image]['tags']:
-            ret_string = image + ':' + tag
-        else:
-            raise NameError('Not a trusted Docker tag for image: ' + image)
+def load():
+    '''Load the cache'''
+    with open(os.path.abspath(cache_file)) as f:
+        global cache
+        cache = yaml.load(f)
+    if cache is not None:
+        global cache
+        cache = {}
+
+
+def get_packages(sha):
+    '''Given an image sha retrieve cache record. If none return an empty list'''
+    if sha in cache.keys():
+        return cache[sha]
     else:
-        raise NameError('Not a trusted Docker image: ' + image)
-    return ret_string
+        return []
+
+
+def add_layer(layer_obj):
+    '''Given a layer object, add it to the cache'''
+    cache.update(layer_obj.to_dict())
+
+
+def save():
+    '''Given a layer object record it into the cache'''
+    with open(os.path.abspath(cache_file), 'w') as f:
+        yaml.dump(cache, f, default_flow_style=False)
+
+
+def remove_layer(sha):
+    '''Remove from cache the layer represented by the sha'''
+    success = False
+    if sha in cache.keys():
+        del cache[sha]
+        success = True
+    return success
+
+
+def clear():
+    '''Empty the cache - don't use unless you really have to_dict'''
+    global cache
+    cache = {}
+    with open(os.path.abspath(cache_file), 'w') as f:
+        global cache
+        yaml.dump(cache, f, default_flow_style=False)

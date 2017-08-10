@@ -30,5 +30,15 @@ class TestClassLayer(unittest.TestCase):
         self.assertTrue(self.layer.remove('y'))
         self.assertFalse(self.layer.remove('y'))
 
+    def testToDict(self):
+        p1 = Package('x')
+        self.layer.add(p1)
+        a_dict = self.layer.to_dict()
+        print(a_dict)
+        self.assertTrue(a_dict['123abc'])
+        self.assertEqual(len(a_dict['123abc']), 1)
+        self.assertEqual(a_dict['123abc'][0]['name'], 'x')
+
+
 if __name__ == '__main__':
     unittest.main()

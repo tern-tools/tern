@@ -5,7 +5,8 @@ class Layer(object):
         packages: list of objects of type Package (package.py)
     methods:
         add: adds a package to the layer
-        remove: removes a package from the layer'''
+        remove: removes a package from the layer
+        to_dict: returns a dict representation of the instance'''
     def __init__(self, sha):
         self.__sha = sha
         self.__packages = []
@@ -32,3 +33,11 @@ class Layer(object):
         if success:
             self.__packages.remove(self.__packages[rem_index])
         return success
+
+    def to_dict(self):
+        layer_dict = {}
+        pkg_list = []
+        for pkg in self.__packages:
+            pkg_list.append(pkg.to_dict())
+        layer_dict.update({self.sha: pkg_list})
+        return layer_dict

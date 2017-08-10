@@ -4,7 +4,9 @@ class Package(object):
         name: package name
         version: package version
         license: package license
-        src_url: package source url'''
+        src_url: package source url
+    methods:
+        to_dict: returns a dict representation of the instance'''
     def __init__(self, name):
         self.__name = name
         self.__version = 0.0
@@ -38,3 +40,11 @@ class Package(object):
     @src_url.setter
     def src_url(self, src_url):
         self.__src_url = src_url
+
+    def to_dict(self):
+        pkg_dict = {}
+        pkg_dict.update({'name': self.name})
+        pkg_dict.update({'version': self.version})
+        pkg_dict.update({'license': self.license})
+        pkg_dict.update({'src_url': self.src_url})
+        return pkg_dict
