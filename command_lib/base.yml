@@ -3,6 +3,7 @@ debian:
   latest: jessie
   tags:
     jessie:
+        shell: '/bin/bash'
         names:
           container:
             invoke:
@@ -21,6 +22,7 @@ debian:
               1: "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
               2: "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done" 
     jessie-backports:
+        shell: '/bin/bash'
         names:
           container:
             invoke:

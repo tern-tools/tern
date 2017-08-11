@@ -16,6 +16,7 @@ run = ['docker', 'run', '-td']
 check_running = ['docker', 'ps', '-a']
 copy = ['docker', 'cp']
 execute = ['docker', 'exec']
+inspect = ['docker', 'inspect']
 stop = ['docker', 'stop']
 remove = ['docker', 'rm']
 delete = ['docker', 'rmi']
@@ -25,18 +26,16 @@ delete = ['docker', 'rmi']
 image = 'doctective'
 container = 'doc-working'
 
-
+# base image command library
+base_file = 'command_lib/base.yml'
 # general snippets in command library
-snippet_file = 'command_lib/general.yml'
-snippets = {}
+snippet_file = 'command_lib/snippets.yml'
+# command library
+command_lib = {'base': {}, 'snippets': {}}
+with open(os.path.abspath(base_file)) as f:
+    command_lib['base'] = yaml.safe_load(f)
 with open(os.path.abspath(snippet_file)) as f:
-    snippets = yaml.safe_load(f)
-
-# package rules
-all_pkgs = '*'
-one_pkg = ''
-# TODO: check if reporting source urls for package management systems is OK
-not_appl = 'NA'
+    command_lib['snippets'] = yaml.safe_load(f)
 
 
 def get_shell_commands(run_comm):
@@ -116,19 +115,19 @@ def parse_command(command):
     return command_dict
 
 
-def check_sourcable(package_name):
-    '''Given a package name find out if the sources can be traced back.
-    We find this out by checking the package against the command library
+def check_sourcable(command, package_name):
+    '''Given a command and package name find out if the sources can be traced
+    back. We find this out by checking the package against the command library
     If the package has a url or source retrieval steps associated with it
     then we return True. If not then we return false'''
     sourcable = False
-    for command in command_lib.keys():
-        for package in command_lib[command]['packages']:
-            # check if one of these are defined in the library
-            if 'url' in package.keys() or \
-                    'url_retrieval' in package.keys() or \
-                    'src_retrieval' in package.keys():
-                sourcable = True
+    if command in command_lib['snippets'].keys():
+        for package in command_lib['snippets'][command]['packages']:
+            if package['name'] == package_name or \
+                    package['name'] == 'default':
+                if 'url' in package.keys() or \
+                        'src' in package.keys():
+                    sourcable = True
     return sourcable
 
 
@@ -141,15 +140,14 @@ def get_packages(docker_commands):
         recognized:{ <command name>: [list of packages installed with it]}
         unrecognized: {<command name>: [list of packages installed with it]}
     '''
-    pkg_dict = {}
-    pkg_dict.update({'recognized': {}, 'unrecognized': {}})
+    pkg_dict = {'recognized': {}, 'unrecognized': {}}
     shell_commands = []
     for docker_command in docker_commands:
         if docker_command[0] == 'RUN':
             shell_commands.extend(get_shell_commands(docker_command[1]))
     for command in shell_commands:
         command_obj = parse_command(command)
-        if command_obj['name'] in command_lib.keys():
+        if command_obj['name'] in command_lib['snippets'].keys():
             if check_sourcable(command_obj['name']):
                 if command_obj['name'] in pkg_dict['recognized'].keys():
                     pkg_dict['recognized'][command_obj['name']].extend(
@@ -236,17 +234,19 @@ def remove_image(image_tag_string):
         docker_command(delete, True, image_tag_string)
 
 
-def check_all_pkgs(command):
-    '''Check if a command directives in the command library applies
-    to all packages installed by the command'''
-    is_all_pkgs = False
-    if len(command_lib[command]['packages']) == 1:
-        if command_lib[command]['packages'][0]['name'] == all_pkgs:
-            is_all_pkgs = True
-    return is_all_pkgs
+def get_base_shell(image_tuple):
+    '''Given the base image tag tuple, return the shell command used for
+    invoking commands inside the image container'''
+    shell = ''
+    if image_tuple[0] in command_lib['base'].keys():
+        if image_tuple[1] in \
+                command_lib['base'][image_tuple[0]]['tags'].keys():
+            shell = \
+                command_lib['base'][image_tuple[0]][image_tuple[1]]['shell']
+    return shell
 
 
-def invoke_in_container(invoke_dict, package, image_tag_string):
+def invoke_in_container(invoke_dict, package, image_tag_string, shell):
     '''Invoke the commands from the invoke dictionary within a running
     container. The invoke dictionary looks like:
         <step>:
@@ -266,7 +266,7 @@ def invoke_in_container(invoke_dict, package, image_tag_string):
                 full_cmd = command
             try:
                 result = docker_command(execute, True, container,
-                                        '/bin/bash', '-c', full_cmd)
+                                        shell, '-c', full_cmd)
             except:
                 print("Error executing command inside the container")
                 break
@@ -275,3 +275,10 @@ def invoke_in_container(invoke_dict, package, image_tag_string):
                   " for this command")
             break
     return result
+
+
+def get_image_id(image_tag_string):
+    '''Get the image ID by inspecting the image'''
+    result = docker_command(inspect,
+                            True, "-f'{{json .Id}}'", image_tag_string)
+    return result.split(':').pop()
