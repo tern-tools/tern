@@ -17,12 +17,9 @@ cache = {}
 
 def load():
     '''Load the cache'''
+    global cache
     with open(os.path.abspath(cache_file)) as f:
-        global cache
         cache = yaml.load(f)
-    if cache is not None:
-        global cache
-        cache = {}
 
 
 def get_packages(sha):
@@ -58,5 +55,4 @@ def clear():
     global cache
     cache = {}
     with open(os.path.abspath(cache_file), 'w') as f:
-        global cache
         yaml.dump(cache, f, default_flow_style=False)
