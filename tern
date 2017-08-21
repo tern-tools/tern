@@ -6,13 +6,13 @@ Tern executable
 
 
 import argparse
-# import report
+import report
 
 
 def main(args):
     '''Execute according to subcommands'''
     if args.name == 'report':
-        print(args.dockerfile)
+        report.execute(args)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

@@ -1,7 +1,6 @@
 '''
 Common functions
 '''
-# import sys
 
 from utils import dockerfile as df
 from utils import commands as cmds
@@ -15,19 +14,31 @@ To tell the tool this information make an entry in command_lib/base.yml'''
 no_invocation = '''No invocation steps to perform within a container nor
 on the host machine.\n To tell the tool how to retrieve this information,
 make an entry in command_lib/base.yml'''
+base_image_not_found = '''Failed to pull the base image. Perhaps it was
+removed from Dockerhub'''
+
+# dockerfile commands
+docker_commands = []
 
 
-def check_cache_base(base_image_tag):
-    '''Given a base image tag return a list of packages for the layers
-    in the cache
-    TODO: images and layers are used intergably for the base image
-    Ideally the packages should be identified by the filesystem and the image
-    ID'''
+def load_docker_commands(dockerfile):
+    '''Given a dockerfile get a persistent list of docker commands'''
+    global docker_commands
+    # TODO: some checks on the passed argument would be nice here
+    docker_commands = df.get_directive_list(df.get_command_list(dockerfile))
+
+
+def check_base(base_image_tag):
+    '''Given a base image tag check if an image exists
+    If not then try to pull the image.'''
     image_tag_string = base_image_tag[0] + df.tag_separator + base_image_tag[1]
-    if not cmds.check_image(image_tag_string):
-        cmds.docker_command(cmds.pull, True, image_tag_string)
-    image_id = cmds.get_image_id(image_tag_string)
-    return c.get_packages(image_id)
+    success = cmds.check_image(image_tag_string)
+    if not success:
+        result = cmds.docker_command(cmds.pull, True, image_tag_string)
+        if result is None:
+            print(base_image_not_found)
+            success = False
+    return success
 
 
 def get_base_dict(base_image_tag):
@@ -68,19 +79,22 @@ def get_base_packages(base_image_tag):
     return package_list
 
 
-def create_report(dockerfile):
+def get_base_layer_obj(dockerfile):
     '''Given a Dockerfile do the following:
         1. Get the base image and tag
         2. Find all the packages that are installed that are in the
         command library
         3. If there are any retrieval steps execute those
-        4. Write a report'''
-    docker_commands = df.get_directive_list(
-        df.get_command_list(dockerfile))
+        4. Return a list of packages with the layer
+        5. If there are none then return None'''
     base_image_tag = df.get_base_image_tag(
         df.get_base_instructions(docker_commands))
+    if not check_base:
+        print(base_image_not_found)
+        raise
+    else:
+        # get the layers
 
-    # check the image against the cache
 
     # for now the image that gets build will be tagged with an image name
     # and the name of the base image on which it is being built

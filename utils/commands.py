@@ -21,11 +21,12 @@ inspect = ['docker', 'inspect']
 stop = ['docker', 'stop']
 remove = ['docker', 'rm']
 delete = ['docker', 'rmi']
+save = ['docker', 'save']
 
 # docker container names
 # TODO: randomly generated image and container names
-image = 'doctective'
-container = 'doc-working'
+image = 'tern-image'
+container = 'tern-container'
 
 # base image command library
 base_file = 'command_lib/base.yml'
@@ -60,7 +61,7 @@ def pushd(path):
 def docker_command(command, sudo=True, *extra):
     '''Invoke docker command'''
     full_cmd = []
-    result = ''
+    result = None
     # check if sudo
     # TODO: need some way of checking if the user is added to the
     # docker group so they already have privileges
@@ -76,7 +77,7 @@ def docker_command(command, sudo=True, *extra):
         print("Running command: " + ' '.join(full_cmd))
         result = subprocess.check_output(full_cmd)
         print("Completed: " + ' '.join(full_cmd))
-        return result
+        return result.decode('utf-8')[:-1]
     except subprocess.CalledProcessError as error:
         print(error)
 
@@ -278,3 +279,7 @@ def query_library(keys):
     while value and keys:
         value = value.get(keys.pop(0))
     return value
+
+
+def get_image_manifest(image_tag_string):
+    '''Run docker save and extract the files in a temporary directory'''

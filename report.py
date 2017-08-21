@@ -1,6 +1,9 @@
 '''
-Edit a report string and write it to a file
+Create a report
 '''
+# import sys
+
+import common
 
 # constants
 report_file = 'report.txt'
@@ -36,3 +39,10 @@ def write_report(report):
     '''Write the report to a file'''
     with open(report_file, 'w') as f:
         f.write(report)
+
+
+def execute(args):
+    '''Create a report'''
+    if args.dockerfile:
+        # parse the dockerfile
+        common.load_docker_commands(args.dockerfile)
