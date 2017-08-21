@@ -11,6 +11,7 @@ within and outside a docker container
 '''
 # docker commands
 check_images = ['docker', 'images']
+pull = ['docker', 'pull']
 build = ['docker', 'build']
 run = ['docker', 'run', '-td']
 check_running = ['docker', 'ps', '-a']
@@ -246,35 +247,21 @@ def get_base_shell(image_tuple):
     return shell
 
 
-def invoke_in_container(invoke_dict, package, image_tag_string, shell):
+def invoke_in_container(invoke_dict, image_tag_string, shell, package=''):
     '''Invoke the commands from the invoke dictionary within a running
     container. The invoke dictionary looks like:
-        <step>:
-            command: <the command to invoke>
-            args: <True/False>
-    update this dict with the result from each command invoked'''
+        <step>: <command>
+    update this dict with the result from each command invoked
+    <step>: <result>'''
     count = len(invoke_dict.keys())
-    result = ''
     for step in range(1, count + 1):
-        full_cmd = ''
-        command = invoke_dict[step]['command']
-        # check if there are any arg rules
-        if 'args' in invoke_dict[step].keys():
-            if invoke_dict[step]['args']:
-                full_cmd = command + ' ' + package
-            else:
-                full_cmd = command
-            try:
-                result = docker_command(execute, True, container,
-                                        shell, '-c', full_cmd)
-            except:
-                print("Error executing command inside the container")
-                break
-        else:
-            print("Please specify if the package name should be an argument"
-                  " for this command")
-            break
-    return result
+        full_cmd = invoke_dict[step].format(package=package)
+        try:
+            invoke_dict[step] = docker_command(execute, True, container,
+                                               shell, '-c', full_cmd)
+        except:
+            print("Error executing command inside the container")
+    return invoke_dict
 
 
 def get_image_id(image_tag_string):
@@ -282,3 +269,12 @@ def get_image_id(image_tag_string):
     result = docker_command(inspect,
                             True, "-f'{{json .Id}}'", image_tag_string)
     return result.split(':').pop()
+
+
+def query_library(keys):
+    '''Given a list of keys recover the value in the library
+    If the key doesn't exist return nothing'''
+    value = command_lib.get(keys.pop(0))
+    while value and keys:
+        value = value.get(keys.pop(0))
+    return value
