@@ -9,7 +9,7 @@ $ git clone ssh://git@git.eng.vmware.com/ostc/docker-compliance.git
 $ source bin/activate
 $ cd docker-compliance
 $ pip install -r requirements.txt
-$ python demo.py '/path/to/dockerfile'
+$ ./tern -h
 ```
 
 ### To run a test
