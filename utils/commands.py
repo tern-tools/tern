@@ -1,6 +1,9 @@
+import io
 import os
 import re
+import shutil
 import subprocess
+import tarfile
 import yaml
 
 from contextlib import contextmanager
@@ -20,7 +23,7 @@ execute = ['docker', 'exec']
 inspect = ['docker', 'inspect']
 stop = ['docker', 'stop']
 remove = ['docker', 'rm']
-delete = ['docker', 'rmi']
+delete = ['docker', 'rmi', '-f']
 save = ['docker', 'save']
 
 # docker container names
@@ -38,6 +41,9 @@ with open(os.path.abspath(base_file)) as f:
     command_lib['base'] = yaml.safe_load(f)
 with open(os.path.abspath(snippet_file)) as f:
     command_lib['snippets'] = yaml.safe_load(f)
+
+# temporary folder for extracting
+temp_folder = 'temp'
 
 
 def get_shell_commands(run_comm):
@@ -59,9 +65,9 @@ def pushd(path):
 
 
 def docker_command(command, sudo=True, *extra):
-    '''Invoke docker command'''
+    '''Invoke docker command. If the command fails nothing is returned
+    If it passes then the result is returned'''
     full_cmd = []
-    result = None
     # check if sudo
     # TODO: need some way of checking if the user is added to the
     # docker group so they already have privileges
@@ -77,7 +83,7 @@ def docker_command(command, sudo=True, *extra):
         print("Running command: " + ' '.join(full_cmd))
         result = subprocess.check_output(full_cmd)
         print("Completed: " + ' '.join(full_cmd))
-        return result.decode('utf-8')[:-1]
+        return result
     except subprocess.CalledProcessError as error:
         print(error)
 
@@ -224,14 +230,13 @@ def start_container(dockerfile, image_tag_string):
 
 def remove_container():
     '''Remove a running container'''
-    docker_command(stop, True, container)
-    docker_command(remove, True, container)
+    if check_container():
+        docker_command(stop, True, container)
+        docker_command(remove, True, container)
 
 
 def remove_image(image_tag_string):
     '''Remove an image'''
-    if check_container():
-        remove_container()
     if check_image(image_tag_string):
         docker_command(delete, True, image_tag_string)
 
@@ -281,5 +286,28 @@ def query_library(keys):
     return value
 
 
-def get_image_manifest(image_tag_string):
+def extract_image_metadata(image_tag_string):
     '''Run docker save and extract the files in a temporary directory'''
+    success = True
+    temp_path = os.path.abspath(temp_folder)
+    result = docker_command(save, True, image_tag_string)
+    if not result:
+        success = False
+    else:
+        with tarfile.open(fileobj=io.BytesIO(result)) as tar:
+            tar.extractall(temp_path)
+        if not os.path.exists(temp_path):
+            success = False
+    return success
+
+
+def clean_temp():
+    '''Remove the temp directory'''
+    temp_path = os.path.abspath(temp_folder)
+    if os.path.exists(temp_path):
+        shutil.rmtree(temp_path)
+
+
+def get_image_manifest():
+    '''Assuming that there is a temp folder with a manifest.json of
+    an image inside, get a dict of the manifest.json file'''
