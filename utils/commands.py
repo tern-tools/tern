@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import re
 import shutil
@@ -44,6 +45,8 @@ with open(os.path.abspath(snippet_file)) as f:
 
 # temporary folder for extracting
 temp_folder = 'temp'
+# docker manifest file
+manifest_file = 'manifest.json'
 
 
 def get_shell_commands(run_comm):
@@ -311,3 +314,8 @@ def clean_temp():
 def get_image_manifest():
     '''Assuming that there is a temp folder with a manifest.json of
     an image inside, get a dict of the manifest.json file'''
+    temp_path = os.path.abspath(temp_folder)
+    with pushd(temp_path):
+        with open(manifest_file) as f:
+            json_obj = json.loads(f.read())
+    return json_obj
