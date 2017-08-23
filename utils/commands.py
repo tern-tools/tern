@@ -1,13 +1,13 @@
 import io
-import json
 import os
 import re
-import shutil
 import subprocess
 import tarfile
 import yaml
 
 from contextlib import contextmanager
+
+import constants
 
 '''
 Shell and docker command parser and invoking of commands
@@ -42,11 +42,6 @@ with open(os.path.abspath(base_file)) as f:
     command_lib['base'] = yaml.safe_load(f)
 with open(os.path.abspath(snippet_file)) as f:
     command_lib['snippets'] = yaml.safe_load(f)
-
-# temporary folder for extracting
-temp_folder = 'temp'
-# docker manifest file
-manifest_file = 'manifest.json'
 
 
 def get_shell_commands(run_comm):
@@ -292,7 +287,7 @@ def query_library(keys):
 def extract_image_metadata(image_tag_string):
     '''Run docker save and extract the files in a temporary directory'''
     success = True
-    temp_path = os.path.abspath(temp_folder)
+    temp_path = os.path.abspath(constants.temp_folder)
     result = docker_command(save, True, image_tag_string)
     if not result:
         success = False
@@ -302,20 +297,3 @@ def extract_image_metadata(image_tag_string):
         if not os.path.exists(temp_path):
             success = False
     return success
-
-
-def clean_temp():
-    '''Remove the temp directory'''
-    temp_path = os.path.abspath(temp_folder)
-    if os.path.exists(temp_path):
-        shutil.rmtree(temp_path)
-
-
-def get_image_manifest():
-    '''Assuming that there is a temp folder with a manifest.json of
-    an image inside, get a dict of the manifest.json file'''
-    temp_path = os.path.abspath(temp_folder)
-    with pushd(temp_path):
-        with open(manifest_file) as f:
-            json_obj = json.loads(f.read())
-    return json_obj

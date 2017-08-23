@@ -8,13 +8,12 @@ class TestUtilCommands(unittest.TestCase):
 
     def setUp(self):
         cmds.docker_command(cmds.pull, True, 'debian:jessie')
+        cmds.extract_image_metadata('debian:jessie')
 
     def testImageMetadata(self):
-        self.assertTrue(cmds.extract_image_metadata('debian:jessie'))
-        self.assertFalse(cmds.extract_image_metadata('repo:tag'))
+        self.assertTrue(md.get_image_manifest())
 
     def tearDown(self):
-        cmds.remove_image('debian:jessie')
         md.clean_temp()
 
 

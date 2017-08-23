@@ -1,7 +1,7 @@
 import os
 import yaml
 '''
-Docker image and layer related modules
+Docker layer cache related modules
 NOTE: the cache contains base image information
 currently there is no way to step through docker history
 So the assumption is that the base image is a flat image (which it is not)
