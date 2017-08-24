@@ -7,7 +7,7 @@ import yaml
 
 from contextlib import contextmanager
 
-import constants
+import utils.constants as const
 
 '''
 Shell and docker command parser and invoking of commands
@@ -287,7 +287,7 @@ def query_library(keys):
 def extract_image_metadata(image_tag_string):
     '''Run docker save and extract the files in a temporary directory'''
     success = True
-    temp_path = os.path.abspath(constants.temp_folder)
+    temp_path = os.path.abspath(const.temp_folder)
     result = docker_command(save, True, image_tag_string)
     if not result:
         success = False

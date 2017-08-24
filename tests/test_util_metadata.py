@@ -11,9 +11,13 @@ class TestUtilCommands(unittest.TestCase):
         cmds.extract_image_metadata('debian:jessie')
 
     def testImageMetadata(self):
-        self.assertTrue(md.get_image_manifest())
+        manifest = md.get_image_manifest()
+        self.assertTrue(manifest)
+        layers = md.get_image_layers(manifest)
+        self.assertEqual(len(layers), 1)
 
     def tearDown(self):
+        cmds.remove_image('debian:jessie')
         md.clean_temp()
 
 
