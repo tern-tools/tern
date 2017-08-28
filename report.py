@@ -1,7 +1,7 @@
 '''
 Create a report
 '''
-# import sys
+import sys
 
 import common
 
@@ -12,7 +12,23 @@ report_unconfirmed = 'Unconfirmed sources:\n'
 report_package = '\t{package_name}\n'
 report_url = '\t\turl: {url}\n'
 report_version = '\t\tversion: {version}\n'
+report_license = '\t\tlicense:\n {license}\n'
 report_unrecog = 'Unrecognized packages:\n'
+report_notes = 'NOTES:\n'
+
+# report messages
+no_packages = '''Unable to recover packages for layer {layer}.
+Consider either entering them manually or create a bash script to retrieve the
+package in the command library.\n'''
+no_version = '''No version for package {package}.
+Consider either entering the version manually or creating a script to retrieve
+it in the command library\n'''
+no_license = '''No license for package {package}.
+Consider either entering the license manually or creating a script to retrieve
+it in the command library\n'''
+no_src_url = '''No source url for package {package}.
+Consider either entering the source url manually or creating a script to
+retrieve it in the command library\n'''
 
 
 def record_report(report_dict):
@@ -20,18 +36,30 @@ def record_report(report_dict):
         confirmed: [{name: <name>, url: <url>, version: <version>}...]
         unconfirmed:[{name: <name>, url: <url>, version: <version>}...]
         unrecognized: [<package names>]
-    Record the report with each of these values'''
+    Record the report with each of these values
+    If there are no packages, record nothing'''
     report = report_confirmed
-    for package in report_dict['confirmed']:
-        report = report + report_package.format(package_name=package['name'])
-        report = report + report_url.format(url=package['url'])
-        report = report + report_version.format(version=package['version'])
+    print(report_dict)
+    if report_dict['confirmed']:
+        print('the package list is not empty')
+        for package in report_dict['confirmed']:
+            report = report + report_package.format(
+                package_name=package['name'])
+            report = report + report_url.format(url=package['url'])
+            report = report + report_version.format(version=package['version'])
+            report = report + report_license.format(license=package['license'])
     report = report + report_unconfirmed
-    for package in report_dict['unconfirmed']:
-        report = report + report_package.format(package_name=package['name'])
-        report = report + report_url.format(url=package['url'])
-        report = report + report_version.format(version=package['version'])
-    report = report + package + ' '
+    if report_dict['unconfirmed']:
+        for package in report_dict['unconfirmed']:
+            report = report + report_package.format(
+                package_name=package['name'])
+            report = report + report_url.format(url=package['url'])
+            report = report + report_version.format(version=package['version'])
+            report = report + report_license.format(license=package['license'])
+    report = report + report_unrecog
+    if report_dict['unrecognized']:
+        for name in report_dict['unrecognized']:
+            report = report + name + ' '
     return report
 
 
@@ -42,7 +70,32 @@ def write_report(report):
 
 
 def execute(args):
-    '''Create a report'''
+    '''Create a report:
+    TODO: need to get the list of packages from the rest of the
+    Dockerfile'''
+    report = {}
+    notes = ''
+    report.update({'confirmed': [], 'unconfirmed': [], 'unrecognized': []})
     if args.dockerfile:
         # parse the dockerfile
         common.load_docker_commands(args.dockerfile)
+        # get the list of layers in the base image
+        base_obj_list = common.get_base_obj()
+        # TODO: also fill out the confirmed, unconfirmed and unrecognized
+        for base_obj in base_obj_list:
+            if base_obj.packages:
+                report['confirmed'].extend(base_obj.packages)
+                # write notes
+                for package in base_obj.packages:
+                    if package.version == 0.0:
+                        notes = notes + no_version.format(package.name)
+                    if package.license == '':
+                        notes = notes + no_license.format(package.name)
+                    if package.src_url == '':
+                        notes = notes + no_src_url.format(package.name)
+            else:
+                notes = notes + no_packages.format(layer=base_obj.sha)
+        report_txt = record_report(report) + '\n\n'
+        report_txt = report_txt + report_notes + notes
+        write_report(report_txt)
+        sys.exit(0)

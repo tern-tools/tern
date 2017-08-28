@@ -48,3 +48,22 @@ class Package(object):
         pkg_dict.update({'license': self.license})
         pkg_dict.update({'src_url': self.src_url})
         return pkg_dict
+
+    def fill(self, package_dict):
+        '''The package dict looks like this:
+            name: <name>
+            version: <version>
+            license: <license string>
+            src_url: <source url>
+        the way to use this method is to instantiate the class with the
+        name and then give it a package dictionary to fill in the rest
+        return true if package name is the same as the one used to instantiate
+        the object, false if not'''
+        success = True
+        if self.name == package_dict['name']:
+            self.version = package_dict['version']
+            self.license = package_dict['license']
+            self.src_url = package_dict['src_url']
+        else:
+            success = False
+        return success
