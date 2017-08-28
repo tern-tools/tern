@@ -39,5 +39,5 @@ class Layer(object):
         pkg_list = []
         for pkg in self.__packages:
             pkg_list.append(pkg.to_dict())
-        layer_dict.update({self.sha: pkg_list})
+            layer_dict.update({self.sha: {'packages': pkg_list}})
         return layer_dict

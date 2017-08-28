@@ -2,12 +2,15 @@ import os
 import yaml
 '''
 Docker layer cache related modules
-NOTE: the cache contains base image information
-currently there is no way to step through docker history
-So the assumption is that the base image is a flat image (which it is not)
-For now we will run commands within the whole base image based on the
-Dockerfile, but ideally we need to step through the base image history and
-find the actual base image
+The cache is currently stored in a yaml file called cache.yml
+It is organized in this way:
+    layer sha:
+        packages:
+           - name:
+             version:
+             license:
+             src_url:
+        .....
 '''
 
 # known base image database
@@ -25,7 +28,7 @@ def load():
 def get_packages(sha):
     '''Given an image sha retrieve cache record. If none return an empty list'''
     if sha in cache.keys():
-        return cache[sha]
+        return cache[sha]['packages']
     else:
         return []
 
