@@ -69,6 +69,19 @@ def write_report(report):
         f.write(report)
 
 
+def append_report(packages, report, notes):
+    '''Append the report and notes with packaging information'''
+    for package in packages:
+        report['confirmed'].append(package.to_dict())
+        if package.version == 0.0:
+            notes = notes + no_version.format(package.name)
+        if package.license == '':
+            notes = notes + no_license.format(package.name)
+        if package.src_url == '':
+            notes = notes + no_src_url.format(package.name)
+    return report, notes
+
+
 def execute(args):
     '''Create a report:
     TODO: need to get the list of packages from the rest of the
@@ -79,23 +92,24 @@ def execute(args):
     if args.dockerfile:
         # parse the dockerfile
         common.load_docker_commands(args.dockerfile)
-        # get the list of layers in the base image
-        base_obj_list = common.get_base_obj()
-        # TODO: also fill out the confirmed, unconfirmed and unrecognized
-        for base_obj in base_obj_list:
-            if base_obj.packages:
-                report['confirmed'].extend(base_obj.packages)
-                # write notes
-                for package in base_obj.packages:
-                    if package.version == 0.0:
-                        notes = notes + no_version.format(package.name)
-                    if package.license == '':
-                        notes = notes + no_license.format(package.name)
-                    if package.src_url == '':
-                        notes = notes + no_src_url.format(package.name)
+    base_image_msg = common.get_dockerfile_base()
+    notes = notes + base_image_msg[1]
+    # get the list of layers in the base image
+    base_obj_list = common.get_base_obj(base_image_msg[0])
+    for base_obj in base_obj_list:
+        if base_obj.packages:
+            report, notes = append_report(base_obj.packages, report, notes)
+        else:
+            # see if packages can be extracted
+            # TODO: right now it is with the whole base image only
+            # i.e. they have only one layer
+            package_list = common.get_packages_from_snippets(base_image_msg[0])
+            if package_list:
+                report, notes = append_report(package_list, report, notes)
             else:
                 notes = notes + no_packages.format(layer=base_obj.sha)
-        report_txt = record_report(report) + '\n\n'
-        report_txt = report_txt + report_notes + notes
-        write_report(report_txt)
-        sys.exit(0)
+
+    report_txt = record_report(report) + '\n\n'
+    report_txt = report_txt + report_notes + notes
+    write_report(report_txt)
+    sys.exit(0)

@@ -4,39 +4,50 @@ debian:
   tags:
     jessie:
         shell: '/bin/bash'
+        # either enter the package names as a list or a snippet to invoke either within or outside the container
         names:
-          container:
-            invoke:
-              1: "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
+          invoke:
+            1:
+              # Currently two types of environments are supported - host or container
+              container:
+                - "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
+          delimiter: '\n'
+        # the length of this list should be the same as the names or else there will be a mismatch
         versions:
-          container:
-            invoke:
-              # versions are mandatory so we could compare with the above but in this way
-              # we can match the package names with the versions when creating our list
-              1: "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-              2: "for p in $pkgs; do echo $p; dpkg -l $p | awk 'NR>5 {print $3}'; echo END; done"
+          invoke:
+            1:
+              container:
+                - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+                - "for p in $pkgs; do echo $p; dpkg -l $p | awk 'NR>5 {print $3}'; echo END; done"
+          delimiter: 'END'
         licenses:
-          container:
-            invoke:
-              # licenses are optional so the copyright file may not exist
-              1: "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-              2: "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done" 
+          invoke:
+            1:
+              container:
+                - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+                - "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done"
+          delimiter: 'END'
+        src_urls: ''
     jessie-backports:
         shell: '/bin/bash'
         names:
-          container:
-            invoke:
-              1: "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
+          invoke:
+            1:
+              container:
+                - "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
+          delimiter: '\n'
         versions:
-          container:
-            invoke:
-              # versions are mandatory so we could compare with the above but in this way
-              # we can match the package names with the versions when creating our list
-              1: "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-              2: "for p in $pkgs; do echo $p; dpkg -l $p | awk 'NR>5 {print $3}'; echo END; done"
+          invoke:
+            1:
+              container:
+                - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+                - "for p in $pkgs; do echo $p; dpkg -l $p | awk 'NR>5 {print $3}'; echo END; done"
+          delimiter: 'END'
         licenses:
-          container:
-            invoke:
-              # licenses are optional so the copyright file may not exist
-              1: "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-              2: "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done" 
+          invoke:
+            1:
+              container:
+                - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+                - "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done" 
+          delimiter: 'END'
+        src_urls: ''

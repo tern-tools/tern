@@ -7,19 +7,24 @@ apt-get:
   packages:
     - name: default
       version:
-        container:
-          invoke:
-            1: "dpkg -l {package} | awk 'NR>5 {print $3}"
+        # either a version number or a script snippet
+        invoke:
+          1:
+            container:
+              - "dpkg -l {package} | awk 'NR>5 {print $3}"
       src_url:
-        container:
-          invoke:
-            1: "apt-get download --print-uris {package}"
+        invoke:
+          1:
+            container:
+              - "apt-get download --print-uris {package}"
       src:
-        container:
-          copy:
+        # copy_in: used to copy into the running container
+        copy_in:
             - from: 'config/{image}/{tag}/sources.list'
               to: '/etc/apt/sources.list'
             - from: 'config/image/apt_get_sources.sh'
               to: '/'
-          invoke:
-            1: './apt_get_sources.sh {package}'
+        invoke:
+            1:
+              container:
+                - './apt_get_sources.sh {package}'

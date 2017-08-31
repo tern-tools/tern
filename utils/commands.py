@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import tarfile
+import time
 import yaml
 
 from contextlib import contextmanager
@@ -30,6 +31,7 @@ save = ['docker', 'save']
 # docker container names
 # TODO: randomly generated image and container names
 image = 'tern-image'
+tag = int(time.time())
 container = 'tern-container'
 
 # base image command library
@@ -218,9 +220,10 @@ def start_container(dockerfile, image_tag_string):
     # TODO: there may be an existing image one would want to build in
     # which case move the build part out into a different module
     path = os.path.dirname(dockerfile)
-    with pushd(path):
-        docker_command(build, True, '-t', image_tag_string, '-f',
-                       os.path.basename(dockerfile), '.')
+    if not check_image(image_tag_string):
+        with pushd(path):
+            docker_command(build, True, '-t', image_tag_string, '-f',
+                           os.path.basename(dockerfile), '.')
     if check_container():
         remove_container()
     docker_command(run, True, '--name', container, image_tag_string)
@@ -239,33 +242,34 @@ def remove_image(image_tag_string):
         docker_command(delete, True, image_tag_string)
 
 
-def get_base_shell(image_tuple):
-    '''Given the base image tag tuple, return the shell command used for
-    invoking commands inside the image container'''
-    shell = ''
+def get_base_info(image_tuple):
+    '''Given the base image tag tuple, return the info for package retrieval
+    snippets'''
+    info = ''
     if image_tuple[0] in command_lib['base'].keys():
         if image_tuple[1] in \
                 command_lib['base'][image_tuple[0]]['tags'].keys():
-            shell = \
-                command_lib['base'][image_tuple[0]][image_tuple[1]]['shell']
-    return shell
+            info = \
+                command_lib['base'][image_tuple[0]]['tags'][image_tuple[1]]
+    return info
 
 
-def invoke_in_container(invoke_dict, image_tag_string, shell, package=''):
+def get_latest_tag(base_image):
+    '''Given the base image get the latest tag'''
+    return command_lib['base'][base_image]['latest']
+
+
+def invoke_in_container(snippet_list, shell, package=''):
     '''Invoke the commands from the invoke dictionary within a running
-    container. The invoke dictionary looks like:
-        <step>: <command>
-    update this dict with the result from each command invoked
-    <step>: <result>'''
-    count = len(invoke_dict.keys())
-    for step in range(1, count + 1):
-        full_cmd = invoke_dict[step].format(package=package)
+    container'''
+    for snippet in snippet_list:
+        full_cmd = snippet.format(package=package)
         try:
-            invoke_dict[step] = docker_command(execute, True, container,
-                                               shell, '-c', full_cmd)
+            result = docker_command(execute, True, container, shell, '-c',
+                                    full_cmd)
         except:
             print("Error executing command inside the container")
-    return invoke_dict
+    return result
 
 
 def get_image_id(image_tag_string):
@@ -273,15 +277,6 @@ def get_image_id(image_tag_string):
     result = docker_command(inspect,
                             True, "-f'{{json .Id}}'", image_tag_string)
     return result.split(':').pop()
-
-
-def query_library(keys):
-    '''Given a list of keys recover the value in the library
-    If the key doesn't exist return nothing'''
-    value = command_lib.get(keys.pop(0))
-    while value and keys:
-        value = value.get(keys.pop(0))
-    return value
 
 
 def extract_image_metadata(image_tag_string):

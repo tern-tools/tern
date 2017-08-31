@@ -9,6 +9,10 @@ from utils import cache as cache
 from utils import metadata as meta
 
 # constants strings
+dockerfile_using_latest = '''The Dockerfile provided does not have a base
+image or it is using 'latest'. Falling back on the default in the command
+library. Consider adding a tag to the FROM line
+(for example: FROM debian:jessie)'''
 no_image_tag = '''No base image and/or tag listed in the command library \n
 To add one, make an entry in command_lib/base.yml'''
 no_command = '''No listing of hardcoded or retrieval steps for {image_tag} \n
@@ -20,19 +24,41 @@ base_image_not_found = '''Failed to pull the base image. Perhaps it was
 removed from Dockerhub'''
 cannot_extract_base_image = '''Failed to extact base image. This shouldn't
 happen'''
+incomplete_command_lib_listing = '''The command library has an incomplete
+listing for {image}:{tag}. Please complete the listing based on the examples'''
+cannot_retrieve_base_packages = '''Cannot retrieve the packages in the base
+image {image}:{tag}. Check the command listing in the command library'''
 
+# dockerfile
+dockerfile = ''
 # dockerfile commands
 docker_commands = []
 
 
-def load_docker_commands(dockerfile):
+def load_docker_commands(dockerfile_path):
     '''Given a dockerfile get a persistent list of docker commands'''
     global docker_commands
     # TODO: some checks on the passed argument would be nice here
-    docker_commands = df.get_directive_list(df.get_command_list(dockerfile))
+    docker_commands = df.get_directive_list(df.get_command_list(
+        dockerfile_path))
+    global dockerfile
+    dockerfile = dockerfile_path
 
 
-def check_base(base_image_tag):
+def get_dockerfile_base():
+    '''Check if the dockerfile's FROM has the 'latest' tag and if so
+    report a message'''
+    base_image_tag = df.get_base_image_tag(df.get_base_instructions(
+        docker_commands))
+    if base_image_tag[1] == 'latest':
+        new_image_tag = (base_image_tag[0],
+                         cmds.get_latest_tag(base_image_tag[0]))
+        return (new_image_tag, dockerfile_using_latest)
+    else:
+        return (base_image_tag, '')
+
+
+def check_base_image(base_image_tag):
     '''Given a base image tag check if an image exists
     If not then try to pull the image.'''
     image_tag_string = base_image_tag[0] + df.tag_separator + base_image_tag[1]
@@ -61,57 +87,86 @@ def get_base_layers(base_image_tag):
     return base_layers
 
 
-def get_base_dict(base_image_tag):
-    '''Return the base dictionary from the command library'''
-    image = base_image_tag[0]
-    # check image
-    listing = cmds.query_library(['base', image])
-    if listing:
-        if base_image_tag[1] == 'latest':
-            tag = cmds.query_library(['base', image, 'latest'])
-        else:
-            tag = base_image_tag[1]
-        # check tag
-        listing = cmds.query_library(['base', image, tag])
-    return listing
+def process_base_invoke(invoke_dict, shell):
+    '''The invoke dictionary looks like this:
+        <step number>: <environment>: <list of commands>
+    1. Find out if there are any container environments if there are
+    then start a container
+    2. For each step invoke the commands
+    NOTE: So far there are no host commands so we will just invoke the
+    container ones'''
+    image_tag_string = cmds.image + df.tag_separator + cmds.tag
+    for step in invoke_dict.keys():
+        if 'container' in invoke_dict[step].keys():
+            cmds.start_container(dockerfile, image_tag_string)
+            break
+    for step in range(1, len(invoke_dict.keys()) + 1):
+        if 'container' in invoke_dict[step].keys():
+            result = cmds.invoke_in_container(
+                invoke_dict[step]['container'], shell)
+    return result
 
 
-def invoke_base_packages(base_image_tag):
-    '''Get the list of packages that are installed in the base layer using
-    the invocations listed in the base command library
-    If they don't exist inform the user'''
-    # TODO: all of the commands listed so far are invoked within a container
-    # there should be some mechanism where the commands get executed one
-    # by one but also outside and inside the container
-    image_tag_string = base_image_tag[0] + df.tag_separator + base_image_tag[1]
-    base_dict = get_base_dict(base_image_tag)
-    package_list = []
-    if base_dict:
-        names_dict = base_dict.get('names')
-        if names_dict:
-            package_list = cmds.invoke_in_container(
-                names_dict['container']['invoke'], image_tag_string,
-                base_dict['shell'])
+def get_info_list(info_dict, info):
+    '''The info dictionary lives under the image and tag name in the base
+    command library. It looks like this:
+        <names>: list of names or snippets to invoke
+        <versions>: list of versions or snippets to invoke
+        <licenses>: list of license information or snippets to invoke
+        <src_urls>: list of source urls or snippets to invoke
+    given the info dictionary and the specific information (names,versions,
+    licenses or src_urls) to look up, return the list of information'''
+    if 'invoke' in info_dict[info]:
+        info_list = process_base_invoke(info_dict[info]['invoke'],
+                                        info_dict['shell'])
+        if 'delimiter' in info_dict[info]:
+            info_list = info_list.split(info_dict[info]['delimiter'])[:-1]
         else:
-            print(no_command.format(image_tag=image_tag_string))
+            info_list = info_dict[info]
+    return info_list
+
+
+def get_packages_from_snippets(base_image_tag):
+    '''Get a list of package objects from invoking the commands in the
+    command library:
+        1. For the image and tag name find if there is a list of package names
+        2. If there is an invoke dictionary, invoke the commands
+        3. Create a list of packages'''
+    pkg_list = []
+    info = cmds.get_base_info(base_image_tag)
+    if info:
+        names = get_info_list(info, 'names')
+        versions = get_info_list(info, 'versions')
+        licenses = get_info_list(info, 'licenses')
+        src_urls = get_info_list(info, 'src_urls')
+        if names and len(names) > 1:
+            for index in range(0, len(names)):
+                pkg = Package(names[index])
+                if len(versions) == len(names):
+                    pkg.version = versions[index]
+                if len(licenses) == len(names):
+                    pkg.license = licenses[index]
+                if len(src_urls) == len(names):
+                    pkg.src_url = src_urls[index]
+                pkg_list.append(pkg)
+        else:
+            print(cannot_retrieve_base_packages.format(
+                image=base_image_tag[0], tag=base_image_tag[1]))
     else:
-        print(no_image_tag)
-    return package_list
+        print(incomplete_command_lib_listing.format(image=base_image_tag[0],
+                                                    tag=base_image_tag[1]))
+    return pkg_list
 
 
-def get_base_obj():
-    '''Given a Dockerfile get a list of layers with their associated packages:
-        1. Get the base image and tag
-        2. Check if the base image exists on the host machine
-        3. Get the layers
-        4. For each layer check if there is a list of packages associated
+def get_base_obj(base_image_tag):
+    '''Get a list of layers with their associated packages:
+        1. Check if the base image exists on the host machine
+        2. Get the layers
+        3. For each layer check if there is a list of packages associated
         with it in the cache
-        5. If there are no packages return a list of empty layer objects'''
+        4. If there are no packages return a list of empty layer objects'''
     obj_list = []
-    # get the base image and tag
-    base_image_tag = df.get_base_image_tag(
-        df.get_base_instructions(docker_commands))
-    if not check_base:
+    if not check_base_image(base_image_tag):
         # the base image cannot be found locally nor remotely
         # at this point there is no context for Tern to use so raise an
         # exception to exit gracefully
