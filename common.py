@@ -13,8 +13,9 @@ dockerfile_using_latest = '''The Dockerfile provided does not have a base
 image or it is using 'latest'. Falling back on the default in the command
 library. Consider adding a tag to the FROM line
 (for example: FROM debian:jessie)'''
-no_image_tag = '''No base image and/or tag listed in the command library \n
-To add one, make an entry in command_lib/base.yml'''
+no_image_tag_listing = \
+    '''No listing of {image}:{tag} in the command library. To add one, make an
+entry in command_lib/base.yml'''
 no_command = '''No listing of hardcoded or retrieval steps for {image_tag} \n
 To tell the tool this information make an entry in command_lib/base.yml'''
 no_invocation = '''No invocation steps to perform within a container nor
@@ -153,8 +154,8 @@ def get_packages_from_snippets(base_image_tag):
             print(cannot_retrieve_base_packages.format(
                 image=base_image_tag[0], tag=base_image_tag[1]))
     else:
-        print(incomplete_command_lib_listing.format(image=base_image_tag[0],
-                                                    tag=base_image_tag[1]))
+        print(no_image_tag_listing.format(image=base_image_tag[0],
+                                          tag=base_image_tag[1]))
     return pkg_list
 
 

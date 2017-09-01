@@ -39,7 +39,6 @@ def record_report(report_dict):
     Record the report with each of these values
     If there are no packages, record nothing'''
     report = report_confirmed
-    print(report_dict)
     if report_dict['confirmed']:
         print('the package list is not empty')
         for package in report_dict['confirmed']:
