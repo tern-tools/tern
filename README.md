@@ -33,10 +33,11 @@ $ python tests/<test file>.py
 
 ### Bugs:
 1. Script assumes user is not in the docker group
-2. When a command fails within a container that package should be moved over to 'unrecognized'
-3. For reporting purposes - parse ENV
-4. Report should have 3 sections: confirmed, unconfirmed, unrecognized
-5. docker-command should raise exceptions that can be caught in demo for exiting
+2. For reporting purposes - parse ENV
+
+### Feature requests:
+1. Logging
+2. Errors don't bubble up to the report. This can be a --verbose option
 
 ### Upstream potential:
 1. Docker API assumes user is in docker group and hence can run docker commands without sudo
