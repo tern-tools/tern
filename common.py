@@ -65,7 +65,7 @@ def check_base_image(base_image_tag):
     image_tag_string = base_image_tag[0] + df.tag_separator + base_image_tag[1]
     success = cmds.check_image(image_tag_string)
     if not success:
-        result = cmds.docker_command(cmds.pull, True, image_tag_string)
+        result = cmds.docker_command(cmds.pull, image_tag_string)
         if result is None:
             print(base_image_not_found)
             success = False

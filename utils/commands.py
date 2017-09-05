@@ -1,5 +1,7 @@
+import grp
 import io
 import os
+import pwd
 import re
 import subprocess
 import tarfile
@@ -64,13 +66,17 @@ def pushd(path):
     os.chdir(curr_path)
 
 
-def docker_command(command, sudo=True, *extra):
+def docker_command(command, *extra):
     '''Invoke docker command. If the command fails nothing is returned
     If it passes then the result is returned'''
     full_cmd = []
-    # check if sudo
-    # TODO: need some way of checking if the user is added to the
-    # docker group so they already have privileges
+    sudo = True
+    try:
+        members = grp.getgrnam('docker').gr_mem
+        if pwd.getpwnam(os.getuid()) in members:
+            sudo = False
+    except:
+        pass
     # TODO: Figure out how to resolve the container when a docker command
     # fails
     if sudo:
@@ -206,7 +212,7 @@ def check_container():
 def check_image(image_tag_string):
     '''Check if image exists'''
     is_image = False
-    result = docker_command(check_images, True, image_tag_string)
+    result = docker_command(check_images, image_tag_string)
     result_lines = result.decode('utf-8').split('\n')
     if len(result_lines) > 2:
         is_image = True
@@ -232,14 +238,14 @@ def start_container(dockerfile, image_tag_string):
 def remove_container():
     '''Remove a running container'''
     if check_container():
-        docker_command(stop, True, container)
-        docker_command(remove, True, container)
+        docker_command(stop, container)
+        docker_command(remove, container)
 
 
 def remove_image(image_tag_string):
     '''Remove an image'''
     if check_image(image_tag_string):
-        docker_command(delete, True, image_tag_string)
+        docker_command(delete, image_tag_string)
 
 
 def get_base_info(image_tuple):
@@ -265,7 +271,7 @@ def invoke_in_container(snippet_list, shell, package=''):
     for snippet in snippet_list:
         full_cmd = snippet.format(package=package)
         try:
-            result = docker_command(execute, True, container, shell, '-c',
+            result = docker_command(execute, container, shell, '-c',
                                     full_cmd)
         except:
             print("Error executing command inside the container")
@@ -274,8 +280,7 @@ def invoke_in_container(snippet_list, shell, package=''):
 
 def get_image_id(image_tag_string):
     '''Get the image ID by inspecting the image'''
-    result = docker_command(inspect,
-                            True, "-f'{{json .Id}}'", image_tag_string)
+    result = docker_command(inspect, "-f'{{json .Id}}'", image_tag_string)
     return result.split(':').pop()
 
 
@@ -283,7 +288,7 @@ def extract_image_metadata(image_tag_string):
     '''Run docker save and extract the files in a temporary directory'''
     success = True
     temp_path = os.path.abspath(const.temp_folder)
-    result = docker_command(save, True, image_tag_string)
+    result = docker_command(save, image_tag_string)
     if not result:
         success = False
     else:

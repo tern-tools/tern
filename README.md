@@ -28,16 +28,16 @@ $ python tests/<test file>.py
 
 1. Knowledge base: Each layer hash should come with a list of known packages that are installed in that layer
 2. Allow for exceptions or additions for the command library
-3. In the reporting do not ignore packages that may be installed in the docker image - see bug 4
+3. In the reporting do not ignore packages that may be installed in the docker image
 4. Harden for testing within VMware's docker community
 
 ### Bugs:
-1. Script assumes user is not in the docker group
-2. For reporting purposes - parse ENV
+1. For reporting purposes - parse ENV
 
 ### Feature requests:
 1. Logging
 2. Errors don't bubble up to the report. This can be a --verbose option
+3. Create install script
 
 ### Upstream potential:
 1. Docker API assumes user is in docker group and hence can run docker commands without sudo
