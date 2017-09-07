@@ -33,6 +33,7 @@ $ python tests/<test file>.py
 
 ### Bugs:
 1. For reporting purposes - parse ENV
+2. Keeps running docker save even if it already exists on the filesystem
 
 ### Feature requests:
 1. Logging

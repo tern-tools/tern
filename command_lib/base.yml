@@ -1,4 +1,17 @@
-# Known package listing steps for base images
+# Known package listings for base images
+# Format to list images
+# <image>:
+#   latest: <the tag that points to 'latest'
+#   tags:
+#     <tag>:
+#       shell: <the shell executable> (needed if entering code snippets)
+#       names: <a list of package names>
+#         invoke: (if this is a script to invoke include this)
+#           1:
+#             container: <list of commands> (if the environment is the container)
+#           2:
+#             host: <list of commands> (if the environment is the host)
+#         delimiter: <the delimiter for the commands> 
 debian:
   latest: jessie
   tags:
@@ -51,3 +64,35 @@ debian:
                 - "for p in $pkgs; do echo $p; cat /usr/share/doc/$package/copyright; echo END; done" 
           delimiter: 'END'
         src_urls: ''
+
+# vmware/photon
+vmware/photon:
+  latest: '1.0'
+  tags:
+    '1.0':
+      shell: '/usr/bin/bash'
+      names:
+        invoke:
+          1:
+            container:
+              - "tdnf list installed | cut -f1 -d'.'"
+        delimiter: '\n'
+      versions:
+        invoke:
+          1:
+            container:
+              - "tdnf check-update"
+              - "pkgs=`tdnf list installed`"
+              - "read -ra arr <<< $pkgs"
+              - "for ((i=1; i<${#arr[@]}; i=i+3)); do echo ${arr[$i]}; done"
+        delimiter: '\n'
+      licenses:
+        invoke:
+          1:
+            container:
+              - "for p in $pkgs; do tdnf info $p | head -10 | tail -1 | cut -f2 -d':' | xargs; done"
+      src_urls:
+        invoke:
+          1:
+            container:
+              - "for p in $pkgs; do tdnf info $p | head -9 | tail -1 | cut -f2-3 -d':' | xargs; done"

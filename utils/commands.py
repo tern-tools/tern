@@ -33,7 +33,7 @@ save = ['docker', 'save']
 # docker container names
 # TODO: randomly generated image and container names
 image = 'tern-image'
-tag = int(time.time())
+tag = str(int(time.time()))
 container = 'tern-container'
 
 # base image command library
@@ -202,7 +202,7 @@ def check_container():
     '''Check if a container exists'''
     is_container = False
     keyvalue = 'name=' + container
-    result = docker_command(check_running, True, '--filter', keyvalue)
+    result = docker_command(check_running, '--filter', keyvalue)
     result_lines = result.decode('utf-8').split('\n')
     if len(result_lines) > 2:
         is_container = True
@@ -228,11 +228,11 @@ def start_container(dockerfile, image_tag_string):
     path = os.path.dirname(dockerfile)
     if not check_image(image_tag_string):
         with pushd(path):
-            docker_command(build, True, '-t', image_tag_string, '-f',
+            docker_command(build, '-t', image_tag_string, '-f',
                            os.path.basename(dockerfile), '.')
     if check_container():
         remove_container()
-    docker_command(run, True, '--name', container, image_tag_string)
+    docker_command(run, '--name', container, image_tag_string)
 
 
 def remove_container():
