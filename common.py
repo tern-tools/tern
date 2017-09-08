@@ -88,7 +88,7 @@ def get_base_layers(base_image_tag):
     return base_layers
 
 
-def process_base_invoke(invoke_dict, shell):
+def process_base_invoke(invoke_dict, image_tag_string, shell):
     '''The invoke dictionary looks like this:
         <step number>: <environment>: <list of commands>
     1. Find out if there are any container environments if there are
@@ -96,10 +96,9 @@ def process_base_invoke(invoke_dict, shell):
     2. For each step invoke the commands
     NOTE: So far there are no host commands so we will just invoke the
     container ones'''
-    image_tag_string = cmds.image + df.tag_separator + cmds.tag
     for step in invoke_dict.keys():
         if 'container' in invoke_dict[step].keys():
-            cmds.start_container(dockerfile, image_tag_string)
+            cmds.start_container(image_tag_string)
             break
     for step in range(1, len(invoke_dict.keys()) + 1):
         if 'container' in invoke_dict[step].keys():
@@ -108,7 +107,7 @@ def process_base_invoke(invoke_dict, shell):
     return result
 
 
-def get_info_list(info_dict, info):
+def get_info_list(info_dict, info, image_tag_string):
     '''The info dictionary lives under the image and tag name in the base
     command library. It looks like this:
         <names>: list of names or snippets to invoke
@@ -119,11 +118,12 @@ def get_info_list(info_dict, info):
     licenses or src_urls) to look up, return the list of information'''
     if 'invoke' in info_dict[info]:
         info_list = process_base_invoke(info_dict[info]['invoke'],
+                                        image_tag_string,
                                         info_dict['shell'])
         if 'delimiter' in info_dict[info]:
             info_list = info_list.split(info_dict[info]['delimiter'])[:-1]
-        else:
-            info_list = info_dict[info]
+    else:
+        info_list = info_dict[info]
     return info_list
 
 
@@ -135,11 +135,12 @@ def get_packages_from_snippets(base_image_tag):
         3. Create a list of packages'''
     pkg_list = []
     info = cmds.get_base_info(base_image_tag)
+    image_tag_string = base_image_tag[0] + df.tag_separator + base_image_tag[1]
     if info:
-        names = get_info_list(info, 'names')
-        versions = get_info_list(info, 'versions')
-        licenses = get_info_list(info, 'licenses')
-        src_urls = get_info_list(info, 'src_urls')
+        names = get_info_list(info, 'names', image_tag_string)
+        versions = get_info_list(info, 'versions', image_tag_string)
+        licenses = get_info_list(info, 'licenses', image_tag_string)
+        src_urls = get_info_list(info, 'src_urls', image_tag_string)
         if names and len(names) > 1:
             for index in range(0, len(names)):
                 pkg = Package(names[index])

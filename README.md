@@ -34,6 +34,9 @@ $ python tests/<test file>.py
 ### Bugs:
 1. For reporting purposes - parse ENV
 2. Keeps running docker save even if it already exists on the filesystem
+3. Reporting of errors in docker commands are not recorded in the report
+4. The container is shut down and brought up for every invoke
+5. Too much noise in the docker command - no need to report unless there was an error
 
 ### Feature requests:
 1. Logging

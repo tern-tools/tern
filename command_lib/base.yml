@@ -75,24 +75,30 @@ vmware/photon:
         invoke:
           1:
             container:
+              - "tdnf check-update" # used to update the repo metadata
               - "tdnf list installed | cut -f1 -d'.'"
-        delimiter: '\n'
+        delimiter: "\n" # make sure the delimiter is in double quotes or python will interpret the \ as literal
       versions:
         invoke:
           1:
             container:
               - "tdnf check-update"
-              - "pkgs=`tdnf list installed`"
-              - "read -ra arr <<< $pkgs"
-              - "for ((i=1; i<${#arr[@]}; i=i+3)); do echo ${arr[$i]}; done"
-        delimiter: '\n'
+              - "list=`tdnf list installed`"
+              - "c=0; for l in $list; do if [ $c == 1 ]; then echo $l; fi; c=$(((c+1)%3)); done;"
+        delimiter: "\n"
       licenses:
         invoke:
           1:
             container:
+              - "tdnf check-update"
+              - "pkgs=`tdnf list installed`"
               - "for p in $pkgs; do tdnf info $p | head -10 | tail -1 | cut -f2 -d':' | xargs; done"
+        delimiter: "\n"
       src_urls:
         invoke:
           1:
             container:
+              - "tdnf check-update"
+              - "pkgs=`tdnf list installed`"
               - "for p in $pkgs; do tdnf info $p | head -9 | tail -1 | cut -f2-3 -d':' | xargs; done"
+        delimiter: "\n"

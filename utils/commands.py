@@ -219,17 +219,22 @@ def check_image(image_tag_string):
     return is_image
 
 
-def start_container(dockerfile, image_tag_string):
-    '''Invoke docker command to build a given docker image and start it
-    Assumptions: Docker is installed and the docker daemon is running
-    There is no other running container from the given image'''
-    # TODO: there may be an existing image one would want to build in
-    # which case move the build part out into a different module
+def build_container(dockerfile, image_tag_string):
+    '''Invoke docker command to build a docker image from the dockerfile
+    It is assumed that docker is installed and the docker daemon is running'''
     path = os.path.dirname(dockerfile)
     if not check_image(image_tag_string):
         with pushd(path):
             docker_command(build, '-t', image_tag_string, '-f',
                            os.path.basename(dockerfile), '.')
+
+
+def start_container(image_tag_string):
+    '''Invoke docker command to start a container
+    If one already exists then stop it
+    Use this only in the beginning of running commands within a container
+    Assumptions: Docker is installed and the docker daemon is running
+    There is no other running container from the given image'''
     if check_container():
         remove_container()
     docker_command(run, '--name', container, image_tag_string)
@@ -273,6 +278,11 @@ def invoke_in_container(snippet_list, shell, package=''):
         try:
             result = docker_command(execute, container, shell, '-c',
                                     full_cmd)
+            # convert from bytestream to string
+            try:
+                result = result.decode('utf-8')
+            except AttributeError:
+                pass
         except:
             print("Error executing command inside the container")
     return result

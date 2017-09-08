@@ -44,7 +44,7 @@ def record_report(report_dict):
         for package in report_dict['confirmed']:
             report = report + report_package.format(
                 package_name=package['name'])
-            report = report + report_url.format(url=package['url'])
+            report = report + report_url.format(url=package['src_url'])
             report = report + report_version.format(version=package['version'])
             report = report + report_license.format(license=package['license'])
     report = report + report_unconfirmed
@@ -52,7 +52,7 @@ def record_report(report_dict):
         for package in report_dict['unconfirmed']:
             report = report + report_package.format(
                 package_name=package['name'])
-            report = report + report_url.format(url=package['url'])
+            report = report + report_url.format(url=package['src_url'])
             report = report + report_version.format(version=package['version'])
             report = report + report_license.format(license=package['license'])
     report = report + report_unrecog
@@ -73,11 +73,11 @@ def append_report(packages, report, notes):
     for package in packages:
         report['confirmed'].append(package.to_dict())
         if package.version == 0.0:
-            notes = notes + no_version.format(package.name)
+            notes = notes + no_version.format(package=package.name)
         if package.license == '':
-            notes = notes + no_license.format(package.name)
+            notes = notes + no_license.format(package=package.name)
         if package.src_url == '':
-            notes = notes + no_src_url.format(package.name)
+            notes = notes + no_src_url.format(package=package.name)
     return report, notes
 
 
