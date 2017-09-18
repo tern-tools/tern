@@ -88,7 +88,6 @@ def docker_command(command, *extra):
     try:
         print("Running command: " + ' '.join(full_cmd))
         result = subprocess.check_output(full_cmd)
-        print("Completed: " + ' '.join(full_cmd))
         return result
     except subprocess.CalledProcessError as error:
         print(error)
