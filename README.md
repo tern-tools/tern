@@ -40,8 +40,7 @@ $ python tests/<test file>.py
 
 ### Feature requests:
 1. Logging
-2. Errors don't bubble up to the report. This can be a --verbose option
-3. Create install script
+2. Create install script
 
 ### Upstream potential:
 1. Docker API assumes user is in docker group and hence can run docker commands without sudo
