@@ -12,7 +12,7 @@ report_unconfirmed = 'Unconfirmed sources:\n'
 report_package = '\t{package_name}\n'
 report_url = '\t\turl: {url}\n'
 report_version = '\t\tversion: {version}\n'
-report_license = '\t\tlicense:\n {license}\n'
+report_license = '\t\tlicense: {license}\n'
 report_unrecog = 'Unrecognized packages:\n'
 report_notes = 'NOTES:\n'
 
