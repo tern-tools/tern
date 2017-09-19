@@ -269,21 +269,29 @@ def get_latest_tag(base_image):
     return command_lib['base'][base_image]['latest']
 
 
-def invoke_in_container(snippet_list, shell, package=''):
+def invoke_in_container(snippet_list, shell, package='', override=''):
     '''Invoke the commands from the invoke dictionary within a running
-    container'''
-    for snippet in snippet_list:
-        full_cmd = snippet.format(package=package)
+    container
+    To override the name of the running container pass the name of another
+    running container'''
+    # construct the full command
+    full_cmd = ''
+    while len(snippet_list) > 1:
+        full_cmd = full_cmd + snippet_list.pop(0).format(package=package) + \
+            '&&'
+    full_cmd = full_cmd + snippet_list[0]
+    try:
+        if override:
+            result = docker_command(execute, override, shell, '-c', full_cmd)
+        else:
+            result = docker_command(execute, container, shell, '-c', full_cmd)
+        # convert from bytestream to string
         try:
-            result = docker_command(execute, container, shell, '-c',
-                                    full_cmd)
-            # convert from bytestream to string
-            try:
-                result = result.decode('utf-8')
-            except AttributeError:
-                pass
-        except:
-            print("Error executing command inside the container")
+            result = result.decode('utf-8')
+        except AttributeError:
+            pass
+    except:
+        print("Error executing command inside the container")
     return result
 
 
