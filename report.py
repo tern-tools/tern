@@ -9,7 +9,7 @@ import common
 report_file = 'report.txt'
 report_confirmed = 'Confirmed sources:\n'
 report_unconfirmed = 'Unconfirmed sources:\n'
-report_package = '\t{package_name}\n'
+report_package = '\t{package}\n'
 report_url = '\t\turl: {url}\n'
 report_version = '\t\tversion: {version}\n'
 report_license = '\t\tlicense: {license}\n'
@@ -29,31 +29,29 @@ it in the command library\n'''
 no_src_url = '''No source url for package {package}.
 Consider either entering the source url manually or creating a script to
 retrieve it in the command library\n'''
+env_dep_dockerfile = '''Docker build failed. I will not be able to determine
+the sources, versions and licenses unless I am executed within the correct
+build environment. I will do my best with the provided Dockerfile...'''
 
 
 def record_report(report_dict):
     '''The report dict will look like this:
         confirmed: [{name: <name>, url: <url>, version: <version>}...]
-        unconfirmed:[{name: <name>, url: <url>, version: <version>}...]
+        unconfirmed:[<package_names>]
         unrecognized: [<package names>]
     Record the report with each of these values
     If there are no packages, record nothing'''
     report = report_confirmed
     if report_dict['confirmed']:
         for package in report_dict['confirmed']:
-            report = report + report_package.format(
-                package_name=package['name'])
+            report = report + report_package.format(package=package['name'])
             report = report + report_url.format(url=package['src_url'])
             report = report + report_version.format(version=package['version'])
             report = report + report_license.format(license=package['license'])
     report = report + report_unconfirmed
     if report_dict['unconfirmed']:
-        for package in report_dict['unconfirmed']:
-            report = report + report_package.format(
-                package_name=package['name'])
-            report = report + report_url.format(url=package['src_url'])
-            report = report + report_version.format(version=package['version'])
-            report = report + report_license.format(license=package['license'])
+        for name in report_dict['unconfirmed']:
+            report = report + name + ' '
     report = report + report_unrecog
     if report_dict['unrecognized']:
         for name in report_dict['unrecognized']:
@@ -67,8 +65,9 @@ def write_report(report):
         f.write(report)
 
 
-def append_report(packages, report, notes):
-    '''Append the report and notes with packaging information'''
+def append_confirmed(packages, report, notes):
+    '''Append the report and notes with packaging information for confirmed
+    packages'''
     for package in packages:
         report['confirmed'].append(package.to_dict())
         if package.version == 0.0:
@@ -92,22 +91,35 @@ def execute(args):
         common.load_docker_commands(args.dockerfile)
     base_image_msg = common.get_dockerfile_base()
     notes = notes + base_image_msg[1]
+    package_list = []
     # get the list of layers in the base image
     base_obj_list = common.get_base_obj(base_image_msg[0])
     for base_obj in base_obj_list:
         if base_obj.packages:
-            report, notes = append_report(base_obj.packages, report, notes)
+            report, notes = append_confirmed(base_obj.packages, report, notes)
         else:
             # see if packages can be extracted
             # TODO: right now it is with the whole base image only
             # i.e. they have only one layer
             package_list = common.get_packages_from_snippets(base_image_msg[0])
-            if package_list:
-                report, notes = append_report(package_list, report, notes)
-            else:
-                notes = notes + no_packages.format(layer=base_obj.sha)
 
-    report_txt = record_report(report) + '\n\n'
-    report_txt = report_txt + report_notes + notes
+    # get a list of packages that may be installed from the dockerfile
+    if common.is_build():
+        # TODO: execute the snippets to get the required package info
+        print('Build succeeded - running general code snippets')
+    else:
+        notes = notes + env_dep_dockerfile
+        unconf_packages = common.get_dockerfile_packages()
+        report['unconfirmed'].extend(unconf_packages[0])
+        report['unrecognized'].extend(unconf_packages[1])
+
+    if package_list:
+        # TODO: Add the list of package list to the layer kb
+        report, notes = append_confirmed(package_list, report, notes)
+    else:
+        notes = notes + no_packages.format(layer=base_obj.sha)
+    report_txt = record_report(report)
+    report_txt = report_txt + '\n' + report_notes + notes
     write_report(report_txt)
+    print('Report completed')
     sys.exit(0)

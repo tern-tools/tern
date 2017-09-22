@@ -91,6 +91,7 @@ def docker_command(command, *extra):
         return result
     except subprocess.CalledProcessError as error:
         print(error)
+        raise
 
 
 def parse_command(command):
@@ -144,7 +145,7 @@ def check_sourcable(command, package_name):
     return sourcable
 
 
-def get_packages(docker_commands):
+def get_package_listing(docker_commands):
     '''Given the docker commands in a dockerfile,  get a dictionary of
     packages that are in the command library of retrievable sources
     If it does not exist in the library then record them under
@@ -161,20 +162,19 @@ def get_packages(docker_commands):
     for command in shell_commands:
         command_obj = parse_command(command)
         if command_obj['name'] in command_lib['snippets'].keys():
-            if check_sourcable(command_obj['name']):
-                if command_obj['name'] in pkg_dict['recognized'].keys():
-                    pkg_dict['recognized'][command_obj['name']].extend(
-                        command_obj['arguments'])
-                else:
-                    pkg_dict['recognized'].update(
-                        {command_obj['name']: command_obj['arguments']})
+            if command_obj['name'] in pkg_dict['recognized'].keys():
+                pkg_dict['recognized'][command_obj['name']].extend(
+                    command_obj['arguments'])
             else:
-                if command_obj['name'] in pkg_dict['unrecognized'].keys():
-                    pkg_dict['unrecognized'][command_obj['name']].extend(
-                        command_obj['arguments'])
-                else:
-                    pkg_dict['unrecognized'].update(
-                        {command_obj['name']: command_obj['arguments']})
+                pkg_dict['recognized'].update(
+                    {command_obj['name']: command_obj['arguments']})
+        else:
+            if command_obj['name'] in pkg_dict['unrecognized'].keys():
+                pkg_dict['unrecognized'][command_obj['name']].extend(
+                    command_obj['arguments'])
+            else:
+                pkg_dict['unrecognized'].update(
+                    {command_obj['name']: command_obj['arguments']})
     return pkg_dict
 
 
@@ -224,8 +224,11 @@ def build_container(dockerfile, image_tag_string):
     path = os.path.dirname(dockerfile)
     if not check_image(image_tag_string):
         with pushd(path):
-            docker_command(build, '-t', image_tag_string, '-f',
-                           os.path.basename(dockerfile), '.')
+            try:
+                docker_command(build, '-t', image_tag_string, '-f',
+                               os.path.basename(dockerfile), '.')
+            except subprocess.CalledProcessError:
+                raise
 
 
 def start_container(image_tag_string):

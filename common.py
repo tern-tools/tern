@@ -29,6 +29,8 @@ incomplete_command_lib_listing = '''The command library has an incomplete
 listing for {image}:{tag}. Please complete the listing based on the examples'''
 cannot_retrieve_base_packages = '''Cannot retrieve the packages in the base
 image {image}:{tag}. Check the command listing in the command library'''
+docker_build_failed = '''Unable to build docker image using Dockerfile
+{dockerfile}'''
 
 # dockerfile
 dockerfile = ''
@@ -186,3 +188,31 @@ def get_base_obj(base_image_tag):
                 layer.add(pkg_obj)
             obj_list.append(layer)
     return obj_list
+
+
+def is_build():
+    '''Attempt to build a given dockerfile
+    If it does not build return False. Else return True'''
+    image_tag_string = cmds.image + df.tag_separator + cmds.tag
+    success = False
+    try:
+        cmds.build_container(dockerfile, image_tag_string)
+    except:
+        print(docker_build_failed.format(dockerfile=dockerfile))
+        success = False
+    else:
+        success = True
+    return success
+
+
+def get_dockerfile_packages():
+    '''Given the dockerfile commands get packages that may have been
+    installed. Use this when there is no image or if it cannot be
+    built
+    1. For each RUN directive get the command used and the packages
+    installed with it
+    2. All of the packages that are recognized would be unconfirmed
+    because there is no container to run the snippets against
+    All the unrecognized packages will be returned in a list of names'''
+    pkg_dict = cmds.get_package_listing(docker_commands)
+    return pkg_dict['recognized'], pkg_dict['unrecognized']
