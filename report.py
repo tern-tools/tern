@@ -118,8 +118,7 @@ def execute(args):
         report, notes = append_confirmed(package_list, report, notes)
     else:
         notes = notes + no_packages.format(layer=base_obj.sha)
-    report_txt = record_report(report)
-    report_txt = report_txt + '\n' + report_notes + notes
+    report_txt = record_report(report) + '\n' + report_notes + notes
     write_report(report_txt)
     print('Report completed')
     sys.exit(0)

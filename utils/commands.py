@@ -221,6 +221,7 @@ def check_image(image_tag_string):
 def build_container(dockerfile, image_tag_string):
     '''Invoke docker command to build a docker image from the dockerfile
     It is assumed that docker is installed and the docker daemon is running'''
+    curr_path = os.getcwd()
     path = os.path.dirname(dockerfile)
     if not check_image(image_tag_string):
         with pushd(path):
@@ -228,6 +229,7 @@ def build_container(dockerfile, image_tag_string):
                 docker_command(build, '-t', image_tag_string, '-f',
                                os.path.basename(dockerfile), '.')
             except subprocess.CalledProcessError:
+                os.chdir(curr_path)
                 raise
 
 
