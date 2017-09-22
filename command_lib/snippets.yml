@@ -4,6 +4,10 @@
 # image: the image name that the tool uses
 # tag: the image tag name that the tool uses
 apt-get:
+  install: 'install' # subcommand to install
+  remove: 'purge' # subcommand to remove a package
+  ignore: # list of subcommands that don't add or remove packages
+    - 'update' 
   packages:
     - name: default
       version:
