@@ -38,7 +38,7 @@ def record_report(report_dict):
     '''The report dict will look like this:
         confirmed: [{name: <name>, url: <url>, version: <version>}...]
         unconfirmed:[<package_names>]
-        unrecognized: [<package names>]
+        unrecognized: [<list of docker commands>]
     Record the report with each of these values
     If there are no packages, record nothing'''
     report = report_confirmed
@@ -54,8 +54,8 @@ def record_report(report_dict):
             report = report + name + ' '
     report = report + report_unrecog
     if report_dict['unrecognized']:
-        for name in report_dict['unrecognized']:
-            report = report + name + ' '
+        for command in report_dict['unrecognized']:
+            report = report + '\t' + command + '\n'
     return report
 
 
@@ -109,9 +109,9 @@ def execute(args):
         print('Build succeeded - running general code snippets')
     else:
         notes = notes + env_dep_dockerfile
-        unconf_packages = common.get_dockerfile_packages()
-        report['unconfirmed'].extend(unconf_packages[0])
-        report['unrecognized'].extend(unconf_packages[1])
+        pkg_dict = common.get_dockerfile_packages()
+        report['unconfirmed'].extend(pkg_dict['recognized'])
+        report['unrecognized'].extend(pkg_dict['unrecognized'])
 
     if package_list:
         # TODO: Add the list of package list to the layer kb

@@ -213,6 +213,7 @@ def get_dockerfile_packages():
     installed with it
     2. All of the packages that are recognized would be unconfirmed
     because there is no container to run the snippets against
-    All the unrecognized packages will be returned in a list of names'''
-    pkg_dict = cmds.get_package_listing(docker_commands)
-    return pkg_dict['recognized'], pkg_dict['unrecognized']
+    All the unrecognized commands will be returned as is'''
+    pkg_dict = cmds.remove_uninstalled(cmds.get_package_listing(
+        docker_commands))
+    return pkg_dict
