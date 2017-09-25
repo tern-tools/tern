@@ -91,18 +91,25 @@ def execute(args):
         common.load_docker_commands(args.dockerfile)
     base_image_msg = common.get_dockerfile_base()
     notes = notes + base_image_msg[1]
-    package_list = []
     # get the list of layers in the base image
     base_obj_list = common.get_base_obj(base_image_msg[0])
     for base_obj in base_obj_list:
         if base_obj.packages:
+            print('Adding packages from cache...')
             report, notes = append_confirmed(base_obj.packages, report, notes)
         else:
             # see if packages can be extracted
             # TODO: right now it is with the whole base image only
             # i.e. they have only one layer
+            print('Nothing in cache. Invoking from command library...')
             package_list = common.get_packages_from_snippets(base_image_msg[0])
-
+            if package_list:
+                common.record_layer(base_obj, package_list)
+                report, notes = append_confirmed(base_obj.packages, report,
+                                                 notes)
+            else:
+                notes = notes + no_packages.format(layer=base_obj.sha)
+    common.save_cache()
     # get a list of packages that may be installed from the dockerfile
     if common.is_build():
         # TODO: execute the snippets to get the required package info
@@ -113,11 +120,6 @@ def execute(args):
         report['unconfirmed'].extend(pkg_dict['recognized'])
         report['unrecognized'].extend(pkg_dict['unrecognized'])
 
-    if package_list:
-        # TODO: Add the list of package list to the layer kb
-        report, notes = append_confirmed(package_list, report, notes)
-    else:
-        notes = notes + no_packages.format(layer=base_obj.sha)
     report_txt = record_report(report) + '\n' + report_notes + notes
     write_report(report_txt)
     print('Report completed')

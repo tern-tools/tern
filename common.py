@@ -177,6 +177,7 @@ def get_base_obj(base_image_tag):
         print(base_image_not_found)
         raise
     else:
+        cache.load()
         # get the layers
         layer_files = get_base_layers(base_image_tag)
         for layer_file in layer_files:
@@ -217,3 +218,20 @@ def get_dockerfile_packages():
     pkg_dict = cmds.remove_uninstalled(cmds.get_package_listing(
         docker_commands))
     return pkg_dict
+
+
+def record_layer(layer_obj, package_list):
+    '''Given a layer object with a list of packages, record the layer in
+    the cache without recording duplicate packages'''
+    # get a list of package names in the current layer object
+    pkg_names = []
+    for pkg in layer_obj.packages:
+        pkg_names.append(pkg.name)
+    for pkg in package_list:
+        if pkg.name not in pkg_names:
+            layer_obj.add(pkg)
+    cache.add_layer(layer_obj)
+
+
+def save_cache():
+    cache.save()
