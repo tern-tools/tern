@@ -61,6 +61,16 @@ def get_dockerfile_base():
         return (base_image_tag, '')
 
 
+def print_dockerfile_base():
+    '''For the purpose of tracking the lines in the dockerfile that
+    produce packages, return a string containing the lines in the dockerfile
+    that pertain to the base image'''
+    base_instr = ''
+    for instr in df.get_base_instructions(docker_commands):
+        base_instr = base_instr + instr[0] + ' ' + instr[1] + '\n'
+    return base_instr
+
+
 def check_base_image(base_image_tag):
     '''Given a base image tag check if an image exists
     If not then try to pull the image.'''
@@ -127,6 +137,38 @@ def get_info_list(info_dict, info, image_tag_string):
     else:
         info_list = info_dict[info]
     return info_list
+
+
+def print_info_list(info_dict, info):
+    '''Return a string with the corresponding information
+    info is either 'names', 'versions', 'licenses' or 'src_urls'
+    '''
+    report = ''
+    if 'invoke' in info_dict[info]:
+        report = report + info + ':\n'
+        for step in range(1, len(info_dict[info]['invoke'].keys()) + 1):
+            if 'container' in info_dict[info]['invoke'][step]:
+                report = report + '\tin container:\n'
+                for snippet in info_dict[info]['invoke'][step]['container']:
+                    report = report + '\t' + snippet
+    else:
+        for value in info_dict[info]:
+            report = report + ' ' + value
+    report = report + '\n'
+    return report
+
+
+def print_image_info(base_image_tag):
+    '''Given the base image and tag in a tuple return a string containing
+    the command_lib/base.yml'''
+    info = cmds.get_base_info(base_image_tag)
+    report = ''
+    report = report + print_info_list(info, 'names')
+    report = report + print_info_list(info, 'versions')
+    report = report + print_info_list(info, 'licenses')
+    report = report + print_info_list(info, 'src_urls')
+    report = report + '\n'
+    return report
 
 
 def get_packages_from_snippets(base_image_tag):

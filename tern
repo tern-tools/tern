@@ -12,7 +12,10 @@ import report
 def main(args):
     '''Execute according to subcommands'''
     if args.name == 'report':
-        report.execute(args)
+        if args.summary:
+            report.execute_summary(args)
+        else:
+            report.execute(args)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -28,6 +31,9 @@ if __name__ == '__main__':
                                           help="Create a report")
     parser_report.add_argument('-d', '--dockerfile',
                                help="Dockerfile used to build the Docker image")
+    parser_report.add_argument('-s', '--summary', action='store_true',
+                               help="Summarize the report as a list of packages"
+                               "with associated information")
     parser_report.set_defaults(name='report')
     args = parser.parse_args()
     main(args)
