@@ -186,11 +186,12 @@ def execute(args):
     common.save_cache()
     # get a list of packages that may be installed from the dockerfile
     report = report + 'Packages from current image:\n'
-    if common.is_build():
+    build, msg = common.is_build()
+    if build:
         # TODO: execute the snippets to get the required package info
         print('Build succeeded - running general code snippets')
     else:
-        report = report + env_dep_dockerfile
+        report = report + env_dep_dockerfile.format(build_fail_msg=msg)
         report = report + checking_against_snippets
         pkg_dict = common.get_dockerfile_packages()
         report = report + 'Packages from parsing Dockerfile RUN commands:\n'

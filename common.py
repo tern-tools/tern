@@ -1,6 +1,8 @@
 '''
 Common functions
 '''
+import subprocess
+
 from classes.layer import Layer
 from classes.package import Package
 from utils import dockerfile as df
@@ -30,7 +32,7 @@ listing for {image}:{tag}. Please complete the listing based on the examples'''
 cannot_retrieve_base_packages = '''Cannot retrieve the packages in the base
 image {image}:{tag}. Check the command listing in the command library'''
 docker_build_failed = '''Unable to build docker image using Dockerfile
-{dockerfile}'''
+{dockerfile}: {error_msg}'''
 
 # dockerfile
 dockerfile = ''
@@ -238,14 +240,17 @@ def is_build():
     If it does not build return False. Else return True'''
     image_tag_string = cmds.image + df.tag_separator + cmds.tag
     success = False
+    msg = ''
     try:
         cmds.build_container(dockerfile, image_tag_string)
-    except:
-        print(docker_build_failed.format(dockerfile=dockerfile))
+    except subprocess.CalledProcessError as error:
+        print(docker_build_failed.format(dockerfile=dockerfile,
+                                         error_msg=error.output))
         success = False
+        msg = error.output
     else:
         success = True
-    return success
+    return success, msg
 
 
 def get_dockerfile_packages():

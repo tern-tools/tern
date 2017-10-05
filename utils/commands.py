@@ -85,13 +85,14 @@ def docker_command(command, *extra):
     for arg in extra:
         full_cmd.append(arg)
     # invoke
-    try:
-        print("Running command: " + ' '.join(full_cmd))
-        result = subprocess.check_output(full_cmd)
+    print("Running command: " + ' '.join(full_cmd))
+    pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+    result, error = pipes.communicate()
+    if error:
+        raise subprocess.CalledProcessError(1, cmd=full_cmd, output=error)
+    else:
         return result
-    except subprocess.CalledProcessError as error:
-        print(error)
-        raise
 
 
 def parse_command(command):
@@ -232,9 +233,11 @@ def build_container(dockerfile, image_tag_string):
             try:
                 docker_command(build, '-t', image_tag_string, '-f',
                                os.path.basename(dockerfile), '.')
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as error:
                 os.chdir(curr_path)
-                raise
+                raise subprocess.CalledProcessError(
+                    error.returncode, cmd=error.cmd,
+                    output=error.output.decode('utf-8'))
 
 
 def start_container(image_tag_string):
