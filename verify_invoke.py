@@ -1,4 +1,5 @@
 import argparse
+import subprocess
 
 import utils.commands as cmds
 
@@ -35,8 +36,20 @@ if __name__ == '__main__':
                         help='A package name that the command needs to \
                         execute with')
     args = parser.parse_args()
-    invoke_dict = look_up_lib(args.keys)
+    info_dict = look_up_lib(args.keys)
+    invoke_dict = info_dict['invoke']
+    delimiter = info_dict['delimiter']
     for step in range(1, len(invoke_dict.keys()) + 1):
-        print(cmds.invoke_in_container(invoke_dict[step]['container'],
-                                       args.shell,
-                                       override=args.container))
+        try:
+            result = cmds.invoke_in_container(invoke_dict[step]['container'],
+                                              args.shell,
+                                              override=args.container)
+            result = result[:-1]
+            # print(result)
+            res_list = result.split(delimiter)
+            if res_list[-1] == '':
+                res_list.pop()
+            print(res_list)
+            print(len(res_list))
+        except subprocess.CalledProcessError as error:
+            print(error.output)
