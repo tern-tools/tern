@@ -197,7 +197,7 @@ def execute(args):
         report = report + 'Packages from parsing Dockerfile RUN commands:\n'
         for pkg in pkg_dict['recognized']:
             report = report + ' ' + pkg
-        report = report + 'Unregonized RUN commands in Dockerfile:\n'
+        report = report + '\nUnregonized RUN commands in Dockerfile:\n'
         for cmd in pkg_dict['unrecognized']:
             report = report + cmd + '\n'
     write_report(report)

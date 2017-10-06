@@ -173,7 +173,7 @@ def get_package_listing(docker_commands):
             if sub == command_lib['snippets'][name]['install']:
                 is_package_op = True
                 installed_dict['installed'] = command_obj['arguments']
-            if sub == command_lib['snippets'][name]['removed']:
+            if sub == command_lib['snippets'][name]['remove']:
                 is_package_op = True
                 installed_dict['removed'] = command_obj['arguments']
             # add only if there are some packages installed or removed
@@ -289,8 +289,12 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
     # construct the full command
     full_cmd = ''
     while len(snippet_list) > 1:
-        full_cmd = full_cmd + snippet_list.pop(0).format(package=package) + \
-            '&&'
+        cmd = snippet_list.pop(0)
+        try:
+            cmd = cmd.format(package=package)
+        except KeyError:
+            pass
+        full_cmd = full_cmd + cmd + '&&'
     full_cmd = full_cmd + snippet_list[0]
     try:
         if override:
@@ -302,9 +306,11 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
             result = result.decode('utf-8')
         except AttributeError:
             pass
-    except:
+        return result
+    except subprocess.CalledProcessError as error:
         print("Error executing command inside the container")
-    return result
+        raise subprocess.CalledProcessError(
+            1, cmd=full_cmd, output=error.output.decode('utf-8'))
 
 
 def get_image_id(image_tag_string):

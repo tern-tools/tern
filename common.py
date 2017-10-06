@@ -134,8 +134,11 @@ def get_info_list(info_dict, info, image_tag_string):
         info_list = process_base_invoke(info_dict[info]['invoke'],
                                         image_tag_string,
                                         info_dict['shell'])
+        info_list = info_list[:-1]
         if 'delimiter' in info_dict[info]:
-            info_list = info_list.split(info_dict[info]['delimiter'])[:-1]
+            info_list = info_list.split(info_dict[info]['delimiter'])
+            if info_list[-1] == '':
+                info_list.pop()
     else:
         info_list = info_dict[info]
     return info_list
@@ -261,9 +264,15 @@ def get_dockerfile_packages():
     installed with it
     2. All of the packages that are recognized would be unconfirmed
     because there is no container to run the snippets against
-    All the unrecognized commands will be returned as is'''
+    All the unrecognized commands will be returned as is
+    Since there will be nothing more to do - recognized is just a list
+    of packages that may have been installed in the dockerfile'''
     pkg_dict = cmds.remove_uninstalled(cmds.get_package_listing(
         docker_commands))
+    recognized_list = []
+    for command in pkg_dict['recognized'].keys():
+        recognized_list.extend(pkg_dict['recognized'][command])
+    pkg_dict.update({'recognized': recognized_list})
     return pkg_dict
 
 
