@@ -15,12 +15,23 @@ apt-get:
         invoke:
           1:
             container:
-              - "dpkg -l {package} | awk 'NR>5 {print $3}"
+              - "dpkg -l {package} | awk 'NR>5 {print $3}'"
       src_url:
         invoke:
           1:
             container:
               - "apt-get download --print-uris {package}"
+      license:
+        invoke:
+          1:
+            container:
+              - "cat /usr/share/doc/{package}/copyright"
+      deps:
+        invoke:
+          1:
+            container:
+              - "apt-cache depends --installed --no-suggests vim | awk 'NR>1 {print $2}'"
+        delimiter: "\n"
       src:
         # copy_in: used to copy into the running container
         copy_in:

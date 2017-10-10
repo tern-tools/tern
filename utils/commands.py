@@ -146,6 +146,41 @@ def check_sourcable(command, package_name):
     return sourcable
 
 
+def get_packages_per_run(docker_run_command):
+    '''Given a Docker RUN instruction retrieve a dictionary of recognized
+    and unrecognized commands
+    the dictionary should look like this:
+        line: <dockerfile line>
+        recognized: { <command name>:
+                         {installed: [list of packages installed]
+                          removed: [list of packaged removed]},...}
+        unrecognized: [list shell commands that were not recognized]'''
+    # TODO: this makes get_package_listing obsolete so remove it
+    docker_inst = docker_run_command[0] + ' ' + docker_run_command[1]
+    pkg_dict = {'line': docker_inst, 'recognized': {}, 'unrecognized': []}
+    shell_commands = get_shell_commands(docker_command[1])
+    for command in shell_commands:
+        installed_dict = {'installed': [], 'removed': []}
+        command_obj = parse_command(command)
+        # see if command is in the snippet library
+        name = command_obj['name']
+        sub = command_obj['subcommand']
+        if name in command_lib['snippets'].keys():
+            is_package_op = False
+            if sub == command_lib['snippets'][name]['install']:
+                is_package_op = True
+                installed_dict['installed'] = command_obj['arguments']
+            if sub == command_lib['snippets'][name]['remove']:
+                is_package_op = True
+                installed_dict['removed'] = command_obj['arguments']
+            # add only if there are some packages installed or removed
+            if is_package_op:
+                pkg_dict['recognized'].update({name: installed_dict})
+        else:
+            pkg_dict['unrecognized'].append(command)
+    return pkg_dict
+
+
 def get_package_listing(docker_commands):
     '''Given the docker commands in a dockerfile,  get a dictionary of
     packages that are in the command library of retrievable sources
@@ -189,7 +224,7 @@ def remove_uninstalled(pkg_dict):
     docker commands, return an updated dictionary with only the packages that
     are installed
     The resulting dictionary should look like this:
-        recognized:{ <command name>: [list of packages installed],...}
+        recognized:{ {<command name>: [list of packages installed]},...}
         unrecognized: [list of shell commands that were not recognized]
         '''
     for command in pkg_dict['recognized'].keys():
@@ -311,6 +346,36 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
         print("Error executing command inside the container")
         raise subprocess.CalledProcessError(
             1, cmd=full_cmd, output=error.output.decode('utf-8'))
+
+
+def get_pkg_attr_list(package_name, shell, attr_dict):
+    '''The command library has package attributes listed like this:
+        {invoke: {1: {container: [command1, command2]},
+                  2: {host: [command1, command2]}}, delimiter: <delimiter}
+    Get the result of the invokes, apply the delimiter to create a list'''
+    # TODO: this makes process_base_invoke and get_info_list in common.py
+    # obsolete
+    attr_list = []
+    if 'invoke' in attr_dict.keys():
+        # invoke the commands
+        for step in range(1, len(attr_dict['invoke'].keys()) + 1):
+            if 'container' in attr_dict['invoke'][step].keys():
+                try:
+                    result = invoke_in_container(
+                        attr_dict['invoke'][step]['container'], shell,
+                        package=package_name)
+                except subprocess.CalledProcessError as error:
+                    raise subprocess.CalledProcessError(
+                        1, cmd=error.cmd, output=error.output)
+                result = result[:-1]
+                if 'delimiter' in attr_dict.keys():
+                    res_list = result.split(attr_dict['delimiter'])
+                    if res_list[-1] == '':
+                        res_list.pop()
+                    attr_list.extend(res_list)
+                else:
+                    attr_list.append(result)
+    return attr_list
 
 
 def get_image_id(image_tag_string):
