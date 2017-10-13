@@ -291,3 +291,78 @@ def record_layer(layer_obj, package_list):
 
 def save_cache():
     cache.save()
+
+
+def check_for_unique_package(command_name, package_name):
+    '''In the snippet library the command name as a list of packages that can
+    be installed with that command. A package name called 'default' indicates
+    that the method of retrieving information applies to any package.
+    However if there is an element with a specific name, the default is
+    overridden with that name.
+    Go through the snippet library for the given command and find the
+    package dictionary with the given package name. If not there look for
+    a pacakge dictionary with the name as 'default'. If that is not there,
+    return an empty dictionary'''
+    pkg = {}
+    for package in cmds.command_lib['snippets'][command_name]['packages']:
+        if package['name'] == package_name:
+            pkg = package
+            break
+    if not pkg:
+        for package in cmds.command_lib['snippets'][command_name]['packages']:
+            if package['name'] == 'default':
+                pkg = package
+                break
+    return pkg
+
+
+def get_package_dependencies(command_name, package_name, shell):
+    '''Given the command name, the package name and the shell,
+    find the list of dependencies'''
+    deps = []
+    # look up snippet library
+    pkg_dict = check_for_unique_package(command_name, package_name)
+    if pkg_dict and 'deps' in pkg_dict.keys():
+        deps.extend(cmds.get_pkg_attr_list(package_name, shell,
+                                           pkg_dict['deps']))
+    return deps
+
+
+def process_docker_run(docker_commands, shell):
+    '''For each of of the docker commands, if the directive is RUN
+    1. Get the packages that were installed
+    This is in the form of a dictionary that looks like this:
+        instruction: <dockerfile instruction>
+        recognized: {command_name: [list of installed packages], ...}
+        unrecognized: [list of commands in the docker RUN instruction]
+    2. Get the dependencies for each of the packages that were installed
+    Update the dictionary to move the recognized to confirmed with a
+    unique list of packages. The resulting dictionary looks like this:
+        instruction: <dockerfile instruction>
+        recognized: {command_name: [], ...}
+        confirmed: {command_name: [],...}
+        unrecognized: [list of commands in the docker RUN instruction]'''
+    pkg_list = []
+    for instruction in docker_commands:
+        if instruction[0] == 'RUN':
+            # get the line, the recognized packages and unrecognized commands
+            pkg_dict = cmds.remove_uninstalled(
+                cmds.get_packages_per_run(instruction))
+            pkg_dict.update({'confirmed': {}})
+            # get package dependencies
+            for cmd in pkg_dict['recognized'].keys():
+                cmd_dict = {cmd: []}
+                all_pkgs = []
+                for pkg in pkg_dict['recognized'][cmd]:
+                    try:
+                        deps = get_package_dependencies(cmd, pkg, shell)
+                        all_pkgs.append(pkg)
+                        all_pkgs.extend(deps)
+                        pkg_dict['recognized'][cmd].remove(pkg)
+                    except:
+                        print("Could not retireve dependencies for: " + pkg)
+                        pass
+                cmd_dict[cmd].extend(list(set(all_pkgs)))
+                pkg_dict['confirmed'].update(cmd_dict)
+            pkg_list.append(pkg_dict)
+    return pkg_list
