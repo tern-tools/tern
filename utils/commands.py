@@ -150,14 +150,16 @@ def get_packages_per_run(docker_run_command):
     '''Given a Docker RUN instruction retrieve a dictionary of recognized
     and unrecognized commands
     the dictionary should look like this:
-        line: <dockerfile line>
+        instruction: <dockerfile instruction>
         recognized: { <command name>:
                          {installed: [list of packages installed]
                           removed: [list of packaged removed]},...}
         unrecognized: [list shell commands that were not recognized]'''
     # TODO: this makes get_package_listing obsolete so remove it
     docker_inst = docker_run_command[0] + ' ' + docker_run_command[1]
-    pkg_dict = {'line': docker_inst, 'recognized': {}, 'unrecognized': []}
+    pkg_dict = {'instruction': docker_inst,
+                'recognized': {},
+                'unrecognized': []}
     shell_commands = get_shell_commands(docker_command[1])
     for command in shell_commands:
         installed_dict = {'installed': [], 'removed': []}

@@ -73,6 +73,13 @@ def print_dockerfile_base():
     return base_instr
 
 
+def get_image_shell(base_image_tag):
+    '''Given the base image tag tuple
+    (<image>, <tag>) look up the base library for the shell'''
+    return \
+        cmds.command_lib['base'][base_image_tag[0]][base_image_tag[1]]['shell']
+
+
 def check_base_image(base_image_tag):
     '''Given a base image tag check if an image exists
     If not then try to pull the image.'''
@@ -176,9 +183,9 @@ def print_image_info(base_image_tag):
     return report
 
 
-def get_packages_from_snippets(base_image_tag):
+def get_packages_from_base(base_image_tag):
     '''Get a list of package objects from invoking the commands in the
-    command library:
+    command library base section:
         1. For the image and tag name find if there is a list of package names
         2. If there is an invoke dictionary, invoke the commands
         3. Create a list of packages'''
@@ -238,10 +245,16 @@ def get_base_obj(base_image_tag):
     return obj_list
 
 
+def get_dockerfile_image_tag():
+    '''Return the image and tag used to build an image from the dockerfile'''
+    image_tag_string = cmds.image + df.tag_separator + cmds.tag
+    return image_tag_string
+
+
 def is_build():
     '''Attempt to build a given dockerfile
     If it does not build return False. Else return True'''
-    image_tag_string = cmds.image + df.tag_separator + cmds.tag
+    image_tag_string = get_dockerfile_image_tag()
     success = False
     msg = ''
     try:
@@ -328,8 +341,8 @@ def get_package_dependencies(command_name, package_name, shell):
     return deps
 
 
-def process_docker_run(docker_commands, shell):
-    '''For each of of the docker commands, if the directive is RUN
+def get_confirmed_packages(docker_run_inst, shell):
+    '''For a dockerfile run instruction
     1. Get the packages that were installed
     This is in the form of a dictionary that looks like this:
         instruction: <dockerfile instruction>
@@ -342,27 +355,87 @@ def process_docker_run(docker_commands, shell):
         recognized: {command_name: [], ...}
         confirmed: {command_name: [],...}
         unrecognized: [list of commands in the docker RUN instruction]'''
-    pkg_list = []
-    for instruction in docker_commands:
-        if instruction[0] == 'RUN':
-            # get the line, the recognized packages and unrecognized commands
-            pkg_dict = cmds.remove_uninstalled(
-                cmds.get_packages_per_run(instruction))
-            pkg_dict.update({'confirmed': {}})
-            # get package dependencies
-            for cmd in pkg_dict['recognized'].keys():
-                cmd_dict = {cmd: []}
-                all_pkgs = []
-                for pkg in pkg_dict['recognized'][cmd]:
-                    try:
-                        deps = get_package_dependencies(cmd, pkg, shell)
-                        all_pkgs.append(pkg)
-                        all_pkgs.extend(deps)
-                        pkg_dict['recognized'][cmd].remove(pkg)
-                    except:
-                        print("Could not retireve dependencies for: " + pkg)
-                        pass
-                cmd_dict[cmd].extend(list(set(all_pkgs)))
-                pkg_dict['confirmed'].update(cmd_dict)
-            pkg_list.append(pkg_dict)
-    return pkg_list
+    # get the instruction, the recognized packages and unrecognized commands
+    run_dict = cmds.remove_uninstalled(
+        cmds.get_packages_per_run(docker_run_inst))
+    run_dict.update({'confirmed': {}})
+    # get package dependencies
+    for cmd in run_dict['recognized'].keys():
+        cmd_dict = {cmd: []}
+        all_pkgs = []
+        remove_pkgs = []
+        for pkg in run_dict['recognized'][cmd]:
+            try:
+                deps = get_package_dependencies(cmd, pkg, shell)
+                all_pkgs.append(pkg)
+                all_pkgs.extend(deps)
+                remove_pkgs.append(pkg)
+            except:
+                print("Could not retireve dependencies for: " + pkg)
+                pass
+        cmd_dict[cmd].extend(list(set(all_pkgs)))
+        run_dict['confirmed'].update(cmd_dict)
+        for rem in remove_pkgs:
+            run_dict['recognized'][cmd].remove(rem)
+    return run_dict
+
+
+def get_package_obj(command_name, package_name, shell):
+    '''Given the command name, and the package name, retrieve the package
+    information, create an oject and return the package object'''
+    # look up command name in snippet library
+    if command_name in cmds.command_lib['snippets'].keys():
+        # get the unique or default information
+        pkg_info = check_for_unique_package(command_name, package_name)
+        if pkg_info:
+            pkg = Package(package_name)
+            # get the information for values
+            keys = pkg_info.keys()
+            if 'version' in keys:
+                version = cmds.get_pkg_attr_list(
+                    package_name, shell, pkg_info['version'])[0]
+                pkg.version = version
+            if 'license' in keys:
+                license = cmds.get_pkg_attr_list(
+                    package_name, shell, pkg_info['license'])[0]
+                pkg.license = license
+            if 'src_url' in keys:
+                src_url = cmds.get_pkg_attr_list(
+                    package_name, shell, pkg_info['src_url'])[0]
+                pkg.src_url = src_url
+            return pkg
+        else:
+            print(
+                'No package named {} nor default listing'.format(package_name))
+    else:
+        print('No command {} listed in snippet library'.format(command_name))
+
+
+def get_packages_from_snippets(command_dict, shell):
+    '''Command dictionary looks like this:
+        { command: [list of packages], command: [list of packages]...}
+    This is the result of parsing through a Dockerfile RUN command.
+    Return a list of packages objects that are installed from the Dockerfile
+    RUN command'''
+    package_list = []
+    for cmd in command_dict.keys():
+        for pkg in command_dict[cmd]:
+            pkg_obj = get_package_obj(cmd, pkg, shell)
+            package_list.append(pkg_obj)
+    return package_list
+
+
+def get_layer_history(image_tag_string):
+    '''For an available image, get a list of tuples containing the dockerfile
+    instruction that created the layer and the diff id of that layer'''
+    history_list = []
+    # save the image first
+    cmds.extract_image_metadata(image_tag_string)
+    # get the list of non-empty history
+    config = meta.get_image_config()
+    history = meta.get_nonempty_history(config)
+    diff_ids = meta.get_diff_ids(config)
+    # create a list of tuples
+    for index in range(0, len(history)):
+        history_list.append((history[index], diff_ids[index]))
+    return history_list
