@@ -3,6 +3,9 @@ Create a report
 '''
 import sys
 
+from utils.commands import start_container
+from utils.commands import remove_container
+from utils.commands import remove_image
 import common
 
 # constants
@@ -102,6 +105,47 @@ def print_package_notes(packages, report, notes):
     return report, notes
 
 
+def print_dockerfile_run(report, shell, base_layer_no):
+    '''Given the report, the shell used for commands in the built image
+    and the number of base layers in the history, retrieve package
+    information for each of the dockerfile RUN instructions and append the
+    results to the report and return the report
+    1. Retrieve the history and the diff ids for the built image and remove
+    the first few lines corresponding to the base image. The next line should
+    correspond with the first dockerfile line run
+    2. For each Dockerfile RUN
+        1. Check if the dockerfile run matches the history.
+        If yes - that is the layer sha. If not, skip to the next RUN line
+        2. Get the run dictionary of commands and packages that were installed
+        with them
+        3. Retrieve package information for these packages
+        4. Create the layer object with this list
+        5. Record the layer with package information
+        6. Append to the report the Dockerfile line, and the packages retrieved
+    '''
+    layer_history = common.get_layer_history(common.get_dockerfile_image_tag())
+    while base_layer_no > 0:
+        layer_history.pop(0)
+        base_layer_no = base_layer_no - 1
+    for instr in common.docker_commands:
+        if instr[0] == 'RUN':
+            if instr[1] in layer_history[0][0]:
+                # this is the sha for the given layer
+                sha = layer_history[0][1]
+                run_dict = common.get_confirmed_packages(instr, shell)
+                report = report + run_dict['instruction'] + '\n'
+                pkg_list = common.get_packages_from_snippets(
+                    run_dict['confirmed'], shell)
+                if pkg_list:
+                    layer_obj = common.build_layer_obj(sha, pkg_list)
+                    common.record_layer(layer_obj)
+                    report, notes = print_package_notes(pkg_list, report, '')
+                    report = report + notes
+                else:
+                    report = report + no_packages.format(layer=sha)
+    return report
+
+
 def execute_summary(args):
     '''Create a summarized report'''
     report = {}
@@ -123,7 +167,7 @@ def execute_summary(args):
             # TODO: right now it is with the whole base image only
             # i.e. they have only one layer
             print('Nothing in cache. Invoking from command library...')
-            package_list = common.get_packages_from_snippets(base_image_msg[0])
+            package_list = common.get_packages_from_base(base_image_msg[0])
             if package_list:
                 common.record_layer(base_obj, package_list)
                 report, notes = append_confirmed(base_obj.packages, report,
@@ -188,8 +232,15 @@ def execute(args):
     report = report + 'Packages from current image:\n'
     build, msg = common.is_build()
     if build:
-        # TODO: execute the snippets to get the required package info
-        print('Build succeeded - running general code snippets')
+        # get the shell that we will use for all the commands
+        shell = common.get_image_shell(base_image_msg[0])
+        # start a container with the built image
+        image_tag_string = common.get_dockerfile_image_tag()
+        start_container(image_tag_string)
+        report = print_dockerfile_run(report, shell, len(base_obj_list))
+        # remove container when done
+        remove_container()
+        remove_image(image_tag_string)
     else:
         report = report + env_dep_dockerfile.format(build_fail_msg=msg)
         report = report + checking_against_snippets

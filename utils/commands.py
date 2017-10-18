@@ -48,6 +48,15 @@ with open(os.path.abspath(snippet_file)) as f:
     command_lib['snippets'] = yaml.safe_load(f)
 
 
+class FormatAwk(dict):
+    '''Code snippets will sometimes use awk and some of the formatting
+    syntax resembles python's formatting. This class is meant to override
+    the KeyError error that occurs for a missing key when trying to format
+    a string such as "awk '{print $1}'"'''
+    def __missing__(self, key):
+        return '{' + key + '}'
+
+
 def get_shell_commands(run_comm):
     '''Given a RUN command return a list of shell commands to be run'''
     comm_list = run_comm.split('&&')
@@ -160,7 +169,7 @@ def get_packages_per_run(docker_run_command):
     pkg_dict = {'instruction': docker_inst,
                 'recognized': {},
                 'unrecognized': []}
-    shell_commands = get_shell_commands(docker_command[1])
+    shell_commands = get_shell_commands(docker_run_command[1])
     for command in shell_commands:
         installed_dict = {'installed': [], 'removed': []}
         command_obj = parse_command(command)
@@ -327,12 +336,9 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
     full_cmd = ''
     while len(snippet_list) > 1:
         cmd = snippet_list.pop(0)
-        try:
-            cmd = cmd.format(package=package)
-        except KeyError:
-            pass
-        full_cmd = full_cmd + cmd + '&&'
-    full_cmd = full_cmd + snippet_list[0]
+        full_cmd = full_cmd + cmd.format_map(FormatAwk(package=package)) + '&&'
+    full_cmd = full_cmd + snippet_list[0].format_map(FormatAwk(package=package))
+    print("full command: " + full_cmd)
     try:
         if override:
             result = docker_command(execute, override, shell, '-c', full_cmd)

@@ -76,8 +76,8 @@ def print_dockerfile_base():
 def get_image_shell(base_image_tag):
     '''Given the base image tag tuple
     (<image>, <tag>) look up the base library for the shell'''
-    return \
-        cmds.command_lib['base'][base_image_tag[0]][base_image_tag[1]]['shell']
+    return cmds.command_lib[
+        'base'][base_image_tag[0]]['tags'][base_image_tag[1]]['shell']
 
 
 def check_base_image(base_image_tag):
@@ -289,7 +289,7 @@ def get_dockerfile_packages():
     return pkg_dict
 
 
-def record_layer(layer_obj, package_list):
+def record_layer(layer_obj, package_list=[]):
     '''Given a layer object with a list of packages, record the layer in
     the cache without recording duplicate packages'''
     # get a list of package names in the current layer object
@@ -300,6 +300,14 @@ def record_layer(layer_obj, package_list):
         if pkg.name not in pkg_names:
             layer_obj.add(pkg)
     cache.add_layer(layer_obj)
+
+
+def build_layer_obj(sha, pkg_obj_list=[]):
+    '''Create a layer object given the sha and a list of package objects'''
+    layer_obj = Layer(sha)
+    for pkg in pkg_obj_list:
+        layer_obj.add(pkg)
+    return layer_obj
 
 
 def save_cache():
@@ -342,7 +350,8 @@ def get_package_dependencies(command_name, package_name, shell):
 
 
 def get_confirmed_packages(docker_run_inst, shell):
-    '''For a dockerfile run instruction
+    '''For a dockerfile run instruction which is a tuple of type:
+        ('RUN', command)
     1. Get the packages that were installed
     This is in the form of a dictionary that looks like this:
         instruction: <dockerfile instruction>
@@ -392,17 +401,26 @@ def get_package_obj(command_name, package_name, shell):
             # get the information for values
             keys = pkg_info.keys()
             if 'version' in keys:
-                version = cmds.get_pkg_attr_list(
-                    package_name, shell, pkg_info['version'])[0]
-                pkg.version = version
+                try:
+                    version = cmds.get_pkg_attr_list(
+                        package_name, shell, pkg_info['version'])[0]
+                    pkg.version = version
+                except subprocess.CalledProcessError as error:
+                    print(error.output)
             if 'license' in keys:
-                license = cmds.get_pkg_attr_list(
-                    package_name, shell, pkg_info['license'])[0]
-                pkg.license = license
+                try:
+                    license = cmds.get_pkg_attr_list(
+                        package_name, shell, pkg_info['license'])[0]
+                    pkg.license = license
+                except subprocess.CalledProcessError as error:
+                    print(error.output)
             if 'src_url' in keys:
-                src_url = cmds.get_pkg_attr_list(
-                    package_name, shell, pkg_info['src_url'])[0]
-                pkg.src_url = src_url
+                try:
+                    src_url = cmds.get_pkg_attr_list(
+                        package_name, shell, pkg_info['src_url'])[0]
+                    pkg.src_url = src_url
+                except subprocess.CalledProcessError as error:
+                    print(error.output)
             return pkg
         else:
             print(
