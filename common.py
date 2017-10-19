@@ -93,20 +93,10 @@ def check_base_image(base_image_tag):
     return success
 
 
-def get_base_layers(base_image_tag):
-    '''Given the base image and tag, get the base layers
-    Note: this assumes that the image exists locally'''
-    base_layers = []
-    image_tag_string = base_image_tag[0] + df.tag_separator + base_image_tag[1]
-    if not cmds.extract_image_metadata(image_tag_string):
-        # there was some error in extracting the metadata so we cannot
-        # find the context for the base image
-        print(cannot_extract_base_image)
-        raise
-    else:
-        # we should now have a place to extract metadata
-        base_layers = meta.get_image_layers(meta.get_image_manifest())
-    return base_layers
+def get_image_tag_string(image_tag_tuple):
+    '''Given a tuple of the image and tag, return a string containing
+    the image and tag'''
+    return image_tag_tuple[0] + df.tag_separator + image_tag_tuple[1]
 
 
 def process_base_invoke(invoke_dict, image_tag_string, shell):
@@ -191,7 +181,7 @@ def get_packages_from_base(base_image_tag):
         3. Create a list of packages'''
     pkg_list = []
     info = cmds.get_base_info(base_image_tag)
-    image_tag_string = base_image_tag[0] + df.tag_separator + base_image_tag[1]
+    image_tag_string = get_image_tag_string(base_image_tag)
     if info:
         names = get_info_list(info, 'names', image_tag_string)
         versions = get_info_list(info, 'versions', image_tag_string)
@@ -232,11 +222,13 @@ def get_base_obj(base_image_tag):
         raise
     else:
         cache.load()
-        # get the layers
-        layer_files = get_base_layers(base_image_tag)
-        for layer_file in layer_files:
-            layer = Layer(meta.get_layer_sha(layer_file))
-            package_list = cache.get_packages(meta.get_layer_sha(layer_file))
+        # get the history with diff ids
+        # tuples look like this: (history command, diff_id)
+        layer_history = get_layer_history(get_image_tag_string(
+            base_image_tag))
+        for layer_tuple in layer_history:
+            layer = Layer(layer_tuple[1])
+            package_list = cache.get_packages(layer_tuple[1])
             for package in package_list:
                 pkg_obj = Package(package['name'])
                 pkg_obj.fill(package)
@@ -452,12 +444,17 @@ def get_layer_history(image_tag_string):
     instruction that created the layer and the diff id of that layer'''
     history_list = []
     # save the image first
-    cmds.extract_image_metadata(image_tag_string)
-    # get the list of non-empty history
-    config = meta.get_image_config()
-    history = meta.get_nonempty_history(config)
-    diff_ids = meta.get_diff_ids(config)
-    # create a list of tuples
-    for index in range(0, len(history)):
-        history_list.append((history[index], diff_ids[index]))
+    if not cmds.extract_image_metadata(image_tag_string):
+        # there was some error in extracting the metadata so we cannot
+        # find the context for the base image
+        print(cannot_extract_base_image)
+        raise
+    else:
+        # get the list of non-empty history
+        config = meta.get_image_config()
+        history = meta.get_nonempty_history(config)
+        diff_ids = meta.get_diff_ids(config)
+        # create a list of tuples
+        for index in range(0, len(history)):
+            history_list.append((history[index], diff_ids[index]))
     return history_list

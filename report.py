@@ -219,7 +219,7 @@ def execute(args):
             report = report + invoking_from_base
             report = report + common.print_image_info(base_image_msg[0])
             print('Nothing in cache. Invoking from command library...')
-            package_list = common.get_packages_from_snippets(base_image_msg[0])
+            package_list = common.get_packages_from_base(base_image_msg[0])
             if package_list:
                 common.record_layer(base_obj, package_list)
                 report, notes = print_package_notes(base_obj.packages, report,
