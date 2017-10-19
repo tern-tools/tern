@@ -2,6 +2,7 @@ import argparse
 import subprocess
 
 import utils.commands as cmds
+from common import check_for_unique_package
 
 '''
 Test script for running commands using docker exec
@@ -36,20 +37,19 @@ if __name__ == '__main__':
                         help='A package name that the command needs to \
                         execute with')
     args = parser.parse_args()
-    info_dict = look_up_lib(args.keys)
-    invoke_dict = info_dict['invoke']
-    delimiter = info_dict['delimiter']
-    for step in range(1, len(invoke_dict.keys()) + 1):
-        try:
-            result = cmds.invoke_in_container(invoke_dict[step]['container'],
-                                              args.shell,
-                                              override=args.container)
-            result = result[:-1]
-            # print(result)
-            res_list = result.split(delimiter)
-            if res_list[-1] == '':
-                res_list.pop()
-            print(res_list)
-            print(len(res_list))
-        except subprocess.CalledProcessError as error:
-            print(error.output)
+    if 'snippets' in args.keys and 'packages' in args.keys:
+        # we're looking up the snippet library
+        # get the package info that corresponds to the package name
+        # or get the default
+        last = args.keys.pop()
+        info_list = look_up_lib(args.keys)
+        info_dict = check_for_unique_package(info_list, args.package)[last]
+    else:
+        info_dict = look_up_lib(args.keys)
+    try:
+        result = cmds.get_pkg_attr_list(
+            args.shell, info_dict, args.package, args.container)
+        print(result)
+        print(len(result))
+    except subprocess.CalledProcessError as error:
+        print(error.output)

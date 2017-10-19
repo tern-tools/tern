@@ -314,23 +314,22 @@ def save_cache():
     cache.save()
 
 
-def check_for_unique_package(command_name, package_name):
-    '''In the snippet library the command name as a list of packages that can
+def check_for_unique_package(package_list, package_name):
+    '''In the snippet library the command name has a list of packages that can
     be installed with that command. A package name called 'default' indicates
     that the method of retrieving information applies to any package.
     However if there is an element with a specific name, the default is
     overridden with that name.
-    Go through the snippet library for the given command and find the
-    package dictionary with the given package name. If not there look for
-    a pacakge dictionary with the name as 'default'. If that is not there,
-    return an empty dictionary'''
+    Given a list of package dictionaries, find the package dictionary with the
+    given package name. If not there look for a pacakge dictionary with the
+    name as 'default'. If that is not there, return an empty dictionary'''
     pkg = {}
-    for package in cmds.command_lib['snippets'][command_name]['packages']:
+    for package in package_list:
         if package['name'] == package_name:
             pkg = package
             break
     if not pkg:
-        for package in cmds.command_lib['snippets'][command_name]['packages']:
+        for package in package_list:
             if package['name'] == 'default':
                 pkg = package
                 break
@@ -342,10 +341,11 @@ def get_package_dependencies(command_name, package_name, shell):
     find the list of dependencies'''
     deps = []
     # look up snippet library
-    pkg_dict = check_for_unique_package(command_name, package_name)
+    pkg_list = cmds.command_lib['snippets'][command_name]['packages']
+    pkg_dict = check_for_unique_package(pkg_list, package_name)
     if pkg_dict and 'deps' in pkg_dict.keys():
-        deps.extend(cmds.get_pkg_attr_list(package_name, shell,
-                                           pkg_dict['deps']))
+        deps.extend(cmds.get_pkg_attr_list(shell, pkg_dict['deps'],
+                                           package_name=package_name))
     return deps
 
 
@@ -395,7 +395,8 @@ def get_package_obj(command_name, package_name, shell):
     # look up command name in snippet library
     if command_name in cmds.command_lib['snippets'].keys():
         # get the unique or default information
-        pkg_info = check_for_unique_package(command_name, package_name)
+        pkg_list = cmds.command_lib['snippets'][command_name]['packages']
+        pkg_info = check_for_unique_package(pkg_list, package_name)
         if pkg_info:
             pkg = Package(package_name)
             # get the information for values
@@ -403,21 +404,24 @@ def get_package_obj(command_name, package_name, shell):
             if 'version' in keys:
                 try:
                     version = cmds.get_pkg_attr_list(
-                        package_name, shell, pkg_info['version'])[0]
+                        shell, pkg_info['version'],
+                        package_name=package_name)[0]
                     pkg.version = version
                 except subprocess.CalledProcessError as error:
                     print(error.output)
             if 'license' in keys:
                 try:
                     license = cmds.get_pkg_attr_list(
-                        package_name, shell, pkg_info['license'])[0]
+                        shell, pkg_info['license'],
+                        package_name=package_name)[0]
                     pkg.license = license
                 except subprocess.CalledProcessError as error:
                     print(error.output)
             if 'src_url' in keys:
                 try:
                     src_url = cmds.get_pkg_attr_list(
-                        package_name, shell, pkg_info['src_url'])[0]
+                        shell, pkg_info['src_url'],
+                        package_name=package_name)[0]
                     pkg.src_url = src_url
                 except subprocess.CalledProcessError as error:
                     print(error.output)

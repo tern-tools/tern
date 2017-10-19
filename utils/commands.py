@@ -356,11 +356,13 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
             1, cmd=full_cmd, output=error.output.decode('utf-8'))
 
 
-def get_pkg_attr_list(package_name, shell, attr_dict):
+def get_pkg_attr_list(shell, attr_dict, package_name='', override=''):
     '''The command library has package attributes listed like this:
         {invoke: {1: {container: [command1, command2]},
                   2: {host: [command1, command2]}}, delimiter: <delimiter}
-    Get the result of the invokes, apply the delimiter to create a list'''
+    Get the result of the invokes, apply the delimiter to create a list
+    override is used for an alternate container name and defaults to
+    an empty string'''
     # TODO: this makes process_base_invoke and get_info_list in common.py
     # obsolete
     attr_list = []
@@ -371,7 +373,7 @@ def get_pkg_attr_list(package_name, shell, attr_dict):
                 try:
                     result = invoke_in_container(
                         attr_dict['invoke'][step]['container'], shell,
-                        package=package_name)
+                        package=package_name, override=override)
                 except subprocess.CalledProcessError as error:
                     raise subprocess.CalledProcessError(
                         1, cmd=error.cmd, output=error.output)
