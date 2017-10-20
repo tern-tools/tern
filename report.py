@@ -105,7 +105,7 @@ def print_package_notes(packages, report, notes):
     return report, notes
 
 
-def print_dockerfile_run(report, shell, base_layer_no):
+def print_dockerfile_run(report, shell, base_layer_no, master_list):
     '''Given the report, the shell used for commands in the built image
     and the number of base layers in the history, retrieve package
     information for each of the dockerfile RUN instructions and append the
@@ -132,15 +132,21 @@ def print_dockerfile_run(report, shell, base_layer_no):
             if instr[1] in layer_history[0][0]:
                 # this is the sha for the given layer
                 sha = layer_history[0][1]
-                run_dict = common.get_confirmed_packages(instr, shell)
-                report = report + run_dict['instruction'] + '\n'
-                report = report + 'diff id: ' + sha[:10] + '\n'
-                pkg_list = common.get_packages_from_snippets(
-                    run_dict['confirmed'], shell)
-                if pkg_list:
-                    layer_obj = common.build_layer_obj(sha, pkg_list)
-                    common.record_layer(layer_obj)
-                    report, notes = print_package_notes(pkg_list, report, '')
+                # retrieve the layer
+                layer_obj = common.get_layer_obj(sha)
+                if not layer_obj.packages:
+                    # see if we can get any from the snippet library
+                    run_dict = common.get_confirmed_packages(
+                        instr, shell, master_list)
+                    report = report + run_dict['instruction'] + '\n'
+                    report = report + 'diff id: ' + sha[:10] + '\n'
+                    pkg_list = common.get_packages_from_snippets(
+                        run_dict['confirmed'], shell)
+                    if pkg_list:
+                        common.record_layer(layer_obj, pkg_list)
+                if layer_obj.packages:
+                    report, notes = print_package_notes(
+                        layer_obj.packages, report, '')
                     report = report + notes
                 else:
                     report = report + no_packages.format(layer=sha)
@@ -199,6 +205,8 @@ def execute(args):
     if args.dockerfile:
         # parse the dockerfile
         common.load_docker_commands(args.dockerfile)
+    # master list of packages so far
+    master_list = []
     # Packages from the base image instructions
     report = report + "Dockerfile base image:\n"
     report = report + common.print_dockerfile_base()
@@ -228,6 +236,7 @@ def execute(args):
                 report = report + notes
             else:
                 report = report + no_packages.format(layer=base_obj.sha)
+        common.collate_package_names(master_list, base_obj)
     # get a list of packages that may be installed from the dockerfile
     report = report + 'Packages from current image:\n'
     build, msg = common.is_build()
@@ -237,7 +246,8 @@ def execute(args):
         # start a container with the built image
         image_tag_string = common.get_dockerfile_image_tag()
         start_container(image_tag_string)
-        report = print_dockerfile_run(report, shell, len(base_obj_list))
+        report = print_dockerfile_run(report, shell, len(base_obj_list),
+                                      master_list)
         # remove container when done
         remove_container()
         remove_image(image_tag_string)

@@ -227,14 +227,21 @@ def get_base_obj(base_image_tag):
         layer_history = get_layer_history(get_image_tag_string(
             base_image_tag))
         for layer_tuple in layer_history:
-            layer = Layer(layer_tuple[1])
-            package_list = cache.get_packages(layer_tuple[1])
-            for package in package_list:
-                pkg_obj = Package(package['name'])
-                pkg_obj.fill(package)
-                layer.add(pkg_obj)
-            obj_list.append(layer)
+            layer_obj = get_layer_obj(layer_tuple[1])
+        obj_list.append(layer_obj)
     return obj_list
+
+
+def get_layer_obj(sha):
+    '''Given the sha, retrieve the list of packages from the cache and
+    return a layer object'''
+    layer_obj = Layer(sha)
+    packages = cache.get_packages(sha)
+    for package in packages:
+        pkg_obj = Package(package['name'])
+        pkg_obj.fill(package)
+        layer_obj.add(pkg_obj)
+    return layer_obj
 
 
 def get_dockerfile_image_tag():
@@ -341,7 +348,7 @@ def get_package_dependencies(command_name, package_name, shell):
     return deps
 
 
-def get_confirmed_packages(docker_run_inst, shell):
+def get_confirmed_packages(docker_run_inst, shell, master_list):
     '''For a dockerfile run instruction which is a tuple of type:
         ('RUN', command)
     1. Get the packages that were installed
@@ -350,6 +357,8 @@ def get_confirmed_packages(docker_run_inst, shell):
         recognized: {command_name: [list of installed packages], ...}
         unrecognized: [list of commands in the docker RUN instruction]
     2. Get the dependencies for each of the packages that were installed
+    3. Remove dependencies already installed in the previous layers which
+    are in the master list of package names
     Update the dictionary to move the recognized to confirmed with a
     unique list of packages. The resulting dictionary looks like this:
         instruction: <dockerfile instruction>
@@ -368,6 +377,9 @@ def get_confirmed_packages(docker_run_inst, shell):
         for pkg in run_dict['recognized'][cmd]:
             try:
                 deps = get_package_dependencies(cmd, pkg, shell)
+                for m in master_list:
+                    if m in deps:
+                        deps.remove(m)
                 all_pkgs.append(pkg)
                 all_pkgs.extend(deps)
                 remove_pkgs.append(pkg)
@@ -458,3 +470,13 @@ def get_layer_history(image_tag_string):
         for index in range(0, len(history)):
             history_list.append((history[index], diff_ids[index]))
     return history_list
+
+
+def collate_package_names(master_list, layer_obj):
+    '''The master list contains a list of package names or an empty
+    list. Append packages from the layer object and return the new list.
+    Use this to keep track of packages introduced in the layers before
+    so the subsequent layers do not have the same packages.'''
+    for pkg in layer_obj.get_package_names():
+        master_list.append(pkg)
+    return master_list
