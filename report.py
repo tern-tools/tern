@@ -134,6 +134,7 @@ def print_dockerfile_run(report, shell, base_layer_no):
                 sha = layer_history[0][1]
                 run_dict = common.get_confirmed_packages(instr, shell)
                 report = report + run_dict['instruction'] + '\n'
+                report = report + 'diff id: ' + sha[:10] + '\n'
                 pkg_list = common.get_packages_from_snippets(
                     run_dict['confirmed'], shell)
                 if pkg_list:
@@ -227,7 +228,6 @@ def execute(args):
                 report = report + notes
             else:
                 report = report + no_packages.format(layer=base_obj.sha)
-    common.save_cache()
     # get a list of packages that may be installed from the dockerfile
     report = report + 'Packages from current image:\n'
     build, msg = common.is_build()
@@ -251,5 +251,6 @@ def execute(args):
         report = report + '\nUnregonized RUN commands in Dockerfile:\n'
         for cmd in pkg_dict['unrecognized']:
             report = report + cmd + '\n'
+    common.save_cache()
     write_report(report)
     sys.exit(0)

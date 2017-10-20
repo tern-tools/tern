@@ -338,7 +338,6 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
         cmd = snippet_list.pop(0)
         full_cmd = full_cmd + cmd.format_map(FormatAwk(package=package)) + '&&'
     full_cmd = full_cmd + snippet_list[0].format_map(FormatAwk(package=package))
-    print("full command: " + full_cmd)
     try:
         if override:
             result = docker_command(execute, override, shell, '-c', full_cmd)
