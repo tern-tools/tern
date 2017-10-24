@@ -6,16 +6,28 @@ Tern executable
 
 
 import argparse
+import logging
+
 import report
 
+# logging
+logfile = 'tern.log'
 
-def main(args):
+
+def main(args, logger):
     '''Execute according to subcommands'''
+    logger.debug('Starting...')
     if args.name == 'report':
+        logger.debug('Creating Report...')
         if args.summary:
+            logger.debug('Creating a summary of components in Docker image...')
             report.execute_summary(args)
         else:
+            logger.debug(
+                'Creating a detailed report on components in Docker image...')
             report.execute(args)
+        logger.debug('Report completed.')
+    logger.debug('Finished')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -36,4 +48,23 @@ if __name__ == '__main__':
                                "with associated information")
     parser_report.set_defaults(name='report')
     args = parser.parse_args()
-    main(args)
+
+    # logging setup
+    logger = logging.getLogger('ternlog')
+    logger.setLevel(logging.DEBUG)
+
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console.setFormatter(formatter)
+
+    log_handler = logging.FileHandler(logfile, mode='w')
+    log_handler.setLevel(logging.DEBUG)
+    log_handler.setFormatter(formatter)
+
+    logger.addHandler(console)
+    logger.addHandler(log_handler)
+
+    # execute
+    main(args, logger)

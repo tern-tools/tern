@@ -1,5 +1,6 @@
 import grp
 import io
+import logging
 import os
 import pwd
 import re
@@ -46,6 +47,9 @@ with open(os.path.abspath(base_file)) as f:
     command_lib['base'] = yaml.safe_load(f)
 with open(os.path.abspath(snippet_file)) as f:
     command_lib['snippets'] = yaml.safe_load(f)
+
+# global logger
+logger = logging.getLogger('ternlog')
 
 
 class FormatAwk(dict):
@@ -94,7 +98,7 @@ def docker_command(command, *extra):
     for arg in extra:
         full_cmd.append(arg)
     # invoke
-    print("Running command: " + ' '.join(full_cmd))
+    logger.debug("Running command: " + ' '.join(full_cmd))
     pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
     result, error = pipes.communicate()

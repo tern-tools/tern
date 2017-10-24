@@ -1,6 +1,7 @@
 '''
 Create a report
 '''
+import logging
 import sys
 
 from utils.commands import start_container
@@ -194,14 +195,13 @@ def execute_summary(args):
 
     report_txt = record_report(report) + '\n' + report_notes + notes
     write_report(report_txt)
-    print('Report completed')
-    sys.exit(0)
 
 
 def execute(args):
     '''Create a longform report
     This is the default execution route'''
     report = ''
+    logger = logging.getLogger('ternlog')
     if args.dockerfile:
         # parse the dockerfile
         common.load_docker_commands(args.dockerfile)
@@ -218,16 +218,17 @@ def execute(args):
         report = report + base_obj.sha[:10] + ':\n'
         if base_obj.packages:
             report = report + 'A record for this layer exists in the cache:\n'
-            print('Adding packages from cache...')
+            logger.debug('Adding packages from cache...')
             report, notes = print_package_notes(base_obj.packages, report, '')
             report = report + notes
         else:
             # see if packages can be extracted
-            # TODO: right now it is with the whole base image only
-            # i.e. they have only one layer
+            # TODO: this only works for true base images
+            # implement a way of getting to the true base image for images
+            # that are derived
             report = report + invoking_from_base
             report = report + common.print_image_info(base_image_msg[0])
-            print('Nothing in cache. Invoking from command library...')
+            logger.debug('Nothing in cache. Invoking from command library...')
             package_list = common.get_packages_from_base(base_image_msg[0])
             if package_list:
                 common.record_layer(base_obj, package_list)
@@ -263,4 +264,3 @@ def execute(args):
             report = report + cmd + '\n'
     common.save_cache()
     write_report(report)
-    sys.exit(0)
