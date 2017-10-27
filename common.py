@@ -1,6 +1,7 @@
 '''
 Common functions
 '''
+import logging
 import subprocess
 
 from classes.layer import Layer
@@ -38,6 +39,9 @@ docker_build_failed = '''Unable to build docker image using Dockerfile
 dockerfile = ''
 # dockerfile commands
 docker_commands = []
+
+# global logger
+logger = logging.getLogger('ternlog')
 
 
 def load_docker_commands(dockerfile_path):
@@ -99,67 +103,6 @@ def get_image_tag_string(image_tag_tuple):
     return image_tag_tuple[0] + df.tag_separator + image_tag_tuple[1]
 
 
-def process_base_invoke(invoke_dict, image_tag_string, shell):
-    '''The invoke dictionary looks like this:
-        <step number>: <environment>: <list of commands>
-    1. Find out if there are any container environments if there are
-    then start a container
-    2. For each step invoke the commands
-    NOTE: So far there are no host commands so we will just invoke the
-    container ones'''
-    for step in invoke_dict.keys():
-        if 'container' in invoke_dict[step].keys():
-            cmds.start_container(image_tag_string)
-            break
-    for step in range(1, len(invoke_dict.keys()) + 1):
-        if 'container' in invoke_dict[step].keys():
-            result = cmds.invoke_in_container(
-                invoke_dict[step]['container'], shell)
-    return result
-
-
-def get_info_list(info_dict, info, image_tag_string):
-    '''The info dictionary lives under the image and tag name in the base
-    command library. It looks like this:
-        <names>: list of names or snippets to invoke
-        <versions>: list of versions or snippets to invoke
-        <licenses>: list of license information or snippets to invoke
-        <src_urls>: list of source urls or snippets to invoke
-    given the info dictionary and the specific information (names,versions,
-    licenses or src_urls) to look up, return the list of information'''
-    if 'invoke' in info_dict[info]:
-        info_list = process_base_invoke(info_dict[info]['invoke'],
-                                        image_tag_string,
-                                        info_dict['shell'])
-        info_list = info_list[:-1]
-        if 'delimiter' in info_dict[info]:
-            info_list = info_list.split(info_dict[info]['delimiter'])
-            if info_list[-1] == '':
-                info_list.pop()
-    else:
-        info_list = info_dict[info]
-    return info_list
-
-
-def print_info_list(info_dict, info):
-    '''Return a string with the corresponding information
-    info is either 'names', 'versions', 'licenses' or 'src_urls'
-    '''
-    report = ''
-    if 'invoke' in info_dict[info]:
-        report = report + info + ':\n'
-        for step in range(1, len(info_dict[info]['invoke'].keys()) + 1):
-            if 'container' in info_dict[info]['invoke'][step]:
-                report = report + '\tin container:\n'
-                for snippet in info_dict[info]['invoke'][step]['container']:
-                    report = report + '\t' + snippet
-    else:
-        for value in info_dict[info]:
-            report = report + ' ' + value
-    report = report + '\n'
-    return report
-
-
 def print_image_info(base_image_tag):
     '''Given the base image and tag in a tuple return a string containing
     the command_lib/base.yml'''
@@ -180,13 +123,13 @@ def get_packages_from_base(base_image_tag):
         2. If there is an invoke dictionary, invoke the commands
         3. Create a list of packages'''
     pkg_list = []
+    # information under the base image tag in the command library
     info = cmds.get_base_info(base_image_tag)
-    image_tag_string = get_image_tag_string(base_image_tag)
     if info:
-        names = get_info_list(info, 'names', image_tag_string)
-        versions = get_info_list(info, 'versions', image_tag_string)
-        licenses = get_info_list(info, 'licenses', image_tag_string)
-        src_urls = get_info_list(info, 'src_urls', image_tag_string)
+        names = cmds.get_pkg_attr_list(info['shell'], info['names'])
+        versions = cmds.get_pkg_attr_list(info['shell'], info['versions'])
+        licenses = cmds.get_pkg_attr_list(info['shell'], info['licenses'])
+        src_urls = cmds.get_pkg_attr_list(info['shell'], info['src_urls'])
         if names and len(names) > 1:
             for index in range(0, len(names)):
                 pkg = Package(names[index])
@@ -198,11 +141,11 @@ def get_packages_from_base(base_image_tag):
                     pkg.src_url = src_urls[index]
                 pkg_list.append(pkg)
         else:
-            print(cannot_retrieve_base_packages.format(
+            logger.warning(cannot_retrieve_base_packages.format(
                 image=base_image_tag[0], tag=base_image_tag[1]))
     else:
-        print(no_image_tag_listing.format(image=base_image_tag[0],
-                                          tag=base_image_tag[1]))
+        logger.warning(no_image_tag_listing.format(
+            image=base_image_tag[0], tag=base_image_tag[1]))
     return pkg_list
 
 
@@ -348,7 +291,7 @@ def get_package_dependencies(command_name, package_name, shell):
     return deps
 
 
-def get_confirmed_packages(docker_run_inst, shell, master_list):
+def get_confirmed_packages(docker_run_inst, shell, prev_pkg_names):
     '''For a dockerfile run instruction which is a tuple of type:
         ('RUN', command)
     1. Get the packages that were installed
@@ -357,8 +300,8 @@ def get_confirmed_packages(docker_run_inst, shell, master_list):
         recognized: {command_name: [list of installed packages], ...}
         unrecognized: [list of commands in the docker RUN instruction]
     2. Get the dependencies for each of the packages that were installed
-    3. Remove dependencies already installed in the previous layers which
-    are in the master list of package names
+    3. Remove dependencies already installed in the previous list of
+    package names
     Update the dictionary to move the recognized to confirmed with a
     unique list of packages. The resulting dictionary looks like this:
         instruction: <dockerfile instruction>
@@ -377,9 +320,9 @@ def get_confirmed_packages(docker_run_inst, shell, master_list):
         for pkg in run_dict['recognized'][cmd]:
             try:
                 deps = get_package_dependencies(cmd, pkg, shell)
-                for m in master_list:
-                    if m in deps:
-                        deps.remove(m)
+                for p in prev_pkg_names:
+                    if p in deps:
+                        deps.remove(p)
                 all_pkgs.append(pkg)
                 all_pkgs.extend(deps)
                 remove_pkgs.append(pkg)
@@ -472,11 +415,10 @@ def get_layer_history(image_tag_string):
     return history_list
 
 
-def collate_package_names(master_list, layer_obj):
-    '''The master list contains a list of package names or an empty
-    list. Append packages from the layer object and return the new list.
+def collate_package_names(pkg_name_list, layer_obj):
+    '''Given a list of package names or an empty list. Append packages from
+    the layer object and return the new list.
     Use this to keep track of packages introduced in the layers before
     so the subsequent layers do not have the same packages.'''
     for pkg in layer_obj.get_package_names():
-        master_list.append(pkg)
-    return master_list
+        pkg_name_list.append(pkg)

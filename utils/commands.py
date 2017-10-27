@@ -90,8 +90,6 @@ def docker_command(command, *extra):
             sudo = False
     except:
         pass
-    # TODO: Figure out how to resolve the container when a docker command
-    # fails
     if sudo:
         full_cmd.append('sudo')
     full_cmd.extend(command)
@@ -366,8 +364,6 @@ def get_pkg_attr_list(shell, attr_dict, package_name='', override=''):
     Get the result of the invokes, apply the delimiter to create a list
     override is used for an alternate container name and defaults to
     an empty string'''
-    # TODO: this makes process_base_invoke and get_info_list in common.py
-    # obsolete
     attr_list = []
     if 'invoke' in attr_dict.keys():
         # invoke the commands

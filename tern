@@ -21,11 +21,10 @@ def main(args, logger):
         logger.debug('Creating Report...')
         if args.summary:
             logger.debug('Creating a summary of components in Docker image...')
-            report.execute_summary(args)
         else:
             logger.debug(
                 'Creating a detailed report on components in Docker image...')
-            report.execute(args)
+        report.execute(args)
         logger.debug('Report completed.')
     logger.debug('Finished')
 
@@ -45,7 +44,7 @@ if __name__ == '__main__':
                                help="Dockerfile used to build the Docker image")
     parser_report.add_argument('-s', '--summary', action='store_true',
                                help="Summarize the report as a list of packages"
-                               "with associated information")
+                               " with associated information")
     parser_report.set_defaults(name='report')
     args = parser.parse_args()
 

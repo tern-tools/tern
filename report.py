@@ -2,7 +2,6 @@
 Create a report
 '''
 import logging
-import sys
 
 from utils.commands import start_container
 from utils.commands import remove_container
@@ -13,7 +12,7 @@ import common
 report_file = 'report.txt'
 report_confirmed = 'Confirmed sources:\n'
 report_unconfirmed = 'Unconfirmed sources:\n'
-report_package = '\t{package}\n'
+report_package = '\tpackage: {package}\n'
 report_url = '\t\turl: {url}\n'
 report_version = '\t\tversion: {version}\n'
 report_license = '\t\tlicense: {license}\n'
@@ -42,31 +41,11 @@ in this layer. Some of the results are shell snippets that will be invoked\n'''
 checking_against_snippets = '''
 Checking against command_lib/snippets.yml to see if there is a listing for
 the commands in the Dockerfile RUN line\n'''
-
-
-def record_report(report_dict):
-    '''The report dict will look like this:
-        confirmed: [{name: <name>, url: <url>, version: <version>}...]
-        unconfirmed:[<package_names>]
-        unrecognized: [<list of docker commands>]
-    Record the report with each of these values
-    If there are no packages, record nothing'''
-    report = report_confirmed
-    if report_dict['confirmed']:
-        for package in report_dict['confirmed']:
-            report = report + report_package.format(package=package['name'])
-            report = report + report_url.format(url=package['src_url'])
-            report = report + report_version.format(version=package['version'])
-            report = report + report_license.format(license=package['license'])
-    report = report + report_unconfirmed
-    if report_dict['unconfirmed']:
-        for name in report_dict['unconfirmed']:
-            report = report + name + ' '
-    report = report + report_unrecog
-    if report_dict['unrecognized']:
-        for command in report_dict['unrecognized']:
-            report = report + '\t' + command + '\n'
-    return report
+retrieved_from_cache = '''\nThere is a record of layer {sha} in the cache.
+Packages in the cache:\n'''
+retrieved_by_invoke = '''\nRetrieving package information in layer {sha} \
+    by running commands:\n'''
+section_terminator = '''\n--------------------------------------------\n\n'''
 
 
 def write_report(report):
@@ -75,28 +54,17 @@ def write_report(report):
         f.write(report)
 
 
-def append_confirmed(packages, report, notes):
-    '''Append the report and notes with packaging information for confirmed
-    packages. Here the report is a dictionary'''
-    for package in packages:
-        report['confirmed'].append(package.to_dict())
-        if package.version == 0.0:
-            notes = notes + no_version.format(package=package.name)
-        if package.license == '':
-            notes = notes + no_license.format(package=package.name)
-        if package.src_url == '':
-            notes = notes + no_src_url.format(package=package.name)
-    return report, notes
-
-
 def print_package_notes(packages, report, notes):
     '''Append to the given report package information and notes if the
     information is missing'''
+    report = report + section_terminator
+    report = report + '\n'
     for package in packages:
         report = report + report_package.format(package=package.name)
         report = report + report_version.format(version=package.version)
         report = report + report_license.format(license=package.license)
         report = report + report_url.format(url=package.src_url)
+        report = report + section_terminator
         if package.version == 0.0:
             notes = notes + no_version.format(package=package.name)
         if package.license == '':
@@ -106,7 +74,68 @@ def print_package_notes(packages, report, notes):
     return report, notes
 
 
-def print_dockerfile_run(report, shell, base_layer_no, master_list):
+def print_image_base(report, base_image_msg, layer_obj, pkg_name_list,
+                     is_summary, logger):
+    '''Given, the report string, the base image tuple with notes, the layer
+    object, the collated package name list and whether we are writing a summary
+    report or not, Return a report that contains the packages in the base
+    image
+    Check if the layer object has any package listing. If there is then
+    create a report containing the content. If not then look up any snippets
+    in the base command library'''
+    # get package information for this layer
+    if layer_obj.packages:
+        # there was something in the cache
+        logger.debug('Adding packages from cache from layer: {}'.format(
+            layer_obj.sha[:10]))
+        if is_summary:
+            report, notes = print_package_notes(layer_obj.packages, report, '')
+            report = report + section_terminator
+        else:
+            report = report + retrieved_from_cache.format(
+                sha=layer_obj.sha[:10])
+            report, notes = print_package_notes(
+                layer_obj.packages, report, '')
+            report = report + base_image_msg[1]
+            report = report + notes
+            report = report + section_terminator
+    else:
+        # nothing in the cache - check in the command library
+        logger.debug('Nothing in cache for layer {}. \
+                     Invoking from command library'.format(
+                         layer_obj.sha[:10]))
+        # start a container
+        image_tag_string = common.get_image_tag_string(base_image_msg[0])
+        start_container(image_tag_string)
+        package_list = common.get_packages_from_base(base_image_msg[0])
+        # remove container when done
+        remove_container()
+        remove_image(image_tag_string)
+        if package_list:
+            # put layer in cache
+            common.record_layer(layer_obj, package_list)
+            # add to master list
+            common.collate_package_names(pkg_name_list, layer_obj)
+            # append to report
+            if is_summary:
+                report, notes = print_package_notes(
+                    layer_obj.packages, report, '')
+            else:
+                report = report + retrieved_by_invoke.format(
+                    sha=layer_obj.sha[:10])
+                report = report + common.print_image_info(base_image_msg[0])
+                report, notes = print_package_notes(
+                    layer_obj.packages, report, '')
+                report = report + notes
+                report = report + section_terminator
+        else:
+            if not is_summary:
+                report = report + no_packages.format(layer=layer_obj.sha[:10])
+    return report
+
+
+def print_dockerfile_run(report, shell, base_layer_no, pkg_name_list,
+                         is_summary, logger):
     '''Given the report, the shell used for commands in the built image
     and the number of base layers in the history, retrieve package
     information for each of the dockerfile RUN instructions and append the
@@ -135,111 +164,89 @@ def print_dockerfile_run(report, shell, base_layer_no, master_list):
                 sha = layer_history[0][1]
                 # retrieve the layer
                 layer_obj = common.get_layer_obj(sha)
-                if not layer_obj.packages:
+                if not is_summary:
+                    report = report + instr[0] + ' ' + instr[1] + '\n'
+                if layer_obj.packages:
+                    # print out the packages
+                    if is_summary:
+                        report, notes = print_package_notes(
+                            layer_obj.packages, report, '')
+                    else:
+                        report = report + retrieved_from_cache.format(
+                            sha=layer_obj.sha[:10])
+                        report, notes = print_package_notes(
+                            layer_obj.packages, report, '')
+                        report = report + notes
+                        report = report + section_terminator
+                else:
                     # see if we can get any from the snippet library
                     run_dict = common.get_confirmed_packages(
-                        instr, shell, master_list)
-                    report = report + run_dict['instruction'] + '\n'
-                    report = report + 'diff id: ' + sha[:10] + '\n'
+                        instr, shell, pkg_name_list)
                     pkg_list = common.get_packages_from_snippets(
                         run_dict['confirmed'], shell)
                     if pkg_list:
+                        # put layer in cache
                         common.record_layer(layer_obj, pkg_list)
-                if layer_obj.packages:
-                    report, notes = print_package_notes(
-                        layer_obj.packages, report, '')
-                    report = report + notes
-                else:
-                    report = report + no_packages.format(layer=sha)
+                        # append to master list
+                        common.collate_package_names(pkg_name_list, layer_obj)
+                        # append to report
+                        if is_summary:
+                            report, notes = print_package_notes(
+                                layer_obj.packages, report, '')
+                        else:
+                            report = report + retrieved_by_invoke.format(
+                                sha=layer_obj.sha)
+                            report, notes = print_package_notes(
+                                layer_obj.packages, report, '')
+                            report = report + notes
+                            report = report + section_terminator
+                    else:
+                        if not is_summary:
+                            report = report + no_packages.format(
+                                layer=layer_obj.sha)
     return report
 
 
-def execute_summary(args):
-    '''Create a summarized report'''
-    report = {}
-    notes = ''
-    report.update({'confirmed': [], 'unconfirmed': [], 'unrecognized': []})
-    if args.dockerfile:
-        # parse the dockerfile
-        common.load_docker_commands(args.dockerfile)
-    base_image_msg = common.get_dockerfile_base()
-    notes = notes + base_image_msg[1]
-    # get the list of layers in the base image
-    base_obj_list = common.get_base_obj(base_image_msg[0])
-    for base_obj in base_obj_list:
-        if base_obj.packages:
-            print('Adding packages from cache...')
-            report, notes = append_confirmed(base_obj.packages, report, notes)
-        else:
-            # see if packages can be extracted
-            # TODO: right now it is with the whole base image only
-            # i.e. they have only one layer
-            print('Nothing in cache. Invoking from command library...')
-            package_list = common.get_packages_from_base(base_image_msg[0])
-            if package_list:
-                common.record_layer(base_obj, package_list)
-                report, notes = append_confirmed(base_obj.packages, report,
-                                                 notes)
-            else:
-                notes = notes + no_packages.format(layer=base_obj.sha)
-    common.save_cache()
-    # get a list of packages that may be installed from the dockerfile
-    if common.is_build():
-        # TODO: execute the snippets to get the required package info
-        print('Build succeeded - running general code snippets')
-    else:
-        notes = notes + env_dep_dockerfile
-        pkg_dict = common.get_dockerfile_packages()
-        report['unconfirmed'].extend(pkg_dict['recognized'])
-        report['unrecognized'].extend(pkg_dict['unrecognized'])
-
-    report_txt = record_report(report) + '\n' + report_notes + notes
-    write_report(report_txt)
-
-
 def execute(args):
-    '''Create a longform report
-    This is the default execution route'''
+    '''
+    Create a report like this:
+        1. The lines from the Dockerfile
+        2. What the tool is doing (either getting package information
+        from the cache or command library
+        3. The list of packages
+        4. Any issues that were detected or suggestions to change the
+        Dockerfile or Command Library
+    For summary, print
+        1. The lines from the Dockerfile
+        2. The packages that came from that line
+        '''
     report = ''
     logger = logging.getLogger('ternlog')
     if args.dockerfile:
         # parse the dockerfile
         common.load_docker_commands(args.dockerfile)
-    # master list of packages so far
+    # master list of package names so far
     master_list = []
-    # Packages from the base image instructions
-    report = report + "Dockerfile base image:\n"
-    report = report + common.print_dockerfile_base()
+
+    # ----------------------------------------------------
+    # Step 1: Get the packages installed in the base image
+    # ----------------------------------------------------
+    if not args.summary:
+        report = report + common.print_dockerfile_base()
     base_image_msg = common.get_dockerfile_base()
-    report = report + base_image_msg[1] + '\n'
+    # get a list of packages that are installed in the base image
+    # the list may contain some layers with no packages in it because
+    # there may be no record of them in the cache
     base_obj_list = common.get_base_obj(base_image_msg[0])
-    report = report + "Base image layers:\n"
-    for base_obj in base_obj_list:
-        report = report + base_obj.sha[:10] + ':\n'
-        if base_obj.packages:
-            report = report + 'A record for this layer exists in the cache:\n'
-            logger.debug('Adding packages from cache...')
-            report, notes = print_package_notes(base_obj.packages, report, '')
-            report = report + notes
-        else:
-            # see if packages can be extracted
-            # TODO: this only works for true base images
-            # implement a way of getting to the true base image for images
-            # that are derived
-            report = report + invoking_from_base
-            report = report + common.print_image_info(base_image_msg[0])
-            logger.debug('Nothing in cache. Invoking from command library...')
-            package_list = common.get_packages_from_base(base_image_msg[0])
-            if package_list:
-                common.record_layer(base_obj, package_list)
-                report, notes = print_package_notes(base_obj.packages, report,
-                                                    '')
-                report = report + notes
-            else:
-                report = report + no_packages.format(layer=base_obj.sha)
-        common.collate_package_names(master_list, base_obj)
+    for layer_obj in base_obj_list:
+        report = print_image_base(
+            report, base_image_msg, layer_obj, master_list, args.summary,
+            logger)
+
+    # ----------------------------------------------------
+    # Step 2: Get the packages installed in the given image
+    # ----------------------------------------------------
     # get a list of packages that may be installed from the dockerfile
-    report = report + 'Packages from current image:\n'
     build, msg = common.is_build()
     if build:
         # get the shell that we will use for all the commands
@@ -248,14 +255,16 @@ def execute(args):
         image_tag_string = common.get_dockerfile_image_tag()
         start_container(image_tag_string)
         report = print_dockerfile_run(report, shell, len(base_obj_list),
-                                      master_list)
+                                      master_list, args.summary, logger)
         # remove container when done
         remove_container()
         remove_image(image_tag_string)
     else:
+        # Dockerfile does not build, so get packages from dockerfile
+        # parsing only
+        pkg_dict = common.get_dockerfile_packages()
         report = report + env_dep_dockerfile.format(build_fail_msg=msg)
         report = report + checking_against_snippets
-        pkg_dict = common.get_dockerfile_packages()
         report = report + 'Packages from parsing Dockerfile RUN commands:\n'
         for pkg in pkg_dict['recognized']:
             report = report + ' ' + pkg
