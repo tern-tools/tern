@@ -43,3 +43,26 @@ apt-get:
             1:
               container:
                 - './apt_get_sources.sh {package}'
+tyum:
+  install: 'install'
+  remove: 'remove'
+  ignore:
+    - 'check-update'
+  packages:
+    - name: default
+      version:
+        invoke:
+          1:
+            container:
+              - 'list=`tdnf list installed {package}`'
+              - 'c=0; for l in $list; do if [ $c == 1 ]; then echo $l; fi; c=$(((c+1)%3)); done;'
+      license:
+        invoke:
+          1:
+            container:
+              - 'tdnf info {package} | head -10 | tail -1 | cut -f2 -d":" | xargs'
+      src_url:
+        invoke:
+          1:
+            container:
+                    - 'tdnf info {package} | head -9 | tail -1 | cut -f2-3 -d":" | xargs'

@@ -103,15 +103,36 @@ def get_image_tag_string(image_tag_tuple):
     return image_tag_tuple[0] + df.tag_separator + image_tag_tuple[1]
 
 
+def print_invoke_list(info_dict, info):
+    '''Given the dictionary from the base or snippet library and the
+    info to retrieve, return the list of snippets that will be invoked
+    info is either 'names', 'versions', 'licenses' or 'src_urls' in the base
+    library or 'name', 'version', 'license' or 'src_url' in the snippet
+    library'''
+    report = ''
+    if 'invoke' in info_dict[info]:
+        report = report + info + ':\n'
+        for step in range(1, len(info_dict[info]['invoke'].keys()) + 1):
+            if 'container' in info_dict[info]['invoke'][step]:
+                report = report + '\tin container:\n'
+                for snippet in info_dict[info]['invoke'][step]['container']:
+                    report = report + '\t' + snippet
+    else:
+        for value in info_dict[info]:
+            report = report + ' ' + value
+    report = report + '\n'
+    return report
+
+
 def print_image_info(base_image_tag):
     '''Given the base image and tag in a tuple return a string containing
     the command_lib/base.yml'''
     info = cmds.get_base_info(base_image_tag)
     report = ''
-    report = report + print_info_list(info, 'names')
-    report = report + print_info_list(info, 'versions')
-    report = report + print_info_list(info, 'licenses')
-    report = report + print_info_list(info, 'src_urls')
+    report = report + print_invoke_list(info, 'names')
+    report = report + print_invoke_list(info, 'versions')
+    report = report + print_invoke_list(info, 'licenses')
+    report = report + print_invoke_list(info, 'src_urls')
     report = report + '\n'
     return report
 

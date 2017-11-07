@@ -71,7 +71,10 @@ def get_nonempty_history(config):
     history = []
     for item in config['history']:
         if 'empty_layer' not in item.keys():
-            history.append(item['created_by'])
+            if 'created_by' in item.keys():
+                history.append(item['created_by'])
+            else:
+                history.append(item['comment'])
     return history
 
 
