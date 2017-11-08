@@ -43,8 +43,8 @@ Checking against command_lib/snippets.yml to see if there is a listing for
 the commands in the Dockerfile RUN line\n'''
 retrieved_from_cache = '''\nThere is a record of layer {sha} in the cache.
 Packages in the cache:\n'''
-retrieved_by_invoke = '''\nRetrieving package information in layer {sha} \
-    by running commands:\n'''
+retrieved_by_invoke = '''\nRetrieving package information in layer {sha}
+by running commands:\n'''
 section_terminator = '''\n--------------------------------------------\n\n'''
 
 
@@ -72,6 +72,16 @@ def print_package_notes(packages, report, notes):
         if package.src_url == '':
             notes = notes + no_src_url.format(package=package.name)
     return report, notes
+
+
+def print_invoke_per_instruction(confirmed_command_dict):
+    '''For each of the confirmed commands in a dockerfile run instruction,
+    print all the invoked snippets'''
+    report = ''
+    for command in confirmed_command_dict.keys():
+        for pkg in confirmed_command_dict[command]:
+            report = report + common.print_package_info(command, pkg) + '\n'
+    return report
 
 
 def print_image_base(report, base_image_msg, layer_obj, pkg_name_list,
@@ -182,6 +192,11 @@ def print_dockerfile_run(report, shell, base_layer_no, pkg_name_list,
                     # see if we can get any from the snippet library
                     run_dict = common.get_confirmed_packages(
                         instr, shell, pkg_name_list)
+                    if not is_summary:
+                        report = report + retrieved_by_invoke.format(
+                            sha=layer_obj.sha)
+                        report = report + print_invoke_per_instruction(
+                            run_dict['confirmed'])
                     pkg_list = common.get_packages_from_snippets(
                         run_dict['confirmed'], shell)
                     if pkg_list:
@@ -194,8 +209,6 @@ def print_dockerfile_run(report, shell, base_layer_no, pkg_name_list,
                             report, notes = print_package_notes(
                                 layer_obj.packages, report, '')
                         else:
-                            report = report + retrieved_by_invoke.format(
-                                sha=layer_obj.sha)
                             report, notes = print_package_notes(
                                 layer_obj.packages, report, '')
                             report = report + notes

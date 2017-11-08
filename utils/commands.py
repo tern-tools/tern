@@ -351,7 +351,7 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
             pass
         return result
     except subprocess.CalledProcessError as error:
-        print("Error executing command inside the container")
+        logger.warning("Error executing command inside the container")
         raise subprocess.CalledProcessError(
             1, cmd=full_cmd, output=error.output.decode('utf-8'))
 

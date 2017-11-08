@@ -65,4 +65,10 @@ tyum:
         invoke:
           1:
             container:
-                    - 'tdnf info {package} | head -9 | tail -1 | cut -f2-3 -d":" | xargs'
+              - 'tdnf info {package} | head -9 | tail -1 | cut -f2-3 -d":" | xargs'
+      deps:
+        invoke:
+          1:
+            container:
+              - 'rpm -qR {package} | tail -n +2 | cut -f1 -d"." | cut -f1 -d" " | cut -f1 -d"(" | uniq'
+        delimiter: "\n"

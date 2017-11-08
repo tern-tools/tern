@@ -299,6 +299,24 @@ def check_for_unique_package(package_list, package_name):
     return pkg
 
 
+def print_package_info(command_name, package_name):
+    '''Given the command name to look up in the snippet library and the
+    package name, return a string with the list of commands that will be
+    invoked in the container'''
+    report = ''
+    pkg_list = cmds.command_lib['snippets'][command_name]['packages']
+    pkg_dict = check_for_unique_package(pkg_list, package_name)
+    report = report + print_invoke_list(pkg_dict, 'version').format(
+        package=package_name)
+    report = report + print_invoke_list(pkg_dict, 'license').format(
+        package=package_name)
+    report = report + print_invoke_list(pkg_dict, 'src_url').format(
+        package=package_name)
+    report = report + print_invoke_list(pkg_dict, 'deps').format(
+        package=package_name)
+    return report
+
+
 def get_package_dependencies(command_name, package_name, shell):
     '''Given the command name, the package name and the shell,
     find the list of dependencies'''
