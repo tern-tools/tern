@@ -70,5 +70,6 @@ tyum:
         invoke:
           1:
             container:
-              - 'rpm -qR {package} | tail -n +2 | cut -f1 -d"." | cut -f1 -d" " | cut -f1 -d"(" | uniq'
+              - 'list=`rpm -qR {package} | cut -f1 -d" "`'
+              - 'for l in $list; do rpm -qa --queryformat "%{NAME}\n" $l; done;'
         delimiter: "\n"
