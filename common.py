@@ -116,7 +116,7 @@ def print_invoke_list(info_dict, info):
             if 'container' in info_dict[info]['invoke'][step]:
                 report = report + '\tin container:\n'
                 for snippet in info_dict[info]['invoke'][step]['container']:
-                    report = report + '\t' + snippet
+                    report = report + '\t' + snippet + '\n'
     else:
         for value in info_dict[info]:
             report = report + ' ' + value
@@ -310,14 +310,14 @@ def print_package_info(command_name, package_name):
     report = ''
     pkg_list = cmds.command_lib['snippets'][command_name]['packages']
     pkg_dict = check_for_unique_package(pkg_list, package_name)
-    report = report + print_invoke_list(pkg_dict, 'version').format(
-        package=package_name)
-    report = report + print_invoke_list(pkg_dict, 'license').format(
-        package=package_name)
-    report = report + print_invoke_list(pkg_dict, 'src_url').format(
-        package=package_name)
-    report = report + print_invoke_list(pkg_dict, 'deps').format(
-        package=package_name)
+    report = report + print_invoke_list(pkg_dict, 'version').format_map(
+        cmds.FormatAwk(package=package_name))
+    report = report + print_invoke_list(pkg_dict, 'license').format_map(
+        cmds.FormatAwk(package=package_name))
+    report = report + print_invoke_list(pkg_dict, 'src_url').format_map(
+        cmds.FormatAwk(package=package_name))
+    report = report + print_invoke_list(pkg_dict, 'deps').format_map(
+        cmds.FormatAwk(package=package_name))
     return report
 
 

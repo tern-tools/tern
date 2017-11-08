@@ -9,6 +9,7 @@ import argparse
 import logging
 
 import report
+from common import clear_cache
 
 # logging
 logfile = 'tern.log'
@@ -17,7 +18,10 @@ logfile = 'tern.log'
 def main(args, logger):
     '''Execute according to subcommands'''
     logger.debug('Starting...')
-    if args.name == 'report':
+    if args.clear_cache:
+        logger.debug('Clearing cache...')
+        clear_cache()
+    if hasattr(args, 'name') and args.name == 'report':
         logger.debug('Creating Report...')
         if args.summary:
             logger.debug('Creating a summary of components in Docker image...')

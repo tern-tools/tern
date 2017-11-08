@@ -194,7 +194,7 @@ def print_dockerfile_run(report, shell, base_layer_no, pkg_name_list,
                         instr, shell, pkg_name_list)
                     if not is_summary:
                         report = report + retrieved_by_invoke.format(
-                            sha=layer_obj.sha)
+                            sha=layer_obj.sha[:10])
                         report = report + print_invoke_per_instruction(
                             run_dict['confirmed'])
                     pkg_list = common.get_packages_from_snippets(
@@ -238,9 +238,7 @@ def execute(args):
     if args.dockerfile:
         # parse the dockerfile
         common.load_docker_commands(args.dockerfile)
-    if args.clear_cache:
-        logger.debug('Clearing cache...')
-        common.clear_cache()
+
     # master list of package names so far
     master_list = []
 
