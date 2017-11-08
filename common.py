@@ -277,6 +277,10 @@ def save_cache():
     cache.save()
 
 
+def clear_cache():
+    cache.clear()
+
+
 def check_for_unique_package(package_list, package_name):
     '''In the snippet library the command name has a list of packages that can
     be installed with that command. A package name called 'default' indicates
@@ -389,28 +393,25 @@ def get_package_obj(command_name, package_name, shell):
             keys = pkg_info.keys()
             if 'version' in keys:
                 try:
-                    version = cmds.get_pkg_attr_list(
+                    pkg.version = cmds.get_pkg_attr_list(
                         shell, pkg_info['version'],
                         package_name=package_name)[0]
-                    pkg.version = version
                 except subprocess.CalledProcessError as error:
-                    print(error.output)
+                    logger.warning(error.output)
             if 'license' in keys:
                 try:
-                    license = cmds.get_pkg_attr_list(
+                    pkg.license = cmds.get_pkg_attr_list(
                         shell, pkg_info['license'],
                         package_name=package_name)[0]
-                    pkg.license = license
                 except subprocess.CalledProcessError as error:
-                    print(error.output)
+                    logger.warning(error.output)
             if 'src_url' in keys:
                 try:
-                    src_url = cmds.get_pkg_attr_list(
+                    pkg.src_url = cmds.get_pkg_attr_list(
                         shell, pkg_info['src_url'],
                         package_name=package_name)[0]
-                    pkg.src_url = src_url
                 except subprocess.CalledProcessError as error:
-                    print(error.output)
+                    logger.warning(error.output)
             return pkg
         else:
             print(

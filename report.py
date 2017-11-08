@@ -111,8 +111,8 @@ def print_image_base(report, base_image_msg, layer_obj, pkg_name_list,
             report = report + section_terminator
     else:
         # nothing in the cache - check in the command library
-        logger.debug('Nothing in cache for layer {}. \
-                     Invoking from command library'.format(
+        logger.debug('Nothing in cache for layer {}. '
+                     'Invoking from command library'.format(
                          layer_obj.sha[:10]))
         # start a container
         image_tag_string = common.get_image_tag_string(base_image_msg[0])
@@ -238,6 +238,9 @@ def execute(args):
     if args.dockerfile:
         # parse the dockerfile
         common.load_docker_commands(args.dockerfile)
+    if args.clear_cache:
+        logger.debug('Clearing cache...')
+        common.clear_cache()
     # master list of package names so far
     master_list = []
 

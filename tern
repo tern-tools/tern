@@ -36,6 +36,8 @@ if __name__ == '__main__':
     information about packages that are installed in a Docker image that is
     built from a Dockerfile, including dependencies. It also allows for
     curation of packages that are installed and maintained manually''')
+    parser.add_argument('-c', '--clear-cache', action='store_true',
+                        help="Clear the cache before running")
     subparsers = parser.add_subparsers(help='Subcommands')
     # subparser for report
     parser_report = subparsers.add_parser('report',
