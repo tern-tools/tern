@@ -65,7 +65,7 @@ def print_package_notes(packages, report, notes):
         report = report + report_license.format(license=package.license)
         report = report + report_url.format(url=package.src_url)
         report = report + section_terminator
-        if package.version == 0.0:
+        if package.version == '':
             notes = notes + no_version.format(package=package.name)
         if package.license == '':
             notes = notes + no_license.format(package=package.name)

@@ -9,7 +9,7 @@ class Package(object):
         to_dict: returns a dict representation of the instance'''
     def __init__(self, name):
         self.__name = name
-        self.__version = 0.0
+        self.__version = ''
         self.__license = ''
         self.__src_url = ''
 
