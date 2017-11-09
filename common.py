@@ -331,7 +331,7 @@ def get_package_dependencies(command_name, package_name, shell):
     if pkg_dict and 'deps' in pkg_dict.keys():
         deps.extend(cmds.get_pkg_attr_list(shell, pkg_dict['deps'],
                                            package_name=package_name))
-    return deps
+    return list(set(deps))
 
 
 def get_confirmed_packages(docker_run_inst, shell, prev_pkg_names):

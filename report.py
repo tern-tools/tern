@@ -98,6 +98,8 @@ def print_image_base(report, base_image_msg, layer_obj, pkg_name_list,
         # there was something in the cache
         logger.debug('Adding packages from cache from layer: {}'.format(
             layer_obj.sha[:10]))
+        # add packages to master list
+        common.collate_package_names(pkg_name_list, layer_obj)
         if is_summary:
             report, notes = print_package_notes(layer_obj.packages, report, '')
             report = report + section_terminator

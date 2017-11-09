@@ -335,10 +335,12 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
     running container'''
     # construct the full command
     full_cmd = ''
-    while len(snippet_list) > 1:
-        cmd = snippet_list.pop(0)
-        full_cmd = full_cmd + cmd.format_map(FormatAwk(package=package)) + '&&'
-    full_cmd = full_cmd + snippet_list[0].format_map(FormatAwk(package=package))
+    last_index = len(snippet_list) - 1
+    for index in range(0, last_index):
+        full_cmd = full_cmd + snippet_list[index].format_map(
+            FormatAwk(package=package)) + ' && '
+    full_cmd = full_cmd + snippet_list[last_index].format_map(
+        FormatAwk(package=package))
     try:
         if override:
             result = docker_command(execute, override, shell, '-c', full_cmd)
