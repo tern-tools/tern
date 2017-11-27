@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-
 '''
-Tern executable
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+SPDX-License-Identifier: Apache-2.0
 '''
 
 
@@ -10,6 +10,9 @@ import logging
 
 import report
 from common import clear_cache
+'''
+Tern executable
+'''
 
 # logging
 logfile = 'tern.log'
@@ -32,6 +35,7 @@ def main(args, logger):
         logger.debug('Report completed.')
     logger.debug('Finished')
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         prog='Tern',
@@ -47,10 +51,11 @@ if __name__ == '__main__':
     parser_report = subparsers.add_parser('report',
                                           help="Create a report")
     parser_report.add_argument('-d', '--dockerfile',
-                               help="Dockerfile used to build the Docker image")
+                               help="Dockerfile used to build the Docker"
+                               " image")
     parser_report.add_argument('-s', '--summary', action='store_true',
-                               help="Summarize the report as a list of packages"
-                               " with associated information")
+                               help="Summarize the report as a list of"
+                               " packages with associated information")
     parser_report.set_defaults(name='report')
     args = parser.parse_args()
 

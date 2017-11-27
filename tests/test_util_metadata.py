@@ -1,3 +1,8 @@
+'''
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+SPDX-License-Identifier: Apache-2.0
+'''
+
 import unittest
 
 import utils.commands as cmds

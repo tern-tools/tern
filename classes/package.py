@@ -1,3 +1,9 @@
+'''
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+SPDX-License-Identifier: Apache-2.0
+'''
+
+
 class Package(object):
     '''A package installed within a Docker image layer
     attributes:

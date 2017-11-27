@@ -1,14 +1,20 @@
 '''
-Docker metadata related modules
-NOTE: these modules work on a temp folder to which the output of docker save
-has already been extracted into
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+SPDX-License-Identifier: Apache-2.0
 '''
+
+
 import json
 import os
 import shutil
 
 from utils.commands import pushd
 import utils.constants as const
+'''
+Docker metadata related modules
+NOTE: these modules work on a temp folder to which the output of docker save
+has already been extracted into
+'''
 
 # docker manifest file
 manifest_file = 'manifest.json'

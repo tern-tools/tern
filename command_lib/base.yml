@@ -1,3 +1,6 @@
+# Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
 # Known package listings for base images
 # Format to list images
 # <image>:

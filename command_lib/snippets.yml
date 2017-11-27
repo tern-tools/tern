@@ -1,3 +1,6 @@
+# Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
 # general commands to be invoked when retrieving package information
 # Key-Value substitutions:
 # package: the package name

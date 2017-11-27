@@ -1,3 +1,9 @@
+'''
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+SPDX-License-Identifier: Apache-2.0
+'''
+
+
 import grp
 import io
 import logging
@@ -88,7 +94,7 @@ def docker_command(command, *extra):
         members = grp.getgrnam('docker').gr_mem
         if pwd.getpwnam(os.getuid()) in members:
             sudo = False
-    except:
+    except KeyError:
         pass
     if sudo:
         full_cmd.append('sudo')

@@ -1,6 +1,8 @@
 '''
-Common functions
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+SPDX-License-Identifier: Apache-2.0
 '''
+
 import logging
 import subprocess
 
@@ -10,6 +12,9 @@ from utils import dockerfile as df
 from utils import commands as cmds
 from utils import cache as cache
 from utils import metadata as meta
+'''
+Common functions
+'''
 
 # constants strings
 dockerfile_using_latest = '''The Dockerfile provided does not have a base
@@ -361,17 +366,13 @@ def get_confirmed_packages(docker_run_inst, shell, prev_pkg_names):
         all_pkgs = []
         remove_pkgs = []
         for pkg in run_dict['recognized'][cmd]:
-            try:
-                deps = get_package_dependencies(cmd, pkg, shell)
-                for p in prev_pkg_names:
-                    if p in deps:
-                        deps.remove(p)
-                all_pkgs.append(pkg)
-                all_pkgs.extend(deps)
-                remove_pkgs.append(pkg)
-            except:
-                print("Could not retireve dependencies for: " + pkg)
-                pass
+            deps = get_package_dependencies(cmd, pkg, shell)
+            for p in prev_pkg_names:
+                if p in deps:
+                    deps.remove(p)
+            all_pkgs.append(pkg)
+            all_pkgs.extend(deps)
+            remove_pkgs.append(pkg)
         cmd_dict[cmd].extend(list(set(all_pkgs)))
         run_dict['confirmed'].update(cmd_dict)
         for rem in remove_pkgs:

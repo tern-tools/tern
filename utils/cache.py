@@ -1,3 +1,9 @@
+'''
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+SPDX-License-Identifier: Apache-2.0
+'''
+
+
 import os
 import yaml
 '''
@@ -26,7 +32,8 @@ def load():
 
 
 def get_packages(sha):
-    '''Given an image sha retrieve cache record. If none return an empty list'''
+    '''Given an image sha retrieve cache record. If none return an empty
+    list'''
     if sha in cache.keys():
         return cache[sha]['packages']
     else:

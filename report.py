@@ -1,12 +1,17 @@
 '''
-Create a report
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+SPDX-License-Identifier: Apache-2.0
 '''
+
 import logging
 
 from utils.commands import start_container
 from utils.commands import remove_container
 from utils.commands import remove_image
 import common
+'''
+Create a report
+'''
 
 # constants
 report_file = 'report.txt'
