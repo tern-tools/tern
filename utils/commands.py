@@ -92,7 +92,7 @@ def docker_command(command, *extra):
     sudo = True
     try:
         members = grp.getgrnam('docker').gr_mem
-        if pwd.getpwnam(os.getuid()) in members:
+        if pwd.getpwuid(os.getuid()).pw_name in members:
             sudo = False
     except KeyError:
         pass

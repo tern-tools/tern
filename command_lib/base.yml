@@ -85,5 +85,5 @@ debian:
                 - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
                 - "for p in $pkgs; do cat /usr/share/doc/$p/copyright; echo EOF; done"
           delimiter: 'EOF'
-        src_urls: ''
+        src_urls: {}
 

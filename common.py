@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import logging
 import subprocess
+import sys
 
 from classes.layer import Layer
 from classes.package import Package
@@ -95,9 +96,12 @@ def check_base_image(base_image_tag):
     image_tag_string = base_image_tag[0] + df.tag_separator + base_image_tag[1]
     success = cmds.check_image(image_tag_string)
     if not success:
-        result = cmds.docker_command(cmds.pull, image_tag_string)
-        if result is None:
-            print(base_image_not_found)
+        try:
+            result = cmds.docker_command(cmds.pull, image_tag_string)
+            print(result)
+            success = True
+        except subprocess.CalledProcessError as error:
+            logger.error(error.output)
             success = False
     return success
 
@@ -187,8 +191,8 @@ def get_base_obj(base_image_tag):
         # the base image cannot be found locally nor remotely
         # at this point there is no context for Tern to use so raise an
         # exception to exit gracefully
-        print(base_image_not_found)
-        raise
+        logger.error(base_image_not_found)
+        sys.exit(1)
     else:
         cache.load()
         # get the history with diff ids
