@@ -179,6 +179,9 @@ def print_dockerfile_run(report, shell, base_layer_no, pkg_name_list,
                 if not is_summary:
                     report = report + instr[0] + ' ' + instr[1] + '\n'
                 if layer_obj.packages:
+                    logger.debug(
+                        'Adding packages from cache from layer: {}'.format(
+                            layer_obj.sha[:10]))
                     # print out the packages
                     if is_summary:
                         report, notes = print_package_notes(
@@ -192,6 +195,9 @@ def print_dockerfile_run(report, shell, base_layer_no, pkg_name_list,
                         report = report + section_terminator
                 else:
                     # see if we can get any from the snippet library
+                    logger.debug('Nothing in cache for layer {}. '
+                                 'Invoking from command library'.format(
+                                     layer_obj.sha[:10]))
                     run_dict = common.get_confirmed_packages(
                         instr, shell, pkg_name_list)
                     if not is_summary:
