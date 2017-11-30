@@ -39,10 +39,22 @@ $ git clone git@gitlab.eng.vmware.com:opensource/tern.git
 $ cd tern
 $ export PYTHONPATH=`pwd`
 $ python tests/<test file>.py
-
 ```
+### Project Status
+
+Tern currently has these features:
+* A Cache to store layers with the packages that are installed in those layers
+* A report containing a line-by-line 'walkthrough' of the Dockerfile to say what packages were installed in each line
+* A summary report
+* The complete list of dependencies are retrieved
+
+Current work:
+* Code refactoring
+* Layering of container filesystems one by one
+* Source retrieval
+
 ### Documentation
-Architecture, function blocks and code descriptions are located on the Wiki. Feel free to use it as a guide to usage and development. We also welcome contributions to the documentation. See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
+Architecture, function blocks, code descriptions and the project roadmap are located on the Wiki. Feel free to use it as a guide to usage and development. We also welcome contributions to the documentation. See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
 
 ### Get Involved
 
