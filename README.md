@@ -1,41 +1,37 @@
-### What is Tern?
+### Welcome to the Tern Project
 
 Tern is a tool to find the metadata for packages installed in Docker containers, specifically the sources, versions and licenses. It does this by looking up
-a "command library" for code snippets to execute in a running container. The command library is a list of shell commands used to install and remove packages
-with associated shell commands to run within the container to retrieve specific information.
+a "command library" for code snippets to execute in a running container. The command library is a list of commands used to install and remove packages
+(such as a package manager) with associated shell commands to run within the container to retrieve specific information.
 
-Tern was created to address the issue that Docker containers where distributed without certainity of what packages they contained. This becomes especially problematic when distributing packages with incompatible licenses or licenses that have restrictions on distribution.
+Tern was created to help developers meet open source compliance requirements for containers. Tools like Docker make it easy to build and distribute containers but keeping track of what is installed is left to developer or devops teams. Tern aims to bridge this gap.
 
-### Requirements
+### Try it out
+
+#### Requirements
 - Git (Installation instructions can be found here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - Docker CE (Installation instructions can be found here: https://docs.docker.com/engine/installation/#server)
 - Python 3.6.2 (sudo apt-get install python3.6 or sudo dnf install python36)
 
-### Getting Started
-Once you have installed the requirements you can run these commands in a terminal to get you started:
+Make sure the docker daemon is running. If it is you can run these commands to get you started:
 ```
 $ python3 -m venv ternenv
 $ cd ternenv
-$ git clone git@gitlab.eng.vmware.com:opensource/tern.git
+$ git clone git@github.com:vmware/tern.git
 $ source bin/activate
 $ cd tern
 $ pip install -r requirements.txt
-$ ./tern report -d samples/debian_vim/Dockerfile
+$ ./tern report -d samples/photon_git/Dockerfile
 ```
-If you come across any issues, please file a bug with the complete output. If it completes successfully, take a look at report.txt. You can file bugs against the report as well
+Take a look at report.txt to see what packages are installed in the created Docker image and how Tern got this information. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with.
 
-### Usage
+#### To get a summary report
 ```
-$ python3 -m venv ternenv
-$ cd ternenv
-$ git clone git@gitlab.eng.vmware.com:opensource/tern.git
-$ source bin/activate
-$ cd tern
-$ pip install -r requirements.txt
-$ ./tern -h
+$ ./tern report -s -d samples/photon_git_Dockerfile
 ```
+WARNING: Tern is meant to give guidance on what may be installed for each line in a Dockerfile so it is recommended that for the purpose of investigation, the default report is used. The summary report may be used as the output of a build artifact or something to submit to a compliance or legal team.
 
-### To run a test
+#### To run a test
 ```
 $ cd ternenv
 $ source bin/activate
@@ -43,4 +39,15 @@ $ git clone git@gitlab.eng.vmware.com:opensource/tern.git
 $ cd tern
 $ export PYTHONPATH=`pwd`
 $ python tests/<test file>.py
+
 ```
+### Documentation
+Architecture, function blocks and code descriptions are located on the Wiki. Feel free to use it as a guide to usage and development. We also welcome contributions to the documentation. See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
+
+### Get Involved
+
+Do you have questions about Tern? Do you think it can do better? Would you like to make it better? You can get involved by giving your feedback and contributing to the code, documentation and conversation!
+
+Please read our [code of conduct](/CODE_OF_CONDUCT.md) first.
+
+Next, take a look at the [contributing guide](/CONTRIBUTING.md) to find out how you can start.
