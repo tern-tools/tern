@@ -15,7 +15,7 @@ You can contribute in the following ways:
 
 * English (not necessarily fluent but workable)
 * Python (a working knowledge of object oriented Python would be nice, but if you know how python functions/modules work, this is enough to get you started)
-* YAML (Tern uses yaml files heavily for data lookup. An overview of YAML can be found [here](http://yaml.org/)
+* YAML (Tern uses yaml files heavily for data lookup. An overview of YAML can be found [here](http://yaml.org/))
 
 ### Keeping in touch
 
@@ -57,6 +57,8 @@ The commit message of your PR should be able to communicate what problem/opportu
 * Use the imperative mood in the subject line
 * Wrap the body at 72 characters
 * Use the body to explain what and why vs. how
+
+Example:
 ```
 Summarize changes in around 50 characters or less
 
@@ -91,12 +93,12 @@ See also: #456, #789
 You may file an issue through the github issue tracker. Please follow the same guidelines as the commit message guidelines when formatting your issue. Please make sure to include the following for quick debugging and resolution:
 
 * The SHA256 commit at which the bug occured
-* The project release version
+* The project release version (if there is one)
 * Your dev environment
 * Reproduction steps
-* The contents of tern.log (which may not have everything that went to stdout so the contents of that would also be helpful if it is different)
+* The contents of tern.log (which may not have everything that went to stdout so the contents of that would also be helpful if different)
 
-You may file an issue and create a pull request that references said issue. This, however, does not guarantee acceptance of the PR. Contributing in this way works for small bug or documentation fixes but doesn't lend itself well to large updates. We encourage you to start a discussion on the forum. Typically a follow up issue will be created referencing the topic.
+You may file an issue and create a PR that references said issue. This, however, does not guarantee acceptance of the PR. Contributing in this way works for small bug or documentation fixes but doesn't lend itself well to large updates. We encourage you to start a discussion on the forum. Typically a follow up issue will be created referencing the topic.
 
 ### Troubleshooting
 
