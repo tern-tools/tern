@@ -48,7 +48,7 @@ Expect to spend time resolving conflicts here.
 
 ### Commit message format
 
-The commit message of your PR should be able to communicate what problem/opportunity the PR addresses without any reference to forum messages or discussions on slack or IRL. You may make a reference to a github issue number using the github format (eg: Resolves: #1). Here is a summary taken from [this blog](https://chris.beams.io/posts/git-commit/)
+The commit message of your PR should be able to communicate what problem/opportunity the PR addresses without any reference to forum messages or discussions on slack or IRL. You may make a reference to a github issue number using the github format (eg: Resolves: #1). Here is an overview of what is needed in a good commit message taken from [this blog](https://chris.beams.io/posts/git-commit/)
 
 * Separate subject from body with a blank line
 * Limit the subject line to 50 characters
@@ -57,6 +57,17 @@ The commit message of your PR should be able to communicate what problem/opportu
 * Use the imperative mood in the subject line
 * Wrap the body at 72 characters
 * Use the body to explain what and why vs. how
+
+In addition to this, we would like you to sign off on your commit. You can cofigure git to automatically do this for you when you run 'git commit -s'.
+```
+$ git config --global user.name "Some Dev"
+$ git config --global user.email somedev@example.com
+```
+You should see a footer in your commit message like this:
+```
+Signed-off-by: Some Dev <somedev@example.com>
+```
+Please use a name you would like to be idenfitied with and an email address that you monitor.
 
 Example:
 ```
@@ -87,6 +98,8 @@ like this:
 
 Resolves: #123
 See also: #456, #789
+
+Signed-off-by: Some Dev <somedev@example.com>
 ```
 ### Filing an Issue
 
