@@ -1,3 +1,5 @@
+![Tern](/docs/img/tern_logo.png)
+
 ### Welcome to the Tern Project
 
 Tern is a tool to find the metadata for packages installed in Docker containers, specifically the sources, versions and licenses. It does this by looking up
