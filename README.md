@@ -37,7 +37,7 @@ WARNING: Tern is meant to give guidance on what may be installed for each line i
 ```
 $ cd ternenv
 $ source bin/activate
-$ git clone git@gitlab.eng.vmware.com:opensource/tern.git
+$ git clone git@github.com:vmware/tern.git
 $ cd tern
 $ export PYTHONPATH=`pwd`
 $ python tests/<test file>.py
