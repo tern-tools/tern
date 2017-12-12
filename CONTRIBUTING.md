@@ -58,7 +58,7 @@ The commit message of your PR should be able to communicate what problem/opportu
 * Wrap the body at 72 characters
 * Use the body to explain what and why vs. how
 
-In addition to this, we would like you to sign off on your commit. You can cofigure git to automatically do this for you when you run 'git commit -s'.
+In addition to this, we would like you to sign off on your commit. You can configure git to automatically do this for you when you run 'git commit -s'.
 ```
 $ git config --global user.name "Some Dev"
 $ git config --global user.email somedev@example.com
@@ -67,7 +67,7 @@ You should see a footer in your commit message like this:
 ```
 Signed-off-by: Some Dev <somedev@example.com>
 ```
-Please use a name you would like to be idenfitied with and an email address that you monitor.
+Please use a name you would like to be identified with and an email address that you monitor.
 
 Example:
 ```
@@ -105,7 +105,7 @@ Signed-off-by: Some Dev <somedev@example.com>
 
 You may file an issue through the github issue tracker. Please follow the same guidelines as the commit message guidelines when formatting your issue. Please make sure to include the following for quick debugging and resolution:
 
-* The SHA256 commit at which the bug occured
+* The SHA256 commit at which the bug occurred
 * The project release version (if there is one)
 * Your dev environment
 * Reproduction steps
