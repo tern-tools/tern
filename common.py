@@ -53,7 +53,6 @@ logger = logging.getLogger('ternlog')
 def load_docker_commands(dockerfile_path):
     '''Given a dockerfile get a persistent list of docker commands'''
     global docker_commands
-    # TODO: some checks on the passed argument would be nice here
     docker_commands = df.get_directive_list(df.get_command_list(
         dockerfile_path))
     global dockerfile
