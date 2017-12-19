@@ -15,6 +15,7 @@ directives = ['FROM',
               'ENV',
               'COPY',
               'ENTRYPOINT',
+              'WORKDIR',
               'VOLUME',
               'EXPOSE',
               'CMD']
