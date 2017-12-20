@@ -3,7 +3,7 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
-from utils import commands as cmds
+from utils import container as cont
 from utils import metadata as md
 from .image_layer import ImageLayer
 
@@ -60,6 +60,10 @@ class Image(object):
     def layers(self):
         return self.__layers
 
+    @property
+    def history(self):
+        return self.__history
+
     def get_image_option(self):
         '''Check to see which value was used to init the image object
         Return the value that was used. If neither one was used raise
@@ -80,7 +84,7 @@ class Image(object):
         '''
         try:
             option = self.get_image_option()
-            if cmds.extract_image_metadata(option):
+            if cont.extract_image_metadata(option):
                 print('Image extracted')
             else:
                 print('Failed to extract image')
@@ -88,6 +92,7 @@ class Image(object):
             self.__id = md.get_image_id(self.__manifest)
             self.__repotags = md.get_image_repotags(self.__manifest)
             self.__config = md.get_image_config(self.__manifest)
+            self.__history = md.get_image_history(self.__config)
             layer_paths = md.get_image_layers(self.__manifest)
             layer_diffs = md.get_diff_ids(self.__config)
             while layer_diffs and layer_paths:

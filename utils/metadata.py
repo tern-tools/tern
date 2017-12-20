@@ -91,16 +91,12 @@ def get_nonempty_history(config):
     return history
 
 
-def get_history(config):
-    '''Given the image config, return the 'created_by' data. If it doesn't
-    exist return an empty string'''
-    history = []
-    for item in config['history']:
-        if 'created_by' in item.keys():
-            history.append(item['created_by'])
-        else:
-            history.append('')
-    return history
+def get_image_history(config):
+    '''If the config has the image history return it. Else return None'''
+    if 'history' in config.keys():
+        return config['history']
+    else:
+        return None
 
 
 def get_diff_ids(config):

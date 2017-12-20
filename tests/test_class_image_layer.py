@@ -9,7 +9,7 @@ from classes.image_layer import ImageLayer
 from classes.package import Package
 
 
-class TestClassLayer(unittest.TestCase):
+class TestClassImageLayer(unittest.TestCase):
 
     def setUp(self):
         self.layer = ImageLayer('123abc', 'path/to/tar')
@@ -46,7 +46,6 @@ class TestClassLayer(unittest.TestCase):
         p1 = Package('x')
         self.layer.add_package(p1)
         a_dict = self.layer.to_dict()
-        print(a_dict)
         self.assertTrue(a_dict['123abc'])
         self.assertEqual(len(a_dict['123abc']['packages']), 1)
         self.assertEqual(a_dict['123abc']['packages'][0]['name'], 'x')
