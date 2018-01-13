@@ -12,6 +12,12 @@ class Command(object):
         name: command name (eg: apt-get)
         options: command options (-v or --verbose)
         words: a subcommand, arguments for the options or/and command arguments
+        flags: a set of flags showing what kind of command it is
+        This is a binary representation in this bit order:
+            install remove ignore
+        an install command is: 0b100 (4)
+        a remove command is: 0b010 (2)
+        to ignore this command: 0b001 (1)
     '''
     def __init__(self, shell_command):
         '''Use the shell command parser to populate the attributes'''
@@ -22,6 +28,8 @@ class Command(object):
         self.__options = command_dict['options']
         self.__words = command_dict['words']
         self.__properties = ['subcommand', 'option_arg']
+        self.__flags = 0b000
+        self.__set_bit = 0b001
 
     @property
     def shell_command(self):
@@ -46,6 +54,10 @@ class Command(object):
     @property
     def words(self):
         return self.__words
+
+    @property
+    def flags(self):
+        return self.__flags
 
     def __set_prop(self, value, prop):
         if prop == 'subcommand':
@@ -75,3 +87,32 @@ class Command(object):
             if opt[0] == option:
                 return opt[1]
         return None
+
+    def is_set(self):
+        '''Check if any flags are set'''
+        return not(self.flags == 0b000)
+
+    def set_install(self):
+        '''Set install flag'''
+        self.__flags = self.__set_bit << 2
+
+    def set_remove(self):
+        '''Set remove flag'''
+        self.__flags = self.__set_bit << 1
+
+    def set_ignore(self):
+        '''Set ignore flag'''
+        print(self.__set_bit)
+        self.__flags = self.__set_bit
+
+    def is_install(self):
+        '''Is this an install command?'''
+        return self.flags == 0b100
+
+    def is_remove(self):
+        '''Is this a remove command?'''
+        return self.flags == 0b010
+
+    def is_ignore(self):
+        '''Is this a command to ignore?'''
+        return self.flags == 0b001

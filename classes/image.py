@@ -3,8 +3,8 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
-from utils import container as cont
-from utils import metadata as md
+from utils import container
+from utils import metadata
 from .image_layer import ImageLayer
 
 
@@ -64,6 +64,10 @@ class Image(object):
     def history(self):
         return self.__history
 
+    def get_layer_diff_ids(self):
+        '''Get a list of layer diff ids'''
+        return [layer.diff_id for layer in self.layers]
+
     def get_image_option(self):
         '''Check to see which value was used to init the image object
         Return the value that was used. If neither one was used raise
@@ -84,17 +88,17 @@ class Image(object):
         '''
         try:
             option = self.get_image_option()
-            if cont.extract_image_metadata(option):
+            if container.extract_image_metadata(option):
                 print('Image extracted')
             else:
                 print('Failed to extract image')
-            self.__manifest = md.get_image_manifest()
-            self.__id = md.get_image_id(self.__manifest)
-            self.__repotags = md.get_image_repotags(self.__manifest)
-            self.__config = md.get_image_config(self.__manifest)
-            self.__history = md.get_image_history(self.__config)
-            layer_paths = md.get_image_layers(self.__manifest)
-            layer_diffs = md.get_diff_ids(self.__config)
+            self.__manifest = metadata.get_image_manifest()
+            self.__id = metadata.get_image_id(self.__manifest)
+            self.__repotags = metadata.get_image_repotags(self.__manifest)
+            self.__config = metadata.get_image_config(self.__manifest)
+            self.__history = metadata.get_image_history(self.__config)
+            layer_paths = metadata.get_image_layers(self.__manifest)
+            layer_diffs = metadata.get_diff_ids(self.__config)
             while layer_diffs and layer_paths:
                 layer = ImageLayer(layer_diffs.pop(0), layer_paths.pop(0))
                 self.__layers.append(layer)

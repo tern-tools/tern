@@ -13,11 +13,13 @@ class TestClassCommand(unittest.TestCase):
         self.install = Command('apt-get install -y git')
         self.untar = Command('tar -x -C file tarfile.tar')
         self.download = Command('wget url')
+        self.remove = Command('apt-get purge git')
 
     def tearDown(self):
         del self.install
         del self.untar
         del self.download
+        del self.remove
 
     def testInstance(self):
         self.assertEqual(self.install.shell_command, 'apt-get install -y git')
@@ -32,6 +34,9 @@ class TestClassCommand(unittest.TestCase):
         self.assertEqual(len(self.install.words), 2)
         self.assertEqual(self.install.words[0], 'install')
         self.assertEqual(self.install.words[1], 'git')
+        self.assertEqual(self.install.flags, 0)
+        self.assertFalse(self.install.is_set())
+
         self.assertEqual(self.untar.shell_command,
                          'tar -x -C file tarfile.tar')
         self.assertEqual(self.untar.name, 'tar')
@@ -43,11 +48,16 @@ class TestClassCommand(unittest.TestCase):
         self.assertEqual(len(self.untar.words), 2)
         self.assertEqual(self.untar.words[0], 'file')
         self.assertEqual(self.untar.words[1], 'tarfile.tar')
+        self.assertEqual(self.untar.flags, 0)
+        self.assertFalse(self.untar.is_set())
+
         self.assertEqual(self.download.name, 'wget')
         self.assertFalse(self.download.subcommand)
         self.assertFalse(self.download.options)
         self.assertEqual(len(self.download.words), 1)
         self.assertEqual(self.download.words[0], 'url')
+        self.assertEqual(self.download.flags, 0)
+        self.assertFalse(self.download.is_set())
 
     def testReassignWord(self):
         # install is a subcommand
@@ -68,6 +78,24 @@ class TestClassCommand(unittest.TestCase):
         # for the wget command there are no options so this should
         # return None
         self.assertEqual(self.download.get_option_argument('-f'), None)
+
+    def testFlags(self):
+        # move install subcommand, then set the flag, then check to
+        # see if the command is an install command
+        self.install.reassign_word('install', 'subcommand')
+        self.install.set_install()
+        self.assertTrue(self.install.is_set())
+        self.assertTrue(self.install.is_install())
+
+        # ignore wget
+        self.download.set_ignore()
+        self.assertTrue(self.download.is_set())
+        self.assertTrue(self.download.is_ignore())
+
+        # set apt-get purge as a remove command
+        self.remove.set_remove()
+        self.assertTrue(self.remove.is_set())
+        self.assertTrue(self.remove.is_remove())
 
 
 if __name__ == '__main__':
