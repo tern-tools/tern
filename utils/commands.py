@@ -12,6 +12,7 @@ from .container import docker_command
 from .container import execute
 from .general import parse_command
 from .constants import container
+from classes.command import Command
 
 '''
 Invoking commands in the command library
@@ -46,24 +47,61 @@ def get_shell_commands(run_comm):
     comm_list = run_comm.split('&&')
     cleaned_list = []
     for comm in comm_list:
-        cleaned_list.append(comm.strip())
+        cleaned_list.append(Command(comm.strip()))
     return cleaned_list
 
 
-def check_sourcable(command, package_name):
-    '''Given a command and package name find out if the sources can be traced
-    back. We find this out by checking the package against the command library
-    If the package has a url or source retrieval steps associated with it
-    then we return True. If not then we return false'''
-    sourcable = False
-    if command in command_lib['snippets'].keys():
-        for package in command_lib['snippets'][command]['packages']:
-            if package['name'] == package_name or \
-                    package['name'] == 'default':
-                if 'url' in package.keys() or \
-                        'src' in package.keys():
-                    sourcable = True
-    return sourcable
+def get_latest_tag(repo):
+    '''Given the repo name of the base image, get the latest tag'''
+    return command_lib['base'][repo]['latest']
+
+
+def get_base_listing(image_tuple):
+    '''Given the base image tag tuple, return the listing in the base command
+    library'''
+    listing = {}
+    if image_tuple[0] in command_lib['base'].keys():
+        if image_tuple[1] in \
+                command_lib['base'][image_tuple[0]]['tags'].keys():
+            listing = \
+                command_lib['base'][image_tuple[0]]['tags'][image_tuple[1]]
+        if image_tuple[1] == 'latest':
+            tag = get_latest_tag(image_tuple[0])
+            listing = \
+                command_lib['base'][image_tuple[0]]['tags'][tag]
+    return listing
+
+
+def get_command_listing(command_name):
+    '''Given a command name retrieve the listing if it exists'''
+    listing = {}
+    if command_name in command_lib['snippets'].keys():
+        listing = command_lib['snippets'][command_name]
+    return listing
+
+
+def set_command_attrs(command_obj):
+    '''Given the command object, move the install and remove listings to
+    subcommands and set the flags, then return True. If the command name
+    is not in the snippets library then return False'''
+    command_listing = get_command_listing(command_obj.name)
+    if command_listing:
+        # the command is in the library
+        if 'install' in command_listing.keys():
+            # try to move install to a subcommand
+            if command_obj(command_listing['install'], 'subcommand'):
+                command_obj.set_install()
+        if 'remove' in command_listing.keys():
+            # try to move remove to a subcommand
+            if command_obj(command_listing['remove'], 'subcommand'):
+                command_obj.set_remove()
+        if 'ignore' in command_listing.keys():
+            # check if any of the words in the ignore list are in
+            # the list of command words
+            for ignore_word in command_listing['ignore']:
+                if ignore_word in command_obj.words:
+                    command_obj.set_ignore()
+                    break
 
 
 def get_packages_per_run(docker_run_command):
@@ -158,23 +196,6 @@ def remove_uninstalled(pkg_dict):
     return pkg_dict
 
 
-def get_base_info(image_tuple):
-    '''Given the base image tag tuple, return the info for package retrieval
-    snippets'''
-    info = ''
-    if image_tuple[0] in command_lib['base'].keys():
-        if image_tuple[1] in \
-                command_lib['base'][image_tuple[0]]['tags'].keys():
-            info = \
-                command_lib['base'][image_tuple[0]]['tags'][image_tuple[1]]
-    return info
-
-
-def get_latest_tag(base_image):
-    '''Given the base image get the latest tag'''
-    return command_lib['base'][base_image]['latest']
-
-
 def invoke_in_container(snippet_list, shell, package='', override=''):
     '''Invoke the commands from the invoke dictionary within a running
     container
@@ -233,3 +254,19 @@ def get_pkg_attr_list(shell, attr_dict, package_name='', override=''):
                 else:
                     attr_list.append(result)
     return attr_list
+
+
+def check_sourcable(command, package_name):
+    '''Given a command and package name find out if the sources can be traced
+    back. We find this out by checking the package against the command library
+    If the package has a url or source retrieval steps associated with it
+    then we return True. If not then we return false'''
+    sourcable = False
+    if command in command_lib['snippets'].keys():
+        for package in command_lib['snippets'][command]['packages']:
+            if package['name'] == package_name or \
+                    package['name'] == 'default':
+                if 'url' in package.keys() or \
+                        'src' in package.keys():
+                    sourcable = True
+    return sourcable
