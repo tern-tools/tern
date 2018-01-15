@@ -8,10 +8,10 @@ import os
 import subprocess
 import yaml
 
-from .container import docker_command
-from .container import execute
-from .general import parse_command
-from .constants import container
+from utils.container import docker_command
+from utils.container import execute
+from utils.general import parse_command
+from utils.constants import container
 from classes.command import Command
 
 '''
