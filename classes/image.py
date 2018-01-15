@@ -3,10 +3,6 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
-from utils import container
-from utils import metadata
-from .image_layer import ImageLayer
-
 
 class Image(object):
     '''A representation of the image to be analyzed
@@ -20,49 +16,49 @@ class Image(object):
         config: the image config metadata
         layers: list of layer objects in the image
         history: a list of commands used to create the filesystem layers
-        This is used in Docker images to match Dockerfiles but is an optional
-        part of OCI compatible images
     methods:
-        load_image: this method uses the metadata utility to load all
-        the metadata for the image
+        load_image: this method is to be implemented in the derived classes
+        get_layer_diff_ids: returns a list of layer diff ids only
+        get_image_option: returns whether the image object was instantiated
+        using the repotag or id
     '''
     def __init__(self, repotag=None, id=None):
         '''Either initialize using the repotag or the id'''
-        self.__repotag = repotag
-        self.__id = id
-        self.__manifest = {}
-        self.__repotags = []
-        self.__config = {}
-        self.__layers = []
-        self.__history = None
+        self._repotag = repotag
+        self._id = id
+        self._manifest = {}
+        self._repotags = []
+        self._config = {}
+        self._layers = []
+        self._history = None
 
     @property
     def repotag(self):
-        return self.__repotag
+        return self._repotag
 
     @property
     def manifest(self):
-        return self.__manifest
+        return self._manifest
 
     @property
     def id(self):
-        return self.__id
+        return self._id
 
     @property
     def repotags(self):
-        return self.__repotags
+        return self._repotags
 
     @property
     def config(self):
-        return self.__config
+        return self._config
 
     @property
     def layers(self):
-        return self.__layers
+        return self._layers
 
     @property
     def history(self):
-        return self.__history
+        return self._history
 
     def get_layer_diff_ids(self):
         '''Get a list of layer diff ids'''
@@ -82,26 +78,7 @@ class Image(object):
             raise NameError("Image object initialized with no repotag or ID")
 
     def load_image(self):
-        '''Load image metadata based on the image build tool
-        There is no standard format and there are several tools used to build
-        container images. For now only docker save is supported
-        '''
-        try:
-            option = self.get_image_option()
-            if container.extract_image_metadata(option):
-                print('Image extracted')
-            else:
-                print('Failed to extract image')
-            self.__manifest = metadata.get_image_manifest()
-            self.__id = metadata.get_image_id(self.__manifest)
-            self.__repotags = metadata.get_image_repotags(self.__manifest)
-            self.__config = metadata.get_image_config(self.__manifest)
-            self.__history = metadata.get_image_history(self.__config)
-            layer_paths = metadata.get_image_layers(self.__manifest)
-            layer_diffs = metadata.get_diff_ids(self.__config)
-            while layer_diffs and layer_paths:
-                layer = ImageLayer(layer_diffs.pop(0), layer_paths.pop(0))
-                self.__layers.append(layer)
-        except NameError as error:
-            print(error)
-            raise NameError(error)
+        '''Load image metadata
+        Currently there is no standard way to do this. For a specific tool,
+        Inherit from this class and override this method'''
+        pass
