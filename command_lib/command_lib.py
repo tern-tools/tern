@@ -13,6 +13,7 @@ from utils.container import execute
 from utils.general import parse_command
 from utils.constants import container
 from classes.command import Command
+from report import errors
 
 '''
 Invoking commands in the command library
@@ -28,6 +29,18 @@ with open(os.path.abspath(base_file)) as f:
     command_lib['base'] = yaml.safe_load(f)
 with open(os.path.abspath(snippet_file)) as f:
     command_lib['snippets'] = yaml.safe_load(f)
+# list of package information keys that the command library can accomodate
+package_keys = ['names',
+                'versions',
+                'licenses',
+                'src_urls',
+                'srcs'
+                'name',
+                'version',
+                'src_url',
+                'license',
+                'deps',
+                'src']
 
 # global logger
 logger = logging.getLogger('ternlog')
@@ -80,6 +93,28 @@ def get_command_listing(command_name):
     return listing
 
 
+def check_for_unique_package(package_list, package_name):
+    '''In the snippet library the command name has a list of packages that can
+    be installed with that command. A package name called 'default' indicates
+    that the method of retrieving information applies to any package.
+    However if there is an element with a specific name, the default is
+    overridden with that name.
+    Given a list of package dictionaries, find the package dictionary with the
+    given package name. If not there look for a pacakge dictionary with the
+    name as 'default'. If that is not there, return an empty dictionary'''
+    pkg = {}
+    for package in package_list:
+        if package['name'] == package_name:
+            pkg = package
+            break
+    if not pkg:
+        for package in package_list:
+            if package['name'] == 'default':
+                pkg = package
+                break
+    return pkg
+
+
 def set_command_attrs(command_obj):
     '''Given the command object, move the install and remove listings to
     subcommands and set the flags, then return True. If the command name
@@ -102,6 +137,31 @@ def set_command_attrs(command_obj):
                 if ignore_word in command_obj.words:
                     command_obj.set_ignore()
                     break
+
+
+def check_keys(listing):
+    '''Given a base listing or snippet package listing, check if the keys are
+    in the allowed list of keys. Return the list of keys that are present
+    and the error messages for the keys that are missing'''
+    report = ''
+    listing_key = ''
+    # assuming that the listing is either under base image and tag
+    # or under a package dictionary get the list of keys
+    cmd_lib_keys = listing.keys()
+    # find the intersection of the keys - this is what we will return
+    valid_keys = set(package_keys).intersection(set(cmd_lib_keys))
+    # find the keys that are not listed in the known list of keys
+    # these will have notes
+    note_keys = set(package_keys).difference(valid_keys)
+    for key in note_keys:
+        listing_key = key
+        report = report + errors.no_listing_for_key
+    # find the keys that are not valid keys and not in the allowed keys
+    warning_keys = set(cmd_lib_keys).difference(valid_keys)
+    for key in warning_keys:
+        listing_key = key
+        report = report + errors.unsupported_listing_key
+    return list(valid_keys), report
 
 
 def get_packages_per_run(docker_run_command):
