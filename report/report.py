@@ -5,53 +5,14 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import logging
 
-from utils.commands import start_container
-from utils.commands import remove_container
-from utils.commands import remove_image
+from utils.container import start_container
+from utils.container import remove_container
+from utils.container import remove_image
 import common
+
 '''
 Create a report
 '''
-
-# constants
-report_file = 'report.txt'
-report_confirmed = 'Confirmed sources:\n'
-report_unconfirmed = 'Unconfirmed sources:\n'
-report_package = '\tpackage: {package}\n'
-report_url = '\t\turl: {url}\n'
-report_version = '\t\tversion: {version}\n'
-report_license = '\t\tlicense: {license}\n'
-report_unrecog = 'Unrecognized packages:\n'
-report_notes = 'NOTES:\n'
-
-# report messages
-no_packages = '''Unable to recover packages for layer {layer}.
-Consider either entering them manually or create a bash script to retrieve the
-package in the command library.\n'''
-no_version = '''No version for package {package}.
-Consider either entering the version manually or creating a script to retrieve
-it in the command library\n'''
-no_license = '''No license for package {package}.
-Consider either entering the license manually or creating a script to retrieve
-it in the command library\n'''
-no_src_url = '''No source url for package {package}.
-Consider either entering the source url manually or creating a script to
-retrieve it in the command library\n'''
-env_dep_dockerfile = '''Docker build failed: {build_fail_msg} \n
-Since the Docker image cannot be built, Tern will try to retrieve package
-information from the Dockerfile itself.\n'''
-invoking_from_base = '''
-Checking against command_lib/base.yml to retrieve information about packages
-in this layer. Some of the results are shell snippets that will be invoked\n'''
-checking_against_snippets = '''
-Checking against command_lib/snippets.yml to see if there is a listing for
-the commands in the Dockerfile RUN line\n'''
-retrieved_from_cache = '''\nThere is a record of layer {sha} in the cache.
-Packages in the cache:\n'''
-retrieved_by_invoke = '''\nRetrieving package information in layer {sha}
-by running commands:\n'''
-section_terminator = '''\n--------------------------------------------\n\n'''
-
 
 def write_report(report):
     '''Write the report to a file'''
