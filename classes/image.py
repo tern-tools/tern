@@ -30,6 +30,7 @@ class Image(object):
         self._repotags = []
         self._config = {}
         self._layers = []
+        self._notices = []
         self._history = None
 
     @property
@@ -57,8 +58,15 @@ class Image(object):
         return self._layers
 
     @property
+    def notices(self):
+        return self._notices
+
+    @property
     def history(self):
         return self._history
+
+    def add_notice(self, notice):
+        self._notices.append(notice)
 
     def get_layer_diff_ids(self):
         '''Get a list of layer diff ids'''

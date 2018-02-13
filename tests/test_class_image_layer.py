@@ -7,6 +7,7 @@ import unittest
 
 from classes.image_layer import ImageLayer
 from classes.package import Package
+from classes.notice import Notice
 
 
 class TestClassImageLayer(unittest.TestCase):
@@ -41,6 +42,11 @@ class TestClassImageLayer(unittest.TestCase):
         self.layer.add_package(p2)
         self.assertTrue(self.layer.remove_package('y'))
         self.assertFalse(self.layer.remove_package('y'))
+
+    def testAddNotice(self):
+        n = Notice()
+        self.layer.add_notice(n)
+        self.assertEqual(len(self.layer.notices), 1)
 
     def testToDict(self):
         p1 = Package('x')
