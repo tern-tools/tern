@@ -11,6 +11,8 @@ class Package(object):
         version: package version
         license: package license
         src_url: package source url
+        notices: a list of Notice objects
+
     methods:
         to_dict: returns a dict representation of the instance'''
     def __init__(self, name):
@@ -18,6 +20,7 @@ class Package(object):
         self.__version = ''
         self.__license = ''
         self.__src_url = ''
+        self.__notices = []
 
     @property
     def name(self):
@@ -46,6 +49,13 @@ class Package(object):
     @src_url.setter
     def src_url(self, src_url):
         self.__src_url = src_url
+
+    @property
+    def notices(self):
+        return self.__notices
+
+    def add_notice(self, notice):
+        self.__notices.append(notice)
 
     def to_dict(self):
         pkg_dict = {}
