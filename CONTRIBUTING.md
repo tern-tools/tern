@@ -19,7 +19,7 @@ You can contribute in the following ways:
 
 ### Keeping in touch
 
-If you would like to ask a question or start a discussion with the maintainers, post a topic on the [public forum](https://groups.google.com/forum/#!forum/tern-maintainers). No registration is required. We will respond to your question or topic within three days unless the post was over the weekend in which case we may take longer to respond. This is our primary communication channel so it is highly likely that you will get a response here.
+If you would like to ask a question or start a discussion, post a topic on the [public forum](https://groups.google.com/forum/#!forum/tern-discussion). You will need to apply to join the group before posting. We will respond to your question or topic within three days unless the post was over the weekend in which case we may take longer to respond. This is our primary communication channel so it is highly likely that you will get a response here.
 
 If you would like to chat live, you can join the [slack channel](https://vmwarecode.slack.com/messages/tern). If you don't have an @vmware.com or @emc.com email, please sign up at https://code.vmware.com/slack to get a Slack invite. Although we monitor the channel, we may not respond right away and if the same question was asked on the forum, we will choose to respond there.
 
