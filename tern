@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import argparse
 import logging
-
+import os
 import report
 from common import clear_cache
 '''
@@ -37,6 +37,13 @@ def main(args, logger):
 
 
 if __name__ == '__main__':
+
+    def check_file_existence(path):
+        if not os.path.isfile(path):
+            msg = "{}: does not exist".format(path)
+            raise argparse.ArgumentTypeError(msg)
+        return path
+
     parser = argparse.ArgumentParser(
         prog='Tern',
         description='''
@@ -50,7 +57,7 @@ if __name__ == '__main__':
     # subparser for report
     parser_report = subparsers.add_parser('report',
                                           help="Create a report")
-    parser_report.add_argument('-d', '--dockerfile',
+    parser_report.add_argument('-d', '--dockerfile', type=check_file_existence,
                                help="Dockerfile used to build the Docker"
                                " image")
     parser_report.add_argument('-s', '--summary', action='store_true',
