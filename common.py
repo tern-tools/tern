@@ -4,6 +4,7 @@ SPDX-License-Identifier: BSD-2-Clause
 '''
 
 import logging
+import os
 import subprocess
 import sys
 
@@ -52,6 +53,8 @@ logger = logging.getLogger('ternlog')
 
 def load_docker_commands(dockerfile_path):
     '''Given a dockerfile get a persistent list of docker commands'''
+    if not os.path.isfile(dockerfile_path):
+        raise IOError("{}: Does not exist".format(dockerfile_path))
     global docker_commands
     docker_commands = df.get_directive_list(df.get_command_list(
         dockerfile_path))
