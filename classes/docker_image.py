@@ -12,6 +12,7 @@ from utils.constants import temp_folder
 from utils.constants import manifest_file
 from utils.container import extract_image_metadata
 from utils.dockerfile import directives
+from utils.dockerfile import tag_separator
 
 from .image_layer import ImageLayer
 from .image import Image
@@ -19,10 +20,46 @@ from .image import Image
 
 class DockerImage(Image):
     '''A representation of an image created by Docker
-    See image.py for super class's attributes'''
+    See image.py for super class's attributes
+    Docker Image specific attributes:
+        repotags: the list of repotags associated with this image
+        history: a list of commands used to create the filesystem layers
+    '''
     def __init__(self, repotag=None, id=None):
-        '''Use superclass's attributes'''
-        super().__init__(repotag, id)
+        '''Initialize using repotag and id'''
+        super().__init__(id)
+        self.__repotag = repotag
+        self.__repotags = []
+        self.__history = None
+        if self.repotag is not None:
+            repo_tag_list = self.__repotag.split(tag_separator)
+            self._name = repo_tag_list[0]
+            self._tag = repo_tag_list[1]
+
+    @property
+    def repotag(self):
+        return self.__repotag
+
+    @property
+    def repotags(self):
+        return self.__repotags
+
+    @property
+    def history(self):
+        return self.__history
+
+    def get_image_option(self):
+        '''Check to see which value was used to init the image object
+        Return the value that was used. If neither one was used raise
+        NameError. If both were used return the id'''
+        if self.repotag is not None and self.id is not None:
+            return self.id
+        elif self.repotag is not None:
+            return self.repotag
+        elif self.id is not None:
+            return self.id
+        else:
+            raise NameError("Image object initialized with no repotag or ID")
 
     def get_image_manifest(self):
         '''Assuming that there is a temp folder with a manifest.json of
@@ -92,7 +129,7 @@ class DockerImage(Image):
         # the history is ordered according to the order of the layers
         # so the first non-empty history corresponds with the first layer
         index = 0
-        for item in self._history:
+        for item in self.__history:
             if 'empty_layer' not in item.keys():
                 if 'created_by' in item.keys():
                     self._layers[index].created_by = item['created_by']
@@ -110,9 +147,9 @@ class DockerImage(Image):
                 print('Failed to extract image')
             self._manifest = self.get_image_manifest()
             self._id = self.get_image_id(self._manifest)
-            self._repotags = self.get_image_repotags(self._manifest)
+            self.__repotags = self.get_image_repotags(self._manifest)
             self._config = self.get_image_config(self._manifest)
-            self._history = self.get_image_history(self._config)
+            self.__history = self.get_image_history(self._config)
             layer_paths = self.get_image_layers(self._manifest)
             layer_diffs = self.get_diff_ids(self._config)
             while layer_diffs and layer_paths:

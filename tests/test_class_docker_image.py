@@ -40,6 +40,8 @@ class TestClassDockerImage(unittest.TestCase):
 
     def testInstance(self):
         self.assertEqual(self.image.repotag, 'debian:jessie')
+        self.assertEqual(self.image.name, 'debian')
+        self.assertEqual(self.image.tag, 'jessie')
         self.assertFalse(self.image.id)
         self.assertFalse(self.image.manifest)
         self.assertFalse(self.image.repotags)
