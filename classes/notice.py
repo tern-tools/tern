@@ -24,13 +24,14 @@ class Notice(object):
         level: notice level - error, warning or hint
             error: cannot continue further
             warning: will try to continue from here
+            info: information only
             hint: message on how to make the results better
     '''
     def __init__(self):
         self.__origin = ''
         self.__message = ''
         self.__level = ''
-        self.__levels = ['error', 'warning', 'hint']
+        self.__levels = ['error', 'warning', 'hint', 'info']
 
     @property
     def origin(self):
