@@ -92,6 +92,19 @@ def check_image(image_tag_string):
     return is_image
 
 
+def pull_image(image_tag_string):
+    '''Try to pull an image from Dockerhub'''
+    is_there = False
+    try:
+        result = docker_command(pull, image_tag_string)
+        print(result)
+        is_there = True
+    except subprocess.CalledProcessError as error:
+        print(error.output)
+        is_there = False
+    return is_there
+
+
 def build_container(dockerfile, image_tag_string):
     '''Invoke docker command to build a docker image from the dockerfile
     It is assumed that docker is installed and the docker daemon is running'''
