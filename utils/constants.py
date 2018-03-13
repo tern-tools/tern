@@ -17,3 +17,5 @@ container = 'testcontainer'
 logger_name = 'docker-utils'
 # manifest file
 manifest_file = 'manifest.json'
+# default shell
+shell = '/bin/sh'
