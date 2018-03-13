@@ -60,19 +60,19 @@ def get_latest_tag(repo):
     return command_lib['base'][repo]['latest']
 
 
-def get_base_listing(image_tuple):
-    '''Given the base image tag tuple, return the listing in the base command
+def get_base_listing(base_image, base_tag):
+    '''Given the base image and tag, return the listing in the base command
     library'''
     listing = {}
-    if image_tuple[0] in command_lib['base'].keys():
-        if image_tuple[1] in \
-                command_lib['base'][image_tuple[0]]['tags'].keys():
+    if base_image in command_lib['base'].keys():
+        if base_tag in \
+                command_lib['base'][base_image]['tags'].keys():
             listing = \
-                command_lib['base'][image_tuple[0]]['tags'][image_tuple[1]]
-        if image_tuple[1] == 'latest':
-            tag = get_latest_tag(image_tuple[0])
+                command_lib['base'][base_image]['tags'][base_tag]
+        if base_tag == 'latest':
+            tag = get_latest_tag(base_tag)
             listing = \
-                command_lib['base'][image_tuple[0]]['tags'][tag]
+                command_lib['base'][base_image]['tags'][tag]
     return listing
 
 
@@ -120,6 +120,14 @@ def check_library_key(listing, key):
             return {}, errors.no_listing_for_package_key.format(
                 listing_key=e)
         return {}, errors.unsupported_listing_for_key.format(listing_key=e)
+
+
+def get_image_shell(base_image_listing):
+    '''Given the base image listing return the image shell. If there is no'''
+    shell, msg = check_library_key(base_image_listing)
+    if not shell:
+        shell = ''
+    return shell, msg
 
 
 def set_command_attrs(command_obj):
@@ -276,6 +284,7 @@ def get_pkg_attr_list(shell, attr_dict, package_name='', override=''):
     override is used for an alternate container name and defaults to
     an empty string'''
     attr_list = []
+    error_msgs = ''
     if 'invoke' in attr_dict.keys():
         # invoke the commands
         for step in range(1, len(attr_dict['invoke'].keys()) + 1):
@@ -285,8 +294,7 @@ def get_pkg_attr_list(shell, attr_dict, package_name='', override=''):
                         attr_dict['invoke'][step]['container'], shell,
                         package=package_name, override=override)
                 except subprocess.CalledProcessError as error:
-                    raise subprocess.CalledProcessError(
-                        1, cmd=error.cmd, output=error.output)
+                    error_msgs = error_msgs + error.output
                 result = result[:-1]
                 if 'delimiter' in attr_dict.keys():
                     res_list = result.split(attr_dict['delimiter'])
@@ -295,7 +303,7 @@ def get_pkg_attr_list(shell, attr_dict, package_name='', override=''):
                     attr_list.extend(res_list)
                 else:
                     attr_list.append(result)
-    return attr_list
+    return attr_list, error_msgs
 
 
 def check_sourcable(command, package_name):
