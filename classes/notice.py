@@ -27,11 +27,12 @@ class Notice(object):
             info: information only
             hint: message on how to make the results better
     '''
-    def __init__(self):
-        self.__origin = ''
-        self.__message = ''
+    def __init__(self, origin='', message='', level=''):
+        self.__origin = origin
+        self.__message = message
         self.__level = ''
         self.__levels = ['error', 'warning', 'hint', 'info']
+        self.level = level
 
     @property
     def origin(self):
