@@ -28,3 +28,38 @@ no_listing_for_package_key = '''No listing for key {listing_key}. ''' \
     '''Consider adding this listing to command_lib/snippets.yml.\n'''
 unsupported_listing_for_key = '''Unsupported listing for key ''' \
     '''{listing_key}.\n'''
+cannot_retrieve_base_packages = '''Cannot retrieve the packages in the ''' \
+    '''base image {image}:{tag}. Check the command listing in the command ''' \
+    '''library'''
+no_invocation = '''No invocation steps to perform within a container nor ''' \
+    '''on the host machine.\n To tell the tool how to retrieve this ''' \
+    '''information, make an entry in command_lib/base.yml'''
+no_image_tag_listing = '''No listing of {image_name}:{image_tag} in the '''\
+    '''command library. To add one, make an entry in command_lib/base.yml'''
+no_command = '''No listing of hardcoded or retrieval steps for ''' \
+    '''{image_tag}.\n To tell the tool this information make an entry ''' \
+    '''in command_lib/base.yml\n'''
+incomplete_command_lib_listing = '''The command library has an incomplete ''' \
+    '''listing for {image_name}:{image_tag}. Please complete the listing based on ''' \
+    '''the examples.\n'''
+no_shell_listing = '''There is no listing for 'shell' under the base ''' \
+    '''listing for {image_name}:{image_tag}. Using default shell: ''' \
+    '''{default_shell}\n'''
+
+# Dockerfile specific errors
+dockerfile_no_tag = '''The Dockerfile provided has no tag in the line ''' \
+    '''{dockerfile_line}. Consider using a specific immutable tag. ''' \
+    '''Defaulting to 'latest'...\n'''
+dockerfile_using_latest = '''The Dockerfile is using the tag 'latest' ''' \
+    '''in line {dockerfile_line}. Consider using a specific immutable tag'''
+base_image_not_found = '''Failed to pull the base image. Perhaps it was ''' \
+    '''removed from Dockerhub\n'''
+cannot_extract_base_image = '''Failed to extact base image {image}:{tag}.'''
+docker_build_failed = '''Unable to build docker image using Dockerfile ''' \
+    '''{dockerfile}: {error_msg}\n'''
+docker_tag_fallback = '''Falling back on tag {latest_tag} in ''' \
+    '''command_lib/base.yml under {image} listing.\n'''
+dockerfile_fallback = '''Falling back on parsing the Dockerfile for ''' \
+    '''package information\n'''
+no_running_docker_container = '''Cannot invoke commands in a container '''\
+    '''as there is no running container.\n'''
