@@ -5,7 +5,6 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import logging
 import subprocess
-import sys
 
 from classes.layer import Layer
 from classes.package import Package
@@ -61,7 +60,6 @@ def add_base_packages(image, info):
     # information under the base image tag in the command library
     listing = cmdlib.get_base_listing(image.name, image.tag)
     origin = 'command_lib/base.yml'
-    pkg_list = []
     if listing:
         shell, msg = cmdlib.get_image_shell(listing)
         if not shell:
@@ -101,40 +99,19 @@ def add_base_packages(image, info):
                         pkg.license = licenses[index]
                     if len(src_urls) == len(names):
                         pkg.src_url = src_urls[index]
-                    pkg_list.append(pkg)
+                        for layer in image.layers:
+                            layer.add_package(pkg)
+            # add all the packages to the cache
+            for layer in image.layers:
+                cache.add_layer(layer)
         # if no container is running give a logging error
         else:
             logger.error(errors.no_running_docker_container)
     # if there is no listing add a notice
     else:
-        no_listing_notice = Notice(origin, no_image_tag_listing.format(
+        no_listing_notice = Notice(origin, errors.no_image_tag_listing.format(
             image_name=image.name, image_tag=image.tag), 'error')
-
-
-
-def get_layer_obj(diff_id):
-    '''Given the diff id, retrieve the list of packages from the cache and
-    return a layer object'''
-    layer_obj = Layer(diff_id)
-    packages = cache.get_packages(diff_id)
-    for package in packages:
-        pkg_obj = Package(package['name'])
-        pkg_obj.fill(package)
-        layer_obj.add(pkg_obj)
-    return layer_obj
-
-
-def record_layer(layer_obj, package_list=[]):
-    '''Given a layer object with a list of packages, record the layer in
-    the cache without recording duplicate packages'''
-    # get a list of package names in the current layer object
-    pkg_names = []
-    for pkg in layer_obj.packages:
-        pkg_names.append(pkg.name)
-    for pkg in package_list:
-        if pkg.name not in pkg_names:
-            layer_obj.add(pkg)
-    cache.add_layer(layer_obj)
+        image.add_notice(no_listing_notice)
 
 
 def build_layer_obj(sha, pkg_obj_list=[]):

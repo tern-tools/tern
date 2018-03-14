@@ -50,7 +50,8 @@ class ImageLayer(object):
         self.__created_by = create_string
 
     def add_package(self, package):
-        self.__packages.append(package)
+        if package.name not in self.get_package_names():
+            self.__packages.append(package)
 
     def add_notice(self, notice):
         self.__notices.append(notice)
