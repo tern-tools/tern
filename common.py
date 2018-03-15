@@ -6,7 +6,6 @@ SPDX-License-Identifier: BSD-2-Clause
 import logging
 import subprocess
 
-from classes.layer import Layer
 from classes.package import Package
 from classes.notice import Notice
 from command_lib import command_lib as cmdlib
@@ -114,23 +113,75 @@ def add_base_packages(image, info):
         image.add_notice(no_listing_notice)
 
 
-def build_layer_obj(sha, pkg_obj_list=[]):
-    '''Create a layer object given the sha and a list of package objects'''
-    layer_obj = Layer(sha)
-    for pkg in pkg_obj_list:
-        layer_obj.add(pkg)
-    return layer_obj
+def fill_package_metadata(pkg_obj, pkg_listing, shell):
+    '''Given a Package object and the Package listing from the command
+    library, fill in the attribute value returned from looking up the
+    data and methods of the package listing.
+    Fill out: version, license and src_url
+    If there are errors, fill out notices'''
+    origin = 'command_lib/snippets.yml'
+    # version
+    version_listing, listing_msg = cmdlib.check_library_key(
+        pkg_listing, 'version')
+    if version_listing:
+        version_list, invoke_msg = cmdlib.get_pkg_attr_list(
+            shell, version_listing, package_name=pkg_obj.name)
+        if version_list:
+            pkg_obj.version = version_list[0]
+        else:
+            version_invoke_error_notice = Notice(origin, invoke_msg, 'error')
+            pkg_obj.add_notice(version_invoke_error_notice)
+    else:
+        no_version_listing_notice = Notice(origin, listing_msg, 'warning')
+        pkg_obj.add_notice(no_version_listing_notice)
+    # license
+    license_listing, listing_msg = cmdlib.check_library_key(
+        pkg_listing, 'license')
+    if license_listing:
+        license_list, invoke_msg = cmdlib.get_pkg_attr_list(
+            shell, license_listing, package_name=pkg_obj.name)
+        if license_list:
+            pkg_obj.license = license_list[0]
+        else:
+            license_invoke_error_notice = Notice(origin, invoke_msg, 'error')
+            pkg_obj.add_notice(license_invoke_error_notice)
+    else:
+        no_license_listing_notice = Notice(origin, listing_msg, 'warning')
+        pkg_obj.add_notice(no_license_listing_notice)
+    # src_urls
+    url_listing, listing_msg = cmdlib.check_library_key(
+        pkg_listing, 'license')
+    if url_listing:
+        url_list, invoke_msg = cmdlib.get_pkg_attr_list(
+            shell, url_listing, package_name=pkg_obj.name)
+        if url_list:
+            pkg_obj.src_url = url_list[0]
+        else:
+            url_invoke_error_notice = Notice(origin, invoke_msg, 'error')
+            pkg_obj.add_notice(url_invoke_error_notice)
+    else:
+        no_url_listing_notice = Notice(origin, listing_msg, 'warning')
+        pkg_obj.add_notice(no_url_listing_notice)
 
 
-def save_cache():
-    cache.save()
+def get_package_obj(command_name, package_name, shell):
+    '''Given the command name, and the package name, retrieve the package
+    information, create an oject and return the package object'''
+    listing = cmdlib.get_command_listing(command_name)
+    if listing:
+        # get the unique or default information
+        pkg_info = cmdlib.check_for_unique_package(
+            listing['packages'], package_name)
+        if pkg_info:
+            pkg = Package(package_name)
+            fill_package_metadata(pkg, pkg_info, shell)
+            return pkg, ''
+        else:
+            return None, errors.no_command_listing.format(
+                command_name=command_name)
 
-
-def clear_cache():
-    cache.clear()
-
-
-
+    else:
+        return None, errors.no_listing_for_snippet_key
 
 def get_package_dependencies(command_name, package_name, shell):
     '''Given the command name, the package name and the shell,
@@ -186,45 +237,6 @@ def get_confirmed_packages(docker_run_inst, shell, prev_pkg_names):
     return run_dict
 
 
-def get_package_obj(command_name, package_name, shell):
-    '''Given the command name, and the package name, retrieve the package
-    information, create an oject and return the package object'''
-    # look up command name in snippet library
-    if command_name in cmds.command_lib['snippets'].keys():
-        # get the unique or default information
-        pkg_list = cmds.command_lib['snippets'][command_name]['packages']
-        pkg_info = check_for_unique_package(pkg_list, package_name)
-        if pkg_info:
-            pkg = Package(package_name)
-            # get the information for values
-            keys = pkg_info.keys()
-            if 'version' in keys:
-                try:
-                    pkg.version = cmds.get_pkg_attr_list(
-                        shell, pkg_info['version'],
-                        package_name=package_name)[0]
-                except subprocess.CalledProcessError as error:
-                    logger.warning(error.output)
-            if 'license' in keys:
-                try:
-                    pkg.license = cmds.get_pkg_attr_list(
-                        shell, pkg_info['license'],
-                        package_name=package_name)[0]
-                except subprocess.CalledProcessError as error:
-                    logger.warning(error.output)
-            if 'src_url' in keys:
-                try:
-                    pkg.src_url = cmds.get_pkg_attr_list(
-                        shell, pkg_info['src_url'],
-                        package_name=package_name)[0]
-                except subprocess.CalledProcessError as error:
-                    logger.warning(error.output)
-            return pkg
-        else:
-            print(
-                'No package named {} nor default listing'.format(package_name))
-    else:
-        print('No command {} listed in snippet library'.format(command_name))
 
 
 def get_packages_from_snippets(command_dict, shell):

@@ -24,7 +24,7 @@ env_dep_dockerfile = '''Docker build failed: {build_fail_msg} \n Since ''' \
     '''package information from the Dockerfile itself.\n'''
 no_listing_for_base_key = '''No listing for key {listing_key}. ''' \
     '''Consider adding this listing to command_lib/base.yml.\n'''
-no_listing_for_package_key = '''No listing for key {listing_key}. ''' \
+no_listing_for_snippet_key = '''No listing for key {listing_key}. ''' \
     '''Consider adding this listing to command_lib/snippets.yml.\n'''
 unsupported_listing_for_key = '''Unsupported listing for key ''' \
     '''{listing_key}.\n'''
@@ -36,9 +36,9 @@ no_invocation = '''No invocation steps to perform within a container nor ''' \
     '''information, make an entry in command_lib/base.yml'''
 no_image_tag_listing = '''No listing of {image_name}:{image_tag} in the '''\
     '''command library. To add one, make an entry in command_lib/base.yml'''
-no_command = '''No listing of hardcoded or retrieval steps for ''' \
-    '''{image_tag}.\n To tell the tool this information make an entry ''' \
-    '''in command_lib/base.yml\n'''
+no_command_listing = '''No listing of hardcoded or retrieval steps for ''' \
+    '''{command_name} nor any default listing.\n To tell the tool this ''' \
+    '''information make an entry in command_lib/snippets.yml\n'''
 incomplete_command_lib_listing = '''The command library has an incomplete ''' \
     '''listing for {image_name}:{image_tag}. Please complete the listing based on ''' \
     '''the examples.\n'''
