@@ -4,16 +4,12 @@ SPDX-License-Identifier: BSD-2-Clause
 '''
 import logging
 import subprocess
-import sys
 
 from classes.docker_image import DockerImage
 from classes.notice import Notice
-from classes.layer import Layer
-from classes.package import Package
 from utils import dockerfile as df
 from utils import container as cont
 from utils import constants as const
-from command_lib import command_lib as cmdlib
 from report import errors
 '''
 Docker specific functions - used when trying to retrieve packages when
@@ -104,12 +100,6 @@ def check_base_image(image, tag):
         success = cont.pull_image(image_tag_string)
     return success
 
-# REMOVE
-def get_image_tag_string(image_tag_tuple):
-    '''Given a tuple of the image and tag, return a string containing
-    the image and tag'''
-    return image_tag_tuple[0] + df.tag_separator + image_tag_tuple[1]
-
 
 def get_dockerfile_image_tag():
     '''Return the image and tag used to build an image from the dockerfile'''
@@ -133,25 +123,3 @@ def is_build():
     else:
         success = True
     return success, msg
-
-# LEFTOFF
-def get_dockerfile_packages():
-    '''Given the dockerfile commands get packages that may have been
-    installed. Use this when there is no image or if it cannot be
-    built
-    1. For each RUN directive get the command used and the packages
-    installed with it
-    2. All of the packages that are recognized would be unconfirmed
-    because there is no container to run the snippets against
-    All the unrecognized commands will be returned as is
-    Since there will be nothing more to do - recognized is just a list
-    of packages that may have been installed in the dockerfile'''
-    pkg_dict = cmds.remove_uninstalled(cmds.get_package_listing(
-        docker_commands))
-    recognized_list = []
-    for command in pkg_dict['recognized'].keys():
-        recognized_list.extend(pkg_dict['recognized'][command])
-    pkg_dict.update({'recognized': recognized_list})
-    return pkg_dict
-
-
