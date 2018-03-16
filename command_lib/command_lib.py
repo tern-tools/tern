@@ -10,7 +10,6 @@ import yaml
 
 from utils.container import docker_command
 from utils.container import execute
-from utils.general import parse_command
 from utils.constants import container
 from classes.command import Command
 from report import errors
@@ -152,98 +151,9 @@ def set_command_attrs(command_obj):
                 if ignore_word in command_obj.words:
                     command_obj.set_ignore()
                     break
-
-
-def get_packages_per_run(docker_run_command):
-    '''Given a Docker RUN instruction retrieve a dictionary of recognized
-    and unrecognized commands
-    the dictionary should look like this:
-        instruction: <dockerfile instruction>
-        recognized: { <command name>:
-                         {installed: [list of packages installed]
-                          removed: [list of packaged removed]},...}
-        unrecognized: [list shell commands that were not recognized]'''
-    docker_inst = docker_run_command[0] + ' ' + docker_run_command[1]
-    pkg_dict = {'instruction': docker_inst,
-                'recognized': {},
-                'unrecognized': []}
-    shell_commands = get_shell_commands(docker_run_command[1])
-    for command in shell_commands:
-        installed_dict = {'installed': [], 'removed': []}
-        command_obj = parse_command(command)
-        # see if command is in the snippet library
-        name = command_obj['name']
-        sub = command_obj['subcommand']
-        if name in command_lib['snippets'].keys():
-            is_package_op = False
-            if sub == command_lib['snippets'][name]['install']:
-                is_package_op = True
-                installed_dict['installed'] = command_obj['arguments']
-            if sub == command_lib['snippets'][name]['remove']:
-                is_package_op = True
-                installed_dict['removed'] = command_obj['arguments']
-            # add only if there are some packages installed or removed
-            if is_package_op:
-                pkg_dict['recognized'].update({name: installed_dict})
-        else:
-            pkg_dict['unrecognized'].append(command)
-    return pkg_dict
-
-
-def get_package_listing(docker_instructions):
-    '''Given the docker instructions in a dockerfile,  get a dictionary of
-    packages that are in the command library of retrievable sources
-    If it does not exist in the library then record them under
-    unrecognized commands
-    the dict looks like this:
-        recognized:{ <command name>:
-                        {installed: [list of packages installed],
-                        removed: [list of packages removed]}}
-        unrecognized: [list of shell commands that were not recognized]
-    '''
-    pkg_dict = {'recognized': {}, 'unrecognized': []}
-    shell_commands = []
-    for instr in docker_instructions:
-        if instr[0] == 'RUN':
-            shell_commands.extend(get_shell_commands(instr[1]))
-    for command in shell_commands:
-        installed_dict = {'installed': [], 'removed': []}
-        command_obj = parse_command(command)
-        # see if command is in the snippet library
-        name = command_obj['name']
-        sub = command_obj['subcommand']
-        if name in command_lib['snippets'].keys():
-            is_package_op = False
-            if sub == command_lib['snippets'][name]['install']:
-                is_package_op = True
-                installed_dict['installed'] = command_obj['arguments']
-            if sub == command_lib['snippets'][name]['remove']:
-                is_package_op = True
-                installed_dict['removed'] = command_obj['arguments']
-            # add only if there are some packages installed or removed
-            if is_package_op:
-                pkg_dict['recognized'].update({name: installed_dict})
-        else:
-            pkg_dict['unrecognized'].append(command)
-    return pkg_dict
-
-
-def remove_uninstalled(pkg_dict):
-    '''Given a dictionary containing the package listing for a set of
-    docker commands, return an updated dictionary with only the packages that
-    are installed
-    The resulting dictionary should look like this:
-        recognized:{ {<command name>: [list of packages installed]},...}
-        unrecognized: [list of shell commands that were not recognized]
-        '''
-    for command in pkg_dict['recognized'].keys():
-        installed_list = pkg_dict['recognized'][command]['installed']
-        remove_list = pkg_dict['recognized'][command]['removed']
-        for remove in remove_list:
-            if remove in installed_list:
-                installed_list.remove(remove)
-        pkg_dict['recognized'].update({command: installed_list})
-    return pkg_dict
+        return True
+    else:
+        return False
 
 
 def invoke_in_container(snippet_list, shell, package='', override=''):
