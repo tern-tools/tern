@@ -6,12 +6,17 @@ SPDX-License-Identifier: BSD-2-Clause
 class ImageLayer(object):
     '''A representation of a container filesystem layer
     attributes:
-        sha: the sha256 of the layer filesystem
+        diff_id: the sha256 of the layer filesystem
         packages: list of objects of type Package (package.py)
         notices: list of Notice objects (notice.py)
         tar_file: the path to the layer filesystem tarball
         created_by: sometimes the metadata will contain a created_by
         key containing the command that created the filesystem layer
+        import_image: if the layer is imported from another image
+        this is a pointer to that image. In Python terms it is just the
+        name of the Image object or any object that uses this layer
+        Based on how container image layers are created, this is usually the
+        last layer of the image that was imported
     methods:
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
@@ -24,6 +29,7 @@ class ImageLayer(object):
         self.__created_by = created_by
         self.__packages = []
         self.__notices = []
+        self.__import_image = None
 
     @property
     def diff_id(self):
@@ -48,6 +54,14 @@ class ImageLayer(object):
     @created_by.setter
     def created_by(self, create_string):
         self.__created_by = create_string
+
+    @property
+    def import_image(self):
+        return self.__import_image
+
+    @import_image.setter
+    def import_image(self, import_image):
+        self.__import_image = import_image
 
     def add_package(self, package):
         if package.name not in self.get_package_names():
