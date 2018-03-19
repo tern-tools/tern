@@ -63,6 +63,18 @@ class Image(object):
         '''Get a list of layer diff ids'''
         return [layer.diff_id for layer in self.layers]
 
+    def set_image_import(self, imported_image):
+        '''If this image is created on top of a given imported image, set this
+        image's layer's import_image to the last layer of the imported image.
+        return True if the imported_image's last layer exists in this image.
+        False if it does not'''
+        if imported_image.layers and imported_image.layers[:-1] in self.layers:
+            self.layers[self.layers.index(
+                imported_image.layers[:-1])].import_from = imported_image
+            return True
+        else:
+            return False
+
     def load_image(self):
         '''Load image metadata
         Currently there is no standard way to do this. For a specific tool,
