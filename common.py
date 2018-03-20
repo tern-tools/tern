@@ -176,3 +176,46 @@ def get_package_dependencies(package_listing, package_name, shell):
             return [], invoke_msg
     else:
         return [], deps_msg
+
+
+def get_installed_packages(command):
+    '''Given a Command object, return a list of package objects'''
+    pkgs = []
+    # check if the command attributes are set
+    if command.is_set() and command.is_install():
+        for word in command.words:
+            pkg = Package(word)
+            pkgs.append(pkg)
+    return pkgs
+
+
+def remove_ignored_commands(command_list):
+    '''For a list of Command objects, examine if the command is ignored.
+    Return all the ignored command strings. This is a filtering operation
+    so all the ignored command objects will be removed from the original
+    list'''
+    ignore_commands = ''
+    filtered_list = []
+    while command_list:
+        command = command_list.pop(0)
+        if command.is_set() and command.is_ignore():
+            ignore_commands = ignore_commands + command.shell_command + '\n'
+        else:
+            filtered_list.append(command)
+    return ignore_commands, filtered_list
+
+
+def remove_unrecognized_commands(command_list):
+    '''For a list of Command objects, examine if the command is not recognized.
+    Return all the unrecognized command strings. This is a filtering operation
+    so all the unrecognized command objects will be removed from the original
+    list'''
+    unrec_commands = ''
+    filtered_list = []
+    while command_list:
+        command = command_list.pop(0)
+        if not command.is_set():
+            unrec_commands = unrec_commands + command.shell_command + '\n'
+        else:
+            filtered_list.append(command)
+    return unrec_commands, filtered_list

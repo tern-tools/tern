@@ -7,10 +7,15 @@ import subprocess
 
 from classes.docker_image import DockerImage
 from classes.notice import Notice
+from classes.command import Command
 from utils import dockerfile as df
 from utils import container as cont
 from utils import constants as const
 from report import errors
+from report import info
+from command_lib import command_lib as cmdlib
+import common
+
 '''
 Docker specific functions - used when trying to retrieve packages when
 given a Dockerfile
@@ -123,3 +128,33 @@ def is_build():
     else:
         success = True
     return success, msg
+
+
+def get_shell_commands(run_instruction):
+    '''Given a RUN command return a list of shell commands to be run'''
+    comm_list = run_instruction.split('&&')
+    cleaned_list = []
+    for comm in comm_list:
+        cleaned_list.append(Command(comm.strip()))
+    return cleaned_list
+
+
+def get_packages_per_run(run_instruction):
+    '''Given a dockerfile run instruction:
+        1. Create a list of Command objects
+        2. For each command, check against the command library for installed
+        commands
+        3. For each install command get installed packages
+        4. Return installed packages and messages for ignored commands and
+        unrecognized commands'''
+    command_list = get_shell_commands(run_instruction)
+    for command in command_list:
+        cmdlib.set_command_attrs(command)
+    ignore_msgs, filter1 = common.remove_ignored_commands(command_list)
+    unrec_msgs, filter2 = common.remove_unrecognized_commands(filter1)
+    pkg_list = []
+    for command in filter2:
+        pkg_list.extend(common.get_installed_packages(command))
+    report = info.ignored + ignore_msgs + info.unrecognized + unrec_msgs
+    return pkg_list, report
+
