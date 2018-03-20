@@ -8,7 +8,7 @@ import logging
 from classes.package import Package
 from classes.notice import Notice
 from command_lib import command_lib as cmdlib
-from report import info
+from report import formats
 from report import errors
 from utils import cache as cache
 from utils import constants as const
@@ -36,7 +36,7 @@ def load_from_cache(image):
                 from_cache_notice = Notice()
                 from_cache_notice.origin = image.get_image_option() + \
                     layer.id
-                from_cache_notice.message = info.loading_from_cache.format(
+                from_cache_notice.message = formats.loading_from_cache.format(
                     layer_id=layer.id)
                 from_cache_notice.level = 'info'
                 layer.add_notice(from_cache_notice)
