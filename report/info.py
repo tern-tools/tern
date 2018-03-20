@@ -11,3 +11,5 @@ loading_from_cache = '''Loading packages from cache for layer {layer_id}:'''
 invoking_base_commands = '''Invoking commands from command_lib/base.yml:'''
 invoking_snippet_commands = '''Invoking commands from ''' \
     '''command_lib/snippets.yml'''
+ignored = '''Ignored Commands:\n'''
+unrecognized = '''Unrecognized Commands:\n'''

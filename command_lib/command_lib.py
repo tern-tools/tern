@@ -11,7 +11,6 @@ import yaml
 from utils.container import docker_command
 from utils.container import execute
 from utils.constants import container
-from classes.command import Command
 from report import errors
 
 '''
@@ -43,15 +42,6 @@ class FormatAwk(dict):
     a string such as "awk '{print $1}'"'''
     def __missing__(self, key):
         return '{' + key + '}'
-
-
-def get_shell_commands(run_comm):
-    '''Given a RUN command return a list of shell commands to be run'''
-    comm_list = run_comm.split('&&')
-    cleaned_list = []
-    for comm in comm_list:
-        cleaned_list.append(Command(comm.strip()))
-    return cleaned_list
 
 
 def get_latest_tag(repo):
@@ -138,11 +128,13 @@ def set_command_attrs(command_obj):
         # the command is in the library
         if 'install' in command_listing.keys():
             # try to move install to a subcommand
-            if command_obj(command_listing['install'], 'subcommand'):
+            if command_obj.reassign_word(
+                command_listing['install'], 'subcommand'):
                 command_obj.set_install()
         if 'remove' in command_listing.keys():
             # try to move remove to a subcommand
-            if command_obj(command_listing['remove'], 'subcommand'):
+            if command_obj.reassign_word(
+                command_listing['remove'], 'subcommand'):
                 command_obj.set_remove()
         if 'ignore' in command_listing.keys():
             # check if any of the words in the ignore list are in
