@@ -12,7 +12,7 @@ from utils import dockerfile as df
 from utils import container as cont
 from utils import constants as const
 from report import errors
-from report import info
+from report import formats
 from command_lib import command_lib as cmdlib
 import common
 
@@ -155,6 +155,6 @@ def get_packages_per_run(run_instruction):
     pkg_list = []
     for command in filter2:
         pkg_list.extend(common.get_installed_packages(command))
-    report = info.ignored + ignore_msgs + info.unrecognized + unrec_msgs
+    report = formats.ignored + ignore_msgs + formats.unrecognized + unrec_msgs
     return pkg_list, report
 
