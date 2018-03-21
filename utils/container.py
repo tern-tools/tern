@@ -154,14 +154,9 @@ def get_image_id(image_tag_string):
 
 def extract_image_metadata(image_tag_string):
     '''Run docker save and extract the files in a temporary directory'''
-    success = True
     temp_path = os.path.abspath(temp_folder)
     result = docker_command(save, image_tag_string)
-    if not result:
-        success = False
-    else:
-        with tarfile.open(fileobj=io.BytesIO(result)) as tar:
-            tar.extractall(temp_path)
-        if not os.path.exists(temp_path):
-            success = False
-    return success
+    with tarfile.open(fileobj=io.BytesIO(result)) as tar:
+        tar.extractall(temp_path)
+    if not os.path.exists(temp_path):
+        raise IOError('Unable to untar Docker image')

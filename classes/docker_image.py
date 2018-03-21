@@ -6,6 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause
 import json
 import os
 import re
+import subprocess
 
 from utils.general import pushd
 from utils.constants import temp_folder
@@ -34,7 +35,10 @@ class DockerImage(Image):
         if self.repotag is not None:
             repo_tag_list = self.__repotag.split(tag_separator)
             self._name = repo_tag_list[0]
-            self._tag = repo_tag_list[1]
+            if len(repo_tag_list) == 2:
+                self._tag = repo_tag_list[1]
+            else:
+                self._tag = ''
 
     @property
     def repotag(self):
@@ -141,10 +145,7 @@ class DockerImage(Image):
         '''Load image metadata using docker commands'''
         try:
             option = self.get_image_option()
-            if extract_image_metadata(option):
-                print('Image extracted')
-            else:
-                print('Failed to extract image')
+            extract_image_metadata(option)
             self._manifest = self.get_image_manifest()
             self._id = self.get_image_id(self._manifest)
             self.__repotags = self.get_image_repotags(self._manifest)
@@ -156,9 +157,12 @@ class DockerImage(Image):
                 layer = ImageLayer(layer_diffs.pop(0), layer_paths.pop(0))
                 self._layers.append(layer)
             self.set_layer_created_by()
-        except NameError as error:
-            print(error)
-            raise NameError(error)
+        except NameError:
+            raise
+        except subprocess.CalledProcessError:
+            raise
+        except IOError:
+            raise
 
     def created_to_instruction(self, created_by):
         '''The 'created_by' key in a Docker image config gives the shell
