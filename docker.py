@@ -27,7 +27,7 @@ dockerfile = ''
 docker_commands = []
 
 # global logger
-logger = logging.getLogger('ternlog')
+logger = logging.getLogger('docker.py')
 
 
 def load_docker_commands(dockerfile_path):
@@ -39,12 +39,12 @@ def load_docker_commands(dockerfile_path):
     dockerfile = dockerfile_path
 
 
-def print_dockerfile_base(base_instructions):
+def print_dockerfile_base():
     '''For the purpose of tracking the lines in the dockerfile that
     produce packages, return a string containing the lines in the dockerfile
     that pertain to the base image'''
     base_instr = ''
-    for instr in base_instructions:
+    for instr in df.get_base_instructions(docker_commands):
         base_instr = base_instr + instr[0] + ' ' + instr[1] + '\n'
     return base_instr
 
@@ -91,19 +91,9 @@ def get_dockerfile_base():
             base_image.notices.add_notice(latest_tag_notice)
         return base_image
     except ValueError as e:
-        # needs logging
-        print(e)
+        logger.warning(errors.cannot_parse_base_image.format(
+            dockerfile=dockerfile, error_msg=e))
         return None
-
-
-def check_base_image(image, tag):
-    '''Given a base image object, check if an image exists
-    If not then try to pull the image.'''
-    image_tag_string = image + df.tag_separator + tag
-    success = cont.check_image(image_tag_string)
-    if not success:
-        success = cont.pull_image(image_tag_string)
-    return success
 
 
 def get_dockerfile_image_tag():
@@ -157,4 +147,3 @@ def get_packages_per_run(run_instruction):
         pkg_list.extend(common.get_installed_packages(command))
     report = formats.ignored + ignore_msgs + formats.unrecognized + unrec_msgs
     return pkg_list, report
-

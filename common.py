@@ -29,25 +29,25 @@ def load_from_cache(image):
     is_full = True
     for layer in image.layers:
         if not layer.packages:
-            raw_pkg_list = cache.get_packages(layer.id)
+            raw_pkg_list = cache.get_packages(layer.diff_id)
             if not raw_pkg_list:
                 is_full = False
             else:
                 from_cache_notice = Notice()
                 from_cache_notice.origin = image.get_image_option() + \
-                    layer.id
+                    layer._diffid
                 from_cache_notice.message = formats.loading_from_cache.format(
-                    layer_id=layer.id)
+                    layer_id=layer.diff_id)
                 from_cache_notice.level = 'info'
                 layer.add_notice(from_cache_notice)
                 for pkg_dict in raw_pkg_list:
                     pkg = Package(pkg_dict['name'])
                     pkg.fill(pkg_dict)
                     layer.add_package(pkg)
-    return image, is_full
+    return is_full
 
 
-def add_base_packages(image, info):
+def add_base_packages(image):
     '''Given an image object, get a list of package objects from
     invoking the commands in the command library base section:
         1. For the image and tag name find if there is a list of package names
@@ -78,10 +78,14 @@ def add_base_packages(image, info):
         # for now, we add the list of packages to all the layers in a
         # starting base image
         if check_container():
-            names, n_msg = cmdlib.get_pkg_attr_list(shell, info['names'])
-            versions, v_msg = cmdlib.get_pkg_attr_list(shell, info['versions'])
-            licenses, l_msg = cmdlib.get_pkg_attr_list(shell, info['licenses'])
-            src_urls, u_msg = cmdlib.get_pkg_attr_list(shell, info['src_urls'])
+            names, n_msg = cmdlib.get_pkg_attr_list(
+                shell, listing['names'])
+            versions, v_msg = cmdlib.get_pkg_attr_list(
+                shell, listing['versions'])
+            licenses, l_msg = cmdlib.get_pkg_attr_list(
+                shell, listing['licenses'])
+            src_urls, u_msg = cmdlib.get_pkg_attr_list(
+                shell, listing['src_urls'])
             # add a notice to the image if something went wrong
             invoke_msg = n_msg + v_msg + l_msg + u_msg
             if invoke_msg:
@@ -97,10 +101,9 @@ def add_base_packages(image, info):
                     if len(src_urls) == len(names):
                         pkg.src_url = src_urls[index]
                         for layer in image.layers:
-                            layer.add_package(pkg)
-            # add all the packages to the cache
-            for layer in image.layers:
-                cache.add_layer(layer)
+                            if not layer.packages:
+                                layer.add_package(pkg)
+                                cache.add_layer(layer)
         # if no container is running give a logging error
         else:
             logger.error(errors.no_running_docker_container)
