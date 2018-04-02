@@ -40,8 +40,8 @@ no_command_listing = '''No listing of hardcoded or retrieval steps for ''' \
     '''{command_name} nor any default listing.\n To tell the tool this ''' \
     '''information make an entry in command_lib/snippets.yml\n'''
 incomplete_command_lib_listing = '''The command library has an incomplete ''' \
-    '''listing for {image_name}:{image_tag}. Please complete the listing based on ''' \
-    '''the examples.\n'''
+    '''listing for {image_name}:{image_tag}. Please complete the listing ''' \
+    '''based on the examples.\n'''
 no_shell_listing = '''There is no listing for 'shell' under the base ''' \
     '''listing for {image_name}:{image_tag}. Using default shell: ''' \
     '''{default_shell}\n'''
@@ -52,6 +52,8 @@ dockerfile_no_tag = '''The Dockerfile provided has no tag in the line ''' \
     '''Defaulting to 'latest'...\n'''
 dockerfile_using_latest = '''The Dockerfile is using the tag 'latest' ''' \
     '''in line {dockerfile_line}. Consider using a specific immutable tag'''
+cannot_parse_base_image = '''Unable to parse base image in the Dockerfile ''' \
+    '''{dockerfile}. Error: {error_msg}\n'''
 base_image_not_found = '''Failed to pull the base image. Perhaps it was ''' \
     '''removed from Dockerhub\n'''
 cannot_extract_base_image = '''Failed to extact base image {image}:{tag}.'''
@@ -63,3 +65,6 @@ dockerfile_fallback = '''Falling back on parsing the Dockerfile for ''' \
     '''package information\n'''
 no_running_docker_container = '''Cannot invoke commands in a container '''\
     '''as there is no running container.\n'''
+
+# not error messages but stuff for the logger
+no_base_image = '''Base image is FROM scratch. Skipping to build'''
