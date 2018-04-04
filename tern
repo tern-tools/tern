@@ -40,10 +40,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         prog='Tern',
         description='''
-           Tern is a Docker image package curation tool. Tern retrieves
-    information about packages that are installed in a Docker image that is
-    built from a Dockerfile, including dependencies. It also allows for
-    curation of packages that are installed and maintained manually''')
+           Tern is a container image component curation tool. Tern retrieves
+    information about packages that are installed in a container image.
+    Learn more at https://github.com/vmware/tern''')
     parser.add_argument('-c', '--clear-cache', action='store_true',
                         help="Clear the cache before running")
     subparsers = parser.add_subparsers(help='Subcommands')
