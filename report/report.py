@@ -4,11 +4,13 @@ SPDX-License-Identifier: BSD-2-Clause
 '''
 
 import logging
+import subprocess
 
 from utils import container
 from utils import constants
 from utils import cache
 from classes.docker_image import DockerImage
+from classes.notice import Notice
 import common
 import docker
 
@@ -18,7 +20,7 @@ Create a report
 
 def write_report(report):
     '''Write the report to a file'''
-    with open(const.report_file, 'w') as f:
+    with open(constants.report_file, 'w') as f:
         f.write(report)
 
 
@@ -36,7 +38,7 @@ def load_base_image():
     base_image = docker.get_dockerfile_base()
     base_instructions_str = docker.print_dockerfile_base()
     # try to get image metadata
-    if check_image(base_image.repotag):
+    if container.check_image(base_image.repotag):
         try:
             base_image.load_image()
         except NameError as error:
@@ -68,7 +70,7 @@ def load_full_image():
         test_image.add_notice(docker_exec_notice)
     except IOError as error:
         extract_error_notice = Notice(test_image.repotag, str(error), 'error')
-        base_image.add_notice(extract_error_notice)
+        test_image.add_notice(extract_error_notice)
     return test_image
 
 
@@ -109,7 +111,10 @@ def execute_dockerfile(args):
             # attempt to get built image metadata
             full_image = load_full_image()
             if len(full_image.notices) == 0:
-                # load from Docker history
+                # link layer to imported base image
+                full_image.set_image_import(base_image)
+                # find packages per layer
+                docker.add_packages_from_history(full_image)
             else:
                 # we cannot extract the built image's metadata
                 dockerfile_parse = True
