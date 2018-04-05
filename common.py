@@ -7,6 +7,7 @@ import logging
 
 from classes.package import Package
 from classes.notice import Notice
+from classes.command import Command
 from command_lib import command_lib as cmdlib
 from report import formats
 from report import errors
@@ -19,6 +20,15 @@ Common functions
 
 # global logger
 logger = logging.getLogger('ternlog')
+
+
+def get_shell_commands(shell_command_line):
+    '''Given a shell command line, get a list of Command objects'''
+    comm_list = shell_command_line.split('&&')
+    cleaned_list = []
+    for comm in comm_list:
+        cleaned_list.append(Command(comm.strip()))
+    return cleaned_list
 
 
 def load_from_cache(image):
@@ -181,14 +191,13 @@ def get_package_dependencies(package_listing, package_name, shell):
         return [], deps_msg
 
 
-def get_installed_packages(command):
-    '''Given a Command object, return a list of package objects'''
+def get_installed_package_names(command):
+    '''Given a Command object, return a list of package names'''
     pkgs = []
     # check if the command attributes are set
     if command.is_set() and command.is_install():
         for word in command.words:
-            pkg = Package(word)
-            pkgs.append(pkg)
+            pkgs.append(word)
     return pkgs
 
 
@@ -222,3 +231,19 @@ def remove_unrecognized_commands(command_list):
         else:
             filtered_list.append(command)
     return unrec_commands, filtered_list
+
+
+def filter_install_commands(shell_command_line):
+    '''Given a shell command line:
+        1. Create a list of Command objects
+        2. For each command, check against the command library for installed
+        commands
+        3. Return installed command objects, and messages for ignored commands
+        and unrecognized commands'''
+    command_list = get_shell_commands(shell_command_line)
+    for command in command_list:
+        cmdlib.set_command_attrs(command)
+    ignore_msgs, filter1 = remove_ignored_commands(command_list)
+    unrec_msgs, filter2 = remove_unrecognized_commands(filter1)
+    report = formats.ignored + ignore_msgs + formats.unrecognized + unrec_msgs
+    return filter2, report
