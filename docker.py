@@ -7,12 +7,11 @@ import subprocess
 
 from classes.docker_image import DockerImage
 from classes.notice import Notice
-from classes.command import Command
+from classes.package import Package
 from utils import dockerfile as df
 from utils import container as cont
 from utils import constants as const
 from report import errors
-from report import formats
 from command_lib import command_lib as cmdlib
 import common
 
@@ -120,30 +119,40 @@ def is_build():
     return success, msg
 
 
-def get_shell_commands(run_instruction):
-    '''Given a RUN command return a list of shell commands to be run'''
-    comm_list = run_instruction.split('&&')
-    cleaned_list = []
-    for comm in comm_list:
-        cleaned_list.append(Command(comm.strip()))
-    return cleaned_list
-
-
-def get_packages_per_run(run_instruction):
-    '''Given a dockerfile run instruction:
-        1. Create a list of Command objects
-        2. For each command, check against the command library for installed
-        commands
-        3. For each install command get installed packages
-        4. Return installed packages and messages for ignored commands and
-        unrecognized commands'''
-    command_list = get_shell_commands(run_instruction)
-    for command in command_list:
-        cmdlib.set_command_attrs(command)
-    ignore_msgs, filter1 = common.remove_ignored_commands(command_list)
-    unrec_msgs, filter2 = common.remove_unrecognized_commands(filter1)
-    pkg_list = []
-    for command in filter2:
-        pkg_list.extend(common.get_installed_packages(command))
-    report = formats.ignored + ignore_msgs + formats.unrecognized + unrec_msgs
-    return pkg_list, report
+def add_packages_from_history(image_obj, shell):
+    '''Given a DockerImage object, get package objects installed in each layer
+    Assume that the imported images have already gone through this process and
+    have their layer's packages populated. So collecting package object occurs
+    from the last linked layer:
+        1. For each layer get a list of package names
+        2. For each package name get a list of dependencies
+        3. Create a list of package objects with metadata
+        4. Add this to the layer'''
+    image_layers = image_obj.layers[image_obj.get_last_import_layer():]
+    for layer in image_layers:
+        if 'RUN' in layer.created_by:
+            origin = layer.diff_id + ': ' + layer.created_by
+            run_command_line = layer.created_by.split(' ', 1)[1]
+            cmd_list, msg = common.filter_install_commands(run_command_line)
+            if msg:
+                cmd_parse_notice = Notice(origin, msg, 'warning')
+                layer.add_notice(cmd_parse_notice)
+            for command in cmd_list:
+                pkg_list = common.get_installed_package_names(command)
+                all_pkgs = []
+                for pkg_name in pkg_list:
+                    pkg_listing = cmdlib.get_package_listing(
+                        command.name, pkg_name)
+                    deps, deps_msg = common.get_package_dependencies(
+                        pkg_listing, pkg_name, shell)
+                    if deps_msg:
+                        logger.warning(deps_msg)
+                    all_pkgs.append(pkg_name)
+                    all_pkgs.extend(deps)
+                unique_pkgs = list(set(all_pkgs))
+                for pkg_name in unique_pkgs:
+                    pkg = Package(pkg_name)
+                    pkg_listing = cmdlib.get_package_listing(
+                        command.name, pkg_name)
+                    common.fill_package_metadata(pkg, pkg_listing, shell)
+                    layer.add_package(pkg)
