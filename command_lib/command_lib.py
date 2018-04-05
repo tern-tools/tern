@@ -119,6 +119,15 @@ def get_image_shell(base_image_listing):
     return shell, msg
 
 
+def get_package_listing(command_name, package_name):
+    '''Given a command name, return the package listing from the snippet
+    library. First get the listing for the command name and then check if
+    there is a package name in the package list or the default'''
+    command_listing = get_command_listing(command_name)
+    pkg_listing = check_for_unique_package(command_listing, package_name)
+    return pkg_listing
+
+
 def set_command_attrs(command_obj):
     '''Given the command object, move the install and remove listings to
     subcommands and set the flags, then return True. If the command name
