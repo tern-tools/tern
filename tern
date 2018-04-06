@@ -8,22 +8,38 @@ SPDX-License-Identifier: BSD-2-Clause
 import argparse
 import logging
 
-import report
-from common import clear_cache
+from report import report
+from utils import cache
+from utils import constants
 '''
 Tern executable
 '''
 
-# logging
-logfile = 'tern.log'
+# global logger
+exec_logger = constants.logger_name + ':main'
+logger = logging.getLogger(exec_logger)
+logger.setLevel(logging.DEBUG)
+
+console = logging.StreamHandler()
+console.setLevel(logging.DEBUG)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console.setFormatter(formatter)
+
+log_handler = logging.FileHandler(constants.logfile, mode='w')
+log_handler.setLevel(logging.DEBUG)
+log_handler.setFormatter(formatter)
+
+logger.addHandler(console)
+logger.addHandler(log_handler)
 
 
-def main(args, logger):
+def main(args):
     '''Execute according to subcommands'''
     logger.debug('Starting...')
     if args.clear_cache:
         logger.debug('Clearing cache...')
-        clear_cache()
+        cache.clear()
     if hasattr(args, 'name') and args.name == 'report':
         logger.debug('Creating Report...')
         if args.summary:
@@ -31,7 +47,7 @@ def main(args, logger):
         else:
             logger.debug(
                 'Creating a detailed report on components in Docker image...')
-        report.execute(args)
+        report.execute_dockerfile(args)
         logger.debug('Report completed.')
     logger.debug('Finished')
 
@@ -58,22 +74,6 @@ if __name__ == '__main__':
     parser_report.set_defaults(name='report')
     args = parser.parse_args()
 
-    # logging setup
-    logger = logging.getLogger('ternlog')
-    logger.setLevel(logging.DEBUG)
-
-    console = logging.StreamHandler()
-    console.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    console.setFormatter(formatter)
-
-    log_handler = logging.FileHandler(logfile, mode='w')
-    log_handler.setLevel(logging.DEBUG)
-    log_handler.setFormatter(formatter)
-
-    logger.addHandler(console)
-    logger.addHandler(log_handler)
 
     # execute
-    main(args, logger)
+    main(args)

@@ -14,7 +14,9 @@ image = 'testimage'
 # running container name
 container = 'testcontainer'
 # logger name
-logger_name = 'main'
+logger_name = 'ternlog'
+# logfile
+logfile = 'tern.log'
 # manifest file
 manifest_file = 'manifest.json'
 # cache file
