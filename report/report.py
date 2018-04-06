@@ -42,8 +42,7 @@ def setup(dockerfile=None):
 
 def load_base_image():
     '''Create base image from dockerfile instructions and return the image'''
-    base_image = docker.get_dockerfile_base()
-    base_instructions_str = docker.print_dockerfile_base()
+    base_image, dockerfile_lines = docker.get_dockerfile_base()
     # try to get image metadata
     if container.check_image(base_image.repotag):
         try:
@@ -52,15 +51,15 @@ def load_base_image():
         except NameError as error:
             logger.warning('Error in loading base image: ' + str(error))
             name_error_notice = Notice(
-                base_instructions_str, str(error), 'error')
+                dockerfile_lines, str(error), 'error')
             base_image.add_notice(name_error_notice)
         except subprocess.CalledProcessError as error:
             docker_exec_notice = Notice(
-                base_instructions_str, str(error.output, 'utf-8'), 'error')
+                dockerfile_lines, str(error.output, 'utf-8'), 'error')
             base_image.add_notice(docker_exec_notice)
         except IOError as error:
             extract_error_notice = Notice(
-                base_instructions_str, str(error), 'error')
+                dockerfile_lines, str(error), 'error')
             base_image.add_notice(extract_error_notice)
     return base_image
 

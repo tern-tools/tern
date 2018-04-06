@@ -52,9 +52,17 @@ class Image(object):
     def name(self):
         return self._name
 
+    @name.setter
+    def name(self, name):
+        self._name = name
+
     @property
     def tag(self):
         return self._tag
+
+    @tag.setter
+    def tag(self, tag):
+        self._tag = tag
 
     def add_notice(self, notice):
         self._notices.append(notice)

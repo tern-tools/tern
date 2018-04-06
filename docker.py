@@ -38,12 +38,12 @@ def load_docker_commands(dockerfile_path):
     dockerfile = dockerfile_path
 
 
-def print_dockerfile_base():
+def print_dockerfile_base(base_instructions):
     '''For the purpose of tracking the lines in the dockerfile that
     produce packages, return a string containing the lines in the dockerfile
     that pertain to the base image'''
     base_instr = ''
-    for instr in df.get_base_instructions(docker_commands):
+    for instr in base_instructions:
         base_instr = base_instr + instr[0] + ' ' + instr[1] + '\n'
     return base_instr
 
@@ -53,7 +53,7 @@ def get_dockerfile_base():
     1. get the instructions around FROM
     2. get the base image and tag
     3. Make notes based on what the image and tag rules are
-    4. Return an image object'''
+    4. Return an image object and the base instructions string'''
     try:
         base_instructions = df.get_base_instructions(docker_commands)
         base_image_tag = df.get_base_image_tag(base_instructions)
@@ -88,7 +88,7 @@ def get_dockerfile_base():
             no_tag_notice.message = message_string
             no_tag_notice.level = 'warning'
             base_image.notices.add_notice(latest_tag_notice)
-        return base_image
+        return base_image, base_instructions
     except ValueError as e:
         logger.warning(errors.cannot_parse_base_image.format(
             dockerfile=dockerfile, error_msg=e))
