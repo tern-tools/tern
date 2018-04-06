@@ -40,6 +40,11 @@ def get_packages(sha):
         return []
 
 
+def get_layers():
+    '''Return a list of layer shas'''
+    return cache.keys()
+
+
 def add_layer(layer_obj):
     '''Given a layer object, add it to the cache'''
     cache.update(layer_obj.to_dict())
