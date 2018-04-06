@@ -57,6 +57,15 @@ def load_from_cache(image):
     return is_full
 
 
+def save_to_cache(image):
+    '''Given an image object, check against the cache to see if a layer id
+    exists. If no then save the layer and package list to the cache'''
+    layers = cache.get_layers()
+    for layer in image.layers:
+        if layer.diff_id in layers and layer.packages:
+            cache.add_layer(layer)
+
+
 def add_base_packages(image):
     '''Given an image object, get a list of package objects from
     invoking the commands in the command library base section:
