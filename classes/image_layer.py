@@ -23,7 +23,7 @@ class ImageLayer(object):
         add_notice: adds a notice to the layer
         to_dict: returns a dict representation of the instance
         get_package_names: returns a list of package names'''
-    def __init__(self, diff_id, tar_file, created_by=None):
+    def __init__(self, diff_id, tar_file=None, created_by=None):
         self.__diff_id = diff_id
         self.__tar_file = tar_file
         self.__created_by = created_by

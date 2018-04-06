@@ -10,13 +10,20 @@ from utils import container
 from utils import constants
 from utils import cache
 from classes.docker_image import DockerImage
+from classes.image import Image
+from classes.image_layer import ImageLayer
 from classes.notice import Notice
+from classes.package import Package
 import common
 import docker
 
 '''
 Create a report
 '''
+
+# global logger
+module_logger = constants.logger_name + ':report.py'
+logger = logging.getLogger(module_logger)
 
 def write_report(report):
     '''Write the report to a file'''
@@ -41,7 +48,9 @@ def load_base_image():
     if container.check_image(base_image.repotag):
         try:
             base_image.load_image()
+            logger.info('Base image loaded')
         except NameError as error:
+            logger.warning('Error in loading base image: ' + str(error))
             name_error_notice = Notice(
                 base_instructions_str, str(error), 'error')
             base_image.add_notice(name_error_notice)
@@ -83,15 +92,35 @@ def get_dockerfile_packages():
         3. Create layer objects with incremental integers and add the package
         list to that layer with a Notice about parsing
         4. Return stub image'''
+    stub_image = Image('easteregg:cookie')
+    layer_count = 0
+    for inst in docker.docker_commands:
+        if inst[0] == 'RUN':
+            layer_count = layer_count + 1
+            layer = ImageLayer(layer_count)
+            install_commands, msg = common.filter_install_commands(inst[1])
+            if msg:
+                filter_notice = Notice(inst[1], msg, 'info')
+                layer.add_notice(filter_notice)
+            pkg_names = []
+            for command in install_commands:
+                pkg_names.append(common.get_installed_package_names(command))
+            for pkg_name in pkg_names:
+                pkg = Package(pkg_name)
+                # shell parser does not parse version pins yet
+                # when that is enabled, Notices for no versions need to be
+                # added here
+                layer.add_package(pkg)
+    return stub_image
 
 
 def execute_dockerfile(args):
     '''Execution path if given a dockerfile'''
-    # logging
-    logger = logging.getLogger(constants.logger_name)
+    logger.info('Setting up...')
     setup(args.dockerfile)
     dockerfile_parse = False
     # try to get Docker base image metadata
+    logger.info('Loading base image...')
     base_image = load_base_image()
     if len(base_image.notices) == 0:
         # load any packages from cache
@@ -114,13 +143,21 @@ def execute_dockerfile(args):
                 # link layer to imported base image
                 full_image.set_image_import(base_image)
                 # find packages per layer
+                container.start_container(full_image.repotag)
                 docker.add_packages_from_history(full_image)
+                container.remove_container()
+                # record missing layers in the cache
+                common.record_image_layers(full_image)
             else:
                 # we cannot extract the built image's metadata
                 dockerfile_parse = True
         else:
             # we cannot build the image
+            common.record_image_layers(base_image)
             dockerfile_parse = True
     else:
         # something went wrong in getting the base image
         dockerfile_parse = True
+    # check if the dockerfile needs to be parsed
+    if dockerfile_parse:
+        stub_image = get_dockerfile_packages()
