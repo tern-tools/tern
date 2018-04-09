@@ -22,8 +22,7 @@ Create a report
 '''
 
 # global logger
-module_logger = constants.logger_name + ':report.py'
-logger = logging.getLogger(module_logger)
+logger = logging.getLogger(constants.logger_name)
 
 def write_report(report):
     '''Write the report to a file'''
@@ -47,17 +46,19 @@ def load_base_image():
     if container.check_image(base_image.repotag):
         try:
             base_image.load_image()
-            logger.info('Base image loaded')
         except NameError as error:
             logger.warning('Error in loading base image: ' + str(error))
             name_error_notice = Notice(
                 dockerfile_lines, str(error), 'error')
             base_image.add_notice(name_error_notice)
         except subprocess.CalledProcessError as error:
+            logger.warning(
+                'Error in loading base image: ' + str(error.output, 'utf-8'))
             docker_exec_notice = Notice(
                 dockerfile_lines, str(error.output, 'utf-8'), 'error')
             base_image.add_notice(docker_exec_notice)
         except IOError as error:
+            logger.warning('Error in loading base image: ' + str(error))
             extract_error_notice = Notice(
                 dockerfile_lines, str(error), 'error')
             base_image.add_notice(extract_error_notice)
@@ -115,12 +116,13 @@ def get_dockerfile_packages():
 
 def execute_dockerfile(args):
     '''Execution path if given a dockerfile'''
-    logger.info('Setting up...')
+    logger.debug('Setting up...')
     setup(args.dockerfile)
     dockerfile_parse = False
     # try to get Docker base image metadata
-    logger.info('Loading base image...')
+    logger.debug('Loading base image...')
     base_image = load_base_image()
+    logger.debug('Base image loaded...')
     if len(base_image.notices) == 0:
         # load any packages from cache
         if not common.load_from_cache(base_image):
@@ -160,3 +162,5 @@ def execute_dockerfile(args):
     # check if the dockerfile needs to be parsed
     if dockerfile_parse:
         stub_image = get_dockerfile_packages()
+    container.remove_image(constants.image)
+    cache.save()
