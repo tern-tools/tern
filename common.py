@@ -11,15 +11,15 @@ from classes.command import Command
 from command_lib import command_lib as cmdlib
 from report import formats
 from report import errors
-from utils import cache as cache
-from utils import constants as const
+from utils import cache
+from utils import constants
 from utils.container import check_container
 '''
 Common functions
 '''
 
 # global logger
-logger = logging.getLogger('ternlog')
+logger = logging.getLogger(constants.logger_name)
 
 
 def get_shell_commands(shell_command_line):
@@ -80,9 +80,11 @@ def add_base_packages(image):
         shell, msg = cmdlib.get_image_shell(listing)
         if not shell:
             # add a warning notice for no shell in the command library
+            logger.warning('No shell listing in command library. '
+                           'Using default shell')
             no_shell_message = errors.no_shell_listing.format(
                 image_name=image.name, image_tag=image.tag,
-                default_shell=const.shell)
+                default_shell=constants.shell)
             no_shell_notice = Notice(origin, no_shell_message, 'warning')
             image.add_notice(no_shell_notice)
             # add a hint notice to add the shell to the command library
@@ -90,7 +92,7 @@ def add_base_packages(image):
                 listing_key='shell')
             add_shell_notice = Notice(origin, add_shell_message, 'hint')
             image.add_notice(add_shell_notice)
-            shell = const.shell
+            shell = constants.shell
         # check if a container is running first
         # eventually this needs to change to use derivatives that have
         # more than 1 layer
