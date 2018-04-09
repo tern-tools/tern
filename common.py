@@ -122,9 +122,7 @@ def add_base_packages(image):
                     if len(src_urls) == len(names):
                         pkg.src_url = src_urls[index]
                         for layer in image.layers:
-                            if not layer.packages:
-                                layer.add_package(pkg)
-                                cache.add_layer(layer)
+                            layer.add_package(pkg)
         # if no container is running give a logging error
         else:
             logger.error(errors.no_running_docker_container)

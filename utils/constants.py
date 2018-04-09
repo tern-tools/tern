@@ -11,6 +11,8 @@ Constants
 temp_folder = 'temp'
 # built image name
 image = 'testimage'
+# built image tag
+tag = 'testtag'
 # running container name
 container = 'testcontainer'
 # logger name
