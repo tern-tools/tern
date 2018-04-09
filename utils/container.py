@@ -129,7 +129,8 @@ def start_container(image_tag_string):
     Assumptions: Docker is installed and the docker daemon is running
     There is no other running container from the given image'''
     if check_container():
-        remove_container()
+        docker_command(stop, container)
+        docker_command(remove, container)
     docker_command(run, '--name', container, image_tag_string)
 
 
