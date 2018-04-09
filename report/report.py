@@ -132,6 +132,10 @@ def execute_dockerfile(args):
             container.start_container(base_image.repotag)
             common.add_base_packages(base_image)
             container.remove_container()
+            logger.debug('Saving base image layers...')
+            common.save_to_cache(base_image)
+            cache.save()
+            cache.load()
         # attempt to get the packages for the rest of the image
         # since we only have a dockerfile, we will attempt to build the
         # image first
@@ -150,7 +154,8 @@ def execute_dockerfile(args):
                 docker.add_packages_from_history(full_image)
                 container.remove_container()
                 # record missing layers in the cache
-                common.record_image_layers(full_image)
+                common.save_to_cache(full_image)
+                cache.save()
             else:
                 # we cannot extract the built image's metadata
                 dockerfile_parse = True
