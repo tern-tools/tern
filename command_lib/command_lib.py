@@ -113,7 +113,7 @@ def check_library_key(listing, key):
 
 def get_image_shell(base_image_listing):
     '''Given the base image listing return the image shell. If there is no'''
-    shell, msg = check_library_key(base_image_listing)
+    shell, msg = check_library_key(base_image_listing, 'shell')
     if not shell:
         shell = ''
     return shell, msg
