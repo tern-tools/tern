@@ -125,8 +125,10 @@ def execute_dockerfile(args):
     logger.debug('Base image loaded...')
     if len(base_image.notices) == 0:
         # load any packages from cache
+        logger.debug('Looking up cache for base image layers...')
         if not common.load_from_cache(base_image):
             # load any packages using the command library
+            logger.debug('Retrieving metadata using scripts...')
             container.start_container(base_image.repotag)
             common.add_base_packages(base_image)
             container.remove_container()
