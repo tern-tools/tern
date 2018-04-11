@@ -135,7 +135,6 @@ def execute_dockerfile(args):
             logger.debug('Saving base image layers...')
             common.save_to_cache(base_image)
             cache.save()
-            cache.load()
         # attempt to get the packages for the rest of the image
         # since we only have a dockerfile, we will attempt to build the
         # image first
