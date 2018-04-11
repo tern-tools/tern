@@ -14,6 +14,7 @@ from classes.image import Image
 from classes.image_layer import ImageLayer
 from classes.notice import Notice
 from classes.package import Package
+from command_lib import command_lib as cmdlib
 import common
 import docker
 
@@ -128,7 +129,7 @@ def execute_dockerfile(args):
         logger.debug('Looking up cache for base image layers...')
         if not common.load_from_cache(base_image):
             # load any packages using the command library
-            logger.debug('Retrieving metadata using scripts...')
+            logger.debug('Retrieving metadata using scripts from base.yml')
             container.start_container(base_image.repotag)
             common.add_base_packages(base_image)
             container.remove_container()
@@ -141,6 +142,11 @@ def execute_dockerfile(args):
         # This step actually needs to go to the beginning but since
         # there is no way of tracking imported images from within
         # the docker image history, we build after importing the base image
+        shell = cmdlib.get_image_shell(
+            cmdlib.get_base_listing(base_image.name, base_image.tag))
+        if not shell:
+            shell = constants.shell
+        logger.debug('Building image...')
         build, msg = docker.is_build()
         if build:
             # attempt to get built image metadata
@@ -150,7 +156,9 @@ def execute_dockerfile(args):
                 full_image.set_image_import(base_image)
                 # find packages per layer
                 container.start_container(full_image.repotag)
-                docker.add_packages_from_history(full_image)
+                logger.debug('Retrieving metadata using scripts from '
+                             'snippets.yml')
+                docker.add_packages_from_history(full_image, shell)
                 container.remove_container()
                 # record missing layers in the cache
                 common.save_to_cache(full_image)
@@ -168,5 +176,6 @@ def execute_dockerfile(args):
     # check if the dockerfile needs to be parsed
     if dockerfile_parse:
         stub_image = get_dockerfile_packages()
-    container.remove_image(constants.image)
+    logger.debug('Cleaning up...')
+    container.remove_image(full_image.repotag)
     cache.save()
