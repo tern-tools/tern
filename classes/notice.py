@@ -27,7 +27,7 @@ class Notice(object):
             info: information only
             hint: message on how to make the results better
     '''
-    def __init__(self, origin='', message='', level=''):
+    def __init__(self, origin='', message='', level='info'):
         self.__origin = origin
         self.__message = message
         self.__level = ''

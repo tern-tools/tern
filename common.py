@@ -43,12 +43,10 @@ def load_from_cache(image):
             if not raw_pkg_list:
                 is_full = False
             else:
-                from_cache_notice = Notice()
-                from_cache_notice.origin = image.get_image_option() + \
-                    layer._diffid
-                from_cache_notice.message = formats.loading_from_cache.format(
+                origin = image.get_image_option() + layer._diffid
+                message = formats.loading_from_cache.format(
                     layer_id=layer.diff_id)
-                from_cache_notice.level = 'info'
+                from_cache_notice = Notice(origin, message, 'info')
                 layer.add_notice(from_cache_notice)
                 for pkg_dict in raw_pkg_list:
                     pkg = Package(pkg_dict['name'])
