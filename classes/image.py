@@ -76,14 +76,18 @@ class Image(object):
         image's layer's import_image to the last layer of the imported image.
         return True if the imported_image's last layer exists in this image.
         False if it does not'''
-        if imported_image.layers and \
-                imported_image.layers[:-1].diff_id in \
-                self.get_layer_diff_ids():
-            self.layers[self.layers.index(
-                imported_image.layers[:-1])].import_from = imported_image
-            return True
+        is_set = True
+        if imported_image.layers:
+            imported_layer = self.get_layer_object(
+                imported_image.layers[-1].diff_id)
+            if imported_layer:
+                imported_layer.import_from = imported_image
+            else:
+                is_set = False
         else:
-            return False
+            is_set = False
+        return is_set
+
 
     def get_last_import_layer(self):
         '''Get the index of the last layer that was brought in from
@@ -91,6 +95,15 @@ class Image(object):
         for layer in self.layers[::-1]:
             if layer.import_from:
                 return layer.index()
+
+    def get_layer_object(self, diff_id):
+        '''Given a layer diff id, return the layer object that contains this
+        diff id'''
+        for layer in self.layers:
+            if layer.diff_id == diff_id:
+                return layer
+        return None
+
 
     def load_image(self):
         '''Load image metadata
