@@ -142,7 +142,7 @@ def execute_dockerfile(args):
         # This step actually needs to go to the beginning but since
         # there is no way of tracking imported images from within
         # the docker image history, we build after importing the base image
-        shell = cmdlib.get_image_shell(
+        shell, msg = cmdlib.get_image_shell(
             cmdlib.get_base_listing(base_image.name, base_image.tag))
         if not shell:
             shell = constants.shell

@@ -3,6 +3,7 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 import logging
+import re
 import subprocess
 
 from classes.docker_image import DockerImage
@@ -26,7 +27,7 @@ dockerfile = ''
 docker_commands = []
 
 # global logger
-logger = logging.getLogger('docker.py')
+logger = logging.getLogger(const.logger_name)
 
 
 def load_docker_commands(dockerfile_path):
@@ -113,10 +114,27 @@ def is_build():
         print(errors.docker_build_failed.format(
             dockerfile=dockerfile, error_msg=error.output))
         success = False
+        logger.error('Error building image: ' + error.output)
         msg = error.output
     else:
+        logger.debug('Successfully built image')
         success = True
     return success, msg
+
+
+def created_to_instruction(created_by):
+    '''The 'created_by' key in a Docker image config gives the shell
+    command that was executed unless it is a #(nop) instruction which is
+    for the other Docker directives. Convert this line into a Dockerfile
+    instruction'''
+    instruction = re.sub('/bin/sh -c', '', created_by).strip()
+    instruction = re.sub('\#\(nop\)', '', instruction).strip()
+    logger.debug('Instruction before filtering: ' + instruction)
+    first = instruction.split(' ').pop(0)
+    logger.debug('directive: ' + first)
+    if first not in df.directives and 'RUN' not in instruction:
+        instruction = 'RUN ' + instruction
+    return instruction
 
 
 def add_packages_from_history(image_obj, shell):
@@ -128,11 +146,16 @@ def add_packages_from_history(image_obj, shell):
         2. For each package name get a list of dependencies
         3. Create a list of package objects with metadata
         4. Add this to the layer'''
-    image_layers = image_obj.layers[image_obj.get_last_import_layer():]
+    image_layers = image_obj.layers[image_obj.get_last_import_layer() + 1:]
+    logger.debug('Retrieving metadata for remaining {} layers'.format(
+        len(image_layers)))
     for layer in image_layers:
-        if 'RUN' in layer.created_by:
-            origin = layer.diff_id + ': ' + layer.created_by
-            run_command_line = layer.created_by.split(' ', 1)[1]
+        instruction = created_to_instruction(layer.created_by)
+        if 'RUN' in instruction:
+            # for Docker the created_by comes from the instruction in the
+            # dockerfile
+            origin = layer.diff_id + ': ' + instruction
+            run_command_line = instruction.split(' ', 1)[1]
             cmd_list, msg = common.filter_install_commands(run_command_line)
             if msg:
                 cmd_parse_notice = Notice(origin, msg, 'warning')

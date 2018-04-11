@@ -163,15 +163,3 @@ class DockerImage(Image):
             raise
         except IOError:
             raise
-
-    def created_to_instruction(self, created_by):
-        '''The 'created_by' key in a Docker image config gives the shell
-        command that was executed unless it is a #(nop) instruction which is
-        for the other Docker directives. Convert this line into a Dockerfile
-        instruction'''
-        instruction = re.sub('/bin/sh -c', '', created_by).strip()
-        instruction = re.sub('\#\(nop\)', '', instruction).strip()
-        first = instruction.split(' ').pop(0)
-        if first in directives and 'RUN' not in instruction:
-            instruction = 'RUN ' + instruction
-        return instruction

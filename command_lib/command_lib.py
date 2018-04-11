@@ -80,7 +80,7 @@ def check_for_unique_package(package_list, package_name):
     However if there is an element with a specific name, the default is
     overridden with that name.
     Given a list of package dictionaries, find the package dictionary with the
-    given package name. If not there look for a pacakge dictionary with the
+    given package name. If not there look for a package dictionary with the
     name as 'default'. If that is not there, return an empty dictionary'''
     pkg = {}
     for package in package_list:
@@ -124,7 +124,8 @@ def get_package_listing(command_name, package_name):
     library. First get the listing for the command name and then check if
     there is a package name in the package list or the default'''
     command_listing = get_command_listing(command_name)
-    pkg_listing = check_for_unique_package(command_listing, package_name)
+    pkg_listing = check_for_unique_package(
+        command_listing['packages'], package_name)
     return pkg_listing
 
 
