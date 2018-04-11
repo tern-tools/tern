@@ -81,7 +81,7 @@ class Image(object):
             imported_layer = self.get_layer_object(
                 imported_image.layers[-1].diff_id)
             if imported_layer:
-                imported_layer.import_from = imported_image
+                imported_layer.import_image = imported_image
             else:
                 is_set = False
         else:
@@ -93,8 +93,8 @@ class Image(object):
         '''Get the index of the last layer that was brought in from
         an imported image'''
         for layer in self.layers[::-1]:
-            if layer.import_from:
-                return layer.index()
+            if layer.import_image:
+                return self.layers.index(layer)
 
     def get_layer_object(self, diff_id):
         '''Given a layer diff id, return the layer object that contains this

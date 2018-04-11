@@ -43,7 +43,7 @@ def load_from_cache(image):
             if not raw_pkg_list:
                 is_full = False
             else:
-                origin = image.get_image_option() + layer._diffid
+                origin = image.get_image_option() + layer.diff_id
                 message = formats.loading_from_cache.format(
                     layer_id=layer.diff_id)
                 from_cache_notice = Notice(origin, message, 'info')
