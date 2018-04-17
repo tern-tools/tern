@@ -49,20 +49,17 @@ def load_base_image():
             base_image.load_image()
         except NameError as error:
             logger.warning('Error in loading base image: ' + str(error))
-            name_error_notice = Notice(
-                dockerfile_lines, str(error), 'error')
-            base_image.add_notice(name_error_notice)
+            base_image.origins.add_notice_to_origins(
+                dockerfile_lines, Notice(str(error), 'error'))
         except subprocess.CalledProcessError as error:
             logger.warning(
                 'Error in loading base image: ' + str(error.output, 'utf-8'))
-            docker_exec_notice = Notice(
-                dockerfile_lines, str(error.output, 'utf-8'), 'error')
-            base_image.add_notice(docker_exec_notice)
+            base_image.origins.add_notice_to_origins(
+                dockerfile_lines, Notice(str(error.output, 'utf-8'), 'error'))
         except IOError as error:
             logger.warning('Error in loading base image: ' + str(error))
-            extract_error_notice = Notice(
-                dockerfile_lines, str(error), 'error')
-            base_image.add_notice(extract_error_notice)
+            base_image.origins.add_notice_to_origin(
+                dockerfile_lines, Notice(str(error), 'error'))
     return base_image
 
 
@@ -72,15 +69,14 @@ def load_full_image():
     try:
         test_image.load_image()
     except NameError as error:
-        name_error_notice = Notice(test_image.repotag, str(error), 'error')
-        test_image.add_notice(name_error_notice)
+        test_image.origins.add_notice_to_origins(
+            test_image.repotag, Notice(str(error), 'error'))
     except subprocess.CalledProcessError as error:
-        docker_exec_notice = Notice(
-            test_image.repotag, str(error.output, 'utf-8'), 'error')
-        test_image.add_notice(docker_exec_notice)
+        test_image.origins.add_notice_to_origins(
+            test_image.repotag, Notice(str(error.output, 'utf-8'), 'error'))
     except IOError as error:
-        extract_error_notice = Notice(test_image.repotag, str(error), 'error')
-        test_image.add_notice(extract_error_notice)
+        test_image.origins.add_notice_to_origins(
+            test_image.repotag, Notice(str(error), 'error'))
     return test_image
 
 
@@ -101,8 +97,8 @@ def get_dockerfile_packages():
             layer = ImageLayer(layer_count)
             install_commands, msg = common.filter_install_commands(inst[1])
             if msg:
-                filter_notice = Notice(inst[1], msg, 'info')
-                layer.add_notice(filter_notice)
+                layer.origins.add_notice_to_origins(
+                    inst[1], Notice(msg, 'info'))
             pkg_names = []
             for command in install_commands:
                 pkg_names.append(common.get_installed_package_names(command))
@@ -124,7 +120,8 @@ def execute_dockerfile(args):
     logger.debug('Loading base image...')
     base_image = load_base_image()
     logger.debug('Base image loaded...')
-    if len(base_image.notices) == 0:
+    # check if the base image added any notices
+    if len(base_image.origins.origins) == 0:
         # load any packages from cache
         logger.debug('Looking up cache for base image layers...')
         if not common.load_from_cache(base_image):
@@ -151,7 +148,7 @@ def execute_dockerfile(args):
         if build:
             # attempt to get built image metadata
             full_image = load_full_image()
-            if len(full_image.notices) == 0:
+            if len(full_image.origins.origins) == 0:
                 # link layer to imported base image
                 full_image.set_image_import(base_image)
                 # find packages per layer

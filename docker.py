@@ -58,6 +58,7 @@ def get_dockerfile_base():
     try:
         base_instructions = df.get_base_instructions(docker_commands)
         base_image_tag = df.get_base_image_tag(base_instructions)
+        dockerfile_lines = print_dockerfile_base(base_instructions)
         # check for scratch
         if base_image_tag[0] == 'scratch':
             # there is no base image - return no image object
@@ -65,18 +66,14 @@ def get_dockerfile_base():
         # there should be some image object here
         repotag = base_image_tag[0] + df.tag_separator + base_image_tag[1]
         from_line = 'FROM ' + repotag
-        origin = print_dockerfile_base(base_instructions)
         base_image = DockerImage(repotag)
         base_image.name = base_image_tag[0]
         # check if there is a tag
         if not base_image_tag[1]:
             message_string = errors.dockerfile_no_tag.format(
                 dockerfile_line=from_line)
-            no_tag_notice = Notice()
-            no_tag_notice.origin = origin
-            no_tag_notice.message = message_string
-            no_tag_notice.level = 'warning'
-            base_image.notices.add_notice(no_tag_notice)
+            base_image.origins.add_notice_to_origins(
+                dockerfile_lines, Notice(message_string, 'warning'))
             base_image.tag = 'latest'
         else:
             base_image.tag = base_image_tag[1]
@@ -84,12 +81,9 @@ def get_dockerfile_base():
         if base_image_tag[1] == 'latest':
             message_string = errors.dockerfile_using_latest.format(
                 dockerfile_line=from_line)
-            latest_tag_notice = Notice()
-            latest_tag_notice.origin = origin
-            no_tag_notice.message = message_string
-            no_tag_notice.level = 'warning'
-            base_image.notices.add_notice(latest_tag_notice)
-        return base_image, base_instructions
+            base_image.origins.add_notice_to_origins(
+                dockerfile_lines, Notice(message_string, 'warning'))
+        return base_image, dockerfile_lines
     except ValueError as e:
         logger.warning(errors.cannot_parse_base_image.format(
             dockerfile=dockerfile, error_msg=e))
@@ -154,12 +148,13 @@ def add_packages_from_history(image_obj, shell):
         if 'RUN' in instruction:
             # for Docker the created_by comes from the instruction in the
             # dockerfile
-            origin = layer.diff_id + ': ' + instruction
+            # each layer is an origin
+            origin_str = layer.diff_id + ': ' + instruction
             run_command_line = instruction.split(' ', 1)[1]
             cmd_list, msg = common.filter_install_commands(run_command_line)
             if msg:
-                cmd_parse_notice = Notice(origin, msg, 'warning')
-                layer.add_notice(cmd_parse_notice)
+                layer.origins.add_notice_to_origins(
+                    origin_str, Notice(msg, 'warning'))
             for command in cmd_list:
                 pkg_list = common.get_installed_package_names(command)
                 all_pkgs = []

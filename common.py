@@ -39,15 +39,19 @@ def load_from_cache(image):
     is_full = True
     for layer in image.layers:
         if not layer.packages:
+            # create an origin for this layer
+            origin_str = image.get_image_option() + layer.diff_id
+            # there are no packages in this layer
+            # try to get it from the cache
             raw_pkg_list = cache.get_packages(layer.diff_id)
             if not raw_pkg_list:
                 is_full = False
             else:
-                origin = image.get_image_option() + layer.diff_id
                 message = formats.loading_from_cache.format(
                     layer_id=layer.diff_id)
-                from_cache_notice = Notice(origin, message, 'info')
-                layer.add_notice(from_cache_notice)
+                # add notice to the origin
+                image.origins.add_notice_to_origins(
+                    origin_str, Notice(message, 'info'))
                 for pkg_dict in raw_pkg_list:
                     pkg = Package(pkg_dict['name'])
                     pkg.fill(pkg_dict)
@@ -73,7 +77,8 @@ def add_base_packages(image):
         4. Add them to the image'''
     # information under the base image tag in the command library
     listing = cmdlib.get_base_listing(image.name, image.tag)
-    origin = 'command_lib/base.yml'
+    # create the origin for the base image
+    origin_str = 'command_lib/base.yml'
     if listing:
         shell, msg = cmdlib.get_image_shell(listing)
         if not shell:
@@ -83,13 +88,13 @@ def add_base_packages(image):
             no_shell_message = errors.no_shell_listing.format(
                 image_name=image.name, image_tag=image.tag,
                 default_shell=constants.shell)
-            no_shell_notice = Notice(origin, no_shell_message, 'warning')
-            image.add_notice(no_shell_notice)
+            image.origins.add_notice_to_origins(
+                origin_str, Notice(no_shell_message, 'warning'))
             # add a hint notice to add the shell to the command library
             add_shell_message = errors.no_listing_for_base_key.format(
                 listing_key='shell')
-            add_shell_notice = Notice(origin, add_shell_message, 'hint')
-            image.add_notice(add_shell_notice)
+            image.origins.add_notice_origins(
+                origin_str, Notice(add_shell_message, 'hint'))
             shell = constants.shell
         # check if a container is running first
         # eventually this needs to change to use derivatives that have
@@ -108,8 +113,8 @@ def add_base_packages(image):
             # add a notice to the image if something went wrong
             invoke_msg = n_msg + v_msg + l_msg + u_msg
             if invoke_msg:
-                pkg_invoke_notice = Notice(origin, invoke_msg, 'error')
-                image.add_notice(pkg_invoke_notice)
+                image.origins.add_notice_to_origins(
+                    origin_str, Notice(invoke_msg, 'error'))
             if names and len(names) > 1:
                 for index in range(0, len(names)):
                     pkg = Package(names[index])
@@ -126,9 +131,9 @@ def add_base_packages(image):
             logger.error(errors.no_running_docker_container)
     # if there is no listing add a notice
     else:
-        no_listing_notice = Notice(origin, errors.no_image_tag_listing.format(
-            image_name=image.name, image_tag=image.tag), 'error')
-        image.add_notice(no_listing_notice)
+        image.origins.add_notice_to_origins(
+            origin_str, Notice(errors.no_image_tag_listing.format(
+                image_name=image.name, image_tag=image.tag), 'error'))
 
 
 def fill_package_metadata(pkg_obj, pkg_listing, shell):
@@ -137,7 +142,8 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
     data and methods of the package listing.
     Fill out: version, license and src_url
     If there are errors, fill out notices'''
-    origin = 'command_lib/snippets.yml'
+    # create a NoticeOrigin for the package
+    origin_str = 'command_lib/snippets.yml'
     # version
     version_listing, listing_msg = cmdlib.check_library_key(
         pkg_listing, 'version')
@@ -147,11 +153,11 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         if version_list:
             pkg_obj.version = version_list[0]
         else:
-            version_invoke_error_notice = Notice(origin, invoke_msg, 'error')
-            pkg_obj.add_notice(version_invoke_error_notice)
+            pkg_obj.origins.add_notice_to_origins(
+                origin_str, Notice(invoke_msg, 'error'))
     else:
-        no_version_listing_notice = Notice(origin, listing_msg, 'warning')
-        pkg_obj.add_notice(no_version_listing_notice)
+        pkg_obj.origins.add_notice_to_origins(
+            origin_str, Notice(listing_msg, 'warning'))
     # license
     license_listing, listing_msg = cmdlib.check_library_key(
         pkg_listing, 'license')
@@ -161,11 +167,11 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         if license_list:
             pkg_obj.license = license_list[0]
         else:
-            license_invoke_error_notice = Notice(origin, invoke_msg, 'error')
-            pkg_obj.add_notice(license_invoke_error_notice)
+            pkg_obj.origins.add_notice_to_origins(
+                origin_str, Notice(invoke_msg, 'error'))
     else:
-        no_license_listing_notice = Notice(origin, listing_msg, 'warning')
-        pkg_obj.add_notice(no_license_listing_notice)
+        pkg_obj.origins.add_notice_to_origins(
+            origin_str, Notice(listing_msg, 'warning'))
     # src_urls
     url_listing, listing_msg = cmdlib.check_library_key(
         pkg_listing, 'license')
@@ -175,11 +181,11 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         if url_list:
             pkg_obj.src_url = url_list[0]
         else:
-            url_invoke_error_notice = Notice(origin, invoke_msg, 'error')
-            pkg_obj.add_notice(url_invoke_error_notice)
+            pkg_obj.origins.add_notice_to_origins(
+                origin_str, Notice(invoke_msg, 'error'))
     else:
-        no_url_listing_notice = Notice(origin, listing_msg, 'warning')
-        pkg_obj.add_notice(no_url_listing_notice)
+        pkg_obj.origins.add_notice_to_origins(
+            origin_str, Notice(listing_msg, 'warning'))
 
 
 def get_package_dependencies(package_listing, package_name, shell):
