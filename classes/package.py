@@ -3,6 +3,8 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
+from .origins import Origins
+
 
 class Package(object):
     '''A package installed within a Docker image layer
@@ -11,7 +13,7 @@ class Package(object):
         version: package version
         license: package license
         src_url: package source url
-        notices: a list of Notice objects
+        origins: a list of NoticeOrigin objects
 
     methods:
         to_dict: returns a dict representation of the instance'''
@@ -20,7 +22,7 @@ class Package(object):
         self.__version = ''
         self.__license = ''
         self.__src_url = ''
-        self.__notices = []
+        self.__origins = Origins()
 
     @property
     def name(self):
@@ -51,11 +53,8 @@ class Package(object):
         self.__src_url = src_url
 
     @property
-    def notices(self):
-        return self.__notices
-
-    def add_notice(self, notice):
-        self.__notices.append(notice)
+    def origins(self):
+        return self.__origins
 
     def to_dict(self):
         pkg_dict = {}
