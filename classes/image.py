@@ -3,6 +3,7 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
+from .origins import Origins
 
 class Image(object):
     '''A representation of the image to be analyzed
@@ -26,7 +27,7 @@ class Image(object):
         self._manifest = {}
         self._config = {}
         self._layers = []
-        self._notices = []
+        self._origins = Origins()
 
     @property
     def manifest(self):
@@ -45,8 +46,8 @@ class Image(object):
         return self._layers
 
     @property
-    def notices(self):
-        return self._notices
+    def origins(self):
+        return self._origins
 
     @property
     def name(self):
@@ -63,9 +64,6 @@ class Image(object):
     @tag.setter
     def tag(self, tag):
         self._tag = tag
-
-    def add_notice(self, notice):
-        self._notices.append(notice)
 
     def get_layer_diff_ids(self):
         '''Get a list of layer diff ids'''

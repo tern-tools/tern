@@ -3,12 +3,14 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
+from .origins import Origins
+
 class ImageLayer(object):
     '''A representation of a container filesystem layer
     attributes:
         diff_id: the sha256 of the layer filesystem
         packages: list of objects of type Package (package.py)
-        notices: list of Notice objects (notice.py)
+        origins: list of NoticeOrigin objects (origins.py)
         tar_file: the path to the layer filesystem tarball
         created_by: sometimes the metadata will contain a created_by
         key containing the command that created the filesystem layer
@@ -20,7 +22,6 @@ class ImageLayer(object):
     methods:
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
-        add_notice: adds a notice to the layer
         to_dict: returns a dict representation of the instance
         get_package_names: returns a list of package names'''
     def __init__(self, diff_id, tar_file=None, created_by=None):
@@ -28,7 +29,7 @@ class ImageLayer(object):
         self.__tar_file = tar_file
         self.__created_by = created_by
         self.__packages = []
-        self.__notices = []
+        self.__origins = Origins()
         self.__import_image = None
 
     @property
@@ -40,8 +41,8 @@ class ImageLayer(object):
         return self.__packages
 
     @property
-    def notices(self):
-        return self.__notices
+    def origins(self):
+        return self.__origins
 
     @property
     def tar_file(self):
@@ -66,9 +67,6 @@ class ImageLayer(object):
     def add_package(self, package):
         if package.name not in self.get_package_names():
             self.__packages.append(package)
-
-    def add_notice(self, notice):
-        self.__notices.append(notice)
 
     def remove_package(self, package_name):
         rem_index = 0
