@@ -45,7 +45,7 @@ def print_dockerfile_base(base_instructions):
     that pertain to the base image'''
     base_instr = ''
     for instr in base_instructions:
-        base_instr = base_instr + instr[0] + ' ' + instr[1] + '\n'
+        base_instr = base_instr + instr[0] + ' ' + instr[1]
     return base_instr
 
 
@@ -124,9 +124,7 @@ def created_to_instruction(created_by):
     instruction'''
     instruction = re.sub('/bin/sh -c', '', created_by).strip()
     instruction = re.sub('\#\(nop\)', '', instruction).strip()
-    logger.debug('Instruction before filtering: ' + instruction)
     first = instruction.split(' ').pop(0)
-    logger.debug('directive: ' + first)
     if first not in df.directives and 'RUN' not in instruction:
         instruction = 'RUN ' + instruction
     return instruction

@@ -47,13 +47,14 @@ def load_from_cache(image):
         if not layer.packages:
             # create an origin for this layer
             origin_str = origin_str + ': ' + layer.diff_id[:10]
-            print(origin_str)
             # there are no packages in this layer
             # try to get it from the cache
             raw_pkg_list = cache.get_packages(layer.diff_id)
             if not raw_pkg_list:
                 is_full = False
             else:
+                logger.debug('Loaded from cache: layer {}'.format(
+                    layer.diff_id[:10]))
                 message = formats.loading_from_cache.format(
                     layer_id=layer.diff_id[:10])
                 # add notice to the origin
