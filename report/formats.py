@@ -19,27 +19,29 @@ package_info_reporting_improvements = ''
 
 # general formatting
 # report disclaimer
-disclaimer = f'''This report was generated using the Tern Project\n\n'''
+disclaimer = '''This report was generated using the Tern Project\n\n'''
 # cache
-retrieve_from_cache = f'''Retrieving packages from cache for layer ''' \
-    f'''{layer_id}:\n\n'''
+retrieve_from_cache = '''Retrieving packages from cache for layer ''' \
+    '''{layer_id}:\n\n'''
 # command library
-base_listing = f'''Direct listing in command_lib/base.yml:\n\n'''
-snippet_listing = f'''Direct listing in command_lib/snippets.yml:\n\n'''
-invoke_for_base = f'''Using invoke listing in command_lib/base.yml:\n\n'''
-invoke_for_snippets = f'''Using invoke listing in command_lib/snippets.yml''' \
-    f''':\n\n'''
+base_listing = '''Direct listing in command_lib/base.yml:\n\n'''
+snippet_listing = '''Direct listing in command_lib/snippets.yml:\n\n'''
+invoke_for_base = '''Using invoke listing in command_lib/base.yml:\n\n'''
+invoke_for_snippets = '''Using invoke listing in command_lib/snippets.yml''' \
+    ''':\n\n'''
 invoke_in_container = '''\tin container:\n'''
 invoke_on_host = '''\ton host:\n'''
 # package information
-package_info = f'''Package: {package_name}\nVersion: {package_version}\n''' \
-    f'''Project URL: {package_url}\nLicense: {package_license}\n\n'''
+package_name = '''Package: {package_name}\n'''
+package_version = '''Version: {package_version}\n'''
+package_url = '''Project URL: {package_url}\n'''
+package_license = '''License: {package_license}\n\n'''
 # notes
-package_notes = f'''Errors: {package_info_retrieval_errors}\n''' \
-    f'''Improvements: {package_info_reporting_improvements}\n'''
+package_notes = '''Errors: {package_info_retrieval_errors}\n''' \
+    '''Improvements: {package_info_reporting_improvements}\n'''
 # demarkation
-package_demarkation = f'''------------------------------------------------''' \
-    f'''\n\n'''
+package_demarkation = '''------------------------------------------------''' \
+    '''\n\n'''
 
 # informational
 loading_from_cache = '''Loading packages from cache for layer {layer_id}:'''
@@ -57,5 +59,9 @@ dockerfile_instruction = ''
 
 # dockerfile report sections
 dockerfile_header = '''Report from Dockerfile\n'''
-dockerfile_base = f'''Base Image: {base_image_instructions}\n'''
-dockerfile_line = f'''Instruction Line: {dockerfile_instruction}\n'''
+dockerfile_base = '''Base Image: {base_image_instructions}\n'''
+dockerfile_line = '''Instruction Line: {dockerfile_instruction}\n'''
+
+# format for notices
+notice_format = '''{origin}:\n\t{info}\n\twarnings:{warnings}''' \
+    '''\n\terrors:{errors}\n\thints:{hints}\n'''

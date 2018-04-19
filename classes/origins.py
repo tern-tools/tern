@@ -18,6 +18,8 @@ class Origins(object):
             If there is no NoticeOrigin object with the given string,
             create a NoticeOrigin object and add it to the list of
             origins
+        add_notice_origin: add an empty NoticeOrigin object
+        is_empty: check if there are any notices
     '''
     def __init__(self):
         self.__origins = []
@@ -39,3 +41,15 @@ class Origins(object):
             notice_orij = NoticeOrigin(orig_string)
             notice_orij.add_notice(notice)
             self.__origins.append(notice_orij)
+
+    def add_notice_origin(self, orig_string):
+        self.__origins.append(NoticeOrigin(orig_string))
+
+    def is_empty(self):
+        empty = True
+        if len(self.__origins) != 0:
+            for orij in self.__origins:
+                if len(orij.notices) != 0:
+                    empty = False
+                    break
+        return empty

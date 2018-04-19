@@ -25,3 +25,5 @@ manifest_file = 'manifest.json'
 cache_file = 'cache.yml'
 # default shell
 shell = '/bin/sh'
+# report file
+report_file = 'report.txt'
