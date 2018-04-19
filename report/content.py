@@ -104,9 +104,9 @@ def print_full_report(image):
         else:
             for layer_origin in layer.origins.origins:
                 notes = notes + print_notices(layer_origin, '\t', '\t\t')
-                for package in layer.packages:
-                    notes = notes + print_package(package, '\t\t')
-                    for package_origin in package.origins.origins:
-                        notes = notes + print_notices(
-                            package_origin, '\t\t', '\t\t\t')
+            for package in layer.packages:
+                notes = notes + print_package(package, '\t\t')
+                for package_origin in package.origins.origins:
+                    notes = notes + print_notices(
+                        package_origin, '\t\t', '\t\t\t')
     return notes

@@ -45,22 +45,23 @@ def load_base_image():
     '''Create base image from dockerfile instructions and return the image'''
     base_image, dockerfile_lines = docker.get_dockerfile_base()
     # try to get image metadata
-    if container.check_image(base_image.repotag):
-        try:
-            base_image.load_image()
-        except NameError as error:
-            logger.warning('Error in loading base image: ' + str(error))
-            base_image.origins.add_notice_to_origins(
-                dockerfile_lines, Notice(str(error), 'error'))
-        except subprocess.CalledProcessError as error:
-            logger.warning(
-                'Error in loading base image: ' + str(error.output, 'utf-8'))
-            base_image.origins.add_notice_to_origins(
-                dockerfile_lines, Notice(str(error.output, 'utf-8'), 'error'))
-        except IOError as error:
-            logger.warning('Error in loading base image: ' + str(error))
-            base_image.origins.add_notice_to_origin(
-                dockerfile_lines, Notice(str(error), 'error'))
+    if not container.check_image(base_image.repotag):
+        container.pull_image(base_image.repotag)
+    try:
+        base_image.load_image()
+    except NameError as error:
+        logger.warning('Error in loading base image: ' + str(error))
+        base_image.origins.add_notice_to_origins(
+            dockerfile_lines, Notice(str(error), 'error'))
+    except subprocess.CalledProcessError as error:
+        logger.warning(
+            'Error in loading base image: ' + str(error.output, 'utf-8'))
+        base_image.origins.add_notice_to_origins(
+            dockerfile_lines, Notice(str(error.output, 'utf-8'), 'error'))
+    except IOError as error:
+        logger.warning('Error in loading base image: ' + str(error))
+        base_image.origins.add_notice_to_origin(
+            dockerfile_lines, Notice(str(error), 'error'))
     return base_image
 
 
@@ -162,28 +163,30 @@ def execute_dockerfile(args):
                     # record missing layers in the cache
                     common.save_to_cache(full_image)
                     cache.save()
+                logger.debug('Cleaning up...')
+                container.remove_image(full_image.repotag)
+                container.remove_image(base_image.repotag)
+                logger.debug('Writing report...')
+                report = content.print_full_report(full_image)
+                write_report(report)
+                cache.save()
             else:
                 # we cannot extract the built image's metadata
                 dockerfile_parse = True
-            report = content.print_full_report(full_image)
-            logger.debug('Cleaning up...')
-            container.remove_image(full_image.repotag)
-            logger.debug('Writing report...')
-            write_report(report)
         else:
             # we cannot build the image
-            common.record_image_layers(base_image)
+            common.save_to_cache(base_image)
             dockerfile_parse = True
     else:
         # something went wrong in getting the base image
         dockerfile_parse = True
     # check if the dockerfile needs to be parsed
     if dockerfile_parse:
+        logger.debug('Cleaning up...')
+        container.remove_image(base_image.repotag)
         logger.debug('Parsing Dockerfile to generate report...')
         stub_image = get_dockerfile_packages()
         report = content.print_full_report(base_image)
         report = report + content.print_full_report(stub_image)
         write_report(report)
-    logger.debug('Cleaning up...')
-    container.remove_image(full_image.repotag)
-    cache.save()
+        cache.save()
