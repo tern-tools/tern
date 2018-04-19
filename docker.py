@@ -67,6 +67,7 @@ def get_dockerfile_base():
         repotag = base_image_tag[0] + df.tag_separator + base_image_tag[1]
         from_line = 'FROM ' + repotag
         base_image = DockerImage(repotag)
+        base_image.origins.add_notice_origin(dockerfile_lines)
         base_image.name = base_image_tag[0]
         # check if there is a tag
         if not base_image_tag[1]:
@@ -149,7 +150,7 @@ def add_packages_from_history(image_obj, shell):
             # for Docker the created_by comes from the instruction in the
             # dockerfile
             # each layer is an origin
-            origin_str = layer.diff_id + ': ' + instruction
+            origin_str = layer.diff_id[:10] + ': ' + instruction
             run_command_line = instruction.split(' ', 1)[1]
             cmd_list, msg = common.filter_install_commands(run_command_line)
             if msg:

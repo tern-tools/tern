@@ -6,6 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause
 import logging
 import subprocess
 
+from report import content
 from utils import container
 from utils import constants
 from utils import cache
@@ -121,7 +122,7 @@ def execute_dockerfile(args):
     base_image = load_base_image()
     logger.debug('Base image loaded...')
     # check if the base image added any notices
-    if len(base_image.origins.origins) == 0:
+    if base_image.origins.is_empty():
         # load any packages from cache
         logger.debug('Looking up cache for base image layers...')
         if not common.load_from_cache(base_image):
@@ -148,21 +149,27 @@ def execute_dockerfile(args):
         if build:
             # attempt to get built image metadata
             full_image = load_full_image()
-            if len(full_image.origins.origins) == 0:
+            if full_image.origins.is_empty():
                 # link layer to imported base image
                 full_image.set_image_import(base_image)
-                # find packages per layer
-                container.start_container(full_image.repotag)
-                logger.debug('Retrieving metadata using scripts from '
-                             'snippets.yml')
-                docker.add_packages_from_history(full_image, shell)
-                container.remove_container()
-                # record missing layers in the cache
-                common.save_to_cache(full_image)
-                cache.save()
+                if not common.load_from_cache(full_image):
+                    # find packages per layer
+                    container.start_container(full_image.repotag)
+                    logger.debug('Retrieving metadata using scripts from '
+                                 'snippets.yml')
+                    docker.add_packages_from_history(full_image, shell)
+                    container.remove_container()
+                    # record missing layers in the cache
+                    common.save_to_cache(full_image)
+                    cache.save()
             else:
                 # we cannot extract the built image's metadata
                 dockerfile_parse = True
+            report = content.print_full_report(full_image)
+            logger.debug('Cleaning up...')
+            container.remove_image(full_image.repotag)
+            logger.debug('Writing report...')
+            write_report(report)
         else:
             # we cannot build the image
             common.record_image_layers(base_image)
@@ -172,7 +179,11 @@ def execute_dockerfile(args):
         dockerfile_parse = True
     # check if the dockerfile needs to be parsed
     if dockerfile_parse:
+        logger.debug('Parsing Dockerfile to generate report...')
         stub_image = get_dockerfile_packages()
+        report = content.print_full_report(base_image)
+        report = report + content.print_full_report(stub_image)
+        write_report(report)
     logger.debug('Cleaning up...')
     container.remove_image(full_image.repotag)
     cache.save()

@@ -37,10 +37,17 @@ def load_from_cache(image):
     doesn't exist continue. If not all the layers have packages, return False
     else return True'''
     is_full = True
+    # check if we can use repotag
+    origin_str = ''
+    if image.repotag:
+        origin_str = image.repotag
+    else:
+        origin_str = 'Image ID - ' + image.id[:10]
     for layer in image.layers:
         if not layer.packages:
             # create an origin for this layer
-            origin_str = image.get_image_option() + layer.diff_id
+            origin_str = origin_str + ': ' + layer.diff_id[:10]
+            print(origin_str)
             # there are no packages in this layer
             # try to get it from the cache
             raw_pkg_list = cache.get_packages(layer.diff_id)
@@ -48,9 +55,9 @@ def load_from_cache(image):
                 is_full = False
             else:
                 message = formats.loading_from_cache.format(
-                    layer_id=layer.diff_id)
+                    layer_id=layer.diff_id[:10])
                 # add notice to the origin
-                image.origins.add_notice_to_origins(
+                layer.origins.add_notice_to_origins(
                     origin_str, Notice(message, 'info'))
                 for pkg_dict in raw_pkg_list:
                     pkg = Package(pkg_dict['name'])

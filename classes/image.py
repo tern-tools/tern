@@ -16,8 +16,6 @@ class Image(object):
     methods:
         load_image: this method is to be implemented in the derived classes
         get_layer_diff_ids: returns a list of layer diff ids only
-        get_image_option: returns whether the image object was instantiated
-        using the repotag or id
     '''
     def __init__(self, id=None):
         '''Either initialize using id'''
