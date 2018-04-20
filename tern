@@ -10,6 +10,8 @@ import logging
 import os
 import report
 from common import clear_cache
+import subprocess
+import sys
 '''
 Tern executable
 '''
@@ -37,6 +39,12 @@ def main(args, logger):
 
 
 if __name__ == '__main__':
+
+    try:
+        docker_is_running = subprocess.check_output('docker ps', shell=True)
+    except subprocess.CalledProcessError as docker:
+        print('Docker daemon is not running. Error code', docker.returncode)
+        sys.exit()
 
     def check_file_existence(path):
         if not os.path.isfile(path):
