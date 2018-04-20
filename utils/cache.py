@@ -6,6 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import os
 import yaml
+from .constants import cache_file
 '''
 Docker layer cache related modules
 The cache is currently stored in a yaml file called cache.yml
@@ -20,7 +21,6 @@ It is organized in this way:
 '''
 
 # known base image database
-cache_file = 'cache.yml'
 cache = {}
 
 
@@ -38,6 +38,11 @@ def get_packages(sha):
         return cache[sha]['packages']
     else:
         return []
+
+
+def get_layers():
+    '''Return a list of layer shas'''
+    return cache.keys()
 
 
 def add_layer(layer_obj):

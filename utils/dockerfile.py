@@ -2,8 +2,6 @@
 Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
-
-
 import re
 '''
 Dockerfile parser and information retrieval
@@ -15,6 +13,7 @@ directives = ['FROM',
               'ENV',
               'COPY',
               'ENTRYPOINT',
+              'WORKDIR',
               'VOLUME',
               'EXPOSE',
               'CMD']
@@ -133,8 +132,7 @@ def get_base_image_tag(base_instructions):
     for now that we will not be passing build arguments in which case
     if there is no default ARG, we will raise an exception indicating that
     since the build arguments are determined by the user we will not
-    be able to determine what the user wanted
-    TODO: accept build arguments'''
+    be able to determine what the user wanted'''
     # get all the ARG key-value pairs
     build_args = {}
     from_instruction = ''
@@ -155,7 +153,5 @@ def get_base_image_tag(base_instructions):
     # check if the base image has a tag
     image_tag_list = from_instruction.split(tag_separator)
     if len(image_tag_list) == 1:
-        # TODO: do we want to be restrictive?
-        print('No tag specified in the base image. Falling back on latest')
-        image_tag_list.append('latest')
+        image_tag_list.append('')
     return tuple(image_tag_list)

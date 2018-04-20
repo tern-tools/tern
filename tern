@@ -7,23 +7,38 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import argparse
 import logging
-import os
-import report
-from common import clear_cache
+
+from report import report
+from utils import cache
+from utils import constants
 '''
 Tern executable
 '''
 
-# logging
-logfile = 'tern.log'
+# global logger
+logger = logging.getLogger(constants.logger_name)
+logger.setLevel(logging.DEBUG)
+
+console = logging.StreamHandler()
+console.setLevel(logging.DEBUG)
+formatter = logging.Formatter(
+    '%(asctime)s - %(levelname)s - %(module)s - %(message)s')
+console.setFormatter(formatter)
+
+log_handler = logging.FileHandler(constants.logfile, mode='w')
+log_handler.setLevel(logging.DEBUG)
+log_handler.setFormatter(formatter)
+
+logger.addHandler(console)
+logger.addHandler(log_handler)
 
 
-def main(args, logger):
+def main(args):
     '''Execute according to subcommands'''
     logger.debug('Starting...')
     if args.clear_cache:
         logger.debug('Clearing cache...')
-        clear_cache()
+        cache.clear()
     if hasattr(args, 'name') and args.name == 'report':
         logger.debug('Creating Report...')
         if args.summary:
@@ -31,7 +46,7 @@ def main(args, logger):
         else:
             logger.debug(
                 'Creating a detailed report on components in Docker image...')
-        report.execute(args)
+        report.execute_dockerfile(args)
         logger.debug('Report completed.')
     logger.debug('Finished')
 
@@ -47,10 +62,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         prog='Tern',
         description='''
-           Tern is a Docker image package curation tool. Tern retrieves
-    information about packages that are installed in a Docker image that is
-    built from a Dockerfile, including dependencies. It also allows for
-    curation of packages that are installed and maintained manually''')
+           Tern is a container image component curation tool. Tern retrieves
+    information about packages that are installed in a container image.
+    Learn more at https://github.com/vmware/tern''')
     parser.add_argument('-c', '--clear-cache', action='store_true',
                         help="Clear the cache before running")
     subparsers = parser.add_subparsers(help='Subcommands')
@@ -66,22 +80,6 @@ if __name__ == '__main__':
     parser_report.set_defaults(name='report')
     args = parser.parse_args()
 
-    # logging setup
-    logger = logging.getLogger('ternlog')
-    logger.setLevel(logging.DEBUG)
-
-    console = logging.StreamHandler()
-    console.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    console.setFormatter(formatter)
-
-    log_handler = logging.FileHandler(logfile, mode='w')
-    log_handler.setLevel(logging.DEBUG)
-    log_handler.setFormatter(formatter)
-
-    logger.addHandler(console)
-    logger.addHandler(log_handler)
 
     # execute
-    main(args, logger)
+    main(args)
