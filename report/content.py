@@ -3,10 +3,7 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
-from command_lib.command_lib import get_base_listing
-from command_lib.command_lib import get_command_listing
-from command_lib.command_lib import FormatAwk
-from command_lib.command_lib import check_for_unique_package
+import command_lib.command_lib as cmdlib
 from report import formats
 
 '''
@@ -34,10 +31,10 @@ def print_invoke_list(info_dict, info):
     return report
 
 
-def print_base_invoke(base_image_tag):
+def print_base_invoke(base_image, base_tag):
     '''Given the base image and tag in a tuple return a string containing
     the command_lib/base.yml'''
-    info = get_base_listing(base_image_tag)
+    info = cmdlib.get_base_listing(base_image, base_tag)
     report = ''
     report = report + print_invoke_list(info, 'names')
     report = report + print_invoke_list(info, 'versions')
@@ -47,23 +44,19 @@ def print_base_invoke(base_image_tag):
     return report
 
 
-def print_package_invoke(command_name, package_name):
+def print_package_invoke(command_name):
     '''Given the command name to look up in the snippet library and the
     package name, return a string with the list of commands that will be
     invoked in the container'''
     report = ''
-    command_listing = get_command_listing(command_name)
+    command_listing = cmdlib.get_command_listing(command_name)
     if command_listing:
         pkg_list = command_listing['packages']
-        pkg_dict = check_for_unique_package(pkg_list, package_name)
-        report = report + print_invoke_list(pkg_dict, 'version').format_map(
-            FormatAwk(package=package_name))
-        report = report + print_invoke_list(pkg_dict, 'license').format_map(
-            FormatAwk(package=package_name))
-        report = report + print_invoke_list(pkg_dict, 'src_url').format_map(
-            FormatAwk(package=package_name))
-        report = report + print_invoke_list(pkg_dict, 'deps').format_map(
-            FormatAwk(package=package_name))
+        for pkg_dict in pkg_list:
+            report = report + print_invoke_list(pkg_dict, 'version')
+            report = report + print_invoke_list(pkg_dict, 'license')
+            report = report + print_invoke_list(pkg_dict, 'src_url')
+            report = report + print_invoke_list(pkg_dict, 'deps')
     return report
 
 
@@ -109,4 +102,5 @@ def print_full_report(image):
                 for package_origin in package.origins.origins:
                     notes = notes + print_notices(
                         package_origin, '\t\t', '\t\t\t')
+            notes = notes + formats.package_demarkation
     return notes
