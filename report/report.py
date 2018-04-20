@@ -113,6 +113,20 @@ def get_dockerfile_packages():
     return stub_image
 
 
+def generate_report(args, *images):
+    '''Generate a report based on the command line options'''
+    logger.debug('Writing report...')
+    report = ''
+    if args.summary:
+        for image in images:
+            report = report + content.print_summary_report(image)
+    else:
+        for image in images:
+            report = report + content.print_full_report(image)
+    write_report(report)
+
+
+
 def execute_dockerfile(args):
     '''Execution path if given a dockerfile'''
     logger.debug('Setting up...')
@@ -166,10 +180,7 @@ def execute_dockerfile(args):
                 logger.debug('Cleaning up...')
                 container.remove_image(full_image.repotag)
                 container.remove_image(base_image.repotag)
-                logger.debug('Writing report...')
-                report = content.print_full_report(full_image)
-                write_report(report)
-                cache.save()
+                generate_report(args, full_image)
             else:
                 # we cannot extract the built image's metadata
                 dockerfile_parse = True
@@ -182,11 +193,9 @@ def execute_dockerfile(args):
         dockerfile_parse = True
     # check if the dockerfile needs to be parsed
     if dockerfile_parse:
+        cache.save()
         logger.debug('Cleaning up...')
         container.remove_image(base_image.repotag)
         logger.debug('Parsing Dockerfile to generate report...')
         stub_image = get_dockerfile_packages()
-        report = content.print_full_report(base_image)
-        report = report + content.print_full_report(stub_image)
-        write_report(report)
-        cache.save()
+        generate_report(args, base_image, stub_image)
