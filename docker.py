@@ -3,6 +3,7 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 import logging
+import os
 import re
 import subprocess
 
@@ -34,6 +35,8 @@ logger = logging.getLogger(const.logger_name)
 
 def load_docker_commands(dockerfile_path):
     '''Given a dockerfile get a persistent list of docker commands'''
+    if not os.path.isfile(dockerfile_path):
+        raise IOError('{} does not exist'.format(dockerfile_path))
     global docker_commands
     docker_commands = df.get_directive_list(df.get_command_list(
         dockerfile_path))
