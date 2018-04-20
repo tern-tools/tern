@@ -24,11 +24,10 @@ disclaimer = '''This report was generated using the Tern Project\n\n'''
 retrieve_from_cache = '''Retrieving packages from cache for layer ''' \
     '''{layer_id}:\n\n'''
 # command library
-base_listing = '''Direct listing in command_lib/base.yml:\n\n'''
-snippet_listing = '''Direct listing in command_lib/snippets.yml:\n\n'''
-invoke_for_base = '''Using invoke listing in command_lib/base.yml:\n\n'''
-invoke_for_snippets = '''Using invoke listing in command_lib/snippets.yml''' \
-    ''':\n\n'''
+base_listing = '''Direct listing in command_lib/base.yml'''
+snippet_listing = '''Direct listing in command_lib/snippets.yml'''
+invoke_for_base = '''Using invoke listing in command_lib/base.yml'''
+invoke_for_snippets = '''Using invoke listing in command_lib/snippets.yml'''
 invoke_in_container = '''\tin container:\n'''
 invoke_on_host = '''\ton host:\n'''
 # package information
@@ -48,8 +47,8 @@ loading_from_cache = '''Loading packages from cache for layer {layer_id}:'''
 invoking_base_commands = '''Invoking commands from command_lib/base.yml:'''
 invoking_snippet_commands = '''Invoking commands from ''' \
     '''command_lib/snippets.yml'''
-ignored = '''Ignored Commands:\n'''
-unrecognized = '''Unrecognized Commands:\n'''
+ignored = '''\nIgnored Commands:'''
+unrecognized = '''\nUnrecognized Commands:'''
 
 # report formatting for dockerfiles
 

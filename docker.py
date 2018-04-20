@@ -13,6 +13,8 @@ from utils import dockerfile as df
 from utils import container as cont
 from utils import constants as const
 from report import errors
+from report import formats
+from report import content
 from command_lib import command_lib as cmdlib
 import common
 
@@ -144,17 +146,21 @@ def add_packages_from_history(image_obj, shell):
         len(image_layers)))
     for layer in image_layers:
         instruction = created_to_instruction(layer.created_by)
+        origin_layer = instruction + ' -> ' + layer.diff_id[:10]
+        layer.origins.add_notice_origin(origin_layer)
+        origin_info = formats.invoke_for_snippets
+        layer.origins.add_notice_origin(origin_info)
         if 'RUN' in instruction:
             # for Docker the created_by comes from the instruction in the
             # dockerfile
-            # each layer is an origin
-            origin_str = layer.diff_id[:10] + ': ' + instruction
             run_command_line = instruction.split(' ', 1)[1]
             cmd_list, msg = common.filter_install_commands(run_command_line)
             if msg:
                 layer.origins.add_notice_to_origins(
-                    origin_str, Notice(msg, 'warning'))
+                    origin_info, Notice(msg, 'warning'))
             for command in cmd_list:
+                origin_cmd = content.print_package_invoke(command.name)
+                layer.origins.add_notice_origin(origin_cmd)
                 pkg_list = common.get_installed_package_names(command)
                 all_pkgs = []
                 for pkg_name in pkg_list:

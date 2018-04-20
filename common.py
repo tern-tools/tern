@@ -11,6 +11,7 @@ from classes.command import Command
 from command_lib import command_lib as cmdlib
 from report import formats
 from report import errors
+from report import content
 from utils import cache
 from utils import constants
 from utils.container import check_container
@@ -86,6 +87,9 @@ def add_base_packages(image):
     # information under the base image tag in the command library
     listing = cmdlib.get_base_listing(image.name, image.tag)
     # create the origin for the base image
+    origin_info = formats.invoking_base_commands + '\n' + \
+        content.print_base_invoke(image.name, image.tag)
+    image.origins.add_notice_origin(origin_info)
     origin_str = 'command_lib/base.yml'
     if listing:
         shell, msg = cmdlib.get_image_shell(listing)
@@ -261,10 +265,14 @@ def filter_install_commands(shell_command_line):
         commands
         3. Return installed command objects, and messages for ignored commands
         and unrecognized commands'''
+    report = ''
     command_list = get_shell_commands(shell_command_line)
     for command in command_list:
         cmdlib.set_command_attrs(command)
     ignore_msgs, filter1 = remove_ignored_commands(command_list)
     unrec_msgs, filter2 = remove_unrecognized_commands(filter1)
-    report = formats.ignored + ignore_msgs + formats.unrecognized + unrec_msgs
+    if ignore_msgs:
+        report = report + formats.ignored + ignore_msgs
+    if unrec_msgs:
+        report = report + formats.unrecognized + unrec_msgs
     return filter2, report
