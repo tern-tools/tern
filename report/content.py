@@ -104,3 +104,16 @@ def print_full_report(image):
                         package_origin, '\t\t', '\t\t\t')
             notes = notes + formats.package_demarkation
     return notes
+
+
+def print_summary_report(image):
+    '''Given an image, only print the package information'''
+    notes = ''
+    for layer in image.layers:
+        if layer.import_image:
+            notes = notes + print_summary_report(layer.import_image)
+        else:
+            for package in layer.packages:
+                notes = notes + print_package(package, '')
+            notes = notes + formats.package_demarkation
+    return notes
