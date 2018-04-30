@@ -8,7 +8,7 @@ import logging
 from classes.package import Package
 from classes.notice import Notice
 from classes.command import Command
-from command_lib import command_lib as cmdlib
+from command_lib import command_lib
 from report import formats
 from report import errors
 from report import content
@@ -85,14 +85,14 @@ def add_base_packages(image):
         3. Create a list of packages
         4. Add them to the image'''
     # information under the base image tag in the command library
-    listing = cmdlib.get_base_listing(image.name, image.tag)
+    listing = command_lib.get_base_listing(image.name, image.tag)
     # create the origin for the base image
     origin_info = formats.invoking_base_commands + '\n' + \
         content.print_base_invoke(image.name, image.tag)
     image.origins.add_notice_origin(origin_info)
     origin_str = 'command_lib/base.yml'
     if listing:
-        shell, msg = cmdlib.get_image_shell(listing)
+        shell, msg = command_lib.get_image_shell(listing)
         if not shell:
             # add a warning notice for no shell in the command library
             logger.warning('No shell listing in command library. '
@@ -114,13 +114,13 @@ def add_base_packages(image):
         # for now, we add the list of packages to all the layers in a
         # starting base image
         if check_container():
-            names, n_msg = cmdlib.get_pkg_attr_list(
+            names, n_msg = command_lib.get_pkg_attr_list(
                 shell, listing['names'])
-            versions, v_msg = cmdlib.get_pkg_attr_list(
+            versions, v_msg = command_lib.get_pkg_attr_list(
                 shell, listing['versions'])
-            licenses, l_msg = cmdlib.get_pkg_attr_list(
+            licenses, l_msg = command_lib.get_pkg_attr_list(
                 shell, listing['licenses'])
-            src_urls, u_msg = cmdlib.get_pkg_attr_list(
+            src_urls, u_msg = command_lib.get_pkg_attr_list(
                 shell, listing['src_urls'])
             # add a notice to the image if something went wrong
             invoke_msg = n_msg + v_msg + l_msg + u_msg
@@ -157,10 +157,10 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
     # create a NoticeOrigin for the package
     origin_str = 'command_lib/snippets.yml'
     # version
-    version_listing, listing_msg = cmdlib.check_library_key(
+    version_listing, listing_msg = command_lib.check_library_key(
         pkg_listing, 'version')
     if version_listing:
-        version_list, invoke_msg = cmdlib.get_pkg_attr_list(
+        version_list, invoke_msg = command_lib.get_pkg_attr_list(
             shell, version_listing, package_name=pkg_obj.name)
         if version_list:
             pkg_obj.version = version_list[0]
@@ -171,10 +171,10 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         pkg_obj.origins.add_notice_to_origins(
             origin_str, Notice(listing_msg, 'warning'))
     # license
-    license_listing, listing_msg = cmdlib.check_library_key(
+    license_listing, listing_msg = command_lib.check_library_key(
         pkg_listing, 'license')
     if license_listing:
-        license_list, invoke_msg = cmdlib.get_pkg_attr_list(
+        license_list, invoke_msg = command_lib.get_pkg_attr_list(
             shell, license_listing, package_name=pkg_obj.name)
         if license_list:
             pkg_obj.license = license_list[0]
@@ -185,10 +185,10 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         pkg_obj.origins.add_notice_to_origins(
             origin_str, Notice(listing_msg, 'warning'))
     # src_urls
-    url_listing, listing_msg = cmdlib.check_library_key(
+    url_listing, listing_msg = command_lib.check_library_key(
         pkg_listing, 'license')
     if url_listing:
-        url_list, invoke_msg = cmdlib.get_pkg_attr_list(
+        url_list, invoke_msg = command_lib.get_pkg_attr_list(
             shell, url_listing, package_name=pkg_obj.name)
         if url_list:
             pkg_obj.src_url = url_list[0]
@@ -204,9 +204,9 @@ def get_package_dependencies(package_listing, package_name, shell):
     '''The package listing is the result of looking up the command name in the
     command library. Given this listing, the package name and the shell
     return a list of package dependency names'''
-    deps_listing, deps_msg = cmdlib.check_library_key(package_listing, 'deps')
+    deps_listing, deps_msg = command_lib.check_library_key(package_listing, 'deps')
     if deps_listing:
-        deps_list, invoke_msg = cmdlib.get_pkg_attr_list(
+        deps_list, invoke_msg = command_lib.get_pkg_attr_list(
             shell, deps_listing, package_name=package_name)
         if deps_list:
             return list(set(deps_list)), ''
@@ -268,7 +268,7 @@ def filter_install_commands(shell_command_line):
     report = ''
     command_list = get_shell_commands(shell_command_line)
     for command in command_list:
-        cmdlib.set_command_attrs(command)
+        command_lib.set_command_attrs(command)
     ignore_msgs, filter1 = remove_ignored_commands(command_list)
     unrec_msgs, filter2 = remove_unrecognized_commands(filter1)
     if ignore_msgs:

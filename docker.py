@@ -10,13 +10,13 @@ import subprocess
 from classes.docker_image import DockerImage
 from classes.notice import Notice
 from classes.package import Package
-from utils import dockerfile as df
-from utils import container as cont
-from utils import constants as const
+from utils import dockerfile
+from utils import container
+from utils import constants
 from report import errors
 from report import formats
 from report import content
-from command_lib import command_lib as cmdlib
+from command_lib import command_lib
 import common
 
 '''
@@ -25,12 +25,12 @@ given a Dockerfile
 '''
 
 # dockerfile
-dockerfile = ''
+dockerfile_global = ''
 # dockerfile commands
 docker_commands = []
 
 # global logger
-logger = logging.getLogger(const.logger_name)
+logger = logging.getLogger(constants.logger_name)
 
 
 def load_docker_commands(dockerfile_path):
@@ -38,10 +38,10 @@ def load_docker_commands(dockerfile_path):
     if not os.path.isfile(dockerfile_path):
         raise IOError('{} does not exist'.format(dockerfile_path))
     global docker_commands
-    docker_commands = df.get_directive_list(df.get_command_list(
+    docker_commands = dockerfile.get_directive_list(dockerfile.get_command_list(
         dockerfile_path))
-    global dockerfile
-    dockerfile = dockerfile_path
+    global dockerfile_global
+    dockerfile_global = dockerfile_path
 
 
 def print_dockerfile_base(base_instructions):
@@ -61,15 +61,15 @@ def get_dockerfile_base():
     3. Make notes based on what the image and tag rules are
     4. Return an image object and the base instructions string'''
     try:
-        base_instructions = df.get_base_instructions(docker_commands)
-        base_image_tag = df.get_base_image_tag(base_instructions)
+        base_instructions = dockerfile.get_base_instructions(docker_commands)
+        base_image_tag = dockerfile.get_base_image_tag(base_instructions)
         dockerfile_lines = print_dockerfile_base(base_instructions)
         # check for scratch
         if base_image_tag[0] == 'scratch':
             # there is no base image - return no image object
             return None
         # there should be some image object here
-        repotag = base_image_tag[0] + df.tag_separator + base_image_tag[1]
+        repotag = base_image_tag[0] + dockerfile.tag_separator + base_image_tag[1]
         from_line = 'FROM ' + repotag
         base_image = DockerImage(repotag)
         base_image.origins.add_notice_origin(dockerfile_lines)
@@ -92,13 +92,13 @@ def get_dockerfile_base():
         return base_image, dockerfile_lines
     except ValueError as e:
         logger.warning(errors.cannot_parse_base_image.format(
-            dockerfile=dockerfile, error_msg=e))
+            dockerfile=dockerfile_global, error_msg=e))
         return None
 
 
 def get_dockerfile_image_tag():
     '''Return the image and tag used to build an image from the dockerfile'''
-    image_tag_string = const.image + df.tag_separator + const.tag
+    image_tag_string = constants.image + dockerfile.tag_separator + constants.tag
     return image_tag_string
 
 
@@ -109,10 +109,10 @@ def is_build():
     success = False
     msg = ''
     try:
-        cont.build_container(dockerfile, image_tag_string)
+        container.build_container(dockerfile_global, image_tag_string)
     except subprocess.CalledProcessError as error:
         print(errors.docker_build_failed.format(
-            dockerfile=dockerfile, error_msg=error.output))
+            dockerfile=dockerfile_global, error_msg=error.output))
         success = False
         logger.error('Error building image: ' + error.output)
         msg = error.output
@@ -130,7 +130,7 @@ def created_to_instruction(created_by):
     instruction = re.sub('/bin/sh -c', '', created_by).strip()
     instruction = re.sub('\#\(nop\)', '', instruction).strip()
     first = instruction.split(' ').pop(0)
-    if first not in df.directives and 'RUN' not in instruction:
+    if first not in dockerfile.directives and 'RUN' not in instruction:
         instruction = 'RUN ' + instruction
     return instruction
 
@@ -167,7 +167,7 @@ def add_packages_from_history(image_obj, shell):
                 pkg_list = common.get_installed_package_names(command)
                 all_pkgs = []
                 for pkg_name in pkg_list:
-                    pkg_listing = cmdlib.get_package_listing(
+                    pkg_listing = command_lib.get_package_listing(
                         command.name, pkg_name)
                     deps, deps_msg = common.get_package_dependencies(
                         pkg_listing, pkg_name, shell)
@@ -178,7 +178,7 @@ def add_packages_from_history(image_obj, shell):
                 unique_pkgs = list(set(all_pkgs))
                 for pkg_name in unique_pkgs:
                     pkg = Package(pkg_name)
-                    pkg_listing = cmdlib.get_package_listing(
+                    pkg_listing = command_lib.get_package_listing(
                         command.name, pkg_name)
                     common.fill_package_metadata(pkg, pkg_listing, shell)
                     layer.add_package(pkg)
