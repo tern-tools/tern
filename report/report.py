@@ -15,7 +15,7 @@ from classes.image import Image
 from classes.image_layer import ImageLayer
 from classes.notice import Notice
 from classes.package import Package
-from command_lib import command_lib as cmdlib
+from command_lib import command_lib
 import common
 import docker
 
@@ -25,6 +25,7 @@ Create a report
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
+
 
 def write_report(report):
     '''Write the report to a file'''
@@ -126,7 +127,6 @@ def generate_report(args, *images):
     write_report(report)
 
 
-
 def execute_dockerfile(args):
     '''Execution path if given a dockerfile'''
     logger.debug('Setting up...')
@@ -155,8 +155,8 @@ def execute_dockerfile(args):
         # This step actually needs to go to the beginning but since
         # there is no way of tracking imported images from within
         # the docker image history, we build after importing the base image
-        shell, msg = cmdlib.get_image_shell(
-            cmdlib.get_base_listing(base_image.name, base_image.tag))
+        shell, msg = command_lib.get_image_shell(
+            command_lib.get_base_listing(base_image.name, base_image.tag))
         if not shell:
             shell = constants.shell
         logger.debug('Building image...')
