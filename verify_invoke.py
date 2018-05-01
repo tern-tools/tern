@@ -6,7 +6,7 @@ SPDX-License-Identifier: BSD-2-Clause
 import argparse
 import subprocess
 
-import utils.commands as cmds
+import utils.commands
 from common import check_for_unique_package
 
 '''
@@ -19,7 +19,7 @@ produce expected results
 def look_up_lib(keys):
     '''Return the dictionary for the keys given
     Assuming that the keys go in order'''
-    subd = cmds.command_lib[keys.pop(0)]
+    subd = utils.commands.command_lib[keys.pop(0)]
     while keys:
         subd = subd[keys.pop(0)]
     return subd
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         a container produce expected results.
         Give a list of keys to point to in the command library and the
         image''')
-    parser.add_argument('--container', default=cmds.container,
+    parser.add_argument('--container', default=utils.commands.container,
                         help='Name of the running container')
     parser.add_argument('--keys', nargs='+',
                         help='List of keys to look up in the command library')
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     else:
         info_dict = look_up_lib(args.keys)
     try:
-        result = cmds.get_pkg_attr_list(
+        result = utils.commands.get_pkg_attr_list(
             args.shell, info_dict, args.package, args.container)
         print(result)
         print(len(result))

@@ -5,22 +5,22 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import unittest
 
-import utils.commands as cmds
-import utils.metadata as md
+import utils.commands
+import utils.metadata
 
 
 class TestUtilCommands(unittest.TestCase):
 
     def setUp(self):
-        cmds.docker_command(cmds.pull, 'debian:jessie')
+        utils.commands.docker_command(utils.commands.pull, 'debian:jessie')
 
     def testImageMetadata(self):
-        self.assertTrue(cmds.extract_image_metadata('debian:jessie'))
-        self.assertFalse(cmds.extract_image_metadata('repo:tag'))
+        self.assertTrue(utils.commands.extract_image_metadata('debian:jessie'))
+        self.assertFalse(utils.commands.extract_image_metadata('repo:tag'))
 
     def tearDown(self):
-        cmds.remove_image('debian:jessie')
-        md.clean_temp()
+        utils.commands.remove_image('debian:jessie')
+        utils.metadata.clean_temp()
 
 
 if __name__ == '__main__':
