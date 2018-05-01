@@ -18,6 +18,7 @@ from classes.package import Package
 from command_lib import command_lib
 import common
 import docker
+import sys
 
 '''
 Create a report
@@ -130,6 +131,11 @@ def generate_report(args, *images):
 def execute_dockerfile(args):
     '''Execution path if given a dockerfile'''
     logger.debug('Setting up...')
+    try:
+        container.docker_command(['docker', 'ps'])
+    except subprocess.CalledProcessError as error:
+        logger.error('Docker daemon is not running: {0}'.format(error.output.decode('utf-8')))
+        sys.exit()
     setup(args.dockerfile)
     dockerfile_parse = False
     # try to get Docker base image metadata
