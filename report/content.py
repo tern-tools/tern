@@ -3,12 +3,13 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
-import command_lib.command_lib as cmdlib
+import command_lib.command_lib
 from report import formats
 
 '''
 Functions to generate content for the report
 '''
+
 
 def print_invoke_list(info_dict, info):
     '''Print out the list of command snippets that get invoked to retrive
@@ -34,7 +35,7 @@ def print_invoke_list(info_dict, info):
 def print_base_invoke(base_image, base_tag):
     '''Given the base image and tag in a tuple return a string containing
     the command_lib/base.yml'''
-    info = cmdlib.get_base_listing(base_image, base_tag)
+    info = command_lib.command_lib.get_base_listing(base_image, base_tag)
     report = ''
     report = report + print_invoke_list(info, 'names')
     report = report + print_invoke_list(info, 'versions')
@@ -49,7 +50,7 @@ def print_package_invoke(command_name):
     package name, return a string with the list of commands that will be
     invoked in the container'''
     report = ''
-    command_listing = cmdlib.get_command_listing(command_name)
+    command_listing = command_lib.command_lib.get_command_listing(command_name)
     if command_listing:
         pkg_list = command_listing['packages']
         for pkg_dict in pkg_list:
