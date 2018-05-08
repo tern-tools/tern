@@ -4,13 +4,11 @@
 
 Tern is an inspection tool to find the metadata of the packages installed in a container image. It runs scripts from the "command library" against the container and collates the information into a Bill of Materials (BOM) report. Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies.
 
-## Why Tern?
-Tern was created to help developers meet open source compliance requirements for containers. Tools like Docker make it easy to build and distribute containers but keeping track of what is installed in the container is left to dev or devops teams. Knowing your container's Bill of Materials not only helps you meet your open source compliance obligations, but helps you debug integration and build errors and identify vulnerable packages in your running containers easily.
-
 ## Table of Contents
+- [FAQ](/docs/faq.md)
 - [Getting Started](#getting-started)
 - [Project Status](#project-status)
-- [Documentation](#documetation)
+- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Glossary of Terms](/docs/glossary.md)
 - [Architecture](/docs/architecture.md)
@@ -59,16 +57,7 @@ $ python tests/<test file>.py
 ```
 ## Project Status<a name="project-status"/>
 
-Tern currently has these features:
-* A Cache to store layers with the packages that are installed in those layers
-* A report containing a line-by-line 'walkthrough' of the Dockerfile to say what packages were installed in each line
-* A summary report
-* The complete list of dependencies are retrieved
-
-Current work:
-* Code refactoring
-* Layering of container filesystems one by one
-* Source retrieval
+We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 0.1.0.
 
 ## Documentation<a name="documentation"/>
 Architecture, function blocks, code descriptions and the project roadmap are located in the docs folder. We also welcome contributions to the documentation. See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
