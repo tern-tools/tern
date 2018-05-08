@@ -10,7 +10,11 @@ Tern was created to help developers meet open source compliance requirements for
 ## Table of Contents
 - [Getting Started](#getting-started)
 - [Project Status](#project-status)
+- [Documentation](#documetation)
 - [Contributing](#contributing)
+- [Glossary of Terms](/docs/glossary.md)
+- [Architecture](/docs/architecture.md)
+- [Navigating the Code](/docs/navigating-the-code.md)
 
 ## Getting Started<a name="getting-started"/>
 
@@ -66,8 +70,8 @@ Current work:
 * Layering of container filesystems one by one
 * Source retrieval
 
-## Documentation
-Architecture, function blocks, code descriptions and the project roadmap are located on the Wiki. Feel free to use it as a guide to usage and development. We also welcome contributions to the documentation. See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
+## Documentation<a name="documentation"/>
+Architecture, function blocks, code descriptions and the project roadmap are located in the docs folder. We also welcome contributions to the documentation. See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
 
 ## Get Involved<a name="contributing"/>
 
