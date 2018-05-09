@@ -1,4 +1,4 @@
-### Contributing to the Tern project
+# Contributing to the Tern project
 
 Once again, we hope you have read our [code of conduct](/CODE_OF_CONDUCT.md) before starting.
 
@@ -11,19 +11,26 @@ You can contribute in the following ways:
 * Improving the Unit and Functional Tests
 * Improving the Core Project
 
-### Skills for contributing
+## Skills for contributing
 
 * English (not necessarily fluent but workable)
 * Python (a working knowledge of object oriented Python would be nice, but if you know how python functions/modules work, this is enough to get you started)
 * YAML (Tern uses yaml files heavily for data lookup. An overview of YAML can be found [here](http://yaml.org/))
 
-### Keeping in touch
+## Keeping in touch
 
 If you would like to ask a question or start a discussion, post a topic on the [public forum](https://groups.google.com/forum/#!forum/tern-discussion). You will need to apply to join the group before posting. We will respond to your question or topic within three days unless the post was over the weekend in which case we may take longer to respond. This is our primary communication channel so it is highly likely that you will get a response here.
 
 If you would like to chat live, you can join the [slack channel](https://vmwarecode.slack.com/messages/tern). If you don't have an @vmware.com or @emc.com email, please click [here](https://code.vmware.com/join), enter your email address and click "Request Invite". Although we monitor the channel, we may not respond right away and if the same question was asked on the forum, we will choose to respond there.
 
-### An overview of the contribution lifecycle
+## Learn about Tern
+
+- [FAQ](/docs/faq.md)
+- [Glossary](/docs/glossary.md)
+- [Architecture](/docs/architecture.md)
+- [Navigating the Code](/docs/navigating-the-code.md)
+
+## An overview of the contribution lifecycle
 
 Once you decide that you would like to play around with the project
 
@@ -46,7 +53,7 @@ Expect to spend time resolving conflicts here.
 8. A reviewer will further communicate with you through the PR.
 9. If everything looks good the PR will be accepted.
 
-### Commit message format
+## Commit message format
 
 The commit message of your PR should be able to communicate what problem/opportunity the PR addresses without any reference to forum messages or discussions on slack or IRL. You may make a reference to a github issue number using the github format (eg: Resolves: #1). Here is an overview of what is needed in a good commit message taken from [this blog](https://chris.beams.io/posts/git-commit/)
 
@@ -101,7 +108,7 @@ See also: #456, #789
 
 Signed-off-by: Some Dev <somedev@example.com>
 ```
-### Filing an Issue
+## Filing an Issue
 
 You may file an issue through the github issue tracker. Please follow the same guidelines as the commit message guidelines when formatting your issue. Please make sure to include the following for quick debugging and resolution:
 
@@ -113,7 +120,7 @@ You may file an issue through the github issue tracker. Please follow the same g
 
 You may file an issue and create a PR that references said issue. This, however, does not guarantee acceptance of the PR. Contributing in this way works for small bug or documentation fixes but doesn't lend itself well to large updates. We encourage you to start a discussion on the forum. Typically a follow up issue will be created referencing the topic.
 
-### Troubleshooting
+## Troubleshooting
 
 * Tern produces a generic message about being unable to execute a docker command with a CalledProcessError from the get go: Make sure the docker daemon is running first
 * Unable to find module 'yaml': make sure to activate the python virtualenv first and then run pip install -r requirements.txt 
