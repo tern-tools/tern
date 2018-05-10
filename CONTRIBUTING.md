@@ -30,6 +30,24 @@ If you would like to chat live, you can join the [slack channel](https://vmwarec
 - [Architecture](/docs/architecture.md)
 - [Navigating the Code](/docs/navigating-the-code.md)
 
+## Coding Style
+
+Tern follows general [PEP8](https://www.python.org/dev/peps/pep-0008/) style guidelines. Apart from that, these specific rules apply:
+- Indents for .py files are 4 spaces long
+- Indents for .yml files are 2 spaces long
+- Modules are listed as external dependencies, followed by a space, followed by internal dependencies, listed individually and in alphabetical order. For example:
+```
+# external dependencies not part of Tern
+# possibly part of the python package or installed via pip
+import os
+import sys
+
+# internal dependencies that are part of Tern
+import common
+import docker
+```
+- Minimize [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity). Most python style checkers also come with McCabe complexity checkers. A good rule of thumb is to limit the number of if-then-else statements to 3 and return once in a module.
+
 ## An overview of the contribution lifecycle
 
 Once you decide that you would like to play around with the project
