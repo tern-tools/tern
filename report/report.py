@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import logging
 import subprocess
+import sys
 
 from report import content
 from utils import container
@@ -130,6 +131,12 @@ def generate_report(args, *images):
 def execute_dockerfile(args):
     '''Execution path if given a dockerfile'''
     logger.debug('Setting up...')
+    try:
+        container.docker_command(['docker', 'ps'])
+    except subprocess.CalledProcessError as error:
+        logger.error('Docker daemon is not running: {0}'.format(error.output.decode('utf-8')))
+        sys.exit()
+
     setup(args.dockerfile)
     dockerfile_parse = False
     # try to get Docker base image metadata
