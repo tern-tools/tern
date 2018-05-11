@@ -28,11 +28,13 @@ cache_file = 'cache.yml'
 shell = '/bin/sh'
 # path where resolv.conf lives
 resolv_path = '/etc/resolv.conf'
+# directory where layer.tar can be extracted to
+untar_dir = 'contents'
 # rootfs working directory
 # this is relative to where tern is
 workdir = 'workdir'
-# rootfs directory where layer diff filesystem is extracted
+# rootfs directory where overlay merges filesystems
 # this is relative to where tern is
-upperdir = 'updir'
+mergedir = 'mergedir'
 # report file
 report_file = 'report.txt'
