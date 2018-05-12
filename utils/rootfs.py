@@ -129,12 +129,17 @@ def run_chroot_command(command_string, shell):
     return result
 
 
-def unwind_mount():
-    '''Unmount all the directories'''
+def undo_mount():
+    '''Unmount proc, sys, and dev directories'''
     rootfs_path = os.path.join(constants.temp_folder, constants.mergedir)
     root_command(unmount, os.path.join(rootfs_path, 'proc'))
     root_command(unmount, os.path.join(rootfs_path, 'sys'))
     root_command(unmount, os.path.join(rootfs_path, 'dev'))
+
+
+def unmount_rootfs():
+    '''Unmount the overlay filesystem'''
+    rootfs_path = os.path.join(constants.temp_folder, constants.mergedir)
     root_command(unmount, '-rf', rootfs_path)
 
 
