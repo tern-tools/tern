@@ -41,11 +41,6 @@ vagrant@ubuntu-bionic:~$ cat ~/.ssh/id_rsa.pub
 ```
 Then copy the output and paste it in the box on GitHub labeled "Key," then give it a title and save.  
 
-# Clone the project repository
-```
-vagrant@ubuntu-bionic:~$ git clone https://github.com/vmware/tern.git
-```
-
 # Check packages
 ## Ubuntu repository versions
 
@@ -81,18 +76,16 @@ vagrant@ubuntu-bionic:~$ sudo apt-get install docker.io
 vagrant@ubuntu-bionic:~$ sudo usermod -a -G docker vagrant
 ```
 
-*Note: -a appends any changes you make to the user group, -G is a secondary user group to which the specified user is added*  
+*Note1: -a appends any changes you make to the user group, -G is a secondary user group to which the specified user is added*  
+*Note2: if this doesn't work, you may have to log out and then log back in to vagrant.*
 
-# Create the tern environment
-
+# Clone the project repository
 ```
-vagrant@ubuntu-bionic:~$ python3 -m venv ternenv
+vagrant@ubuntu-bionic:~$ git clone https://github.com/vmware/tern.git
 ```
 
-# Activate the tern environment
-
+# Run the program
 ```
-$ source bin/activate
 $ cd tern
 $ pip install -r requirements.txt
 $ ./tern report -d samples/photon_git/Dockerfile     # Runs the program against a sample Docker file
