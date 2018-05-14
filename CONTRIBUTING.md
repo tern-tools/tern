@@ -23,6 +23,9 @@ If you would like to ask a question or start a discussion, post a topic on the [
 
 If you would like to chat live, you can join the [slack channel](https://vmwarecode.slack.com/messages/tern). If you don't have an @vmware.com or @emc.com email, please click [here](https://code.vmware.com/join), enter your email address and click "Request Invite". Although we monitor the channel, we may not respond right away and if the same question was asked on the forum, we will choose to respond there.
 
+## Set-up a virtual machine for the project
+To work on Tern, you may want to set-up a virtual machine that can run Ubuntu. To do so, follow the [instructions here.](/docs/contributing-setup.md)
+
 ## Learn about Tern
 
 - [FAQ](/docs/faq.md)
