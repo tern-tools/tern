@@ -146,10 +146,11 @@ def undo_mount():
     root_command(unmount, os.path.join(rootfs_path, 'dev'))
 
 
-def unmount_rootfs():
+def unmount_rootfs(num_layers):
     '''Unmount the overlay filesystem'''
     rootfs_path = os.path.join(constants.temp_folder, constants.mergedir)
-    root_command(unmount, '-rl', rootfs_path)
+    for _ in range(num_layers):
+        root_command(unmount, '-rl', rootfs_path)
 
 
 def clean_up():
