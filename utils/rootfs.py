@@ -5,7 +5,6 @@ SPDX-License-Identifier: BSD-2-Clause
 import logging
 import os
 import subprocess
-import shutil
 import tarfile
 
 from . import constants
@@ -63,6 +62,16 @@ def get_untar_dir(layer_tarfile):
     '''get the directory to untar the layer tar file'''
     return os.path.join(constants.temp_folder, os.path.dirname(
         layer_tarfile), constants.untar_dir)
+
+
+def set_up():
+    '''Create required directories'''
+    workdir_path = os.path.join(constants.temp_folder, constants.workdir)
+    mergedir_path = os.path.join(constants.temp_folder, constants.mergedir)
+    if not os.path.isdir(workdir_path):
+        os.mkdir(workdir_path)
+    if not os.path.isdir(mergedir_path):
+        os.mkdir(mergedir_path)
 
 
 def extract_layer_tar(layer_tar_path, directory_path):
@@ -140,12 +149,12 @@ def undo_mount():
 def unmount_rootfs():
     '''Unmount the overlay filesystem'''
     rootfs_path = os.path.join(constants.temp_folder, constants.mergedir)
-    root_command(unmount, '-rf', rootfs_path)
+    root_command(unmount, '-rl', rootfs_path)
 
 
 def clean_up():
     '''Remove all the setup directories'''
     mergedir_path = os.path.join(constants.temp_folder, constants.mergedir)
     workdir_path = os.path.join(constants.temp_folder, constants.workdir)
-    shutil.rmtree(mergedir_path)
-    shutil.rmtree(workdir_path)
+    root_command(remove, mergedir_path)
+    root_command(remove, workdir_path)
