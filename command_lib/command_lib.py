@@ -11,6 +11,7 @@ import yaml
 from utils.container import docker_command
 from utils.container import execute
 from utils.constants import container
+from utils import rootfs
 from report import errors
 
 '''
@@ -158,12 +159,9 @@ def set_command_attrs(command_obj):
         return False
 
 
-def invoke_in_container(snippet_list, shell, package='', override=''):
-    '''Invoke the commands from the invoke dictionary within a running
-    container
-    To override the name of the running container pass the name of another
-    running container'''
-    # construct the full command
+def collate_snippets(snippet_list, package=''):
+    '''Given a list of snippets, make a concatenated string with all the
+    commands'''
     full_cmd = ''
     last_index = len(snippet_list) - 1
     for index in range(0, last_index):
@@ -171,6 +169,16 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
             FormatAwk(package=package)) + ' && '
     full_cmd = full_cmd + snippet_list[last_index].format_map(
         FormatAwk(package=package))
+    return full_cmd
+
+
+def invoke_in_container(snippet_list, shell, package='', override=''):
+    '''Invoke the commands from the invoke dictionary within a running
+    container
+    To override the name of the running container pass the name of another
+    running container'''
+    # construct the full command
+    full_cmd = collate_snippets(snippet_list, package)
     try:
         if override:
             result = docker_command(execute, override, shell, '-c', full_cmd)
@@ -186,6 +194,23 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
         logger.warning("Error executing command inside the container")
         raise subprocess.CalledProcessError(
             1, cmd=full_cmd, output=error.output.decode('utf-8'))
+
+
+def invoke_in_rootfs(snippet_list, shell, package=''):
+    '''Invoke the commands from the invoke dictionary in a root filesystem
+    assuming the root filesystem is ready to accept commands'''
+    # construct the full command
+    full_cmd = collate_snippets(snippet_list, package)
+    try:
+        result = rootfs.run_chroot_command(full_cmd, shell)
+        try:
+            result = result.decode('utf-8')
+        except AttributeError:
+            pass
+        return result
+    except subprocess.CalledProcessError as error:
+        logger.warning('Error executing snippets: {0}'.format(error))
+        raise
 
 
 def get_pkg_attr_list(shell, attr_dict, package_name='', override=''):
