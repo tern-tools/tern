@@ -133,9 +133,14 @@ def run_chroot_command(command_string, shell):
     target_dir = os.path.join(constants.temp_folder, constants.mergedir)
     mount_proc = '--mount-proc=' + os.path.join(
         os.path.abspath(target_dir), 'proc')
-    result = root_command(unshare_pid, mount_proc, 'chroot', target_dir,
-                          shell, '-c', command_string)
-    return result
+    try:
+        result = root_command(unshare_pid, mount_proc, 'chroot', target_dir,
+                              shell, '-c', command_string)
+        return result
+    except subprocess.CalledProcessError as error:
+        logger.warning("Error executing command in chroot")
+        raise subprocess.CalledProcessError(
+            1, cmd=command_string, output=error.output.decode('utf-8'))
 
 
 def undo_mount():
