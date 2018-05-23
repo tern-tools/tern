@@ -213,11 +213,16 @@ def invoke_in_rootfs(snippet_list, shell, package=''):
         raise
 
 
-def get_pkg_attr_list(shell, attr_dict, package_name='', override=''):
+def get_pkg_attr_list(shell, attr_dict, package_name='', chroot=True,
+                      override=''):
     '''The command library has package attributes listed like this:
         {invoke: {1: {container: [command1, command2]},
                   2: {host: [command1, command2]}}, delimiter: <delimiter}
-    Get the result of the invokes, apply the delimiter to create a list
+    Given the shell to use, the attribute dictionary and the package name, get
+    the result of the invokes, apply the delimiter to create a list and
+    return the list.
+    chroot is used to indicate whether to run the commands in a chroot
+    environment and defaults to True
     override is used for an alternate container name and defaults to
     an empty string'''
     attr_list = []
@@ -226,12 +231,23 @@ def get_pkg_attr_list(shell, attr_dict, package_name='', override=''):
         # invoke the commands
         for step in range(1, len(attr_dict['invoke'].keys()) + 1):
             if 'container' in attr_dict['invoke'][step].keys():
-                try:
-                    result = invoke_in_container(
-                        attr_dict['invoke'][step]['container'], shell,
-                        package=package_name, override=override)
-                except subprocess.CalledProcessError as error:
-                    error_msgs = error_msgs + error.output
+                snippet_list = attr_dict['invoke'][step]['container']
+                result = ''
+                # if we need to run in a chroot environment
+                if chroot:
+                    try:
+                        result = invoke_in_rootfs(
+                            snippet_list, shell, package=package_name)
+                    except subprocess.CalledProcessError as error:
+                        error_msgs = error_msgs + error.output
+                else:
+                # if we need to run in a container
+                    try:
+                        result = invoke_in_container(
+                            snippet_list, shell, package=package_name,
+                            override=override)
+                    except subprocess.CalledProcessError as error:
+                        error_msgs = error_msgs + error.output
                 result = result[:-1]
                 if 'delimiter' in attr_dict.keys():
                     res_list = result.split(attr_dict['delimiter'])
