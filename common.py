@@ -115,13 +115,13 @@ def add_base_packages(image):
         # starting base image
         if check_container():
             names, n_msg = command_lib.get_pkg_attr_list(
-                shell, listing['names'])
+                shell, listing['names'], chroot=False)
             versions, v_msg = command_lib.get_pkg_attr_list(
-                shell, listing['versions'])
+                shell, listing['versions'], chroot=False)
             licenses, l_msg = command_lib.get_pkg_attr_list(
-                shell, listing['licenses'])
+                shell, listing['licenses'], chroot=False)
             src_urls, u_msg = command_lib.get_pkg_attr_list(
-                shell, listing['src_urls'])
+                shell, listing['src_urls'], chroot=False)
             # add a notice to the image if something went wrong
             invoke_msg = n_msg + v_msg + l_msg + u_msg
             if invoke_msg:
@@ -161,7 +161,7 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         pkg_listing, 'version')
     if version_listing:
         version_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, version_listing, package_name=pkg_obj.name)
+            shell, version_listing, package_name=pkg_obj.name, chroot=False)
         if version_list:
             pkg_obj.version = version_list[0]
         else:
@@ -175,7 +175,7 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         pkg_listing, 'license')
     if license_listing:
         license_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, license_listing, package_name=pkg_obj.name)
+            shell, license_listing, package_name=pkg_obj.name, chroot=False)
         if license_list:
             pkg_obj.license = license_list[0]
         else:
@@ -189,7 +189,7 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         pkg_listing, 'license')
     if url_listing:
         url_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, url_listing, package_name=pkg_obj.name)
+            shell, url_listing, package_name=pkg_obj.name, chroot=False)
         if url_list:
             pkg_obj.src_url = url_list[0]
         else:
@@ -207,7 +207,7 @@ def get_package_dependencies(package_listing, package_name, shell):
     deps_listing, deps_msg = command_lib.check_library_key(package_listing, 'deps')
     if deps_listing:
         deps_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, deps_listing, package_name=package_name)
+            shell, deps_listing, package_name=package_name, chroot=False)
         if deps_list:
             return list(set(deps_list)), ''
         else:
