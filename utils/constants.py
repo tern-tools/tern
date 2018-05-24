@@ -7,7 +7,8 @@ SPDX-License-Identifier: BSD-2-Clause
 Constants
 '''
 
-# temporary folder for extracting docker image
+# temporary folder for extracting container image
+# this is relative to where the tern executable is
 temp_folder = 'temp'
 # built image name
 image = 'testimage'
@@ -25,5 +26,15 @@ manifest_file = 'manifest.json'
 cache_file = 'cache.yml'
 # default shell
 shell = '/bin/sh'
+# path where resolv.conf lives
+resolv_path = '/etc/resolv.conf'
+# directory where layer.tar can be extracted to
+untar_dir = 'contents'
+# rootfs working directory
+# this is relative to where tern is
+workdir = 'workdir'
+# rootfs directory where overlay merges filesystems
+# this is relative to where tern is
+mergedir = 'mergedir'
 # report file
 report_file = 'report.txt'
