@@ -2,7 +2,7 @@
 
 # Welcome to the Tern Project
 
-Tern is an inspection tool to find the metadata of the packages installed in a container image. It runs scripts from the "command library" against the container and collates the information into a Bill of Materials (BOM) report. Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies.
+Tern is an inspection tool to find the metadata of the packages installed in a container image. It runs scripts from the "command library" against the container and collates the information into a Bill of Materials (BOM) report. Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration, and deployment strategies.
 
 ## Table of Contents
 - [FAQ](/docs/faq.md)
@@ -64,7 +64,7 @@ Architecture, function blocks, code descriptions and the project roadmap are loc
 
 ## Get Involved<a name="contributing"/>
 
-Do you have questions about Tern? Do you think it can do better? Would you like to make it better? You can get involved by giving your feedback and contributing to the code, documentation and conversation!
+Do you have questions about Tern? Do you think it can do better? Would you like to make it better? You can get involved by giving your feedback and contributing to the code, documentation, and conversation!
 
 Please read our [code of conduct](/CODE_OF_CONDUCT.md) first.
 
