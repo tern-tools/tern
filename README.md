@@ -2,7 +2,7 @@
 
 # Welcome to the Tern Project
 
-Tern is an inspection tool to find the metadata of the packages installed in a container image. It runs scripts from the "command library" against the container and collates the information into a Bill of Materials (BOM) report. Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies.
+Tern is an inspection tool to find the metadata of the packages installed in a container image. It runs scripts from the "command library" against the container and collates the information into a Bill of Materials (BOM) report. Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration, and deployment strategies.
 
 ## Table of Contents
 - [FAQ](/docs/faq.md)
@@ -17,7 +17,7 @@ Tern is an inspection tool to find the metadata of the packages installed in a c
 ## Getting Started<a name="getting-started"/>
 
 ### Requirements
-Tern is currently developed on a Linux distro with a kernel version >= 4.0. Possible development distros are Ubuntu 16.04 or newer or Fedora 25 or newer.
+Tern development currently requires a Linux distro with a kernel version >= 4.0. Possible development distros are Ubuntu 16.04 or newer or Fedora 25 or newer.
 Install the following:
 - Git (Installation instructions can be found here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - Python 3.6.2 (sudo apt-get install python3.6 or sudo dnf install python36)
@@ -64,7 +64,7 @@ Architecture, function blocks, code descriptions and the project roadmap are loc
 
 ## Get Involved<a name="contributing"/>
 
-Do you have questions about Tern? Do you think it can do better? Would you like to make it better? You can get involved by giving your feedback and contributing to the code, documentation and conversation!
+Do you have questions about Tern? Do you think it can do better? Would you like to make it better? You can get involved by giving your feedback and contributing to the code, documentation, and conversation!
 
 Please read our [code of conduct](/CODE_OF_CONDUCT.md) first.
 
