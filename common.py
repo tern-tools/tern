@@ -186,7 +186,7 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
             origin_str, Notice(listing_msg, 'warning'))
     # src_urls
     url_listing, listing_msg = command_lib.check_library_key(
-        pkg_listing, 'license')
+        pkg_listing, 'src_url')
     if url_listing:
         url_list, invoke_msg = command_lib.get_pkg_attr_list(
             shell, url_listing, package_name=pkg_obj.name, chroot=False)
