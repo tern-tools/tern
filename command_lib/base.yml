@@ -124,3 +124,38 @@ openjdk:
                 - 'for p in $pkgs; do apt show $p 2>/dev/null | grep APT-Sources: | cut -c 14-; done'
           delimiter: "\n"
 
+# alpine ---------------------------------------------------------------------------------------------------------
+alpine:
+  latest: '3.7'
+  tags:
+    '3.7':
+      shell: '/bin/sh'
+      names:
+        invoke:
+          1:
+            container:
+                # send all warnings to /dev/null
+              - 'apk info 2>/dev/null'
+        delimiter: "\n" # make sure the delimiter is in double quotes or python will interpret the \ as literal
+      versions:
+        invoke:
+          1:
+            container:
+                # use double quotes when using awk
+              - "pkgs=`apk info 2>/dev/null`"
+              - "for p in $pkgs; do apk info $p 2>/dev/null | head -1 | awk '{print $1}'; done"
+        delimiter: "\n"
+      licenses:
+        invoke:
+          1:
+            container:
+              - 'pkgs=`apk info 2>/dev/null`'
+              - 'for p in $pkgs; do apk -a info $p 2>/dev/null | tail -2 | head -1; done'
+        delimiter: "\n"
+      src_urls:
+        invoke:
+          1:
+            container:
+              - 'pkgs=`apk info 2>/dev/null`'
+              - 'for p in $pkgs; do apk info $p 2>/dev/null | head -5 | tail -1; done'
+        delimiter: "\n"
