@@ -47,7 +47,8 @@ def parse_command(command):
     while command_tokens:
         if options.match(command_tokens[0]):
             option_flag = command_tokens.pop(0)
-            if not options.match(command_tokens[0]):
+            # we have to check if this is the end of the command
+            if len(command_tokens) > 0 and not options.match(command_tokens[0]):
                 option_arg = command_tokens[0]
             else:
                 option_arg = ''
