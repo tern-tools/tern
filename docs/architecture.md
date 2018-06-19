@@ -11,6 +11,11 @@ The general approach to finding package metadata given some files is to perform 
 3. Inform not Ignore: Tern will report on all exceptions it has encountered during the course of its execution
 
 ## Layout
+
+Here is a general architecture diagram:
+
+![Tern architecture](./img/arch.png)
+
 There are 3 sections that operate together:
 
 ### The Cache
