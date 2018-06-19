@@ -151,7 +151,6 @@ You may file an issue and create a PR that references said issue. This, however,
 
 ## Troubleshooting
 
-* Tern produces a generic message about being unable to execute a docker command with a CalledProcessError from the get go: Make sure the docker daemon is running first
 * Unable to find module 'yaml': make sure to activate the python virtualenv first and then run pip install -r requirements.txt
 
 ## Dealing with cache.yml
