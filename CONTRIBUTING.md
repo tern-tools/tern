@@ -53,26 +53,34 @@ import docker
 
 ## An overview of the contribution lifecycle
 
-Once you decide that you would like to play around with the project
+Before you start, file an issue regarding the change you are going to contribute or the bug you are going to fix. For enhancements, please file an issue with 'Proposal:' at the beginning of the issue summary. Please don't start working on the issue until we have responded. @nishakm is the lead maintainer so a response from them means you have a go ahead to start!
+
+Once you're assigned the issue, here's a general list of steps to start work:
 
 1. Fork the git repository to your personal github account. See [here](https://help.github.com/articles/fork-a-repo/#fork-an-example-repository) and [here](https://help.github.com/articles/fork-a-repo/#keep-your-fork-synced) to get you started.
-2. Create a branch for your work
+2. Create a branch for your work. Make sure to prepend the issue number a short summary of the work separated by hyphens.
 ```
-$ git checkout -b my-work
+$ git checkout -b issue-work-summary
+```
+Eg:
+```
+$ git checkout -b 45-fix-stuff
 ```
 3. Work on the code
-4. Update your branch with the latest from upstream. See [here](https://help.github.com/articles/syncing-a-fork/) for an example. Note that if you have not worked on the master branch of your fork, the merges should be fast-forward merges and you should not be resolving conflicts.
-5. Replay your work on top of the latest
+4. Test your code - run the tool against one of the sample Dockerfiles in the samples folder
+5. If all looks good, you are ready to commit your changes. This is a little different from the other projects as if all goes well in step No. 4, you should have changes in cache.yml that shouldn't be committed. So when committing, make sure to not add the cache.yml file.
+6. Update your branch with the latest from upstream. See [here](https://help.github.com/articles/syncing-a-fork/) for an example. Note that if you have not worked on the master branch of your fork, the merges should be fast-forward merges and you should not be resolving conflicts.
+7. Replay your work on top of the latest
 ```
 $ git checkout my-work
 $ git rebase master
 ```
 Expect to spend time resolving conflicts here.
-6. Run functional tests.
-6. Push your branch changes to a remote branch in your fork of the repo
-7. Submit a pull request (PR for short) to the upstream repo. See [here](https://help.github.com/articles/creating-a-pull-request-from-a-fork/) to get you started. If all goes well, there should be no conflicts.
-8. A reviewer will further communicate with you through the PR.
-9. If everything looks good the PR will be accepted.
+8. Run functional tests.
+9. Push your branch changes to a remote branch in your fork of the repo
+10. Submit a pull request (PR for short) to the upstream repo. See [here](https://help.github.com/articles/creating-a-pull-request-from-a-fork/) to get you started. If all goes well, there should be no conflicts.
+11. A reviewer will further communicate with you through the PR.
+12. If everything looks good the PR will be accepted.
 
 ## Commit message format
 
