@@ -28,7 +28,8 @@ Tern's main purpose is to produce reports, either as an aid for understanding a 
 
 ## Process Flow
 The flowchart here shows the general flow of control
-![Tern process flow](/img/tern_flow.png)
+
+![Tern process flow](./img/tern_flow.png)
 
 ## Objects
 Tern uses classes to encapsulate some of the objects that it will be referencing during thr course of execution. They can be found in the classes directory. The general format is that Image contains a list of type ImageLayer and each ImageLayer contains a list of type Package. On top of that each of those objects contain an object of type Origins. The Origins object contains a list of type NoticeOrigin which contains a list of type Notice.
