@@ -26,6 +26,10 @@ Some acknowledgement should be made here that this is not the only way to create
 ### The Reporting
 Tern's main purpose is to produce reports, either as an aid for understanding a container image or as a manifest for something else to consume. The default is the verbose report explaining where in the container the list of packages came from and what commands created them. The easiest format to consume is actually cache.yml that only contains the filesystem layer identifier and the list of packages installed in it. Support for other types of formats are available using format converters. A summary text format is also available containing just the packages installed.
 
+## Process Flow
+The flowchart here shows the general flow of control
+![Tern process flow](/img/tern_flow.png)
+
 ## Objects
 Tern uses classes to encapsulate some of the objects that it will be referencing during thr course of execution. They can be found in the classes directory. The general format is that Image contains a list of type ImageLayer and each ImageLayer contains a list of type Package. On top of that each of those objects contain an object of type Origins. The Origins object contains a list of type NoticeOrigin which contains a list of type Notice.
 
