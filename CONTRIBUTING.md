@@ -152,4 +152,38 @@ You may file an issue and create a PR that references said issue. This, however,
 ## Troubleshooting
 
 * Tern produces a generic message about being unable to execute a docker command with a CalledProcessError from the get go: Make sure the docker daemon is running first
-* Unable to find module 'yaml': make sure to activate the python virtualenv first and then run pip install -r requirements.txt 
+* Unable to find module 'yaml': make sure to activate the python virtualenv first and then run pip install -r requirements.txt
+
+## Dealing with cache.yml
+
+cache.yml is actually a stand-in for a more sophisticated database. Tern is still not there yet. Git does not allow you to ignore this file as it is tracked. So here are some steps to deal with changes in cache.yml that you don't want to commit but still want to use:
+1. Before updating your work branch, stash the changes
+```
+$ git stash
+Saved working directory and index state WIP on master: 71e923f Fixed bug in reporting urls for installed packages
+$ git stash list
+stash@{0}: WIP on master: 71e923f Fixed bug in reporting urls for installed packages
+$ git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+nothing to commit, working tree clean
+
+```
+2. Now you can work on the branch. When you are ready to test, apply the changes back and drop the stash from the stack.
+```
+$ git stash apply
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   cache.yml
+
+no changes added to commit (use "git add" and/or "git commit -a")
+$ git stash drop
+Dropped refs/stash@{0} (f29de29fb1ea23829ff757d078e1c2a7b067708e)
+```
+3. Commit all your changes except for cache.yml. When done committing, you can apply the uncommitted changes to the stack again before proceeding.
