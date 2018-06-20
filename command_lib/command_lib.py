@@ -8,9 +8,8 @@ import os
 import subprocess
 import yaml
 
-from utils.container import docker_command
-from utils.container import execute
-from utils.constants import container
+from utils import container
+from utils import constants
 from utils import rootfs
 from report import errors
 
@@ -33,7 +32,7 @@ base_keys = {'names', 'versions', 'licenses', 'src_urls', 'srcs'}
 package_keys = {'name', 'version', 'src_url', 'license', 'src'}
 
 # global logger
-logger = logging.getLogger('ternlog')
+logger = logging.getLogger(constants.logger_name)
 
 
 class FormatAwk(dict):
@@ -45,24 +44,14 @@ class FormatAwk(dict):
         return '{' + key + '}'
 
 
-def get_latest_tag(repo):
-    '''Given the repo name of the base image, get the latest tag'''
-    return command_lib['base'][repo]['latest']
-
-
-def get_base_listing(base_image, base_tag):
-    '''Given the base image and tag, return the listing in the base command
-    library'''
+def get_base_listing(pkg_mgr):
+    '''Given the package manager name, return the dictionary in base.yml'''
     listing = {}
-    if base_image in command_lib['base'].keys():
-        if base_tag in \
-                command_lib['base'][base_image]['tags'].keys():
-            listing = \
-                command_lib['base'][base_image]['tags'][base_tag]
-        if base_tag == 'latest':
-            tag = get_latest_tag(base_tag)
-            listing = \
-                command_lib['base'][base_image]['tags'][tag]
+    if pkg_mgr in command_lib['base'].keys():
+        listing = command_lib['base'][pkg_mgr]
+    else:
+        logger.warning(errors.no_listing_for_base_key.format(
+            listing_key=pkg_mgr))
     return listing
 
 
@@ -71,6 +60,9 @@ def get_command_listing(command_name):
     listing = {}
     if command_name in command_lib['snippets'].keys():
         listing = command_lib['snippets'][command_name]
+    else:
+        logger.warning(errors.no_listing_for_snippet_key.format(
+            listing_key=command_name))
     return listing
 
 
@@ -113,7 +105,8 @@ def check_library_key(listing, key):
 
 
 def get_image_shell(base_image_listing):
-    '''Given the base image listing return the image shell. If there is no'''
+    '''Given the base image listing return the image shell. If there is no
+    shell listing, return an empty string'''
     shell, msg = check_library_key(base_image_listing, 'shell')
     if not shell:
         shell = ''
@@ -181,9 +174,11 @@ def invoke_in_container(snippet_list, shell, package='', override=''):
     full_cmd = collate_snippets(snippet_list, package)
     try:
         if override:
-            result = docker_command(execute, override, shell, '-c', full_cmd)
+            result = container.docker_command(
+                container.execute, override, shell, '-c', full_cmd)
         else:
-            result = docker_command(execute, container, shell, '-c', full_cmd)
+            result = container.docker_command(
+                container.execute, container, shell, '-c', full_cmd)
         # convert from bytestream to string
         try:
             result = result.decode('utf-8')
