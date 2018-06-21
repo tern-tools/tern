@@ -43,7 +43,7 @@ incomplete_command_lib_listing = '''The command library has an incomplete ''' \
     '''listing for {image_name}:{image_tag}. Please complete the listing ''' \
     '''based on the examples.\n'''
 no_shell_listing = '''There is no listing for 'shell' under the base ''' \
-    '''listing for {image_name}:{image_tag}. Using default shell: ''' \
+    '''listing for {binary}. Using default shell: ''' \
     '''{default_shell}\n'''
 
 # Dockerfile specific errors
