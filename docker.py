@@ -135,50 +135,16 @@ def created_to_instruction(created_by):
     return instruction
 
 
-def add_packages_from_history(image_obj, shell):
-    '''Given a DockerImage object, get package objects installed in each layer
-    Assume that the imported images have already gone through this process and
-    have their layer's packages populated. So collecting package object occurs
-    from the last linked layer:
-        1. For each layer get a list of package names
-        2. For each package name get a list of dependencies
-        3. Create a list of package objects with metadata
-        4. Add this to the layer'''
-    image_layers = image_obj.layers[image_obj.get_last_import_layer() + 1:]
-    logger.debug('Retrieving metadata for remaining {} layers'.format(
-        len(image_layers)))
-    for layer in image_layers:
-        instruction = created_to_instruction(layer.created_by)
-        origin_layer = instruction + ' -> ' + layer.diff_id[:10]
-        layer.origins.add_notice_origin(origin_layer)
-        origin_info = formats.invoke_for_snippets
-        layer.origins.add_notice_origin(origin_info)
-        if 'RUN' in instruction:
-            # for Docker the created_by comes from the instruction in the
-            # dockerfile
-            run_command_line = instruction.split(' ', 1)[1]
-            cmd_list, msg = common.filter_install_commands(run_command_line)
-            if msg:
-                layer.origins.add_notice_to_origins(
-                    origin_info, Notice(msg, 'warning'))
-            for command in cmd_list:
-                origin_cmd = content.print_package_invoke(command.name)
-                layer.origins.add_notice_origin(origin_cmd)
-                pkg_list = common.get_installed_package_names(command)
-                all_pkgs = []
-                for pkg_name in pkg_list:
-                    pkg_listing = command_lib.get_package_listing(
-                        command.name, pkg_name)
-                    deps, deps_msg = common.get_package_dependencies(
-                        pkg_listing, pkg_name, shell)
-                    if deps_msg:
-                        logger.warning(deps_msg)
-                    all_pkgs.append(pkg_name)
-                    all_pkgs.extend(deps)
-                unique_pkgs = list(set(all_pkgs))
-                for pkg_name in unique_pkgs:
-                    pkg = Package(pkg_name)
-                    pkg_listing = command_lib.get_package_listing(
-                        command.name, pkg_name)
-                    common.fill_package_metadata(pkg, pkg_listing, shell)
-                    layer.add_package(pkg)
+def add_packages_from_history(diff_layer, shell):
+    '''Given a layer object, get package objects installed in each layer
+    At this time, Docker keeps a history of commands that created non-empty
+    layers. Use that to find possible install commands and packages. This will
+    not work for OCI compatible images as created_by is not mandated.'''
+    instruction = created_to_instruction(diff_layer.created_by)
+    origin_layer = instruction + ' -> ' + diff_layer.diff_id[:10]
+    diff_layer.origins.add_notice_origin(origin_layer)
+    if 'RUN' in instruction:
+        # for Docker the created_by comes from the instruction in the
+        # dockerfile
+        run_command_line = instruction.split(' ', 1)[1]
+        common.add_diff_packages(diff_layer, run_command_line, shell)
