@@ -94,8 +94,8 @@ def load_full_image():
     return test_image
 
 
-def analyze_image(image_obj):
-    '''Given an image object, for each layer, retrieve the packages, first
+def analyze_docker_image(image_obj):
+    '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
     and then look up the command library for commands to run in chroot'''
@@ -110,7 +110,7 @@ def analyze_image(image_obj):
         # mount first so as not to lose context with what is in the cache
         rootfs.mount_diff_layer(layer.tar_file)
         if not common.load_from_cache(layer):
-            common.add_diff_packages(image_obj.layer, binary)
+            docker.add_packages_from_history(image_obj.layer, binary)
     # undo all the mounts
     rootfs.undo_mount()
     rootfs.unmount_rootfs()
@@ -181,7 +181,7 @@ def execute_dockerfile(args):
         if full_image.origins.is_empty():
             # image loading was successful
             # analyze image
-            analyze_image(full_image)
+            analyze_docker_image(full_image)
         else:
             # we cannot load the full image
             logger.warning('Cannot retrieve full image metadata')
@@ -200,7 +200,7 @@ def execute_dockerfile(args):
         if base_image.origins.is_empty():
             # image loading was successful
             # analyze image
-            analyze_image(base_image)
+            analyze_docker_image(base_image)
         else:
             # we cannot load the base image
             logger.warning('Cannot retrieve base image metadata')
