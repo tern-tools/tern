@@ -44,14 +44,14 @@ class FormatAwk(dict):
         return '{' + key + '}'
 
 
-def get_base_listing(pkg_mgr):
-    '''Given the package manager name, return the dictionary in base.yml'''
+def get_base_listing(key):
+    '''Given the key listing in base.yml, return the dictionary'''
     listing = {}
-    if pkg_mgr in command_lib['base'].keys():
-        listing = command_lib['base'][pkg_mgr]
+    if key in command_lib['base'].keys():
+        listing = command_lib['base'][key]
     else:
         logger.warning(errors.no_listing_for_base_key.format(
-            listing_key=pkg_mgr))
+            listing_key=key))
     return listing
 
 
