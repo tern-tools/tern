@@ -8,6 +8,7 @@ import subprocess
 import sys
 
 from report import content
+from report import errors
 from utils import container
 from utils import constants
 from utils import cache
@@ -104,7 +105,11 @@ def analyze_docker_image(image_obj):
         # get packages for the first layer
         rootfs.mount_base_layer(image_obj.layers[0].tar_file)
         binary = common.get_base_bin(image_obj.layers[0])
-        common.add_base_packages(image_obj.layers[0], binary)
+        if binary:
+            common.add_base_packages(image_obj.layers[0], binary)
+        else:
+            logger.warning(errors.unrecognized_base.format(
+                image_name=image_obj.name, image_tag=image_obj.tag))
     # get packages for subsequent layers
     for layer in image_obj.layers[1:]:
         # mount first so as not to lose context with what is in the cache
