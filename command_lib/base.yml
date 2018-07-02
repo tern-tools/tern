@@ -15,6 +15,8 @@
 
 # tdnf ---------------------------------------------------------------------------------------------------------------------------------
 tdnf:
+  path:
+    - 'usr/bin/tdnf' # don't put forward slash here as os.path.join will think it is the root directory on the host
   shell: '/usr/bin/bash'
   names:
     invoke:
@@ -52,6 +54,8 @@ tdnf:
 
 # dpkg -------------------------------------------------------------------------------------------------------------------------------
 dpkg:
+  path:
+    - 'usr/bin/dpkg'
   shell: '/bin/bash'
   # either enter the package names as a list or a snippet to invoke either within or outside the container
   names:
@@ -80,6 +84,8 @@ dpkg:
 
 # apk ---------------------------------------------------------------------------------------------------------
 apk:
+  path:
+    - 'sbin/apk'
   shell: '/bin/sh'
   names:
     invoke:

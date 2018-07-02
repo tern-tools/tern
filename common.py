@@ -68,9 +68,17 @@ def save_to_cache(image):
 
 
 def get_base_bin(base_layer):
-    '''Given the base layer, find the binary used to identify the base OS
-    layer'''
+    '''Given the base layer object, find the binary used to identify the
+    base OS layer. Assume that the layer filesystem is mounted'''
     binary = ''
+    # the path to where the filesystem is mounted
+    # look at utils/rootfs.py mount_base_layer module
+    cwd = os.path.join(os.getcwd(), constants.temp_folder, constants.mergedir)
+    for key in command_lib.command_lib['base'].keys():
+        for path in command_lib.command_lib['base'][key]:
+            if os.path.exists(os.path.join(cwd, path)):
+                binary = key
+                break
     return binary
 
 
