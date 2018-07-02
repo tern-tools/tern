@@ -7,6 +7,8 @@ SPDX-License-Identifier: BSD-2-Clause
 Error messages
 '''
 
+unrecognized_base = '''Unable to determine the base OS of the image ''' \
+    '''{image_name}:{image_tag}\n'''
 no_packages = '''Unable to recover packages for layer {layer_id}. Consider ''' \
     '''either entering them manually or create a bash script to retrieve ''' \
     '''the package in the command library.\n'''
