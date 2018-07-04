@@ -4,6 +4,7 @@ SPDX-License-Identifier: BSD-2-Clause
 '''
 
 import logging
+import os
 import subprocess
 import sys
 
@@ -20,6 +21,7 @@ from classes.notice import Notice
 from classes.package import Package
 import common
 import docker
+from command_lib import command_lib
 
 '''
 Create a report
@@ -42,6 +44,9 @@ def setup(dockerfile=None):
     # load dockerfile if present
     if dockerfile:
         docker.load_docker_commands(dockerfile)
+    # create temporary working directory
+    if not os.path.exists(constants.temp_folder):
+        os.mkdir(constants.temp_folder)
     # set up folders for rootfs operations
     rootfs.set_up()
 
@@ -100,25 +105,32 @@ def analyze_docker_image(image_obj):
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
     and then look up the command library for commands to run in chroot'''
+    shell = ''
     # check the first layer
     if not common.load_from_cache(image_obj.layers[0]):
         # get packages for the first layer
         rootfs.mount_base_layer(image_obj.layers[0].tar_file)
         binary = common.get_base_bin(image_obj.layers[0])
         if binary:
+            # find the shell to invoke commands in
+            shell, _ = command_lib.get_image_shell(
+                command_lib.get_base_listing(binary))
+            if not shell:
+                shell = constants.shell
             common.add_base_packages(image_obj.layers[0], binary)
         else:
             logger.warning(errors.unrecognized_base.format(
                 image_name=image_obj.name, image_tag=image_obj.tag))
+        rootfs.undo_mount()
     # get packages for subsequent layers
     for layer in image_obj.layers[1:]:
         # mount first so as not to lose context with what is in the cache
         rootfs.mount_diff_layer(layer.tar_file)
         if not common.load_from_cache(layer):
-            docker.add_packages_from_history(image_obj.layer, binary)
+            docker.add_packages_from_history(layer, shell)
+        rootfs.undo_mount()
     # undo all the mounts
-    rootfs.undo_mount()
-    rootfs.unmount_rootfs()
+    rootfs.unmount_rootfs(len(image_obj.layers))
 
 
 def get_dockerfile_packages():
