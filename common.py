@@ -4,6 +4,7 @@ SPDX-License-Identifier: BSD-2-Clause
 '''
 
 import logging
+import os
 
 from classes.package import Package
 from classes.notice import Notice
@@ -75,7 +76,7 @@ def get_base_bin(base_layer):
     # look at utils/rootfs.py mount_base_layer module
     cwd = os.path.join(os.getcwd(), constants.temp_folder, constants.mergedir)
     for key in command_lib.command_lib['base'].keys():
-        for path in command_lib.command_lib['base'][key]:
+        for path in command_lib.command_lib['base'][key]['path']:
             if os.path.exists(os.path.join(cwd, path)):
                 binary = key
                 break
