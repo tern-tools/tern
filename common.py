@@ -298,7 +298,8 @@ def add_diff_packages(diff_layer, command_line, shell):
                 pkg_listing, pkg_name, shell)
             if deps_msg:
                 logger.warning(deps_msg)
-                diff_layer.origins.add_notice_to_origins(origin_info, 'error')
+                diff_layer.origins.add_notice_to_origins(
+                    origin_info, Notice(deps_msg, 'error'))
             all_pkgs.append(pkg_name)
             all_pkgs.extend(deps)
         unique_pkgs = list(set(all_pkgs))
