@@ -106,31 +106,46 @@ def analyze_docker_image(image_obj):
     library. For looking up in command library first mount the filesystem
     and then look up the command library for commands to run in chroot'''
     shell = ''
-    # check the first layer
-    if not common.load_from_cache(image_obj.layers[0]):
-        # get packages for the first layer
-        rootfs.mount_base_layer(image_obj.layers[0].tar_file)
-        binary = common.get_base_bin(image_obj.layers[0])
-        if binary:
-            # find the shell to invoke commands in
-            shell, _ = command_lib.get_image_shell(
-                command_lib.get_base_listing(binary))
-            if not shell:
-                shell = constants.shell
-            common.add_base_packages(image_obj.layers[0], binary)
-        else:
-            logger.warning(errors.unrecognized_base.format(
-                image_name=image_obj.name, image_tag=image_obj.tag))
+    # set the layer that is mounted. In the beginning this is 0
+    mounted = 0
+    # find the shell by mounting the base layer
+    target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
+    binary = common.get_base_bin(image_obj.layers[0])
+    # find the shell to invoke commands in
+    shell, _ = command_lib.get_image_shell(
+        command_lib.get_base_listing(binary))
+    if not shell:
+        shell = constants.shell
+    # only extract packages if there is a known binary and the layer is not
+    # cached
+    if binary and not common.load_from_cache(image_obj.layers[0]):
+        # get the packages of the first layer
+        rootfs.prep_rootfs(target)
+        common.add_base_packages(image_obj.layers[0], binary)
+        # unmount proc, sys and dev
         rootfs.undo_mount()
+    else:
+        logger.warning(errors.unrecognized_base.format(
+            image_name=image_obj.name, image_tag=image_obj.tag))
     # get packages for subsequent layers
-    for layer in image_obj.layers[1:]:
-        # mount first so as not to lose context with what is in the cache
-        rootfs.mount_diff_layer(layer.tar_file)
-        if not common.load_from_cache(layer):
-            docker.add_packages_from_history(layer, shell)
-        rootfs.undo_mount()
+    curr_layer = 1
+    while curr_layer < len(image_obj.layers):
+        if not common.load_from_cache(image_obj.layers[curr_layer]):
+            # mount from the layer after the mounted layer till the current
+            # layer
+            for index in range(mounted + 1, curr_layer + 1):
+                target = rootfs.mount_diff_layer(
+                    image_obj.layers[index].tar_file)
+            mounted = curr_layer
+            # mount dev, sys and proc after mounting diff layers
+            rootfs.prep_rootfs(target)
+            docker.add_packages_from_history(
+                image_obj.layers[curr_layer], shell)
+            rootfs.undo_mount()
+        curr_layer = curr_layer + 1
     # undo all the mounts
-    rootfs.unmount_rootfs(len(image_obj.layers))
+    rootfs.unmount_rootfs(mounted + 1)
+    common.save_to_cache(image_obj)
 
 
 def get_dockerfile_packages():

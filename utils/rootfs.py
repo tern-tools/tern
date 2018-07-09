@@ -98,8 +98,7 @@ def prep_rootfs(rootfs_dir):
 def mount_base_layer(base_layer_tar):
     '''To mount to base layer:
         1. Untar the base layer tar file
-        2. Mount into mergedir
-        3. Prepare all the mounts'''
+        2. Mount into mergedir'''
     base_rootfs_path = get_untar_dir(base_layer_tar)
     source_dir_path = os.path.join(constants.temp_folder, base_layer_tar)
     target_dir_path = os.path.join(constants.temp_folder, constants.mergedir)
@@ -107,14 +106,13 @@ def mount_base_layer(base_layer_tar):
         root_command(remove, base_rootfs_path)
     extract_layer_tar(source_dir_path, base_rootfs_path)
     root_command(mount, base_rootfs_path, target_dir_path)
-    prep_rootfs(target_dir_path)
+    return target_dir_path
 
 
 def mount_diff_layer(diff_layer_tar):
     '''To mount the diff layer:
         1. Untar the diff rootfs
-        2. Union mount this directory on the mergedir
-        3. Prepare all the mounts'''
+        2. Union mount this directory on the mergedir'''
     upper_dir_path = get_untar_dir(diff_layer_tar)
     source_dir_path = os.path.join(constants.temp_folder, diff_layer_tar)
     merge_dir_path = os.path.join(constants.temp_folder, constants.mergedir)
@@ -125,7 +123,7 @@ def mount_diff_layer(diff_layer_tar):
     args = 'lowerdir=' + merge_dir_path + ',upperdir=' + upper_dir_path + \
         ',workdir=' + workdir_path
     root_command(union_mount, args, merge_dir_path)
-    prep_rootfs(merge_dir_path)
+    return merge_dir_path
 
 
 def run_chroot_command(command_string, shell):
