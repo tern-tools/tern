@@ -93,6 +93,11 @@ def add_base_packages(base_layer, binary):
     # find the binary
     listing = command_lib.get_base_listing(binary)
     if listing:
+        # put info notice about what is going to be invoked
+        snippet_msg = formats.invoke_for_base + '\n' + \
+            content.print_base_invoke(binary)
+        base_layer.origins.add_notice_to_origins(
+            origin_layer, Notice(snippet_msg, 'info'))
         shell, msg = command_lib.get_image_shell(listing)
         if not shell:
             # add a warning notice for no shell in the command library
