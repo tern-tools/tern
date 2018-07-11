@@ -9,14 +9,10 @@ import subprocess
 
 from classes.docker_image import DockerImage
 from classes.notice import Notice
-from classes.package import Package
 from utils import dockerfile
 from utils import container
 from utils import constants
 from report import errors
-from report import formats
-from report import content
-from command_lib import command_lib
 import common
 
 '''
@@ -130,7 +126,8 @@ def created_to_instruction(created_by):
     instruction = re.sub('/bin/sh -c', '', created_by).strip()
     instruction = re.sub('\#\(nop\)', '', instruction).strip()
     first = instruction.split(' ').pop(0)
-    if first not in dockerfile.directives and 'RUN' not in instruction:
+    if first and first not in dockerfile.directives and \
+            'RUN' not in instruction:
         instruction = 'RUN ' + instruction
     return instruction
 
@@ -148,3 +145,25 @@ def add_packages_from_history(diff_layer, shell):
         # dockerfile
         run_command_line = instruction.split(' ', 1)[1]
         common.add_diff_packages(diff_layer, run_command_line, shell)
+
+
+def set_imported_layers(docker_image):
+    '''Given a Docker image object that was built from a Dockerfile, set the
+    layers that were imported using the Dockerfile's FROM command or the ones
+    that came before it'''
+    dockerfile_lines = dockerfile.get_command_list(dockerfile_global)
+    index = -1
+    from_line = ''
+    for line in dockerfile_lines:
+        if 'FROM' in line:
+            from_line = line
+            break
+    for layer in docker_image.layers:
+        instr = created_to_instruction(layer.created_by)
+        if instr in dockerfile_lines:
+            index = docker_image.layers.index(layer)
+            break
+    if index != -1:
+        # index was set so all layers before this index has been imported
+        for i in range(0, index):
+            docker_image.layers[i].import_str = from_line
