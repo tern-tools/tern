@@ -19,6 +19,8 @@ class ImageLayer(object):
         name of the Image object or any object that uses this layer
         Based on how container image layers are created, this is usually the
         last layer of the image that was imported
+        import_str: The string from a build tool (like a Dockerfile) that
+        created this layer by importing it from another image
     methods:
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
@@ -31,6 +33,7 @@ class ImageLayer(object):
         self.__packages = []
         self.__origins = Origins()
         self.__import_image = None
+        self.__import_str = ''
 
     @property
     def diff_id(self):
@@ -63,6 +66,14 @@ class ImageLayer(object):
     @import_image.setter
     def import_image(self, import_image):
         self.__import_image = import_image
+
+    @property
+    def import_str(self):
+        return self.__import_str
+
+    @import_str.setter
+    def import_str(self, import_str):
+        self.__import_str = import_str
 
     def add_package(self, package):
         if package.name not in self.get_package_names():

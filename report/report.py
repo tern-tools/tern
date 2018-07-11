@@ -105,6 +105,15 @@ def analyze_docker_image(image_obj):
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
     and then look up the command library for commands to run in chroot'''
+    # find the layers that are imported
+    docker.set_imported_layers(image_obj)
+    # add notices for each layer if it is imported
+    for layer in image_obj.layers:
+        origin_str = layer.diff_id[:10]
+        layer.origins.add_notice_origin(origin_str)
+        if layer.import_str:
+            layer.origins.add_notice_to_origins(origin_str, Notice(
+                'Imported in Dockerfile using: ' + layer.import_str, 'info'))
     shell = ''
     # set the layer that is mounted. In the beginning this is 0
     mounted = 0
@@ -118,12 +127,13 @@ def analyze_docker_image(image_obj):
         shell = constants.shell
     # only extract packages if there is a known binary and the layer is not
     # cached
-    if binary and not common.load_from_cache(image_obj.layers[0]):
-        # get the packages of the first layer
-        rootfs.prep_rootfs(target)
-        common.add_base_packages(image_obj.layers[0], binary)
-        # unmount proc, sys and dev
-        rootfs.undo_mount()
+    if binary:
+        if not common.load_from_cache(image_obj.layers[0]):
+            # get the packages of the first layer
+            rootfs.prep_rootfs(target)
+            common.add_base_packages(image_obj.layers[0], binary)
+            # unmount proc, sys and dev
+            rootfs.undo_mount()
     else:
         logger.warning(errors.unrecognized_base.format(
             image_name=image_obj.name, image_tag=image_obj.tag))
