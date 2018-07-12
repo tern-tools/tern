@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import logging
 import os
+import shutil
 import subprocess
 import sys
 
@@ -52,11 +53,19 @@ def setup(dockerfile=None):
 
 
 def teardown():
-    '''Clean up everything'''
+    '''Tear down tern setup'''
     # save the cache
     cache.save()
     # remove folders for rootfs operations
     rootfs.clean_up()
+
+
+def clean_image_tars(image_obj):
+    '''Clean up untar directories'''
+    for layer in image_obj.layers:
+        fspath = rootfs.get_untar_dir(layer.tar_file)
+        if os.path.exists(fspath):
+            rootfs.root_command(rootfs.remove, fspath)
 
 
 def load_base_image():
@@ -230,6 +239,8 @@ def execute_dockerfile(args):
             completed = False
         # clean up image
         container.remove_image(full_image.repotag)
+        if not args.keep_working_dir:
+            clean_image_tars(full_image)
     else:
         # cannot build the image
         logger.warning('Cannot build image')
@@ -251,10 +262,14 @@ def execute_dockerfile(args):
         stub_image = get_dockerfile_packages()
         # clean up image
         container.remove_image(base_image.repotag)
+        if not args.keep_working_dir:
+            clean_image_tars(base_image)
     # generate report based on what images were created
     if completed:
         generate_report(args, full_image)
     else:
         generate_report(args, base_image, stub_image)
-    logger.debug('Cleaning up...')
+    logger.debug('Teardown...')
     teardown()
+    if not args.keep_working_dir:
+        shutil.rmtree(os.path.abspath(constants.temp_folder))
