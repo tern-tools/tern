@@ -11,6 +11,7 @@ import sys
 
 from report import content
 from report import errors
+from report import formats
 from utils import container
 from utils import constants
 from utils import cache
@@ -95,17 +96,19 @@ def load_base_image():
 def load_full_image():
     '''Create image object from test image and return the object'''
     test_image = DockerImage(docker.get_dockerfile_image_tag())
+    failure_origin = formats.image_load_failure.format(
+        testimage=test_image.repotag)
     try:
         test_image.load_image()
     except NameError as error:
         test_image.origins.add_notice_to_origins(
-            test_image.repotag, Notice(str(error), 'error'))
+            failure_origin, Notice(str(error), 'error'))
     except subprocess.CalledProcessError as error:
         test_image.origins.add_notice_to_origins(
-            test_image.repotag, Notice(str(error.output, 'utf-8'), 'error'))
+            failure_origin, Notice(str(error.output, 'utf-8'), 'error'))
     except IOError as error:
         test_image.origins.add_notice_to_origins(
-            test_image.repotag, Notice(str(error), 'error'))
+            failure_origin, Notice(str(error), 'error'))
     return test_image
 
 
@@ -118,7 +121,7 @@ def analyze_docker_image(image_obj):
     docker.set_imported_layers(image_obj)
     # add notices for each layer if it is imported
     for layer in image_obj.layers:
-        origin_str = layer.diff_id[:10]
+        origin_str = 'Layer: ' + layer.diff_id[:10]
         layer.origins.add_notice_origin(origin_str)
         if layer.import_str:
             layer.origins.add_notice_to_origins(origin_str, Notice(
@@ -201,7 +204,7 @@ def get_dockerfile_packages():
 def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     logger.debug('Writing report...')
-    report = ''
+    report = formats.disclaimer
     if args.summary:
         for image in images:
             report = report + content.print_summary_report(image)
@@ -231,6 +234,9 @@ def execute_dockerfile(args):
         full_image = load_full_image()
         if full_image.origins.is_empty():
             # image loading was successful
+            # Add an image origin here
+            full_image.origins.add_notice_origin(
+                formats.dockerfile_image.format(dockerfile=args.dockerfile))
             # analyze image
             analyze_docker_image(full_image)
         else:
@@ -252,6 +258,9 @@ def execute_dockerfile(args):
         base_image = load_base_image()
         if base_image.origins.is_empty():
             # image loading was successful
+            # add a notice stating failure to build image
+            base_image.origins.add_notice_to_origins(
+                args.dockerfile, Notice(formats.image_build_failure, 'warning'))
             # analyze image
             analyze_docker_image(base_image)
         else:
