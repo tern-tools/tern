@@ -3,159 +3,116 @@
 #
 # Known package listings for base images
 # Format to list images
-# <image>:
-#   latest: <the tag that points to 'latest'
-#   tags:
-#     <tag>:
-#       shell: <the shell executable> (needed if entering code snippets)
-#       names: <a list of package names>
-#         invoke: (if this is a script to invoke include this)
-#           1:
-#             container: <list of commands> (if the environment is the container)
-#           2:
-#             host: <list of commands> (if the environment is the host)
-#         delimiter: <the delimiter for the commands> 
+# <package manager>:
+#   shell: <the shell executable> (needed if entering code snippets)
+#   names: <a list of package names>
+#     invoke: (if this is a script to invoke include this)
+#       1:
+#         container: <list of commands> (if the environment is the container)
+#       2:
+#         host: <list of commands> (if the environment is the host)
+#     delimiter: <the delimiter for the commands> 
 
-# vmware/photon
-vmware/photon:
-  latest: '1.0'
-  tags:
-    '1.0':
-      shell: '/usr/bin/bash'
-      names:
-        invoke:
-          1:
-            container:
-                    # make sure to use single quotes for these lines as
-                    # docker exec doesn't parse double quotes contiguously
-              - 'tdnf check-update > /dev/null' # used to update the repo metadata
-              - 'tdnf list installed | cut -f1 -d"."'
-        delimiter: "\n" # make sure the delimiter is in double quotes or python will interpret the \ as literal
-      versions:
-        invoke:
-          1:
-            container:
-              - 'tdnf check-update > /dev/null'
-              - 'list=`tdnf list installed`'
-              - 'c=0; for l in $list; do if [ $c == 1 ]; then echo $l; fi; c=$(((c+1)%3)); done;'
-        delimiter: "\n"
-      licenses:
-        invoke:
-          1:
-            container:
-              - 'tdnf check-update > /dev/null'
-              - 'pkgs=`tdnf list installed | cut -f1 -d"."`'
-              - 'for p in $pkgs; do tdnf info $p | head -10 | tail -1 | cut -f2 -d":" | xargs; done'
-        delimiter: "\n"
-      src_urls:
-        invoke:
-          1:
-            container:
-              - 'tdnf check-update > /dev/null'
-              - 'pkgs=`tdnf list installed | cut -f1 -d"."`'
-              - 'for p in $pkgs; do tdnf info $p | head -9 | tail -1 | cut -f2-3 -d":" | xargs; done'
-        delimiter: "\n"
+# tdnf ---------------------------------------------------------------------------------------------------------------------------------
+tdnf:
+  path:
+    - 'usr/bin/tdnf' # don't put forward slash here as os.path.join will think it is the root directory on the host
+  shell: '/usr/bin/bash'
+  names:
+    invoke:
+      1:
+        container:
+          # make sure to use single quotes for these lines as
+          # docker exec doesn't parse double quotes contiguously
+          - 'tdnf check-update > /dev/null' # used to update the repo metadata
+          - 'tdnf list installed | cut -f1 -d"."'
+    delimiter: "\n" # make sure the delimiter is in double quotes or python will interpret the \ as literal
+  versions:
+    invoke:
+      1:
+        container:
+          - 'tdnf check-update > /dev/null'
+          - 'list=`tdnf list installed`'
+          - 'c=0; for l in $list; do if [ $c == 1 ]; then echo $l; fi; c=$(((c+1)%3)); done;'
+    delimiter: "\n"
+  licenses:
+    invoke:
+      1:
+        container:
+          - 'tdnf check-update > /dev/null'
+          - 'pkgs=`tdnf list installed | cut -f1 -d"."`'
+          - 'for p in $pkgs; do tdnf info $p | head -10 | tail -1 | cut -f2 -d":" | xargs; done'
+    delimiter: "\n"
+  src_urls:
+    invoke:
+      1:
+        container:
+          - 'tdnf check-update > /dev/null'
+          - 'pkgs=`tdnf list installed | cut -f1 -d"."`'
+          - 'for p in $pkgs; do tdnf info $p | head -9 | tail -1 | cut -f2-3 -d":" | xargs; done'
+    delimiter: "\n"
 
-# debian -------------------------------------------------------------------------------------------------------------------------------
-debian:
-  latest: jessie
-  tags:
-    jessie:
-        shell: '/bin/bash'
-        # either enter the package names as a list or a snippet to invoke either within or outside the container
-        names:
-          invoke:
-            1:
-              # Currently two types of environments are supported - host or container
-              container:
-                - "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
-          delimiter: "\n"
-        # the length of this list should be the same as the names or else there will be a mismatch
-        versions:
-          invoke:
-            1:
-              container:
-                - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-                - "for p in $pkgs; do dpkg -l $p | awk 'NR>5 {print $3}'; done"
-          delimiter: "\n"
-        licenses:
-          invoke:
-            1:
-              container:
-                - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-                - "for p in $pkgs; do cat /usr/share/doc/$p/copyright; echo LICEOF; done"
-          delimiter: 'LICEOF'
-        src_urls: {}
+# dpkg -------------------------------------------------------------------------------------------------------------------------------
+dpkg:
+  path:
+    - 'usr/bin/dpkg'
+  shell: '/bin/bash'
+  # either enter the package names as a list or a snippet to invoke either within or outside the container
+  names:
+    invoke:
+      1:
+        # Currently two types of environments are supported - host or container
+        container:
+          - "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
+    delimiter: "\n"
+  # the length of this list should be the same as the names or else there will be a mismatch
+  versions:
+    invoke:
+      1:
+        container:
+          - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+          - "for p in $pkgs; do dpkg -l $p | awk 'NR>5 {print $3}'; done"
+    delimiter: "\n"
+  licenses:
+    invoke:
+      1:
+        container:
+          - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+          - "for p in $pkgs; do cat /usr/share/doc/$p/copyright; echo LICEOF; done"
+    delimiter: 'LICF'
+  src_urls: {}
 
-# openjdk -------------------------------------------------------------------------------------------------------------------------------
-openjdk:
-  latest: '8'
-  tags:
-    '8':
-        shell: '/bin/bash'
-        # either enter the package names as a list or a snippet to invoke either within or outside the container
-        names:
-          invoke:
-            1:
-              # Currently two types of environments are supported - host or container
-              container:
-                - "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
-          delimiter: "\n"
-        # the length of this list should be the same as the names or else there will be a mismatch
-        versions:
-          invoke:
-            1:
-              container:
-                - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-                - "for p in $pkgs; do dpkg -l $p | awk 'NR>5 {print $3}'; done"
-          delimiter: "\n"
-        licenses:
-          invoke:
-            1:
-              container:
-                - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-                - "for p in $pkgs; do cat /usr/share/doc/$p/copyright; echo LICEOF; done"
-          delimiter: 'LICEOF'
-        src_urls:
-          invoke:
-            1:
-              container:
-                - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-                - 'for p in $pkgs; do apt show $p 2>/dev/null | grep APT-Sources: | cut -c 14-; done'
-          delimiter: "\n"
-
-# alpine ---------------------------------------------------------------------------------------------------------
-alpine:
-  latest: '3.7'
-  tags:
-    '3.7':
-      shell: '/bin/sh'
-      names:
-        invoke:
-          1:
-            container:
-                # send all warnings to /dev/null
-              - 'apk info 2>/dev/null'
-        delimiter: "\n" # make sure the delimiter is in double quotes or python will interpret the \ as literal
-      versions:
-        invoke:
-          1:
-            container:
-                # use double quotes when using awk
-              - "pkgs=`apk info 2>/dev/null`"
-              - "for p in $pkgs; do apk info $p 2>/dev/null | head -1 | awk '{print $1}'; done"
-        delimiter: "\n"
-      licenses:
-        invoke:
-          1:
-            container:
-              - 'pkgs=`apk info 2>/dev/null`'
-              - 'for p in $pkgs; do apk -a info $p 2>/dev/null | tail -2 | head -1; done'
-        delimiter: "\n"
-      src_urls:
-        invoke:
-          1:
-            container:
-              - 'pkgs=`apk info 2>/dev/null`'
-              - 'for p in $pkgs; do apk info $p 2>/dev/null | head -5 | tail -1; done'
-        delimiter: "\n"
+# apk ---------------------------------------------------------------------------------------------------------
+apk:
+  path:
+    - 'sbin/apk'
+  shell: '/bin/sh'
+  names:
+    invoke:
+      1:
+        container:
+          # send all warnings to /dev/null
+          - 'apk info 2>/dev/null'
+    delimiter: "\n" # make sure the delimiter is in double quotes or python will interpret the \ as literal
+  versions:
+    invoke:
+      1:
+        container:
+          # use double quotes when using awk
+          - "pkgs=`apk info 2>/dev/null`"
+          - "for p in $pkgs; do apk info $p 2>/dev/null | head -1 | awk '{print $1}'; done"
+    delimiter: "\n"
+  licenses:
+    invoke:
+      1:
+        container:
+          - 'pkgs=`apk info 2>/dev/null`'
+          - 'for p in $pkgs; do apk -a info $p 2>/dev/null | tail -2 | head -1; done'
+    delimiter: "\n"
+  src_urls:
+    invoke:
+      1:
+        container:
+          - 'pkgs=`apk info 2>/dev/null`'
+          - 'for p in $pkgs; do apk info $p 2>/dev/null | head -5 | tail -1; done'
+    delimiter: "\n"

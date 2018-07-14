@@ -7,6 +7,8 @@ SPDX-License-Identifier: BSD-2-Clause
 Error messages
 '''
 
+unrecognized_base = '''Unable to determine the base OS of the image ''' \
+    '''{image_name}:{image_tag}\n'''
 no_packages = '''Unable to recover packages for layer {layer_id}. Consider ''' \
     '''either entering them manually or create a bash script to retrieve ''' \
     '''the package in the command library.\n'''
@@ -43,7 +45,7 @@ incomplete_command_lib_listing = '''The command library has an incomplete ''' \
     '''listing for {image_name}:{image_tag}. Please complete the listing ''' \
     '''based on the examples.\n'''
 no_shell_listing = '''There is no listing for 'shell' under the base ''' \
-    '''listing for {image_name}:{image_tag}. Using default shell: ''' \
+    '''listing for {binary}. Using default shell: ''' \
     '''{default_shell}\n'''
 
 # Dockerfile specific errors

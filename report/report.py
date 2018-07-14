@@ -4,21 +4,26 @@ SPDX-License-Identifier: BSD-2-Clause
 '''
 
 import logging
+import os
+import shutil
 import subprocess
 import sys
 
 from report import content
+from report import errors
+from report import formats
 from utils import container
 from utils import constants
 from utils import cache
+from utils import rootfs
 from classes.docker_image import DockerImage
 from classes.image import Image
 from classes.image_layer import ImageLayer
 from classes.notice import Notice
 from classes.package import Package
-from command_lib import command_lib
 import common
 import docker
+from command_lib import command_lib
 
 '''
 Create a report
@@ -41,6 +46,27 @@ def setup(dockerfile=None):
     # load dockerfile if present
     if dockerfile:
         docker.load_docker_commands(dockerfile)
+    # create temporary working directory
+    if not os.path.exists(constants.temp_folder):
+        os.mkdir(constants.temp_folder)
+    # set up folders for rootfs operations
+    rootfs.set_up()
+
+
+def teardown():
+    '''Tear down tern setup'''
+    # save the cache
+    cache.save()
+    # remove folders for rootfs operations
+    rootfs.clean_up()
+
+
+def clean_image_tars(image_obj):
+    '''Clean up untar directories'''
+    for layer in image_obj.layers:
+        fspath = rootfs.get_untar_dir(layer.tar_file)
+        if os.path.exists(fspath):
+            rootfs.root_command(rootfs.remove, fspath)
 
 
 def load_base_image():
@@ -70,18 +96,78 @@ def load_base_image():
 def load_full_image():
     '''Create image object from test image and return the object'''
     test_image = DockerImage(docker.get_dockerfile_image_tag())
+    failure_origin = formats.image_load_failure.format(
+        testimage=test_image.repotag)
     try:
         test_image.load_image()
     except NameError as error:
         test_image.origins.add_notice_to_origins(
-            test_image.repotag, Notice(str(error), 'error'))
+            failure_origin, Notice(str(error), 'error'))
     except subprocess.CalledProcessError as error:
         test_image.origins.add_notice_to_origins(
-            test_image.repotag, Notice(str(error.output, 'utf-8'), 'error'))
+            failure_origin, Notice(str(error.output, 'utf-8'), 'error'))
     except IOError as error:
         test_image.origins.add_notice_to_origins(
-            test_image.repotag, Notice(str(error), 'error'))
+            failure_origin, Notice(str(error), 'error'))
     return test_image
+
+
+def analyze_docker_image(image_obj):
+    '''Given a DockerImage object, for each layer, retrieve the packages, first
+    looking up in cache and if not there then looking up in the command
+    library. For looking up in command library first mount the filesystem
+    and then look up the command library for commands to run in chroot'''
+    # find the layers that are imported
+    docker.set_imported_layers(image_obj)
+    # add notices for each layer if it is imported
+    for layer in image_obj.layers:
+        origin_str = 'Layer: ' + layer.diff_id[:10]
+        layer.origins.add_notice_origin(origin_str)
+        if layer.import_str:
+            layer.origins.add_notice_to_origins(origin_str, Notice(
+                'Imported in Dockerfile using: ' + layer.import_str, 'info'))
+    shell = ''
+    # set the layer that is mounted. In the beginning this is 0
+    mounted = 0
+    # find the shell by mounting the base layer
+    target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
+    binary = common.get_base_bin(image_obj.layers[0])
+    # find the shell to invoke commands in
+    shell, _ = command_lib.get_image_shell(
+        command_lib.get_base_listing(binary))
+    if not shell:
+        shell = constants.shell
+    # only extract packages if there is a known binary and the layer is not
+    # cached
+    if binary:
+        if not common.load_from_cache(image_obj.layers[0]):
+            # get the packages of the first layer
+            rootfs.prep_rootfs(target)
+            common.add_base_packages(image_obj.layers[0], binary)
+            # unmount proc, sys and dev
+            rootfs.undo_mount()
+    else:
+        logger.warning(errors.unrecognized_base.format(
+            image_name=image_obj.name, image_tag=image_obj.tag))
+    # get packages for subsequent layers
+    curr_layer = 1
+    while curr_layer < len(image_obj.layers):
+        if not common.load_from_cache(image_obj.layers[curr_layer]):
+            # mount from the layer after the mounted layer till the current
+            # layer
+            for index in range(mounted + 1, curr_layer + 1):
+                target = rootfs.mount_diff_layer(
+                    image_obj.layers[index].tar_file)
+            mounted = curr_layer
+            # mount dev, sys and proc after mounting diff layers
+            rootfs.prep_rootfs(target)
+            docker.add_packages_from_history(
+                image_obj.layers[curr_layer], shell)
+            rootfs.undo_mount()
+        curr_layer = curr_layer + 1
+    # undo all the mounts
+    rootfs.unmount_rootfs(mounted + 1)
+    common.save_to_cache(image_obj)
 
 
 def get_dockerfile_packages():
@@ -118,7 +204,7 @@ def get_dockerfile_packages():
 def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     logger.debug('Writing report...')
-    report = ''
+    report = formats.disclaimer
     if args.summary:
         for image in images:
             report = report + content.print_summary_report(image)
@@ -134,75 +220,65 @@ def execute_dockerfile(args):
     try:
         container.docker_command(['docker', 'ps'])
     except subprocess.CalledProcessError as error:
-        logger.error('Docker daemon is not running: {0}'.format(error.output.decode('utf-8')))
+        logger.error('Docker daemon is not running: {0}'.format(
+            error.output.decode('utf-8')))
         sys.exit()
-
     setup(args.dockerfile)
-    dockerfile_parse = False
-    # try to get Docker base image metadata
-    logger.debug('Loading base image...')
-    base_image = load_base_image()
-    logger.debug('Base image loaded...')
-    # check if the base image added any notices
-    if base_image.origins.is_empty():
-        # load any packages from cache
-        logger.debug('Looking up cache for base image layers...')
-        if not common.load_from_cache(base_image):
-            # load any packages using the command library
-            logger.debug('Retrieving metadata using scripts from base.yml')
-            container.start_container(base_image.repotag)
-            common.add_base_packages(base_image)
-            container.remove_container()
-            logger.debug('Saving base image layers...')
-            common.save_to_cache(base_image)
-            cache.save()
-        # attempt to get the packages for the rest of the image
-        # since we only have a dockerfile, we will attempt to build the
-        # image first
-        # This step actually needs to go to the beginning but since
-        # there is no way of tracking imported images from within
-        # the docker image history, we build after importing the base image
-        shell, msg = command_lib.get_image_shell(
-            command_lib.get_base_listing(base_image.name, base_image.tag))
-        if not shell:
-            shell = constants.shell
-        logger.debug('Building image...')
-        build, msg = docker.is_build()
-        if build:
-            # attempt to get built image metadata
-            full_image = load_full_image()
-            if full_image.origins.is_empty():
-                # link layer to imported base image
-                full_image.set_image_import(base_image)
-                if not common.load_from_cache(full_image):
-                    # find packages per layer
-                    container.start_container(full_image.repotag)
-                    logger.debug('Retrieving metadata using scripts from '
-                                 'snippets.yml')
-                    docker.add_packages_from_history(full_image, shell)
-                    container.remove_container()
-                    # record missing layers in the cache
-                    common.save_to_cache(full_image)
-                    cache.save()
-                logger.debug('Cleaning up...')
-                container.remove_image(full_image.repotag)
-                container.remove_image(base_image.repotag)
-                generate_report(args, full_image)
-            else:
-                # we cannot extract the built image's metadata
-                dockerfile_parse = True
+    # attempt to build the image
+    logger.debug('Building Docker image...')
+    # placeholder to check if we can analyze the full image
+    completed = True
+    build, msg = docker.is_build()
+    if build:
+        # attempt to get built image metadata
+        full_image = load_full_image()
+        if full_image.origins.is_empty():
+            # image loading was successful
+            # Add an image origin here
+            full_image.origins.add_notice_origin(
+                formats.dockerfile_image.format(dockerfile=args.dockerfile))
+            # analyze image
+            analyze_docker_image(full_image)
         else:
-            # we cannot build the image
-            common.save_to_cache(base_image)
-            dockerfile_parse = True
+            # we cannot load the full image
+            logger.warning('Cannot retrieve full image metadata')
+            completed = False
+        # clean up image
+        container.remove_image(full_image.repotag)
+        if not args.keep_working_dir:
+            clean_image_tars(full_image)
     else:
-        # something went wrong in getting the base image
-        dockerfile_parse = True
-    # check if the dockerfile needs to be parsed
-    if dockerfile_parse:
-        cache.save()
-        logger.debug('Cleaning up...')
-        container.remove_image(base_image.repotag)
+        # cannot build the image
+        logger.warning('Cannot build image')
+        completed = False
+    # check if we have analyzed the full image or not
+    if not completed:
+        # get the base image
+        logger.debug('Loading base image...')
+        base_image = load_base_image()
+        if base_image.origins.is_empty():
+            # image loading was successful
+            # add a notice stating failure to build image
+            base_image.origins.add_notice_to_origins(
+                args.dockerfile, Notice(formats.image_build_failure, 'warning'))
+            # analyze image
+            analyze_docker_image(base_image)
+        else:
+            # we cannot load the base image
+            logger.warning('Cannot retrieve base image metadata')
+        # run through commands in the Dockerfile
         logger.debug('Parsing Dockerfile to generate report...')
         stub_image = get_dockerfile_packages()
+        # clean up image
+        container.remove_image(base_image.repotag)
+        if not args.keep_working_dir:
+            clean_image_tars(base_image)
+    # generate report based on what images were created
+    if completed:
+        generate_report(args, full_image)
+    else:
         generate_report(args, base_image, stub_image)
+    logger.debug('Teardown...')
+    teardown()
+    if not args.keep_working_dir:
+        shutil.rmtree(os.path.abspath(constants.temp_folder))
