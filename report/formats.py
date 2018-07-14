@@ -43,8 +43,8 @@ package_demarkation = '''------------------------------------------------''' \
     '''\n\n'''
 
 # informational
-loading_from_cache = '''Loading packages from cache for layer {layer_id}:'''
-invoking_base_commands = '''Invoking commands from command_lib/base.yml:'''
+loading_from_cache = '''Loading packages from cache for layer {layer_id}'''
+invoking_base_commands = '''Invoking commands from command_lib/base.yml'''
 invoking_snippet_commands = '''Invoking commands from ''' \
     '''command_lib/snippets.yml'''
 ignored = '''\nIgnored Commands:'''
@@ -57,9 +57,13 @@ base_image_instructions = ''
 dockerfile_instruction = ''
 
 # dockerfile report sections
-dockerfile_header = '''Report from Dockerfile\n'''
-dockerfile_base = '''Base Image: {base_image_instructions}\n'''
-dockerfile_line = '''Instruction Line: {dockerfile_instruction}\n'''
+dockerfile_image = '''Image built from Dockerfile {dockerfile}'''
+dockerfile_base = '''Base Image: {base_image_instructions}'''
+dockerfile_line = '''Instruction Line: {dockerfile_instruction}'''
+image_build_failure = '''Failed to build image from Dockerfile'''
+image_load_failure = '''Failed to load metadata for built image {testimage}'''
+layer_created_by = '''Layer created by commands: {created_by}'''
+no_created_by = '''No information about filesystem origin'''
 
 # format for notices
 notice_format = '''{origin}:\n\t{info}\n\twarnings:{warnings}''' \

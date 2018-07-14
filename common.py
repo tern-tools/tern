@@ -38,7 +38,7 @@ def load_from_cache(layer):
     If it doesn't exist return false
     Add notices to the layer's origins matching the origin_str'''
     loaded = False
-    origin_str = layer.created_by
+    origin_layer = 'Layer: ' + layer.diff_id[:10]
     if not layer.packages:
         # there are no packages in this layer
         # try to get it from the cache
@@ -49,7 +49,7 @@ def load_from_cache(layer):
             message = formats.loading_from_cache.format(
                 layer_id=layer.diff_id[:10])
             # add notice to the origin
-            layer.origins.add_notice_to_origins(origin_str, Notice(
+            layer.origins.add_notice_to_origins(origin_layer, Notice(
                 message, 'info'))
             for pkg_dict in raw_pkg_list:
                 pkg = Package(pkg_dict['name'])
@@ -88,8 +88,15 @@ def add_base_packages(base_layer, binary):
         1. get the listing from the base.yml
         2. Invoke any commands against the base layer
         3. Make a list of packages and add them to the layer'''
-    origin_layer = base_layer.created_by
-    origin_command_lib = 'command_lib/base.yml'
+    origin_layer = 'Layer: ' + base_layer.diff_id[:10]
+    if base_layer.created_by:
+        base_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            formats.layer_created_by.format(created_by=base_layer.created_by),
+            'info'))
+    else:
+        base_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            formats.no_created_by, 'warning'))
+    origin_command_lib = formats.invoking_base_commands
     # find the binary
     listing = command_lib.get_base_listing(binary)
     if listing:
@@ -282,17 +289,18 @@ def add_diff_packages(diff_layer, command_line, shell):
         3. For each package get the dependencies
         4. For each unique package name, find the metadata and add to the
         layer'''
-    origin_info = formats.invoke_for_snippets
-    diff_layer.origins.add_notice_origin(origin_info)
+    origin_layer = 'Layer: ' + diff_layer.diff_id[:10]
     # parse all installed commands
     cmd_list, msg = filter_install_commands(command_line)
     if msg:
         diff_layer.origins.add_notice_to_origins(
-            origin_info, Notice(msg, 'warning'))
+            origin_layer, Notice(msg, 'warning'))
     # find packages for each command
     for command in cmd_list:
-        origin_cmd = content.print_package_invoke(command.name)
-        diff_layer.origins.add_notice_origin(origin_cmd)
+        cmd_msg = formats.invoke_for_snippets + '\n' + \
+            content.print_package_invoke(command.name)
+        diff_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            cmd_msg, 'info'))
         pkg_list = get_installed_package_names(command)
         # collect all the dependencies for each package name
         all_pkgs = []
@@ -304,7 +312,7 @@ def add_diff_packages(diff_layer, command_line, shell):
             if deps_msg:
                 logger.warning(deps_msg)
                 diff_layer.origins.add_notice_to_origins(
-                    origin_info, Notice(deps_msg, 'error'))
+                    origin_layer, Notice(deps_msg, 'error'))
             all_pkgs.append(pkg_name)
             all_pkgs.extend(deps)
         unique_pkgs = list(set(all_pkgs))

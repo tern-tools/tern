@@ -13,6 +13,7 @@ from utils import dockerfile
 from utils import container
 from utils import constants
 from report import errors
+from report import formats
 import common
 
 '''
@@ -94,7 +95,8 @@ def get_dockerfile_base():
 
 def get_dockerfile_image_tag():
     '''Return the image and tag used to build an image from the dockerfile'''
-    image_tag_string = constants.image + dockerfile.tag_separator + constants.tag
+    image_tag_string = constants.image + dockerfile.tag_separator + \
+        constants.tag
     return image_tag_string
 
 
@@ -137,9 +139,15 @@ def add_packages_from_history(diff_layer, shell):
     At this time, Docker keeps a history of commands that created non-empty
     layers. Use that to find possible install commands and packages. This will
     not work for OCI compatible images as created_by is not mandated.'''
-    instruction = created_to_instruction(diff_layer.created_by)
-    origin_layer = instruction + ' -> ' + diff_layer.diff_id[:10]
-    diff_layer.origins.add_notice_origin(origin_layer)
+    origin_layer = 'Layer: ' + diff_layer.diff_id[:10]
+    if diff_layer.created_by:
+        instruction = created_to_instruction(diff_layer.created_by)
+        diff_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            formats.dockerfile_line.format(dockerfile_instruction=instruction),
+            'info'))
+    else:
+        diff_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            formats.no_created_by, 'warning'))
     if 'RUN' in instruction:
         # for Docker the created_by comes from the instruction in the
         # dockerfile
