@@ -32,10 +32,10 @@ def print_invoke_list(info_dict, info):
     return report
 
 
-def print_base_invoke(base_image, base_tag):
-    '''Given the base image and tag in a tuple return a string containing
+def print_base_invoke(key):
+    '''Given the key in the base library, return a string containing
     the command_lib/base.yml'''
-    info = command_lib.command_lib.get_base_listing(base_image, base_tag)
+    info = command_lib.command_lib.get_base_listing(key)
     report = ''
     report = report + print_invoke_list(info, 'names')
     report = report + print_invoke_list(info, 'versions')

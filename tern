@@ -68,6 +68,8 @@ if __name__ == '__main__':
     Learn more at https://github.com/vmware/tern''')
     parser.add_argument('-c', '--clear-cache', action='store_true',
                         help="Clear the cache before running")
+    parser.add_argument('-k', '--keep-working-dir', action='store_true',
+                        help="Keep the working directory after execution")
     subparsers = parser.add_subparsers(help='Subcommands')
     # subparser for report
     parser_report = subparsers.add_parser('report',
