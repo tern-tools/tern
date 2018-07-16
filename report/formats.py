@@ -63,7 +63,7 @@ dockerfile_line = '''Instruction Line: {dockerfile_instruction}'''
 image_build_failure = '''Failed to build image from Dockerfile'''
 image_load_failure = '''Failed to load metadata for built image {testimage}'''
 layer_created_by = '''Layer created by commands: {created_by}'''
-no_created_by = '''No information about filesystem origin'''
+no_created_by = '''No information about filesystem creation'''
 
 # format for notices
 notice_format = '''{origin}:\n\t{info}\n\twarnings:{warnings}''' \
