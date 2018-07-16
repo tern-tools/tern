@@ -323,3 +323,18 @@ def add_diff_packages(diff_layer, command_line, shell):
                 command.name, pkg_name)
             fill_package_metadata(pkg, pkg_listing, shell)
             diff_layer.add_package(pkg)
+
+
+def update_master_list(master_list, layer_obj):
+    '''A general utility to update a master list of package names and clean
+    out a layer's list of package objects
+    Given a master list of package names and a layer object containing a list
+    of package objects, append to the master list all the package names that
+    are not in the master list and remove the duplicate packages from the
+    layer object'''
+    layer_packages = layer_obj.get_package_names()
+    keep_list = list(set(layer_packages) - set(master_list))
+    remove_list = list(set(layer_packages) - set(keep_list))
+    master_list.extend(keep_list)
+    for pkg in remove_list:
+        layer_obj.remove_package(pkg)

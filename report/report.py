@@ -129,6 +129,8 @@ def analyze_docker_image(image_obj):
     shell = ''
     # set the layer that is mounted. In the beginning this is 0
     mounted = 0
+    # set up empty master list of package names
+    master_list = []
     # find the shell by mounting the base layer
     target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
     binary = common.get_base_bin(image_obj.layers[0])
@@ -149,6 +151,10 @@ def analyze_docker_image(image_obj):
     else:
         logger.warning(errors.unrecognized_base.format(
             image_name=image_obj.name, image_tag=image_obj.tag))
+    # populate the master list with all packages found in the first layer
+    # can't use assignment as that will just point to the image object's layer
+    for p in image_obj.layers[0].get_package_names():
+        master_list.append(p)
     # get packages for subsequent layers
     curr_layer = 1
     while curr_layer < len(image_obj.layers):
@@ -164,6 +170,8 @@ def analyze_docker_image(image_obj):
             docker.add_packages_from_history(
                 image_obj.layers[curr_layer], shell)
             rootfs.undo_mount()
+            # update the master list
+            common.update_master_list(master_list, image_obj.layers[curr_layer])
         curr_layer = curr_layer + 1
     # undo all the mounts
     rootfs.unmount_rootfs(mounted + 1)
