@@ -7,7 +7,7 @@ We are excited to be working with the community to help with Open Source complia
 You can contribute in the following ways:
 
 * Improving the Documentation
-* Adding to the Command Library
+* [Adding to the Command Library](docs/adding-to-command-library.md)
 * Improving the Unit and Functional Tests
 * Improving the Core Project
 

@@ -54,7 +54,8 @@ if __name__ == '__main__':
     try:
         result = command_lib.get_pkg_attr_list(
             args.shell, info_dict, args.package, False, args.container)
-        print(result)
-        print(len(result[0]))
+        print('Output list: ' + ' '.join(result[0]))
+        print('Error messages: ' + result[1])
+        print('Number of elements: ' + str(len(result[0])))
     except subprocess.CalledProcessError as error:
         print(error.output)
