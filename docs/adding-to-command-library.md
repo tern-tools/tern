@@ -1,3 +1,4 @@
+# Adding a Listing to the Command Library
 There is no special magic that Tern uses to get all the information about
 packages installed in a Docker image. It just invokes shell scripts within
 or outside a [chroot](https://wiki.archlinux.org/index.php/change_root)
@@ -8,7 +9,7 @@ Since its accuracy is heavily dependent on these shell scripts, it is
 important to check whether the scripts are producing the the right information
 in the right format.
 
-The shell scripts are listed in the [Command Library](../glossary.md) which is
+The shell scripts are listed in the [Command Library](glossary.md) which is
 simply two yaml files: `command_lib/base.yml` and `command_lib/snippets.yml`.
 
 base.yml lists snippets that operate on full root filesystems that typically
@@ -44,16 +45,17 @@ dpkg:
 you can run in a Docker container based on debian to get all the names of the
 packages installed in your container (the stuff after `dpkg --get-selections`
 is to trim out the information about the versions, arch and other information
-to just get the names`). So, nothing special, but still needs to be accurate.
+to just get the names). So, nothing special, but still needs to be accurate.
                                                                                                                        
-### Adding to the Base Image Command Library                                                                                                                 
+## Adding to the Base Image Command Library                                                                                                                 
 You can recognize a base OS Docker image from the Dockerfile. Typically, the
 Dockerfile starts with the line `FROM scratch` followed by `ADD <filesystem>.tar /`
 which adds an entire OS filesystem to the image. There are many base images
 available to use on Dockerhub. Before considering adding any of them to the
 Command Library:
                                                                                                       
-- Check if there is a Dockerfile published                                                                                       - Check if the Dockerfile starts with 'FROM scratch' followed by 'ADD <filesystem.tar>'
+* Check if there is a Dockerfile published
+* Check if the Dockerfile starts with 'FROM scratch' followed by 'ADD <filesystem.tar>'
 
 Here is an example of Debian's base OS [Dockerfile](https://github.com/debuerreotype/docker-debian-artifacts/blob/de09dd55b6328b37b89a33e76b698f9dbe611fab/jessie/Dockerfile):
 
@@ -109,7 +111,7 @@ like the version, licenses and project urls for the packages.
 
 This listing will now work for any debian based container OS or a minimal root filesystem that comes with dpkg.
 
-### Adding to the Snippet Command Library
+## Adding to the Snippet Command Library
 
 Once Tern analyzes the base layer of the container image, it will try to figure
 out what packages were installed in the subsequent layers. It does that by
@@ -179,14 +181,15 @@ given the name of the package to be 'default', Tern will run the shell scripts
 on every package name it has parsed from the container manifest that was installed
 with apt-get.
 
-### Using verify_invoke.py to check your script
+## Using verify_invoke.py to check your script
 
 To check if your script is producing accurate results that Tern can understand,
 you can make use of the verify_invoke.py script for both base.yml and
 snippets.yml listing
 
 ```
-$ python ./verify_invoke.py -h
+$ export PYTHONPATH=`pwd
+$ python tools/verify_invoke.py -h
 usage: verify_invoke.py [-h] [--container CONTAINER] [--keys KEYS [KEYS ...]]                                                   
                         [--shell SHELL] [--package PACKAGE]
 
@@ -205,7 +208,7 @@ optional arguments:
 ```
 
 I assume here that you have already installed Docker and are familiar with
-how to run a container. verify_invoke will not do this for you, but you
+how to run a container. verify_invoke.py will not do this for you, but you
 can use it to test your snippets. I also assume you have set up the Tern
 environment:
 
@@ -221,19 +224,23 @@ $ pip install -r requirements.txt
 
 Generally here is the workflow:
 
-#### For base.yml
+### For base.yml
 
 1. Run your container using `docker run -td --name test <image:tag>` to run your container in the background and with a pseudo-tty and to give it a name `test`
-2. Run verify_invoke with the following flags
+2. Export PYTHONPATH to the current directory assuming you have already cd'd into the tern directory
 ```
-$ python ./verify_invoke.py --container test --keys base <package_manager> <names/versions/licenses/src_urls> --shell '/usr/bin/bash'
+$ export PYTHONPATH=`pwd`
+```
+3. Run verify_invoke with the following flags
+```
+$ python tools/verify_invoke.py --container test --keys base <package_manager> <names/versions/licenses/src_urls> --shell '/usr/bin/bash'
 ```
 
 This should give you a result that looks something like this:
 ```
-$ python ./verify_invoke.py --container zen_yonath --keys base tdnf names --shell '/usr/bin/bash'
+$ python tools/verify_invoke.py --container pensive_kapitsa --keys base tdnf names --shell '/usr/bin/bash'
 Output list: bash bzip2-libs ca-certificates ca-certificates-pki curl curl-libs e2fsprogs-libs elfutils-libelf expat-libs filesystem glibc hawkey krb5 libcap libdb libgcc libsolv libssh2 ncurses-libs nspr nss-libs openssl photon-release photon-repos popt readline rpm-libs sqlite-libs tdnf toybox xz-libs zlib
-Error messages:
+Error messages: 
 Number of elements: 32
 ```
 
@@ -257,19 +264,23 @@ You can now verify if this result is what you expect for the list of package
 names, the number of elements in the list i.e. the number of installed packages
 and if there were any error messages
 
-#### For snippets.yml
+### For snippets.yml
 
 1. Run your container using `docker run -td --name test <image:tag>` to run your container in the background and with a pseudo-tty and to give it a name `test`
-2. Run verify_invoke with the following flags
+2. Export the PYTHONPATH to the current directory assuming you have cd'd into the tern directory
 ```
-$ python ./verify_invoke.py --container test --keys snippets <command> packages <version/license/src_url> --shell '/usr/bin/bash' --package <package name>
+$ export PYTHONPATH=`pwd`
+```
+3. Run verify_invoke with the following flags
+```
+$ python tools/verify_invoke.py --container test --keys snippets <command> packages <version/license/src_url> --shell '/usr/bin/bash' --package <package name>
 ```
 
 This should give you a result that looks something like this:
 ```
-$ python ./verify_invoke.py --container zen_yonath --keys snippets tyum packages version --shell '/usr/bin/bash' --package bash
+$ python tools/verify_invoke.py --container pensive_kapitsa --keys snippets tyum packages version --shell '/usr/bin/bash' --package bash
 Output list: 4.4-6.ph2
-Error messages: 
+Error messages:
 Number of elements: 1
 ```
 
