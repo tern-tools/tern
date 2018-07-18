@@ -39,13 +39,19 @@ def write_report(report):
         f.write(report)
 
 
-def setup(dockerfile=None):
+def setup(dockerfile=None, image_tag_string=None):
     '''Any initial setup'''
     # load the cache
     cache.load()
     # load dockerfile if present
     if dockerfile:
         docker.load_docker_commands(dockerfile)
+    # check if the docker image is present
+    if image_tag_string:
+        if not container.check_image(image_tag_string):
+            logger.fatal(errors.cannot_find_image.format(
+                imagetag=image_tag_string))
+            sys.exit()
     # create temporary working directory
     if not os.path.exists(constants.temp_folder):
         os.mkdir(constants.temp_folder)
@@ -93,9 +99,9 @@ def load_base_image():
     return base_image
 
 
-def load_full_image():
-    '''Create image object from test image and return the object'''
-    test_image = DockerImage(docker.get_dockerfile_image_tag())
+def load_full_image(image_tag_string):
+    '''Create image object from image name and tag and return the object'''
+    test_image = DockerImage(image_tag_string)
     failure_origin = formats.image_load_failure.format(
         testimage=test_image.repotag)
     try:
@@ -112,13 +118,14 @@ def load_full_image():
     return test_image
 
 
-def analyze_docker_image(image_obj):
+def analyze_docker_image(image_obj, dockerfile=False):
     '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
     and then look up the command library for commands to run in chroot'''
     # find the layers that are imported
-    docker.set_imported_layers(image_obj)
+    if dockerfile:
+        docker.set_imported_layers(image_obj)
     # add notices for each layer if it is imported
     for layer in image_obj.layers:
         origin_str = 'Layer: ' + layer.diff_id[:10]
@@ -222,16 +229,21 @@ def generate_report(args, *images):
     write_report(report)
 
 
-def execute_dockerfile(args):
-    '''Execution path if given a dockerfile'''
-    logger.debug('Setting up...')
+def check_docker_daemon():
+    '''Check if the Docker daemon is running. If not, exit gracefully'''
     try:
         container.docker_command(['docker', 'ps'])
     except subprocess.CalledProcessError as error:
         logger.error('Docker daemon is not running: {0}'.format(
             error.output.decode('utf-8')))
         sys.exit()
-    setup(args.dockerfile)
+
+
+def execute_dockerfile(args):
+    '''Execution path if given a dockerfile'''
+    check_docker_daemon()
+    logger.debug('Setting up...')
+    setup(dockerfile=args.dockerfile)
     # attempt to build the image
     logger.debug('Building Docker image...')
     # placeholder to check if we can analyze the full image
@@ -239,14 +251,15 @@ def execute_dockerfile(args):
     build, msg = docker.is_build()
     if build:
         # attempt to get built image metadata
-        full_image = load_full_image()
+        image_tag_string = docker.get_dockerfile_image_tag()
+        full_image = load_full_image(image_tag_string)
         if full_image.origins.is_empty():
             # image loading was successful
             # Add an image origin here
             full_image.origins.add_notice_origin(
                 formats.dockerfile_image.format(dockerfile=args.dockerfile))
             # analyze image
-            analyze_docker_image(full_image)
+            analyze_docker_image(full_image, True)
         else:
             # we cannot load the full image
             logger.warning('Cannot retrieve full image metadata')
@@ -286,6 +299,33 @@ def execute_dockerfile(args):
         generate_report(args, full_image)
     else:
         generate_report(args, base_image, stub_image)
+    logger.debug('Teardown...')
+    teardown()
+    if not args.keep_working_dir:
+        shutil.rmtree(os.path.abspath(constants.temp_folder))
+
+
+def execute_docker_image(args):
+    '''Execution path if given a Docker image'''
+    check_docker_daemon()
+    logger.debug('Setting up...')
+    setup(image_tag_string=args.docker_image)
+    # attempt to get built image metadata
+    full_image = load_full_image(args.docker_image)
+    if full_image.origins.is_empty():
+        # image loading was successful
+        # Add an image origin here
+        full_image.origins.add_notice_origin(
+            formats.docker_image.format(imagetag=args.docker_image))
+        # analyze image
+        analyze_docker_image(full_image)
+        # generate report
+        generate_report(args, full_image)
+    else:
+        # we cannot load the full image
+        logger.warning('Cannot retrieve full image metadata')
+    if not args.keep_working_dir:
+        clean_image_tars(full_image)
     logger.debug('Teardown...')
     teardown()
     if not args.keep_working_dir:

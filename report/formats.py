@@ -65,6 +65,9 @@ image_load_failure = '''Failed to load metadata for built image {testimage}'''
 layer_created_by = '''Layer created by commands: {created_by}'''
 no_created_by = '''No information about filesystem creation'''
 
+# docker image report
+docker_image = '''Docker image: {imagetag}'''
+
 # format for notices
 notice_format = '''{origin}:\n\t{info}\n\twarnings:{warnings}''' \
     '''\n\terrors:{errors}\n\thints:{hints}\n'''

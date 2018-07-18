@@ -47,7 +47,10 @@ def main(args):
         else:
             logger.debug(
                 'Creating a detailed report on components in Docker image...')
-        report.execute_dockerfile(args)
+        if args.dockerfile:
+            report.execute_dockerfile(args)
+        if args.docker_image:
+            report.execute_docker_image(args)
         logger.debug('Report completed.')
     logger.debug('Finished')
 
@@ -77,6 +80,9 @@ if __name__ == '__main__':
     parser_report.add_argument('-d', '--dockerfile', type=check_file_existence,
                                help="Dockerfile used to build the Docker"
                                " image")
+    parser_report.add_argument('-i', '--docker-image',
+                               help="Docker image that exists locally -"
+                               " image:tag")
     parser_report.add_argument('-s', '--summary', action='store_true',
                                help="Summarize the report as a list of"
                                " packages with associated information")
