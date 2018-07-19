@@ -59,6 +59,9 @@ $ python tests/<test file>.py
 
 We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 0.1.0.
 
+## Releases
+* [v0.1.0](docs/releases/v0_1_0.md)
+
 ## Documentation<a name="documentation"/>
 Architecture, function blocks, code descriptions and the project roadmap are located in the docs folder. We also welcome contributions to the documentation. See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
 
