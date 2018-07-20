@@ -27,6 +27,7 @@ If you happen to be using Docker containers
 
 Make sure the docker daemon is running.
 
+### Get the code
 
 ```
 $ python3 -m venv ternenv
@@ -34,17 +35,31 @@ $ cd ternenv
 $ git clone https://github.com/vmware/tern.git
 $ source bin/activate
 $ cd tern
+$ git checkout -b release v0.1.0
 $ pip install -r requirements.txt
-$ ./tern report -d samples/photon_git/Dockerfile
 ```
 
-Take a look at report.txt to see what packages are installed in the created Docker image and how Tern got this information. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with.
+### To run against a Docker image
+If you have a Docker image pulled locally and want to inspect it
+```
+$ ./tern report -i debian:jessie
+```
+Take a look at report.txt to see what packages are installed in the Docker image and how Tern got this information. If you encounter any errors, please file an issue.
+
+### To run against a Dockerfile
+You can run Tern against a Dockerfile. Tern will build the image for you and then analyze it with respect to the Dockerfile
+```
+$ ./tern report -d samples/photon_git/Dockerfile
+```
+Take a look at report.txt to see what packages are installed in the created Docker image and how Tern got this information. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
 
 ### To get a summary report
+To get just a list of packages, you can use the `-s` option to get a summary report.
 ```
 $ ./tern report -s -d samples/photon_git/Dockerfile
 ```
-WARNING: Tern is meant to give guidance on what may be installed for each line in a Dockerfile so it is recommended that for the purpose of investigation, the default report is used. The summary report may be used as the output of a build artifact or something to submit to a compliance or legal team.
+
+WARNING: Tern is meant to give guidance on what may be installed in a container image, so it is recommended that for the purpose of investigation, the default report is used. The summary report may be used as the output of a build artifact or something to submit to a compliance or legal team.
 
 ### To run a test
 ```
@@ -56,8 +71,9 @@ $ export PYTHONPATH=`pwd`
 $ python tests/<test file>.py
 ```
 ## Project Status<a name="project-status"/>
+Release 0.1.0 is here! Please see the [release notes](docs/releases/v0_1_0.md) for details.
 
-We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 0.1.0.
+We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 0.2.0
 
 ## Releases
 * [v0.1.0](docs/releases/v0_1_0.md)
