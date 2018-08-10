@@ -2,8 +2,10 @@
 Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
+import hashlib
 import logging
 import os
+import stat
 import subprocess
 import tarfile
 
@@ -162,3 +164,61 @@ def clean_up():
     workdir_path = os.path.join(constants.temp_folder, constants.workdir)
     root_command(remove, mergedir_path)
     root_command(remove, workdir_path)
+
+
+def get_file_stats(workdir, file_path):
+    '''Given the working directory path and path to a file, return a string
+    with the file stats in this form:
+        filepath|inode|file permissions|uid|gid|size|num links|extended
+        attributes|
+    List the extended attributes as a key-value pair and a comma delimiter'''
+    # find the extended attributes for the file
+    attrs_list = []
+    for attr in os.listxattr(file_path):
+        attr_value = os.getxattr(file_path, attr).decode(
+            'utf-8').strip(' \t\r\b\0')
+        attr_str = attr + "=" + attr_value
+        attrs_list.append(attr_str)
+    attrs = ','.join(attrs_list)
+    # get file status
+    stats = os.stat(file_path)
+    perms = stat.filemode(stats.st_mode)
+    # get file path without the working directory
+    file_from_root = file_path.split(workdir).pop()
+    file_stats = file_from_root + '|' + str(stats.st_ino) + '|' + perms + \
+        '|' + str(stats.st_uid) + '|' + str(stats.st_gid) + '|' + \
+        str(stats.st_size) + '|' + str(stats.st_nlink) + '|' + attrs + '|'
+    return file_stats
+
+
+def get_file_sha(file_path):
+    '''Given the path to a file, return the sha256sum of the file'''
+    sha256sum = hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        for file_bytes in iter(lambda: f.read(4096), b""):
+            sha256sum.update(file_bytes)
+    return sha256sum.hexdigest()
+
+
+def calc_fs_hash(fs_path):
+    '''Given the path to the filesystem, calculate the filesystem hash as
+    follows:
+        1. For each file in the fs_path, find file statistics
+        2. Append the file content's 256sha hash to the file stats
+        3. Calculate the sha of the contents
+        4. Save this file in the layer sha's directory to look at later
+        Note that this file will be deleted if the -k flag is not given'''
+    file_list = []
+    for root, _, files in os.walk(fs_path, topdown=True, onerror=None):
+        for f_name in files:
+            file_path = os.path.join(root, f_name)
+            file_desc = get_file_stats(fs_path, file_path)
+            file_desc = file_desc + get_file_sha(file_path)
+            file_list.append(file_desc)
+    hash_contents = '\n'.join(file_list)
+    file_name = hashlib.sha256(hash_contents.encode('utf-8')).hexdigest()
+    # write file to an appropriate location
+    hash_file = os.path.join(os.path.dirname(fs_path), file_name) + '.txt'
+    with open(hash_file, 'w') as f:
+        f.write(hash_contents)
+    return file_name
