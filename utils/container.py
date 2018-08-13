@@ -36,7 +36,6 @@ delete = ['docker', 'rmi', '-f']
 save = ['docker', 'save']
 
 # docker container names
-# TODO: randomly generated image and container names
 # image = const.image
 tag = str(int(time.time()))
 
