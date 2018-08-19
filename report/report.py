@@ -15,6 +15,7 @@ from report import formats
 from utils import container
 from utils import constants
 from utils import cache
+from utils import general
 from utils import rootfs
 from classes.docker_image import DockerImage
 from classes.image import Image
@@ -41,6 +42,8 @@ def write_report(report):
 
 def setup(dockerfile=None, image_tag_string=None):
     '''Any initial setup'''
+    # generate random names for image, container, and tag
+    general.initialize_names()
     # load the cache
     cache.load()
     # load dockerfile if present

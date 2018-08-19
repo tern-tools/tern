@@ -11,11 +11,11 @@ Constants
 # this is relative to where the tern executable is
 temp_folder = 'temp'
 # built image name
-image = 'testimage'
+image = 'ternimage'
 # built image tag
-tag = 'testtag'
+tag = 'terntag'
 # running container name
-container = 'testcontainer'
+container = 'terncontainer'
 # logger name
 logger_name = 'ternlog'
 # logfile
