@@ -177,8 +177,8 @@ def analyze_docker_image(image_obj, dockerfile=False):
             docker.add_packages_from_history(
                 image_obj.layers[curr_layer], shell)
             rootfs.undo_mount()
-            # update the master list
-            common.update_master_list(master_list, image_obj.layers[curr_layer])
+        # update the master list
+        common.update_master_list(master_list, image_obj.layers[curr_layer])
         curr_layer = curr_layer + 1
     # undo all the mounts
     rootfs.unmount_rootfs(mounted + 1)
