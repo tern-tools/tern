@@ -3,10 +3,12 @@ Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 import os
+import random
 import re
 
 from contextlib import contextmanager
 
+from . import constants
 
 # from https://stackoverflow.com/questions/6194499/pushd-through-os-system
 @contextmanager
@@ -15,6 +17,13 @@ def pushd(path):
     os.chdir(path)
     yield
     os.chdir(curr_path)
+
+
+def initialize_names():
+   randint = random.randint(10000,99999)
+   constants.image = constants.image + "_" + str(randint)
+   constants.tag = constants.tag + "_" + str(randint)
+   constants.container = constants.container + "_" + str(randint)
 
 
 def parse_command(command):
