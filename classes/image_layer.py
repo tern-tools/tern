@@ -1,14 +1,18 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
+import os
 
 from .origins import Origins
+from utils import rootfs
 
 class ImageLayer(object):
     '''A representation of a container filesystem layer
     attributes:
         diff_id: the sha256 of the layer filesystem
+        fs_hash: the hashed contents of the layer filesystem - default to empty
+        string if there is no tarball of the layer filesystem
         packages: list of objects of type Package (package.py)
         origins: list of NoticeOrigin objects (origins.py)
         tar_file: the path to the layer filesystem tarball
@@ -25,9 +29,11 @@ class ImageLayer(object):
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
         to_dict: returns a dict representation of the instance
-        get_package_names: returns a list of package names'''
+        get_package_names: returns a list of package names
+        gen_fs_hash: calculate the filesystem hash'''
     def __init__(self, diff_id, tar_file=None, created_by=None):
         self.__diff_id = diff_id
+        self.__fs_hash = ''
         self.__tar_file = tar_file
         self.__created_by = created_by
         self.__packages = []
@@ -42,6 +48,10 @@ class ImageLayer(object):
     @property
     def packages(self):
         return self.__packages
+
+    @property
+    def fs_hash(self):
+        return self.__fs_hash
 
     @property
     def origins(self):
@@ -96,7 +106,7 @@ class ImageLayer(object):
         pkg_list = []
         for pkg in self.__packages:
             pkg_list.append(pkg.to_dict())
-            layer_dict.update({self.diff_id: {'packages': pkg_list,
+            layer_dict.update({self.fs_hash: {'packages': pkg_list,
                                               'tar_file': self.__tar_file,
                                               'created_by': self.__created_by
                                               }})
@@ -108,3 +118,15 @@ class ImageLayer(object):
         for pkg in self.packages:
             pkg_list.append(pkg.name)
         return pkg_list
+
+    def gen_fs_hash(self):
+        '''Get the filesystem hash if the image class was created with a
+        tar_file'''
+        if self.__tar_file:
+            fs_dir = rootfs.get_untar_dir(self.__tar_file)
+            tar_file = rootfs.get_layer_tar_path(self.__tar_file)
+            # remove the fs directory if it already exists
+            if os.path.isdir(fs_dir):
+                rootfs.root_command(rootfs.remove, fs_dir)
+            rootfs.extract_layer_tar(tar_file, fs_dir)
+            self.__fs_hash = rootfs.calc_fs_hash(fs_dir)

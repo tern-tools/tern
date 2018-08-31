@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
@@ -131,7 +131,7 @@ def analyze_docker_image(image_obj, dockerfile=False):
         docker.set_imported_layers(image_obj)
     # add notices for each layer if it is imported
     for layer in image_obj.layers:
-        origin_str = 'Layer: ' + layer.diff_id[:10]
+        origin_str = 'Layer: ' + layer.fs_hash[:10]
         layer.origins.add_notice_origin(origin_str)
         if layer.import_str:
             layer.origins.add_notice_to_origins(origin_str, Notice(

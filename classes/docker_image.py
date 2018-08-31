@@ -1,18 +1,16 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
 import json
 import os
-import re
 import subprocess
 
 from utils.general import pushd
 from utils.constants import temp_folder
 from utils.constants import manifest_file
 from utils.container import extract_image_metadata
-from utils.dockerfile import directives
 from utils.dockerfile import tag_separator
 
 from .image_layer import ImageLayer
@@ -155,6 +153,7 @@ class DockerImage(Image):
             layer_diffs = self.get_diff_ids(self._config)
             while layer_diffs and layer_paths:
                 layer = ImageLayer(layer_diffs.pop(0), layer_paths.pop(0))
+                layer.gen_fs_hash()
                 self._layers.append(layer)
             self.set_layer_created_by()
         except NameError:

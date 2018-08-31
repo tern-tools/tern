@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
@@ -38,16 +38,16 @@ def load_from_cache(layer):
     If it doesn't exist return false
     Add notices to the layer's origins matching the origin_str'''
     loaded = False
-    origin_layer = 'Layer: ' + layer.diff_id[:10]
+    origin_layer = 'Layer: ' + layer.fs_hash[:10]
     if not layer.packages:
         # there are no packages in this layer
         # try to get it from the cache
-        raw_pkg_list = cache.get_packages(layer.diff_id)
+        raw_pkg_list = cache.get_packages(layer.fs_hash)
         if raw_pkg_list:
             logger.debug('Loaded from cache: layer {}'.format(
-                layer.diff_id[:10]))
+                layer.fs_hash[:10]))
             message = formats.loading_from_cache.format(
-                layer_id=layer.diff_id[:10])
+                layer_id=layer.fs_hash[:10])
             # add notice to the origin
             layer.origins.add_notice_to_origins(origin_layer, Notice(
                 message, 'info'))
@@ -64,7 +64,7 @@ def save_to_cache(image):
     exists. If no then save the layer and package list to the cache'''
     existing_layers = cache.get_layers()
     for layer in image.layers:
-        if layer.diff_id not in existing_layers and layer.packages:
+        if layer.fs_hash not in existing_layers and layer.packages:
             cache.add_layer(layer)
 
 
@@ -88,7 +88,7 @@ def add_base_packages(base_layer, binary):
         1. get the listing from the base.yml
         2. Invoke any commands against the base layer
         3. Make a list of packages and add them to the layer'''
-    origin_layer = 'Layer: ' + base_layer.diff_id[:10]
+    origin_layer = 'Layer: ' + base_layer.fs_hash[:10]
     if base_layer.created_by:
         base_layer.origins.add_notice_to_origins(origin_layer, Notice(
             formats.layer_created_by.format(created_by=base_layer.created_by),
@@ -289,7 +289,7 @@ def add_diff_packages(diff_layer, command_line, shell):
         3. For each package get the dependencies
         4. For each unique package name, find the metadata and add to the
         layer'''
-    origin_layer = 'Layer: ' + diff_layer.diff_id[:10]
+    origin_layer = 'Layer: ' + diff_layer.fs_hash[:10]
     # parse all installed commands
     cmd_list, msg = filter_install_commands(command_line)
     if msg:
