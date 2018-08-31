@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 import hashlib
@@ -65,6 +65,11 @@ def get_untar_dir(layer_tarfile):
         layer_tarfile), constants.untar_dir)
 
 
+def get_layer_tar_path(layer_tarfile):
+    '''get the full path of the layer tar file'''
+    return os.path.join(constants.temp_folder, layer_tarfile)
+
+
 def set_up():
     '''Create required directories'''
     workdir_path = os.path.join(constants.temp_folder, constants.workdir)
@@ -101,11 +106,7 @@ def mount_base_layer(base_layer_tar):
         1. Untar the base layer tar file
         2. Mount into mergedir'''
     base_rootfs_path = get_untar_dir(base_layer_tar)
-    source_dir_path = os.path.join(constants.temp_folder, base_layer_tar)
     target_dir_path = os.path.join(constants.temp_folder, constants.mergedir)
-    if os.path.isdir(base_rootfs_path):
-        root_command(remove, base_rootfs_path)
-    extract_layer_tar(source_dir_path, base_rootfs_path)
     root_command(mount, base_rootfs_path, target_dir_path)
     return target_dir_path
 
@@ -115,12 +116,8 @@ def mount_diff_layer(diff_layer_tar):
         1. Untar the diff rootfs
         2. Union mount this directory on the mergedir'''
     upper_dir_path = get_untar_dir(diff_layer_tar)
-    source_dir_path = os.path.join(constants.temp_folder, diff_layer_tar)
     merge_dir_path = os.path.join(constants.temp_folder, constants.mergedir)
     workdir_path = os.path.join(constants.temp_folder, constants.workdir)
-    if os.path.isdir(upper_dir_path):
-        root_command(remove, upper_dir_path)
-    extract_layer_tar(source_dir_path, upper_dir_path)
     args = 'lowerdir=' + merge_dir_path + ',upperdir=' + upper_dir_path + \
         ',workdir=' + workdir_path
     root_command(union_mount, args, merge_dir_path)
