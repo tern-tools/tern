@@ -43,10 +43,8 @@ tag = str(int(time.time()))
 logger = logging.getLogger(logger_name)
 
 
-def docker_command(command, *extra):
-    '''Invoke docker command. If the command fails nothing is returned
-    If it passes then the result is returned'''
-    full_cmd = []
+def is_sudo():
+    '''Check if the user uses sudo for docker commands'''
     sudo = True
     try:
         members = grp.getgrnam('docker').gr_mem
@@ -54,7 +52,14 @@ def docker_command(command, *extra):
             sudo = False
     except KeyError:
         pass
-    if sudo:
+    return sudo
+
+
+def docker_command(command, *extra):
+    '''Invoke docker command. If the command fails nothing is returned
+    If it passes then the result is returned'''
+    full_cmd = []
+    if is_sudo():
         full_cmd.append('sudo')
     full_cmd.extend(command)
     for arg in extra:
@@ -68,6 +73,23 @@ def docker_command(command, *extra):
         raise subprocess.CalledProcessError(1, cmd=full_cmd, output=error)
     else:
         return result
+
+
+def docker_command_check(command, *extra):
+    '''Invoke docker command using subprocess.check_output'''
+    full_cmd = []
+    if is_sudo():
+        full_cmd.append('sudo')
+    full_cmd.extend(command)
+    for arg in extra:
+        full_cmd.append(arg)
+    # invoke
+    logger.debug("Running command: " + ' '.join(full_cmd))
+    try:
+        result = subprocess.check_output(full_cmd)
+        return result
+    except subprocess.CalledProcessError:
+        raise
 
 
 def check_container():
@@ -155,7 +177,7 @@ def get_image_id(image_tag_string):
 def extract_image_metadata(image_tag_string):
     '''Run docker save and extract the files in a temporary directory'''
     temp_path = os.path.abspath(temp_folder)
-    result = docker_command(save, image_tag_string)
+    result = docker_command_check(save, image_tag_string)
     with tarfile.open(fileobj=io.BytesIO(result)) as tar:
         tar.extractall(temp_path)
     if not os.path.exists(temp_path):
