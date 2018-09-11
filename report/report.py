@@ -137,8 +137,6 @@ def analyze_docker_image(image_obj, dockerfile=False):
             layer.origins.add_notice_to_origins(origin_str, Notice(
                 'Imported in Dockerfile using: ' + layer.import_str, 'info'))
     shell = ''
-    # set the layer that is mounted. In the beginning this is 0
-    mounted = 0
     # set up empty master list of package names
     master_list = []
     # find the shell by mounting the base layer
@@ -161,6 +159,8 @@ def analyze_docker_image(image_obj, dockerfile=False):
     else:
         logger.warning(errors.unrecognized_base.format(
             image_name=image_obj.name, image_tag=image_obj.tag))
+    # unmount the first layer
+    rootfs.unmount_rootfs()
     # populate the master list with all packages found in the first layer
     # can't use assignment as that will just point to the image object's layer
     for p in image_obj.layers[0].get_package_names():
@@ -169,22 +169,20 @@ def analyze_docker_image(image_obj, dockerfile=False):
     curr_layer = 1
     while curr_layer < len(image_obj.layers):
         if not common.load_from_cache(image_obj.layers[curr_layer]):
-            # mount from the layer after the mounted layer till the current
-            # layer
-            for index in range(mounted + 1, curr_layer + 1):
-                target = rootfs.mount_diff_layer(
-                    image_obj.layers[index].tar_file)
-            mounted = curr_layer
+            # mount diff layers from 0 till the current layer
+            tar_layers = []
+            for index in range(0, curr_layer + 1):
+                tar_layers.append(image_obj.layers[index].tar_file)
+            target = rootfs.mount_diff_layers(tar_layers)
             # mount dev, sys and proc after mounting diff layers
             rootfs.prep_rootfs(target)
             docker.add_packages_from_history(
                 image_obj.layers[curr_layer], shell)
             rootfs.undo_mount()
+            rootfs.unmount_rootfs()
         # update the master list
         common.update_master_list(master_list, image_obj.layers[curr_layer])
         curr_layer = curr_layer + 1
-    # undo all the mounts
-    rootfs.unmount_rootfs(mounted + 1)
     common.save_to_cache(image_obj)
 
 
@@ -284,7 +282,8 @@ def execute_dockerfile(args):
             # image loading was successful
             # add a notice stating failure to build image
             base_image.origins.add_notice_to_origins(
-                args.dockerfile, Notice(formats.image_build_failure, 'warning'))
+                args.dockerfile, Notice(
+                    formats.image_build_failure, 'warning'))
             # analyze image
             analyze_docker_image(base_image)
         else:

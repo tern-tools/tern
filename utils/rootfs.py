@@ -111,14 +111,17 @@ def mount_base_layer(base_layer_tar):
     return target_dir_path
 
 
-def mount_diff_layer(diff_layer_tar):
-    '''To mount the diff layer:
-        1. Untar the diff rootfs
-        2. Union mount this directory on the mergedir'''
-    upper_dir_path = get_untar_dir(diff_layer_tar)
+def mount_diff_layers(diff_layers_tar):
+    '''Using overlayfs, mount all the layer tarballs'''
+    # make a list of directory paths to give to lowerdir
+    lower_dir_paths = []
+    for layer_tar in diff_layers_tar:
+        lower_dir_paths.append(get_untar_dir(layer_tar))
+    upper_dir = lower_dir_paths.pop()
+    lower_dir = ':'.join(list(reversed(lower_dir_paths)))
     merge_dir_path = os.path.join(constants.temp_folder, constants.mergedir)
     workdir_path = os.path.join(constants.temp_folder, constants.workdir)
-    args = 'lowerdir=' + merge_dir_path + ',upperdir=' + upper_dir_path + \
+    args = 'lowerdir=' + lower_dir + ',upperdir=' + upper_dir + \
         ',workdir=' + workdir_path
     root_command(union_mount, args, merge_dir_path)
     return merge_dir_path
@@ -147,11 +150,10 @@ def undo_mount():
     root_command(unmount, os.path.join(rootfs_path, 'dev'))
 
 
-def unmount_rootfs(num_layers):
-    '''Unmount the overlay filesystem'''
+def unmount_rootfs():
+    '''Unmount the filesystem'''
     rootfs_path = os.path.join(constants.temp_folder, constants.mergedir)
-    for _ in range(num_layers):
-        root_command(unmount, '-rl', rootfs_path)
+    root_command(unmount, '-rl', rootfs_path)
 
 
 def clean_up():
@@ -178,5 +180,5 @@ def calc_fs_hash(fs_path):
         with open(hash_file, 'w') as f:
             f.write(hash_contents.decode('utf-8'))
         return file_name
-    except:
+    except subprocess.CalledProcessError:
         raise
