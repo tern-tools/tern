@@ -35,8 +35,8 @@ def load_docker_commands(dockerfile_path):
     if not os.path.isfile(dockerfile_path):
         raise IOError('{} does not exist'.format(dockerfile_path))
     global docker_commands
-    docker_commands = dockerfile.get_directive_list(dockerfile.get_command_list(
-        dockerfile_path))
+    docker_commands = dockerfile.get_directive_list(
+        dockerfile.get_command_list(dockerfile_path))
     global dockerfile_global
     dockerfile_global = dockerfile_path
 
@@ -66,7 +66,8 @@ def get_dockerfile_base():
             # there is no base image - return no image object
             return None
         # there should be some image object here
-        repotag = base_image_tag[0] + dockerfile.tag_separator + base_image_tag[1]
+        repotag = base_image_tag[0] + dockerfile.tag_separator + \
+            base_image_tag[1]
         from_line = 'FROM ' + repotag
         base_image = DockerImage(repotag)
         base_image.origins.add_notice_origin(dockerfile_lines)
@@ -139,7 +140,7 @@ def add_packages_from_history(diff_layer, shell):
     At this time, Docker keeps a history of commands that created non-empty
     layers. Use that to find possible install commands and packages. This will
     not work for OCI compatible images as created_by is not mandated.'''
-    origin_layer = 'Layer: ' + diff_layer.diff_id[:10]
+    origin_layer = 'Layer: ' + diff_layer.fs_hash[:10]
     if diff_layer.created_by:
         instruction = created_to_instruction(diff_layer.created_by)
         diff_layer.origins.add_notice_to_origins(origin_layer, Notice(
