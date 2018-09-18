@@ -139,13 +139,27 @@ def analyze_docker_image(image_obj, dockerfile=False):
     shell = ''
     # set up empty master list of package names
     master_list = []
-    # find the shell by mounting the base layer
+    # find the binary by mounting the base layer
     target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
     binary = common.get_base_bin(image_obj.layers[0])
+    # set up a notice origin referring to the base command library listing
+    origin_command_lib = formats.invoking_base_commands
     # find the shell to invoke commands in
-    shell, _ = command_lib.get_image_shell(
+    shell, msg = command_lib.get_image_shell(
         command_lib.get_base_listing(binary))
     if not shell:
+        # add a warning notice for no shell in the command library
+        logger.warning('No shell listing in command library. '
+                       'Using default shell')
+        no_shell_message = errors.no_shell_listing.format(
+            binary, default_shell=constants.shell)
+        image_obj.layers[0].origins.add_notice_to_origins(
+            origin_command_lib, Notice(no_shell_message, 'warning'))
+        # add a hint notice to add the shell to the command library
+        add_shell_message = errors.no_listing_for_base_key.format(
+            listing_key='shell')
+        image_obj.layers[0].origins.add_notice_origins(
+            origin_command_lib, Notice(add_shell_message, 'hint'))
         shell = constants.shell
     # only extract packages if there is a known binary and the layer is not
     # cached
@@ -153,7 +167,7 @@ def analyze_docker_image(image_obj, dockerfile=False):
         if not common.load_from_cache(image_obj.layers[0]):
             # get the packages of the first layer
             rootfs.prep_rootfs(target)
-            common.add_base_packages(image_obj.layers[0], binary)
+            common.add_base_packages(image_obj.layers[0], binary, shell)
             # unmount proc, sys and dev
             rootfs.undo_mount()
     else:
