@@ -83,18 +83,18 @@ def get_base_bin(base_layer):
     return binary
 
 
-def add_base_packages(base_layer, binary):
-    '''Given the base layer and the binary found in layer fs:
+def add_base_packages(image_layer, binary, shell):
+    '''Given the image layer, the binary to invoke and shell:
         1. get the listing from the base.yml
         2. Invoke any commands against the base layer
         3. Make a list of packages and add them to the layer'''
-    origin_layer = 'Layer: ' + base_layer.fs_hash[:10]
-    if base_layer.created_by:
-        base_layer.origins.add_notice_to_origins(origin_layer, Notice(
-            formats.layer_created_by.format(created_by=base_layer.created_by),
+    origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
+    if image_layer.created_by:
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            formats.layer_created_by.format(created_by=image_layer.created_by),
             'info'))
     else:
-        base_layer.origins.add_notice_to_origins(origin_layer, Notice(
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             formats.no_created_by, 'warning'))
     origin_command_lib = formats.invoking_base_commands
     # find the binary
@@ -103,22 +103,10 @@ def add_base_packages(base_layer, binary):
         # put info notice about what is going to be invoked
         snippet_msg = formats.invoke_for_base + '\n' + \
             content.print_base_invoke(binary)
-        base_layer.origins.add_notice_to_origins(
+        image_layer.origins.add_notice_to_origins(
             origin_layer, Notice(snippet_msg, 'info'))
         shell, msg = command_lib.get_image_shell(listing)
         if not shell:
-            # add a warning notice for no shell in the command library
-            logger.warning('No shell listing in command library. '
-                           'Using default shell')
-            no_shell_message = errors.no_shell_listing.format(
-                binary, default_shell=constants.shell)
-            base_layer.origins.add_notice_to_origins(
-                origin_command_lib, Notice(no_shell_message, 'warning'))
-            # add a hint notice to add the shell to the command library
-            add_shell_message = errors.no_listing_for_base_key.format(
-                listing_key='shell')
-            base_layer.origins.add_notice_origins(
-                origin_command_lib, Notice(add_shell_message, 'hint'))
             shell = constants.shell
         # get all the packages in the base layer
         names, n_msg = command_lib.get_pkg_attr_list(shell, listing['names'])
@@ -131,7 +119,7 @@ def add_base_packages(base_layer, binary):
         # add a notice to the image if something went wrong
         invoke_msg = n_msg + v_msg + l_msg + u_msg
         if invoke_msg:
-            base_layer.origins.add_notice_to_origins(
+            image_layer.origins.add_notice_to_origins(
                 origin_layer, Notice(invoke_msg, 'error'))
         if names and len(names) > 1:
             for index in range(0, len(names)):
@@ -142,10 +130,10 @@ def add_base_packages(base_layer, binary):
                     pkg.license = licenses[index]
                 if len(src_urls) == len(names):
                     pkg.src_url = src_urls[index]
-                base_layer.add_package(pkg)
+                image_layer.add_package(pkg)
     # if there is no listing add a notice
     else:
-        base_layer.origins.add_notice_to_origins(
+        image_layer.origins.add_notice_to_origins(
             origin_command_lib, Notice(errors.no_listing_for_base_key.format(
                 listing_key=binary), 'error'))
 
