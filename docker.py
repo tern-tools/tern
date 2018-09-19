@@ -126,8 +126,8 @@ def created_to_instruction(created_by):
     command that was executed unless it is a #(nop) instruction which is
     for the other Docker directives. Convert this line into a Dockerfile
     instruction'''
-    instruction = re.sub('/bin/sh -c', '', created_by).strip()
-    instruction = re.sub('\#\(nop\)', '', instruction).strip()
+    instruction = re.sub('/bin/sh -c ', '', created_by).strip()
+    instruction = re.sub(re.escape('#(nop) '), '', instruction).strip()
     first = instruction.split(' ').pop(0)
     if first and first not in dockerfile.directives and \
             'RUN' not in instruction:
@@ -135,25 +135,35 @@ def created_to_instruction(created_by):
     return instruction
 
 
-def add_packages_from_history(diff_layer, shell):
-    '''Given a layer object, get package objects installed in each layer
-    At this time, Docker keeps a history of commands that created non-empty
-    layers. Use that to find possible install commands and packages. This will
-    not work for OCI compatible images as created_by is not mandated.'''
-    origin_layer = 'Layer: ' + diff_layer.fs_hash[:10]
-    if diff_layer.created_by:
-        instruction = created_to_instruction(diff_layer.created_by)
-        diff_layer.origins.add_notice_to_origins(origin_layer, Notice(
+def get_commands_from_history(image_layer):
+    '''Given the image layer object and the shell, get the list of command
+    objects that created the layer'''
+    # set up notice origin for the layer
+    origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
+    if image_layer.created_by:
+        instruction = created_to_instruction(image_layer.created_by)
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             formats.dockerfile_line.format(dockerfile_instruction=instruction),
             'info'))
     else:
-        diff_layer.origins.add_notice_to_origins(origin_layer, Notice(
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             formats.no_created_by, 'warning'))
-    if 'RUN' in instruction:
-        # for Docker the created_by comes from the instruction in the
-        # dockerfile
-        run_command_line = instruction.split(' ', 1)[1]
-        common.add_diff_packages(diff_layer, run_command_line, shell)
+    command_line = instruction.split(' ', 1)[1]
+    # Image layers are created with the directives RUN, ADD and COPY
+    # For ADD and COPY instructions, there is no information about the
+    # packages added
+    if 'ADD' in instruction or 'COPY' in instruction:
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            errors.unknown_content.format(files=command_line), 'warning'))
+        # return an empty list as we cannot find any commands
+        return []
+    else:
+        # for RUN instructions we can return a list of commands
+        command_list, msg = common.filter_install_commands(command_line)
+        if msg:
+            image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+                msg, 'warning'))
+        return command_list
 
 
 def set_imported_layers(docker_image):

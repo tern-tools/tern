@@ -9,9 +9,9 @@ Error messages
 
 unrecognized_base = '''Unable to determine the base OS of the image ''' \
     '''{image_name}:{image_tag}\n'''
-no_packages = '''Unable to recover packages for layer {layer_id}. Consider ''' \
-    '''either entering them manually or create a bash script to retrieve ''' \
-    '''the package in the command library.\n'''
+no_packages = '''Unable to recover packages for layer {layer_id}. ''' \
+    '''Consider either entering them manually or create a bash script to ''' \
+    '''retrieve the package in the command library.\n'''
 no_version = '''No version for package {package_name}. Consider either ''' \
     '''entering the version manually or creating a script to retrieve ''' \
     '''it in the command library\n'''
@@ -47,6 +47,8 @@ incomplete_command_lib_listing = '''The command library has an incomplete ''' \
 no_shell_listing = '''There is no listing for 'shell' under the base ''' \
     '''listing for {binary}. Using default shell: ''' \
     '''{default_shell}\n'''
+unknown_content = '''Unknown content included in layer {files}. Please ''' \
+    '''analyze these files separately\n'''
 
 # Dockerfile specific errors
 dockerfile_no_tag = '''The Dockerfile provided has no tag in the line ''' \

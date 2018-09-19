@@ -113,14 +113,10 @@ def get_image_shell(base_image_listing):
     return shell, msg
 
 
-def get_package_listing(command_name, package_name):
+def get_package_listing(command_name):
     '''Given a command name, return the package listing from the snippet
-    library. First get the listing for the command name and then check if
-    there is a package name in the package list or the default'''
-    command_listing = get_command_listing(command_name)
-    pkg_listing = check_for_unique_package(
-        command_listing['packages'], package_name)
-    return pkg_listing
+    library.'''
+    return get_command_listing(command_name)['packages']
 
 
 def set_command_attrs(command_obj):
@@ -132,13 +128,13 @@ def set_command_attrs(command_obj):
         # the command is in the library
         if 'install' in command_listing.keys():
             # try to move install to a subcommand
-            if command_obj.reassign_word(
-                command_listing['install'], 'subcommand'):
+            if command_obj.reassign_word(command_listing['install'],
+                                         'subcommand'):
                 command_obj.set_install()
         if 'remove' in command_listing.keys():
             # try to move remove to a subcommand
-            if command_obj.reassign_word(
-                command_listing['remove'], 'subcommand'):
+            if command_obj.reassign_word(command_listing['remove'],
+                                         'subcommand'):
                 command_obj.set_remove()
         if 'ignore' in command_listing.keys():
             # check if any of the words in the ignore list are in
@@ -236,7 +232,7 @@ def get_pkg_attr_list(shell, attr_dict, package_name='', chroot=True,
                     except subprocess.CalledProcessError as error:
                         error_msgs = error_msgs + error.output
                 else:
-                # if we need to run in a container
+                    # if we need to run in a container
                     try:
                         result = invoke_in_container(
                             snippet_list, shell, package=package_name,
