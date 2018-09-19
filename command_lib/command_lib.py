@@ -113,7 +113,7 @@ def get_image_shell(base_image_listing):
     return shell, msg
 
 
-def get_package_listing(command_name, package_name):
+def get_package_listing(command_name, package_name=''):
     '''Given a command name, return the package listing from the snippet
     library.
     1. Get the listing for the command name
@@ -121,7 +121,7 @@ def get_package_listing(command_name, package_name):
     3. If not, check if there is a package name in the package list or
     if the default method that should be used'''
     command_listing = get_command_listing(command_name)
-    if type(command_listing['packages']) is str:
+    if not package_name:
         pkg_listing = command_listing['packages']
     else:
         pkg_listing = check_for_unique_package(
