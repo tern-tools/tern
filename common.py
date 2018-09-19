@@ -269,48 +269,42 @@ def filter_install_commands(shell_command_line):
     return filter2, report
 
 
-def add_diff_packages(diff_layer, command_line, shell):
-    '''Given a layer object, command line string that created it, and the
+def add_snippet_packages(image_layer, command, shell):
+    '''Given an image layer object, a command object, and the
     shell used to invoke commands, add package metadata to the layer object
-        1. Parse the command line to get individual install commands
-        2. For each command get the packages installed
+    We assume the filesystem is already mounted and ready
+        1. Get the packages installed by the command
         3. For each package get the dependencies
         4. For each unique package name, find the metadata and add to the
         layer'''
-    origin_layer = 'Layer: ' + diff_layer.fs_hash[:10]
-    # parse all installed commands
-    cmd_list, msg = filter_install_commands(command_line)
-    if msg:
-        diff_layer.origins.add_notice_to_origins(
-            origin_layer, Notice(msg, 'warning'))
-    # find packages for each command
-    for command in cmd_list:
-        cmd_msg = formats.invoke_for_snippets + '\n' + \
-            content.print_package_invoke(command.name)
-        diff_layer.origins.add_notice_to_origins(origin_layer, Notice(
-            cmd_msg, 'info'))
-        pkg_list = get_installed_package_names(command)
-        # collect all the dependencies for each package name
-        all_pkgs = []
-        for pkg_name in pkg_list:
-            pkg_listing = command_lib.get_package_listing(
-                command.name, pkg_name)
-            deps, deps_msg = get_package_dependencies(
-                pkg_listing, pkg_name, shell)
-            if deps_msg:
-                logger.warning(deps_msg)
-                diff_layer.origins.add_notice_to_origins(
-                    origin_layer, Notice(deps_msg, 'error'))
-            all_pkgs.append(pkg_name)
-            all_pkgs.extend(deps)
-        unique_pkgs = list(set(all_pkgs))
-        # get package metadata for each package name
-        for pkg_name in unique_pkgs:
-            pkg = Package(pkg_name)
-            pkg_listing = command_lib.get_package_listing(
-                command.name, pkg_name)
-            fill_package_metadata(pkg, pkg_listing, shell)
-            diff_layer.add_package(pkg)
+    # set up a notice origin for the layer
+    origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
+    # find packages for the command
+    cmd_msg = formats.invoke_for_snippets + '\n' + \
+        content.print_package_invoke(command.name)
+    image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+        cmd_msg, 'info'))
+    pkg_list = get_installed_package_names(command)
+    # collect all the dependencies for each package name
+    all_pkgs = []
+    for pkg_name in pkg_list:
+        pkg_listing = command_lib.get_package_listing(
+            command.name, pkg_name)
+        deps, deps_msg = get_package_dependencies(
+            pkg_listing, pkg_name, shell)
+        if deps_msg:
+            logger.warning(deps_msg)
+            image_layer.origins.add_notice_to_origins(
+                origin_layer, Notice(deps_msg, 'error'))
+        all_pkgs.append(pkg_name)
+        all_pkgs.extend(deps)
+    unique_pkgs = list(set(all_pkgs))
+    # get package metadata for each package name
+    for pkg_name in unique_pkgs:
+        pkg = Package(pkg_name)
+        pkg_listing = command_lib.get_package_listing(command.name, pkg_name)
+        fill_package_metadata(pkg, pkg_listing, shell)
+        image_layer.add_package(pkg)
 
 
 def update_master_list(master_list, layer_obj):

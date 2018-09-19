@@ -121,6 +121,16 @@ def load_full_image(image_tag_string):
     return test_image
 
 
+def image_setup(image_obj):
+    '''Add notices for each layer'''
+    for layer in image_obj.layers:
+        origin_str = 'Layer: ' + layer.fs_hash[:10]
+        layer.origins.add_notice_origin(origin_str)
+        if layer.import_str:
+            layer.origins.add_notice_to_origins(origin_str, Notice(
+                'Imported in Dockerfile using: ' + layer.import_str, 'info'))
+
+
 def analyze_docker_image(image_obj, dockerfile=False):
     '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
@@ -130,12 +140,7 @@ def analyze_docker_image(image_obj, dockerfile=False):
     if dockerfile:
         docker.set_imported_layers(image_obj)
     # add notices for each layer if it is imported
-    for layer in image_obj.layers:
-        origin_str = 'Layer: ' + layer.fs_hash[:10]
-        layer.origins.add_notice_origin(origin_str)
-        if layer.import_str:
-            layer.origins.add_notice_to_origins(origin_str, Notice(
-                'Imported in Dockerfile using: ' + layer.import_str, 'info'))
+    image_setup(image_obj)
     shell = ''
     # set up empty master list of package names
     master_list = []
@@ -183,6 +188,10 @@ def analyze_docker_image(image_obj, dockerfile=False):
     curr_layer = 1
     while curr_layer < len(image_obj.layers):
         if not common.load_from_cache(image_obj.layers[curr_layer]):
+            # get commands that created the layer
+            # for docker images this is retrieved from the image history
+            command_list = docker.get_commands_from_history(
+                image_obj.layers[curr_layer])
             # mount diff layers from 0 till the current layer
             tar_layers = []
             for index in range(0, curr_layer + 1):
@@ -190,8 +199,15 @@ def analyze_docker_image(image_obj, dockerfile=False):
             target = rootfs.mount_diff_layers(tar_layers)
             # mount dev, sys and proc after mounting diff layers
             rootfs.prep_rootfs(target)
-            docker.add_packages_from_history(
-                image_obj.layers[curr_layer], shell)
+            # for each command look up the snippet library
+            for command in command_list:
+                pkg_listing = command_lib.get_package_listing(command.name)
+                if type(pkg_listing) is str:
+                    common.add_base_packages(
+                        image_obj.layers[curr_layer], pkg_listing, shell)
+                else:
+                    common.add_snippet_packages(
+                        image_obj.layers[curr_layer], command, shell)
             rootfs.undo_mount()
             rootfs.unmount_rootfs()
         # update the master list
