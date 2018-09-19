@@ -131,6 +131,17 @@ def image_setup(image_obj):
                 'Imported in Dockerfile using: ' + layer.import_str, 'info'))
 
 
+def mount_overlay_fs(image_obj, top_layer):
+    '''Given the image object and the top most layer, mount all the layers
+    until the top layer using overlayfs'''
+    tar_layers = []
+    for index in range(0, top_layer + 1):
+        tar_layers.append(image_obj.layers[index].tar_file)
+    target = rootfs.mount_diff_layers(tar_layers)
+    # mount dev, sys and proc after mounting diff layers
+    rootfs.prep_rootfs(target)
+
+
 def analyze_docker_image(image_obj, dockerfile=False):
     '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
@@ -192,13 +203,9 @@ def analyze_docker_image(image_obj, dockerfile=False):
             # for docker images this is retrieved from the image history
             command_list = docker.get_commands_from_history(
                 image_obj.layers[curr_layer])
-            # mount diff layers from 0 till the current layer
-            tar_layers = []
-            for index in range(0, curr_layer + 1):
-                tar_layers.append(image_obj.layers[index].tar_file)
-            target = rootfs.mount_diff_layers(tar_layers)
-            # mount dev, sys and proc after mounting diff layers
-            rootfs.prep_rootfs(target)
+            if command_list:
+                # mount diff layers from 0 till the current layer
+                mount_overlay_fs(image_obj, curr_layer)
             # for each command look up the snippet library
             for command in command_list:
                 pkg_listing = command_lib.get_package_listing(command.name)
@@ -207,9 +214,11 @@ def analyze_docker_image(image_obj, dockerfile=False):
                         image_obj.layers[curr_layer], pkg_listing, shell)
                 else:
                     common.add_snippet_packages(
-                        image_obj.layers[curr_layer], command, shell)
-            rootfs.undo_mount()
-            rootfs.unmount_rootfs()
+                        image_obj.layers[curr_layer], command, pkg_listing,
+                        shell)
+            if command_list:
+                rootfs.undo_mount()
+                rootfs.unmount_rootfs()
         # update the master list
         common.update_master_list(master_list, image_obj.layers[curr_layer])
         curr_layer = curr_layer + 1

@@ -269,10 +269,10 @@ def filter_install_commands(shell_command_line):
     return filter2, report
 
 
-def add_snippet_packages(image_layer, command, shell):
-    '''Given an image layer object, a command object, and the
-    shell used to invoke commands, add package metadata to the layer object
-    We assume the filesystem is already mounted and ready
+def add_snippet_packages(image_layer, command, pkg_listing, shell):
+    '''Given an image layer object, a command object, the package listing
+    and the shell used to invoke commands, add package metadata to the layer
+    object. We assume the filesystem is already mounted and ready
         1. Get the packages installed by the command
         3. For each package get the dependencies
         4. For each unique package name, find the metadata and add to the
@@ -288,10 +288,10 @@ def add_snippet_packages(image_layer, command, shell):
     # collect all the dependencies for each package name
     all_pkgs = []
     for pkg_name in pkg_list:
-        pkg_listing = command_lib.get_package_listing(
-            command.name, pkg_name)
+        pkg_invoke = command_lib.check_for_unique_package(
+            pkg_listing, pkg_name)
         deps, deps_msg = get_package_dependencies(
-            pkg_listing, pkg_name, shell)
+            pkg_invoke, pkg_name, shell)
         if deps_msg:
             logger.warning(deps_msg)
             image_layer.origins.add_notice_to_origins(
@@ -302,8 +302,7 @@ def add_snippet_packages(image_layer, command, shell):
     # get package metadata for each package name
     for pkg_name in unique_pkgs:
         pkg = Package(pkg_name)
-        pkg_listing = command_lib.get_package_listing(command.name, pkg_name)
-        fill_package_metadata(pkg, pkg_listing, shell)
+        fill_package_metadata(pkg, pkg_invoke, shell)
         image_layer.add_package(pkg)
 
 
