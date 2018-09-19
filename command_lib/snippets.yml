@@ -51,31 +51,9 @@ tyum:
   remove: 'remove'
   ignore:
     - 'check-update'
-  packages:
-    - name: default
-      version:
-        invoke:
-          1:
-            container:
-              - 'list=`tdnf list installed {package}`'
-              - 'c=0; for l in $list; do if [ $c == 1 ]; then echo $l; fi; c=$(((c+1)%3)); done;'
-      license:
-        invoke:
-          1:
-            container:
-              - 'tdnf info {package} | head -10 | tail -1 | cut -f2 -d":" | xargs'
-      src_url:
-        invoke:
-          1:
-            container:
-              - 'tdnf info {package} | head -9 | tail -1 | cut -f2-3 -d":" | xargs'
-      deps:
-        invoke:
-          1:
-            container:
-              - 'list=`rpm -qR {package} | cut -f1 -d" "`'
-              - 'for l in $list; do rpm -qa --queryformat "%{NAME}\n" $l; done;'
-        delimiter: "\n"
+    - 'clean'
+  packages: 'tdnf'
+
 apk:
   install: 'add'
   remove: 'del'

@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 import os
@@ -9,6 +9,7 @@ import re
 from contextlib import contextmanager
 
 from . import constants
+
 
 # from https://stackoverflow.com/questions/6194499/pushd-through-os-system
 @contextmanager
@@ -20,10 +21,10 @@ def pushd(path):
 
 
 def initialize_names():
-   randint = random.randint(10000,99999)
-   constants.image = constants.image + "_" + str(randint)
-   constants.tag = constants.tag + "_" + str(randint)
-   constants.container = constants.container + "_" + str(randint)
+    randint = random.randint(10000, 99999)
+    constants.image = constants.image + "_" + str(randint)
+    constants.tag = constants.tag + "_" + str(randint)
+    constants.container = constants.container + "_" + str(randint)
 
 
 def parse_command(command):
@@ -51,19 +52,20 @@ def parse_command(command):
     command_dict = {}
     command_tokens = command.split(' ')
     # first token is the command name
-    command_dict.update({'name': command_tokens.pop(0)})
+    command_dict.update({'name': command_tokens.pop(0).strip()})
     # find options in the rest of the list
     while command_tokens:
         if options.match(command_tokens[0]):
-            option_flag = command_tokens.pop(0)
+            option_flag = command_tokens.pop(0).strip()
             # we have to check if this is the end of the command
-            if len(command_tokens) > 0 and not options.match(command_tokens[0]):
-                option_arg = command_tokens[0]
+            if len(command_tokens) > 0 \
+                    and not options.match(command_tokens[0]):
+                option_arg = command_tokens[0].strip()
             else:
                 option_arg = ''
             option_list.append((option_flag, option_arg))
         else:
-            word_list.append(command_tokens.pop(0))
+            word_list.append(command_tokens.pop(0).strip())
     # now we have options and the remainder words
     command_dict.update({'options': option_list,
                          'words': word_list})
