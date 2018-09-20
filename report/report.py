@@ -259,7 +259,7 @@ def get_dockerfile_packages():
 def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     logger.debug('Writing report...')
-    report = formats.disclaimer
+    report = formats.disclaimer.format(commit_sha=general.get_git_rev())
     if args.summary:
         for image in images:
             report = report + content.print_summary_report(image)

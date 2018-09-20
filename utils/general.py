@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 import os
 import random
 import re
+import subprocess
 
 from contextlib import contextmanager
 
@@ -70,3 +71,13 @@ def parse_command(command):
     command_dict.update({'options': option_list,
                          'words': word_list})
     return command_dict
+
+
+def get_git_rev():
+    '''Assuming we are operating within a git repository, get the SHA
+    of the current commit'''
+    command = ['git', 'show', '--format=%H', 'HEAD']
+    output = subprocess.check_output(command)
+    if type(output) == bytes:
+        output = output.decode('utf-8')
+    return output.split('\n').pop(0)
