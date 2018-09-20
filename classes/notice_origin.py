@@ -1,9 +1,10 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
 from report import formats
+
 
 class NoticeOrigin(object):
     '''The origin of a notice
@@ -12,7 +13,8 @@ class NoticeOrigin(object):
         the configuration
         notices: a list of Notice objects
     methods:
-        collate_notices: print all the notices for this origin and
+        print_notices: print all the notices for this origin and
+        to_dict: return a dict representation of the object
     '''
     def __init__(self, origin_str):
         self.__origin_str = origin_str
@@ -48,3 +50,12 @@ class NoticeOrigin(object):
             origin=self.origin, info=info, warnings=warnings, errors=errors,
             hints=hints)
         return notice_msg
+
+    def to_dict(self):
+        no_dict = {}
+        notice_dicts = []
+        no_dict.update({'origin_str': self.origin_str})
+        for notice in self.notices:
+            notice_dicts.append(notice.to_dict())
+        no_dict.update({'notices': notice_dicts})
+        return no_dict

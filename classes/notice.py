@@ -1,7 +1,8 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
+
 
 class NoticeException(Exception):
     '''Base notice exception'''
@@ -18,14 +19,14 @@ class LevelException(NoticeException):
 class Notice(object):
     '''A notice for reporting purposes
     attributes:
-        origin: what the notice is referencing - the image, the image layer id
-        the dockerfile line
         message: the notice message
         level: notice level - error, warning or hint
             error: cannot continue further
             warning: will try to continue from here
             info: information only
             hint: message on how to make the results better
+    methods:
+        to_dict: returns a dict representation of the object
     '''
     def __init__(self, message='', level='info'):
         self.__message = message
@@ -51,3 +52,9 @@ class Notice(object):
             self.__level = level
         else:
             raise LevelException(level, 'Illegal Level')
+
+    def to_dict(self):
+        notice_dict = {}
+        notice_dict.update({'message': self.message})
+        notice_dict.update({'level': self.level})
+        return notice_dict
