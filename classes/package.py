@@ -16,7 +16,9 @@ class Package(object):
         origins: a list of NoticeOrigin objects
 
     methods:
-        to_dict: returns a dict representation of the instance'''
+        to_dict: returns a dict representation of the instance
+        fill: instantiates a package object given a dict representation.
+        is_equal: compares two package objects.'''
     def __init__(self, name):
         self.__name = name
         self.__version = ''
@@ -82,3 +84,15 @@ class Package(object):
         else:
             success = False
         return success
+
+    def is_equal(self, other):
+        '''This method performs a deep comparison between two objects by
+        iterating over the dictionary for each object returned by to_dict
+        and comparing the vales for each key in both. This function will only
+        return true if every key value pair matches between the two
+        dictionaries.'''
+        other_pkg_dict = other.to_dict()
+        for key, value in self.to_dict().items():
+            if value != other_pkg_dict[key]:
+                return False
+        return True
