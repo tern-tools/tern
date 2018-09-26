@@ -18,13 +18,14 @@ You can contribute in the following ways:
 * YAML (Tern uses yaml files heavily for data lookup. An overview of YAML can be found [here](http://yaml.org/))
 
 ## Keeping in touch
-
+### Public forum
 If you would like to ask a question or start a discussion, post a topic on the [public forum](https://groups.google.com/forum/#!forum/tern-discussion). You will need to apply to join the group before posting. We will respond to your question or topic within three days unless the post was over the weekend in which case we may take longer to respond. This is our primary communication channel so it is highly likely that you will get a response here.
 
-If you would like to chat live, you can join the [slack channel](https://vmwarecode.slack.com/messages/tern). If you don't have an @vmware.com or @emc.com email, please click [here](https://code.vmware.com/join), enter your email address and click "Request Invite". Although we monitor the channel, we may not respond right away and if the same question was asked on the forum, we will choose to respond there.
+### Slack channel
+If you would like to chat live, you can join the Slack channel. If you don't have an @vmware.com or @emc.com email, please [follow this link](https://code.vmware.com/join), enter your email address and click "Request Invite". Although we monitor the channel, we may not respond right away and if the same question was asked on the forum, we will choose to respond there. If you are already a member of the slack channel, or if you have an @vmware.com or @emc.com email, you can simply [sign-in to the Slack channel](https://vmwarecode.slack.com/messages/tern).
 
 ## Set-up a virtual machine for the project
-To work on Tern, you may want to set-up a virtual machine that can run Ubuntu. To do so, follow the [instructions here.](/docs/contributing-setup.md)
+To work on Tern, you may want to set-up a virtual machine that can run Ubuntu. To do so, follow [these instructions.](/docs/contributing-setup.md)
 
 ## Learn about Tern
 
@@ -38,7 +39,8 @@ To work on Tern, you may want to set-up a virtual machine that can run Ubuntu. T
 Tern follows general [PEP8](https://www.python.org/dev/peps/pep-0008/) style guidelines. Apart from that, these specific rules apply:
 - Indents for .py files are 4 spaces long
 - Indents for .yml files are 2 spaces long
-- Modules are listed as external dependencies, followed by a space, followed by internal dependencies, listed individually and in alphabetical order. For example:
+- Modules are listed as external dependencies, followed by a space, followed by internal dependencies, listed individually and in alphabetical order. For example:  
+
 ```
 # external dependencies not part of Tern
 # possibly part of the python package or installed via pip
