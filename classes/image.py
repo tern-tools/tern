@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
@@ -16,6 +16,7 @@ class Image(object):
     methods:
         load_image: this method is to be implemented in the derived classes
         get_layer_diff_ids: returns a list of layer diff ids only
+        to_dict: return a python dictionary representation of the image
     '''
     def __init__(self, id=None):
         '''Either initialize using id'''
@@ -106,3 +107,6 @@ class Image(object):
         Currently there is no standard way to do this. For a specific tool,
         Inherit from this class and override this method'''
         pass
+
+    def to_dict(self):
+        return {}
