@@ -55,4 +55,4 @@ class Origins(object):
         return empty
 
     def to_dict(self):
-            return [origin.to_dict() for origin in self.origins]
+        return [origin.to_dict() for origin in self.origins]
