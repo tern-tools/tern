@@ -20,6 +20,7 @@ class Origins(object):
             origins
         add_notice_origin: add an empty NoticeOrigin object
         is_empty: check if there are any notices
+        to_dict: return a dict representation of the object
     '''
     def __init__(self):
         self.__origins = []
@@ -53,3 +54,6 @@ class Origins(object):
                     empty = False
                     break
         return empty
+
+    def to_dict(self):
+        return [origin.to_dict() for origin in self.origins]
