@@ -106,10 +106,10 @@ class ImageLayer(object):
         pkg_list = []
         for pkg in self.__packages:
             pkg_list.append(pkg.to_dict())
-            layer_dict.update({self.fs_hash: {'packages': pkg_list,
-                                              'tar_file': self.__tar_file,
-                                              'created_by': self.__created_by
-                                              }})
+        layer_dict.update({self.fs_hash: {'packages': pkg_list,
+                                          'tar_file': self.tar_file,
+                                          'created_by': self.created_by
+                                          }})
         return layer_dict
 
     def get_package_names(self):
