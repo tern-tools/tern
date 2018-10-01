@@ -23,6 +23,7 @@ class DockerImage(Image):
     Docker Image specific attributes:
         repotags: the list of repotags associated with this image
         history: a list of commands used to create the filesystem layers
+        to_dict: return a dict representation of the object
     '''
     def __init__(self, repotag=None, id=None):
         '''Initialize using repotag and id'''
@@ -49,6 +50,13 @@ class DockerImage(Image):
     @property
     def history(self):
         return self.__history
+
+    def to_dict(self):
+        super_dict = super().to_dict()
+        super_dict.update({'repotag': self.repotag})
+        super_dict.update({'repotags': self.repotags})
+        super_dict.update({'history': self.history})
+        return super_dict
 
     def get_image_option(self):
         '''Check to see which value was used to init the image object
