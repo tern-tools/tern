@@ -4,6 +4,7 @@ SPDX-License-Identifier: BSD-2-Clause
 '''
 import os
 
+from .package import Package
 from .origins import Origins
 from utils import rootfs
 
@@ -86,8 +87,13 @@ class ImageLayer(object):
         self.__import_str = import_str
 
     def add_package(self, package):
-        if package.name not in self.get_package_names():
-            self.__packages.append(package)
+        try:
+            assert isinstance(package, Package), \
+                   'Object type is {0}, should be Package'.format(type(package))
+            if package.name not in self.get_package_names():
+                self.__packages.append(package)
+        except AssertionError:
+            raise
 
     def remove_package(self, package_name):
         rem_index = 0

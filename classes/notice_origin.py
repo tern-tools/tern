@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 
 from report import formats
 
+from .notice import Notice
 
 class NoticeOrigin(object):
     '''The origin of a notice
@@ -29,7 +30,12 @@ class NoticeOrigin(object):
         return self.__notices
 
     def add_notice(self, notice):
-        self.__notices.append(notice)
+        try:
+            assert isinstance(notice, Notice), \
+                   'Object type is {0}, should be Notice'.format(type(notice))
+            self.__notices.append(notice)
+        except AssertionError:
+            raise
 
     def print_notices(self):
         '''Using the notice format, return a formatted string'''
