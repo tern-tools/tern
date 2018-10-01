@@ -114,7 +114,9 @@ class ImageLayer(object):
             pkg_list.append(pkg.to_dict())
         layer_dict.update({self.fs_hash: {'packages': pkg_list,
                                           'tar_file': self.tar_file,
-                                          'created_by': self.created_by
+                                          'created_by': self.created_by,
+                                          'diff_id': self.diff_id,
+                                          'import_str': self.import_str
                                           }})
         return layer_dict
 
