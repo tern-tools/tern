@@ -109,4 +109,10 @@ class Image(object):
         pass
 
     def to_dict(self):
-        return {}
+        d = {'name': self.name(),
+             'tag': self.tag(),
+             'manifest': self.manifest(),
+             'config': self.config(),
+             'layers': [layer.to_dict() for layer in self.layers()]
+            }
+        return d
