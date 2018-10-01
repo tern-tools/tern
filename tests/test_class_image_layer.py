@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
@@ -7,7 +7,6 @@ import unittest
 
 from classes.image_layer import ImageLayer
 from classes.package import Package
-from classes.notice import Notice
 
 
 class TestClassImageLayer(unittest.TestCase):
@@ -43,19 +42,14 @@ class TestClassImageLayer(unittest.TestCase):
         self.assertTrue(self.layer.remove_package('y'))
         self.assertFalse(self.layer.remove_package('y'))
 
-    def testAddNotice(self):
-        n = Notice()
-        self.layer.add_notice(n)
-        self.assertEqual(len(self.layer.notices), 1)
-
     def testToDict(self):
         p1 = Package('x')
         self.layer.add_package(p1)
         a_dict = self.layer.to_dict()
-        self.assertTrue(a_dict['123abc'])
-        self.assertEqual(len(a_dict['123abc']['packages']), 1)
-        self.assertEqual(a_dict['123abc']['packages'][0]['name'], 'x')
-        self.assertEqual(a_dict['123abc']['tar_file'], 'path/to/tar')
+        self.assertTrue(a_dict[''])
+        self.assertEqual(len(a_dict['']['packages']), 1)
+        self.assertEqual(a_dict['']['packages'][0]['name'], 'x')
+        self.assertEqual(a_dict['']['tar_file'], 'path/to/tar')
 
     def testGetPackageNames(self):
         p1 = Package('x')
