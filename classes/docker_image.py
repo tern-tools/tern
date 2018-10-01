@@ -163,3 +163,13 @@ class DockerImage(Image):
             raise
         except IOError:
             raise
+
+    def to_dict(self):
+        '''Returns a dictionary reflecting the properties of the image, including Docker-specific ones'''
+        dictview = super.to_dict(self)
+        dictview.update('repotags', self.repotags())
+        dictview.update('repotag', self.repotag())
+        dictview.update('history', self.history())
+        
+        return dictview
+                        
