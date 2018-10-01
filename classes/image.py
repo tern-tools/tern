@@ -16,6 +16,7 @@ class Image(object):
     methods:
         load_image: this method is to be implemented in the derived classes
         get_layer_diff_ids: returns a list of layer diff ids only
+        to_dict: return a dictionary reflecting the properties of the image
     '''
     def __init__(self, id=None):
         '''Either initialize using id'''
@@ -106,3 +107,17 @@ class Image(object):
         Currently there is no standard way to do this. For a specific tool,
         Inherit from this class and override this method'''
         pass
+
+
+    def to_dict(self) :
+        '''Returns a dict object reflecting properties of the image'''
+        return {
+            'id': self.id,
+            'name': self.name,
+            'tag': self.tag,
+            'manifest': self.manifest,
+            'config': self.config,
+            'layers': self.layers,
+            'origins': self.origins
+        }
+    
