@@ -50,6 +50,15 @@ class DockerImage(Image):
     def history(self):
         return self.__history
 
+    def to_dict(self):
+        data = {
+            'reprtag': self.repotag,
+            'reprtags': self.repotags,
+            'history': self.history
+        }
+        super_dict = super().to_dict(data)
+        return super_dict
+
     def get_image_option(self):
         '''Check to see which value was used to init the image object
         Return the value that was used. If neither one was used raise
