@@ -108,5 +108,12 @@ class Image(object):
         Inherit from this class and override this method'''
         pass
 
-    def to_dict(self):
-        return {}
+    def to_dict(self, data):
+        try:
+            return self.parse_to_dict(data)
+        except ValueError:
+            raise Exception("Invalid value")
+
+    @staticmethod
+    def parse_to_dict(data):
+        return dict(data)
