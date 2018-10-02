@@ -162,3 +162,6 @@ class DockerImage(Image):
             raise
         except IOError:
             raise
+
+    def to_dict(self, data):
+        return super().to_dict(data)
