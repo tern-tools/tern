@@ -1,0 +1,20 @@
+language: python
+sudo: required
+python:
+  - "3.6"
+  - "3.7"
+
+services:
+  - docker
+
+before_install:
+  - docker.io/photon@sha256:7b89e6dddeed4d90609d00192ae19685bd5eb72c0ae31b47613a84bacd9a8637
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  - export $PYTHONPATH=`pwd`
+
+script:
+- ./tern report -i docker.io/photon
