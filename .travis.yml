@@ -9,7 +9,7 @@ services:
 
 before_install:
   - docker pull docker.io/photon@sha256:7b89e6dddeed4d90609d00192ae19685bd5eb72c0ae31b47613a84bacd9a8637
-  - docker tag `docker images --filter "reference=docker.io/photon" -q` docker.io/photon:test
+  - docker tag $(docker images --filter "reference=docker.io/photon" -q) docker.io/photon:test
 
 install:
   - pip install -r requirements.txt
