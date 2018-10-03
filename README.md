@@ -1,5 +1,7 @@
 ![Tern](/docs/img/tern_logo.png)
 
+[![Build Status](https://travis-ci.com/vmware/tern.svg?branch=master)](https://travis-ci.com/vmware/tern)
+
 # Welcome to the Tern Project
 
 Tern is an inspection tool to find the metadata of the packages installed in a container image. It runs scripts from the "command library" against the container and collates the information into a Bill of Materials (BOM) report. Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies.
