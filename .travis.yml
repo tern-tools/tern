@@ -7,12 +7,13 @@ python:
 services:
   - docker
 
+env:
+  - PYTHONPATH=`pwd`
+
 before_install:
   - docker pull docker.io/photon@sha256:7b89e6dddeed4d90609d00192ae19685bd5eb72c0ae31b47613a84bacd9a8637
+  - export IMAGE=`docker images --filter "reference=docker.io/photon" -q`
 
-env:
-  - IMAGE=`docker images --filter "reference=docker.io/photon" -q`
-  - PYTHONPATH=`pwd`
 
 install:
   - pip install -r requirements.txt
