@@ -38,7 +38,13 @@ class TestClassNotice(unittest.TestCase):
         self.assertEqual(self.notice.origin, 'FROM')
         self.assertEqual(self.notice.message, 'tag')
         self.assertEqual(self.notice.level, 'warning')
-
+    
+    def testToDict(self):
+        self.notice.message = 'tag'
+        self.notice.level = 'warning'
+        dict = self.notice.to_dict()
+        self.assertEqual(dict.message, 'tag')
+        self.assertEqual(dict.level, 'warning')
 
 if __name__ == '__main__':
     unittest.main()
