@@ -18,13 +18,10 @@ class TestClassNotice(unittest.TestCase):
         del self.notice
 
     def testInstance(self):
-        self.assertFalse(self.notice.origin)
         self.assertFalse(self.notice.message)
-        self.assertFalse(self.notice.level)
+        self.assertEqual(self.notice.level, 'info')
 
     def testSetters(self):
-        self.notice.origin = 'FROM'
-        self.assertEqual(self.notice.origin, 'FROM')
         self.notice.message = 'tag'
         self.assertEqual(self.notice.message, 'tag')
         with self.assertRaises(NoticeException):
@@ -32,10 +29,8 @@ class TestClassNotice(unittest.TestCase):
         self.notice.level = 'warning'
 
     def testGetters(self):
-        self.notice.origin = 'FROM'
         self.notice.message = 'tag'
         self.notice.level = 'warning'
-        self.assertEqual(self.notice.origin, 'FROM')
         self.assertEqual(self.notice.message, 'tag')
         self.assertEqual(self.notice.level, 'warning')
 
