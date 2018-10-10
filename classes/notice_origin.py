@@ -50,10 +50,10 @@ class NoticeOrigin(object):
                 warnings = warnings + notice.message
             if notice.level == 'error':
                 errors = errors + notice.message
-            if notice.level == 'hints':
+            if notice.level == 'hint':
                 hints = hints + notice.message
-        notice_msg = formats.notice_format(
-            origin=self.origin, info=info, warnings=warnings, errors=errors,
+        notice_msg = formats.notice_format.format(
+            origin=self.origin_str, info=info, warnings=warnings, errors=errors,
             hints=hints)
         return notice_msg
 
