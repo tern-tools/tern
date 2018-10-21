@@ -22,6 +22,7 @@ Tern is an inspection tool to find the metadata of the packages installed in a c
 Tern is currently developed on a Linux distro with a kernel version >= 4.0. Possible development distros are Ubuntu 16.04 or newer or Fedora 25 or newer.
 Install the following:
 - Git (Installation instructions can be found here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- attr (sudo apt-get install attr or sudo dnf install attr)
 - Python 3.6.2 (sudo apt-get install python3.6 or sudo dnf install python36)
 
 If you happen to be using Docker containers
