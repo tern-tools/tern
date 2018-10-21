@@ -1,10 +1,17 @@
+dist: xenial
+
+sudo: true
+
 language: python
-sudo: required
+
 python:
   - "3.6"
 
 services:
   - docker
+
+before_install:
+  - sudo apt-get install -y attr
 
 install:
   - pip install -r requirements.txt
@@ -13,4 +20,4 @@ before_script:
   - docker pull docker.io/photon:2.0
 
 script:
-  - ./tern report -i docker.io/photon:2.0
+  - ./tern report -i photon:2.0
