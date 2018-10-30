@@ -34,9 +34,12 @@ Create a report
 logger = logging.getLogger(constants.logger_name)
 
 
-def write_report(report):
+def write_report(report, file_type='text'):
     '''Write the report to a file'''
-    with open(constants.report_file, 'w') as f:
+    file_name = constants.report_file
+    if file_type == 'yaml':
+        file_name = constants.yaml_file
+    with open(file_name, 'w') as f:
         f.write(report)
 
 
@@ -258,15 +261,38 @@ def get_dockerfile_packages():
 
 def generate_report(args, *images):
     '''Generate a report based on the command line options'''
-    logger.debug('Writing report...')
+    if args.yaml:
+        report = generate_yaml(images)
+        write_report(report, 'yaml')
+    elif args.summary:
+        report = generate_verbose(True, images)
+        write_report(report)
+    else:
+        report = generate_verbose(False, images)
+        write_report(report)
+
+
+def generate_verbose(is_summary, images):
+    '''Generate a verbose report'''
     report = formats.disclaimer.format(commit_sha=general.get_git_rev())
-    if args.summary:
+    if is_summary:
+        logger.debug('Creating a summary of components in image...')
         for image in images:
             report = report + content.print_summary_report(image)
     else:
+        logger.debug('Creating a detailed report of components in image...')
         for image in images:
             report = report + content.print_full_report(image)
-    write_report(report)
+    return report
+
+
+def generate_yaml(images):
+    '''Generate a yaml report'''
+    logger.debug('Creating YAML report...')
+    report = formats.disclaimer_yaml.format(commit_sha=general.get_git_rev())
+    for image in images:
+        report = report + content.print_yaml_report(image)
+    return report
 
 
 def check_docker_daemon():

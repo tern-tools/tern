@@ -4,5 +4,6 @@ __pycache__
 sources
 temp
 report.txt
+report.yml
 tern.log
 cache.yml

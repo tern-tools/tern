@@ -2,7 +2,7 @@
 Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
-
+import yaml
 import command_lib.command_lib
 from report import formats
 
@@ -118,3 +118,10 @@ def print_summary_report(image):
                 notes = notes + print_package(package, '')
             notes = notes + formats.package_demarkation
     return notes
+
+
+def print_yaml_report(image):
+    '''Given an image object, create a yaml report'''
+    image_dict = {}
+    image_dict.update({'image': image.to_dict()})
+    return yaml.dump(image_dict, default_flow_style=False)
