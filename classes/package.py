@@ -66,6 +66,12 @@ class Package(object):
         pkg_dict.update({'src_url': self.src_url})
         return pkg_dict
 
+    def to_dict_notes(self):
+        '''Return the package dictionary with the notices and their origins'''
+        notes_dict = self.to_dict()
+        notes_dict.update({'notes': self.origins.to_dict()})
+        return notes_dict
+
     def fill(self, package_dict):
         '''The package dict looks like this:
             name: <name>
