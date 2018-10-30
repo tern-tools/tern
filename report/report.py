@@ -261,7 +261,7 @@ def get_dockerfile_packages():
 
 def generate_report(args, *images):
     '''Generate a report based on the command line options'''
-    if args.yaml:
+    if args.yaml_file:
         report = generate_yaml(images)
         write_report(report, 'yaml')
     elif args.summary:

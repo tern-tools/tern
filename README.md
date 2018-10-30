@@ -66,7 +66,7 @@ WARNING: Tern is meant to give guidance on what may be installed in a container 
 ### To get the results in YAML form
 To get the results in a YAML file to be consumed by a downstream tool or script
 ```
-$ ./tern report -y -i debian:jessie
+$ ./tern report -Y -i debian:jessie
 ```
 
 ### To run a test
