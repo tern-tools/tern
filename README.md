@@ -61,8 +61,13 @@ To get just a list of packages, you can use the `-s` option to get a summary rep
 ```
 $ ./tern report -s -d samples/photon_git/Dockerfile
 ```
-
 WARNING: Tern is meant to give guidance on what may be installed in a container image, so it is recommended that for the purpose of investigation, the default report is used. The summary report may be used as the output of a build artifact or something to submit to a compliance or legal team.
+
+### To get the results in YAML form
+To get the results in a YAML file to be consumed by a downstream tool or script
+```
+$ ./tern report -y -i debian:jessie
+```
 
 ### To run a test
 ```
