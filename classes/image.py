@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 
 from .origins import Origins
 
+
 class Image(object):
     '''A representation of the image to be analyzed
     attributes:
@@ -85,7 +86,6 @@ class Image(object):
             is_set = False
         return is_set
 
-
     def get_last_import_layer(self):
         '''Get the index of the last layer that was brought in from
         an imported image'''
@@ -101,7 +101,6 @@ class Image(object):
                 return layer
         return None
 
-
     def load_image(self):
         '''Load image metadata
         Currently there is no standard way to do this. For a specific tool,
@@ -109,11 +108,13 @@ class Image(object):
         pass
 
     def to_dict(self):
+        '''Return a dictionary representation of the image'''
         d = {'id': self.id,
              'name': self.name,
              'tag': self.tag,
              'manifest': self.manifest,
              'config': self.config,
-             'layers': [layer.to_dict() for layer in self.layers]
-            }
+             'layers': [layer.to_dict() for layer in self.layers],
+             'notes': self.origins.to_dict()
+             }
         return d

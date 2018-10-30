@@ -8,6 +8,7 @@ from .package import Package
 from .origins import Origins
 from utils import rootfs
 
+
 class ImageLayer(object):
     '''A representation of a container filesystem layer
     attributes:
@@ -89,7 +90,8 @@ class ImageLayer(object):
     def add_package(self, package):
         try:
             assert isinstance(package, Package), \
-                   'Object type is {0}, should be Package'.format(type(package))
+                   'Object type is {0}, should be Package'.format(
+                       type(package))
             if package.name not in self.get_package_names():
                 self.__packages.append(package)
         except AssertionError:
@@ -111,12 +113,13 @@ class ImageLayer(object):
         layer_dict = {}
         pkg_list = []
         for pkg in self.__packages:
-            pkg_list.append(pkg.to_dict())
+            pkg_list.append(pkg.to_dict_notes())
         layer_dict.update({self.fs_hash: {'packages': pkg_list,
                                           'tar_file': self.tar_file,
                                           'created_by': self.created_by,
                                           'diff_id': self.diff_id,
-                                          'import_str': self.import_str
+                                          'import_str': self.import_str,
+                                          'notes': self.origins.to_dict()
                                           }})
         return layer_dict
 
