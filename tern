@@ -41,12 +41,6 @@ def main(args):
         logger.debug('Clearing cache...')
         cache.clear()
     if hasattr(args, 'name') and args.name == 'report':
-        logger.debug('Creating Report...')
-        if args.summary:
-            logger.debug('Creating a summary of components in Docker image...')
-        else:
-            logger.debug(
-                'Creating a detailed report on components in Docker image...')
         if args.dockerfile:
             report.execute_dockerfile(args)
         if args.docker_image:
@@ -86,9 +80,10 @@ if __name__ == '__main__':
     parser_report.add_argument('-s', '--summary', action='store_true',
                                help="Summarize the report as a list of"
                                " packages with associated information")
+    parser_report.add_argument('-y', '--yaml', action='store_true',
+                               help="Create a report in yaml format")
     parser_report.set_defaults(name='report')
     args = parser.parse_args()
-
 
     # execute
     main(args)
