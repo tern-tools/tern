@@ -82,6 +82,8 @@ if __name__ == '__main__':
                                " packages with associated information")
     parser_report.add_argument('-Y', '--yaml-file', action='store_true',
                                help="Create a report in yaml format")
+    parser_report.add_argument('-J', '--json-file', action='store_true',
+                               help="Create a report in json format")
     parser_report.set_defaults(name='report')
     args = parser.parse_args()
 
