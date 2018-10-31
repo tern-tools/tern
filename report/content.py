@@ -2,6 +2,7 @@
 Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
+import json
 import yaml
 import command_lib.command_lib
 from report import formats
@@ -125,3 +126,12 @@ def print_yaml_report(image):
     image_dict = {}
     image_dict.update({'image': image.to_dict()})
     return yaml.dump(image_dict, default_flow_style=False)
+
+
+def print_json_report(images):
+    '''Given a list of image objects, create a json object string'''
+    image_list = []
+    for image in images:
+        image_list.append({'image': image.to_dict()})
+    image_dict = {'images': image_list}
+    return json.dumps(image_dict)

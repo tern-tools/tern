@@ -5,5 +5,6 @@ sources
 temp
 report.txt
 report.yml
+report.json
 tern.log
 cache.yml
