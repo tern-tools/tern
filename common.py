@@ -60,11 +60,9 @@ def load_from_cache(layer):
 
 
 def save_to_cache(image):
-    '''Given an image object, check against the cache to see if a layer id
-    exists. If no then save the layer and package list to the cache'''
-    existing_layers = cache.get_layers()
+    '''Given an image object, save all layers to the cache'''
     for layer in image.layers:
-        if layer.fs_hash not in existing_layers and layer.packages:
+        if layer.packages:
             cache.add_layer(layer)
 
 
