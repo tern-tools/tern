@@ -69,6 +69,12 @@ To get the results in a YAML file to be consumed by a downstream tool or script
 $ ./tern report -Y -i debian:jessie
 ```
 
+### To get the results in JSON form
+To get the results in a JSON file for web use
+```
+$ ./tern report -J -i debian:jessie
+```
+
 ### To run a test
 ```
 $ cd ternenv
