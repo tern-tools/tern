@@ -8,3 +8,4 @@ report.yml
 report.json
 tern.log
 cache.yml
+vagrant/.*
