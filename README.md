@@ -4,7 +4,20 @@
 
 # Welcome to the Tern Project
 
-Tern is an inspection tool to find the metadata of the packages installed in a container image. It runs scripts from the "command library" against the container and collates the information into a Bill of Materials (BOM) report. Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies.
+Tern is a software package inspection tool for containers written in Python.
+
+## Quick Links
+- [Quick Start](#getting-started)
+- [Start Contributing](CONTRIBUTING.md)
+
+## What is Tern?
+Tern is an inspection tool to find the metadata of the packages installed in a container image. It does this in two steps:
+1. It uses overlayfs to mount the first filesystem layer in a container image
+2. It then executes scripts from the "command library" in a chroot environment to collect information about packages installed in that layer
+3. With that information as a base, it continues to iterate over step 1 and 2 for the rest of the layers in the container image
+4. Once done, it generates a report in different formats. The default report is a verbose explanation of what layers brought in what software components. If a Dockerfile is provided then it will also provide what lines in the Dockerfile was used to create the layers.
+
+Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies.
 
 ## Table of Contents
 - [FAQ](/docs/faq.md)
@@ -21,6 +34,7 @@ Tern is an inspection tool to find the metadata of the packages installed in a c
 ### Requirements
 Tern is currently developed on a Linux distro with a kernel version >= 4.0. Possible development distros are Ubuntu 16.04 or newer or Fedora 25 or newer.
 Install the following:
+
 - Git (Installation instructions can be found here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - attr (sudo apt-get install attr or sudo dnf install attr)
 - Python 3.6.2 (sudo apt-get install python3.6 or sudo dnf install python36)
