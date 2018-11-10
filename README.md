@@ -44,7 +44,11 @@ If you happen to be using Docker containers
 
 Make sure the docker daemon is running.
 
-### Get the code
+### Getting Started with Vagrant
+Vagrant is a tool to setup an isolated virtual software development environment. Follow [these steps](/docs/contributing-setup.md) to set up your Vagrant environment. This is a requirement if you are using Windows or Mac OSs. 
+
+### Getting Started on Linux
+If you have a Linux OS with the above requirements, you can start by setting up a python virtual environment to run the code.
 
 ```
 $ python3 -m venv ternenv
