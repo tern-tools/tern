@@ -2,37 +2,89 @@
 
 Once again, we hope you have read our [code of conduct](/CODE_OF_CONDUCT.md) before starting.
 
-We are excited to be working with the community to help with Open Source compliance obligations!
+We are excited to work with anyone at any level contributing their time and efforts towards the project.
 
 You can contribute in the following ways:
 
-* Improving the Documentation
-* [Adding to the Command Library](docs/adding-to-command-library.md)
-* Improving the Unit and Functional Tests
-* Improving the Core Project
+**File Issues**
+- Ask questions about the project goals, a specific use case, or clarification on documentation. Asking questions lead to issues being filed, eventually making the project more usable.
+- Run the code against any Docker image you are using, or any of the tests and submit bug reports when you find them.
 
-## Skills for contributing
+**Contribute Documentation**
+- Improve the documentation, project structure and workflow by creating a proposal.
+- Contribute changes to documentation by [submitting pull requests](#submit-pr) to it.
 
+**Contribute Code**
+- Improve the robustness of the project by [adding to the Command Library](docs/adding-to-command-library.md).
+- Resolve Issues.
+
+## Am I Qualified to Contribute?
+
+The short answer is 'yes'!
+
+The long answer is that there are some basic requirements that will help you contribute to any project on GitHub and this one in particular. Leveling up requires some extra knowledge:
+
+**Beginner**
 * English (not necessarily fluent but workable)
-* Python (a working knowledge of object oriented Python would be nice, but if you know how python functions/modules work, this is enough to get you started)
-* YAML (Tern uses yaml files heavily for data lookup. An overview of YAML can be found [here](http://yaml.org/))
+* The Python 3 Programming Language (Python is a very friendly community with plenty of tutorials you can search for)
+* The Git version control system. Follow GitHub's setup guide [here](https://help.github.com/articles/set-up-git/). You can also practice submitting a pull request with no code [here](https://github.com/nishakm/puns).
 
-## Keeping in touch
+**Intermediate**
+* YAML (Tern uses yaml files heavily for data lookup. An overview of YAML can be found [here](http://yaml.org/))
+* Object Oriented Programming in Python
+* Python virtual environments
+* Unix Command Line and shell scripts
+* Linux System Administration
+* [Docker Containers](https://docs.docker.com/)
+* [Vagrant](https://www.vagrantup.com/docs/index.html)
+
+**Advanced**
+* [Container Images](https://docs.docker.com/v17.09/engine/userguide/storagedriver/imagesandcontainers/)
+* [OverlayFS](https://wiki.archlinux.org/index.php/Overlay_filesystem)
+* Advanced Python knowledge
+* Linux Kernel knowledge would be nice
+
+## Communicating through GitHub Issues
+
+The fastest way you can get our attention is by filing an issue. We have some templates that help with organizing the information but if you don't think any of them are suitable, just file a regular GitHub issue. All issue templates are located in the .github/ISSUE_TEMPLATE folder in your local clone if you want to take a look at it before filing an issue.
+
+You can:
+- Ask a question
+- Submit a proposal
+- Submit a feature request
+- File a bug report
+- File a regular GitHub issue
+
+Please do not submit a pull request without filing an issue. We will ask you to file one and refer to it in your commit message before we merge it.
+
+**A note about maintainer's time**
+Maintainers are people with lives of their own. The typical time to get a response to a question or a review on a PR is 3 business days but we take chunks of time off for other things as well so it could take longer.
+
+**Project Maintainers**
+- @nishakm
+- @tpepper
+
+## Other Communication Channels
+
 ### Public forum
-If you would like to ask a question or start a discussion, post a topic on the [public forum](https://groups.google.com/forum/#!forum/tern-discussion). You will need to apply to join the group before posting. We will respond to your question or topic within three days unless the post was over the weekend in which case we may take longer to respond. This is our primary communication channel so it is highly likely that you will get a response here.
+You can post a topic on the [public forum](https://groups.google.com/forum/#!forum/tern-discussion). You will need to apply to join the group before posting.
 
 ### Slack channel
-If you would like to chat live, you can join the Slack channel. If you don't have an @vmware.com or @emc.com email, please [follow this link](https://code.vmware.com/join), enter your email address and click "Request Invite". Although we monitor the channel, we may not respond right away and if the same question was asked on the forum, we will choose to respond there. If you are already a member of the slack channel, or if you have an @vmware.com or @emc.com email, you can simply [sign-in to the Slack channel](https://vmwarecode.slack.com/messages/tern).
+If you would like to chat live, you can join the Slack channel. If you don't have an @vmware.com or @emc.com email, please [follow this link](https://code.vmware.com/join), enter your email address and click "Request Invite". If you are already a member of the slack channel, or if you have an @vmware.com or @emc.com email, you can simply [sign-in to the Slack channel](https://vmwarecode.slack.com/messages/tern).
 
-## Set-up a virtual machine for the project
-To work on Tern, you may want to set-up a virtual machine that can run Ubuntu. To do so, follow [these instructions.](/docs/contributing-setup.md)
+## How Do I Start Contributing?<a name="submit-pr">
 
-## Learn about Tern
+Look for issues without the label `assigned` on it. This indicates that someone is already working on it. Some labels that may be of interest are listed here:
 
-- [FAQ](/docs/faq.md)
-- [Glossary](/docs/glossary.md)
-- [Architecture](/docs/architecture.md)
-- [Navigating the Code](/docs/navigating-the-code.md)
+- docs: Documentation changes
+- good-first-issue: A good issue to start off with if this is your first time contributing to this project
+- first-timers-only: A good issue to start off with if this is your first time contributing to any GitHub project
+- tests: An issue regarding testing the project code
+- tools: An issue regarding tools for developers or contributors
+- bug: A bug in code functionality
+- arch: An issue requiring some architectural change
+
+To start, comment on the issue asking if you can work on it. A maintainer will tag your username to the issue and apply the `assigned` label on it.
 
 ## Coding Style
 
@@ -53,36 +105,6 @@ import docker
 ```
 - Minimize [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity). Most python style checkers also come with McCabe complexity checkers. A good rule of thumb is to limit the number of if-then-else statements to 3 and return once in a module.
 
-## An overview of the contribution lifecycle
-
-Before you start, file an issue regarding the change you are going to contribute or the bug you are going to fix. For enhancements, please file an issue with 'Proposal:' at the beginning of the issue summary. Please don't start working on the issue until we have responded. @nishakm is the lead maintainer so a response from them means you have a go ahead to start!
-
-Once you're assigned the issue, here's a general list of steps to start work:
-
-1. Fork the git repository to your personal github account. See [here](https://help.github.com/articles/fork-a-repo/#fork-an-example-repository) and [here](https://help.github.com/articles/fork-a-repo/#keep-your-fork-synced) to get you started.
-2. Create a branch for your work. Make sure to prepend the issue number a short summary of the work separated by hyphens.
-```
-$ git checkout -b issue-work-summary
-```
-Eg:
-```
-$ git checkout -b 45-fix-stuff
-```
-3. Work on the code
-4. Test your code - run the tool against one of the sample Dockerfiles in the samples folder
-5. If all looks good, you are ready to commit your changes. This is a little different from the other projects as if all goes well in step No. 4, you should have changes in cache.yml that shouldn't be committed. So when committing, make sure to not add the cache.yml file.
-6. Update your branch with the latest from upstream. See [here](https://help.github.com/articles/syncing-a-fork/) for an example. Note that if you have not worked on the master branch of your fork, the merges should be fast-forward merges and you should not be resolving conflicts.
-7. Replay your work on top of the latest
-```
-$ git checkout my-work
-$ git rebase master
-```
-Expect to spend time resolving conflicts here.
-8. Run functional tests.
-9. Push your branch changes to a remote branch in your fork of the repo
-10. Submit a pull request (PR for short) to the upstream repo. See [here](https://help.github.com/articles/creating-a-pull-request-from-a-fork/) to get you started. If all goes well, there should be no conflicts.
-11. A reviewer will further communicate with you through the PR.
-12. If everything looks good the PR will be accepted.
 
 ## Commit message format
 
@@ -139,17 +161,13 @@ See also: #456, #789
 
 Signed-off-by: Some Dev <somedev@example.com>
 ```
-## Filing an Issue
 
-You may file an issue through the github issue tracker. Please follow the same guidelines as the commit message guidelines when formatting your issue. Please make sure to include the following for quick debugging and resolution:
+## Learn about Tern
 
-* The SHA256 commit at which the bug occurred
-* The project release version (if there is one)
-* Your dev environment
-* Reproduction steps
-* The contents of tern.log (which may not have everything that went to stdout so the contents of that would also be helpful if different)
-
-You may file an issue and create a PR that references said issue. This, however, does not guarantee acceptance of the PR. Contributing in this way works for small bug or documentation fixes but doesn't lend itself well to large updates. We encourage you to start a discussion on the forum. Typically a follow up issue will be created referencing the topic.
+- [FAQ](/docs/faq.md)
+- [Glossary](/docs/glossary.md)
+- [Architecture](/docs/architecture.md)
+- [Navigating the Code](/docs/navigating-the-code.md)
 
 ## Troubleshooting
 
@@ -158,6 +176,7 @@ You may file an issue and create a PR that references said issue. This, however,
 ## Dealing with cache.yml
 
 cache.yml is actually a stand-in for a more sophisticated database. Tern is still not there yet. Git does not allow you to ignore this file as it is tracked. So here are some steps to deal with changes in cache.yml that you don't want to commit but still want to use:
+
 1. Before updating your work branch, stash the changes
 ```
 $ git stash
@@ -169,9 +188,10 @@ On branch master
 Your branch is up to date with 'origin/master'.
 
 nothing to commit, working tree clean
-
 ```
+
 2. Now you can work on the branch. When you are ready to test, apply the changes back and drop the stash from the stack.
+
 ```
 $ git stash apply
 On branch master
@@ -187,4 +207,5 @@ no changes added to commit (use "git add" and/or "git commit -a")
 $ git stash drop
 Dropped refs/stash@{0} (f29de29fb1ea23829ff757d078e1c2a7b067708e)
 ```
+
 3. Commit all your changes except for cache.yml. When done committing, you can apply the uncommitted changes to the stack again before proceeding.
