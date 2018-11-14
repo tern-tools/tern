@@ -83,6 +83,13 @@ def clean_image_tars(image_obj):
             rootfs.root_command(rootfs.remove, fspath)
 
 
+def clean_working_dir():
+    '''Clean up the working directory'''
+    path = os.path.abspath(constants.temp_folder)
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+
 def load_base_image():
     '''Create base image from dockerfile instructions and return the image'''
     base_image, dockerfile_lines = docker.get_dockerfile_base()
@@ -401,4 +408,4 @@ def execute_docker_image(args):
     logger.debug('Teardown...')
     teardown()
     if not args.keep_working_dir:
-        shutil.rmtree(os.path.abspath(constants.temp_folder))
+        clean_working_dir()
