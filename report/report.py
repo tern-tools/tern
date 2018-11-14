@@ -172,15 +172,17 @@ def analyze_docker_image(image_obj, dockerfile=False):
     binary = common.get_base_bin(image_obj.layers[0])
     # set up a notice origin referring to the base command library listing
     origin_command_lib = formats.invoking_base_commands
+    # set up a notice origin for the first layer
+    origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
     # find the shell to invoke commands in
     shell, msg = command_lib.get_image_shell(
         command_lib.get_base_listing(binary))
-    if not shell:
+    if binary and not shell:
         # add a warning notice for no shell in the command library
         logger.warning('No shell listing in command library. '
                        'Using default shell')
         no_shell_message = errors.no_shell_listing.format(
-            binary, default_shell=constants.shell)
+            binary=binary, default_shell=constants.shell)
         image_obj.layers[0].origins.add_notice_to_origins(
             origin_command_lib, Notice(no_shell_message, 'warning'))
         # add a hint notice to add the shell to the command library
@@ -189,9 +191,8 @@ def analyze_docker_image(image_obj, dockerfile=False):
         image_obj.layers[0].origins.add_notice_origins(
             origin_command_lib, Notice(add_shell_message, 'hint'))
         shell = constants.shell
-    # only extract packages if there is a known binary and the layer is not
-    # cached
-    if binary:
+        # only extract packages if there is a known binary and the layer is not
+        # cached
         if not common.load_from_cache(image_obj.layers[0]):
             # get the packages of the first layer
             rootfs.prep_rootfs(target)
@@ -199,8 +200,14 @@ def analyze_docker_image(image_obj, dockerfile=False):
             # unmount proc, sys and dev
             rootfs.undo_mount()
     else:
-        logger.warning(errors.unrecognized_base.format(
-            image_name=image_obj.name, image_tag=image_obj.tag))
+        no_base = errors.unrecognized_base.format(
+            image_name=image_obj.name, image_tag=image_obj.tag)
+        logger.warning(no_base)
+        image_obj.layers[0].origins.add_notice_to_origins(
+            origin_first_layer, Notice(no_base, 'warning'))
+        # no binary means there is no shell so set to default shell
+        logger.warning('Unknown filesystem. Using default shell')
+        shell = constants.shell
     # unmount the first layer
     rootfs.unmount_rootfs()
     # populate the master list with all packages found in the first layer
