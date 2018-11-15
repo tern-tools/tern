@@ -32,16 +32,16 @@ def get_shell_commands(shell_command_line):
     return cleaned_list
 
 
-def load_from_cache(layer):
+def load_from_cache(layer, redo=False):
     '''Given a layer object, check against cache to see if that layer id exists
     if yes then get the package list and load it in the layer and return true.
-    If it doesn't exist return false
+    If it doesn't exist return false. Default operation is to not redo the cache.
     Add notices to the layer's origins matching the origin_str'''
     loaded = False
     origin_layer = 'Layer: ' + layer.fs_hash[:10]
-    if not layer.packages:
-        # there are no packages in this layer
-        # try to get it from the cache
+    if not layer.packages and not redo:
+        # there are no packages in this layer and we are not repopulating the
+        # cache, try to get it from the cache
         raw_pkg_list = cache.get_packages(layer.fs_hash)
         if raw_pkg_list:
             logger.debug('Loaded from cache: layer {}'.format(
