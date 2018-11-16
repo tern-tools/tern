@@ -177,7 +177,7 @@ def analyze_docker_image(image_obj, dockerfile=False):
     # find the shell to invoke commands in
     shell, msg = command_lib.get_image_shell(
         command_lib.get_base_listing(binary))
-    if binary and not shell:
+    if not shell:
         # add a warning notice for no shell in the command library
         logger.warning('No shell listing in command library. '
                        'Using default shell')
@@ -191,8 +191,9 @@ def analyze_docker_image(image_obj, dockerfile=False):
         image_obj.layers[0].origins.add_notice_origins(
             origin_command_lib, Notice(add_shell_message, 'hint'))
         shell = constants.shell
-        # only extract packages if there is a known binary and the layer is not
-        # cached
+    # only extract packages if there is a known binary and the layer is not
+    # cached
+    if binary:
         if not common.load_from_cache(image_obj.layers[0]):
             # get the packages of the first layer
             rootfs.prep_rootfs(target)
