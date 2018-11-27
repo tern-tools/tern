@@ -154,7 +154,7 @@ def mount_overlay_fs(image_obj, top_layer):
     rootfs.prep_rootfs(target)
 
 
-def analyze_docker_image(image_obj, dockerfile=False):
+def analyze_docker_image(image_obj, redo=False, dockerfile=False):
     '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
@@ -194,7 +194,7 @@ def analyze_docker_image(image_obj, dockerfile=False):
     # only extract packages if there is a known binary and the layer is not
     # cached
     if binary:
-        if not common.load_from_cache(image_obj.layers[0]):
+        if not common.load_from_cache(image_obj.layers[0], redo):
             # get the packages of the first layer
             rootfs.prep_rootfs(target)
             common.add_base_packages(image_obj.layers[0], binary, shell)
@@ -218,7 +218,7 @@ def analyze_docker_image(image_obj, dockerfile=False):
     # get packages for subsequent layers
     curr_layer = 1
     while curr_layer < len(image_obj.layers):
-        if not common.load_from_cache(image_obj.layers[curr_layer]):
+        if not common.load_from_cache(image_obj.layers[curr_layer], redo):
             # get commands that created the layer
             # for docker images this is retrieved from the image history
             command_list = docker.get_commands_from_history(
@@ -345,7 +345,7 @@ def execute_dockerfile(args):
             full_image.origins.add_notice_origin(
                 formats.dockerfile_image.format(dockerfile=args.dockerfile))
             # analyze image
-            analyze_docker_image(full_image, True)
+            analyze_docker_image(full_image, args.redo, True)
         else:
             # we cannot load the full image
             logger.warning('Cannot retrieve full image metadata')
@@ -370,7 +370,7 @@ def execute_dockerfile(args):
                 args.dockerfile, Notice(
                     formats.image_build_failure, 'warning'))
             # analyze image
-            analyze_docker_image(base_image)
+            analyze_docker_image(base_image, args.redo)
         else:
             # we cannot load the base image
             logger.warning('Cannot retrieve base image metadata')
@@ -405,7 +405,7 @@ def execute_docker_image(args):
         full_image.origins.add_notice_origin(
             formats.docker_image.format(imagetag=args.docker_image))
         # analyze image
-        analyze_docker_image(full_image)
+        analyze_docker_image(full_image, args.redo)
         # generate report
         generate_report(args, full_image)
     else:
