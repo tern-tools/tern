@@ -67,6 +67,8 @@ if __name__ == '__main__':
                         help="Clear the cache before running")
     parser.add_argument('-k', '--keep-working-dir', action='store_true',
                         help="Keep the working directory after execution")
+    parser.add_argument('-r', '--redo', action='store_true',
+                        help="Repopulate the cache for found layers")
     subparsers = parser.add_subparsers(help='Subcommands')
     # subparser for report
     parser_report = subparsers.add_parser('report',
