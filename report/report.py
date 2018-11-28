@@ -165,7 +165,7 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):
     # add notices for each layer if it is imported
     image_setup(image_obj)
     shell = ''
-    # set up empty master list of package names
+    # set up empty master list of packages
     master_list = []
     # find the binary by mounting the base layer
     target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
@@ -212,8 +212,7 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):
     # unmount the first layer
     rootfs.unmount_rootfs()
     # populate the master list with all packages found in the first layer
-    # can't use assignment as that will just point to the image object's layer
-    for p in image_obj.layers[0].get_package_names():
+    for p in image_obj.layers[0].packages:
         master_list.append(p)
     # get packages for subsequent layers
     curr_layer = 1
