@@ -35,8 +35,8 @@ def get_shell_commands(shell_command_line):
 def load_from_cache(layer, redo=False):
     '''Given a layer object, check against cache to see if that layer id exists
     if yes then get the package list and load it in the layer and return true.
-    If it doesn't exist return false. Default operation is to not redo the cache.
-    Add notices to the layer's origins matching the origin_str'''
+    If it doesn't exist return false. Default operation is to not redo the
+    cache. Add notices to the layer's origins matching the origin_str'''
     loaded = False
     origin_layer = 'Layer: ' + layer.fs_hash[:10]
     if not layer.packages and not redo:
@@ -305,15 +305,26 @@ def add_snippet_packages(image_layer, command, pkg_listing, shell):
 
 
 def update_master_list(master_list, layer_obj):
-    '''A general utility to update a master list of package names and clean
-    out a layer's list of package objects
-    Given a master list of package names and a layer object containing a list
-    of package objects, append to the master list all the package names that
-    are not in the master list and remove the duplicate packages from the
+    '''Given a master list of package objects and a layer object containing a
+    list of package objects, append to the master list all the package objects
+    that are not in the master list and remove the duplicate packages from the
     layer object'''
-    layer_packages = layer_obj.get_package_names()
-    keep_list = list(set(layer_packages) - set(master_list))
-    remove_list = list(set(layer_packages) - set(keep_list))
-    master_list.extend(keep_list)
-    for pkg in remove_list:
-        layer_obj.remove_package(pkg)
+    # temporary placement of package objects
+    unique = []
+    for i in range(len(layer_obj.packages)):
+        item = layer_obj.packages.pop(0)
+        # check for whether the package exists on the master list
+        exists = False
+        for pkg in master_list:
+            if item.is_equal(pkg):
+                exists = True
+                break
+        if not exists:
+            unique.append(item)
+    # add all the unique packages to the master list
+    for u in unique:
+        master_list.append(u)
+    # empty the unique packages back into the layer object
+    while unique:
+        layer_obj.packages.append(unique.pop(0))
+    del unique
