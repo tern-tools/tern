@@ -188,7 +188,7 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):
         # add a hint notice to add the shell to the command library
         add_shell_message = errors.no_listing_for_base_key.format(
             listing_key='shell')
-        image_obj.layers[0].origins.add_notice_origins(
+        image_obj.layers[0].origins.add_notice_to_origins(
             origin_command_lib, Notice(add_shell_message, 'hint'))
         shell = constants.shell
     # only extract packages if there is a known binary and the layer is not
