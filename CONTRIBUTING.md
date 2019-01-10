@@ -179,7 +179,7 @@ cache.yml is actually a stand-in for a more sophisticated database. Tern is stil
 
 1. Before updating your work branch, stash the changes
 ```
-$ git stash
+$ git stash push
 Saved working directory and index state WIP on master: 71e923f Fixed bug in reporting urls for installed packages
 $ git stash list
 stash@{0}: WIP on master: 71e923f Fixed bug in reporting urls for installed packages
@@ -193,7 +193,7 @@ nothing to commit, working tree clean
 2. Now you can work on the branch. When you are ready to test, apply the changes back and drop the stash from the stack.
 
 ```
-$ git stash apply
+$ git stash pop
 On branch master
 Your branch is up to date with 'origin/master'.
 
@@ -204,8 +204,6 @@ Changes not staged for commit:
 	modified:   cache.yml
 
 no changes added to commit (use "git add" and/or "git commit -a")
-$ git stash drop
-Dropped refs/stash@{0} (f29de29fb1ea23829ff757d078e1c2a7b067708e)
 ```
 
 3. Commit all your changes except for cache.yml. When done committing, you can apply the uncommitted changes to the stack again before proceeding.
