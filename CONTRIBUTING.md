@@ -101,7 +101,7 @@ import sys
 
 # internal dependencies that are part of Tern
 import common
-import docker
+from utils import rootfs
 ```
 - Minimize [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity). Most python style checkers also come with McCabe complexity checkers. A good rule of thumb is to limit the number of if-then-else statements to 3 and return once in a module.
 

@@ -23,7 +23,7 @@ from classes.image_layer import ImageLayer
 from classes.notice import Notice
 from classes.package import Package
 import common
-import docker
+import docker_helpers as dhelper
 from command_lib import command_lib
 
 '''
@@ -53,7 +53,7 @@ def setup(dockerfile=None, image_tag_string=None):
     cache.load()
     # load dockerfile if present
     if dockerfile:
-        docker.load_docker_commands(dockerfile)
+        dhelper.load_docker_commands(dockerfile)
     # check if the docker image is present
     if image_tag_string:
         if not container.check_image(image_tag_string):
@@ -92,7 +92,7 @@ def clean_working_dir():
 
 def load_base_image():
     '''Create base image from dockerfile instructions and return the image'''
-    base_image, dockerfile_lines = docker.get_dockerfile_base()
+    base_image, dockerfile_lines = dhelper.get_dockerfile_base()
     # try to get image metadata
     if not container.check_image(base_image.repotag):
         container.pull_image(base_image.repotag)
@@ -161,7 +161,7 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):
     and then look up the command library for commands to run in chroot'''
     # find the layers that are imported
     if dockerfile:
-        docker.set_imported_layers(image_obj)
+        dhelper.set_imported_layers(image_obj)
     # add notices for each layer if it is imported
     image_setup(image_obj)
     shell = ''
@@ -220,7 +220,7 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):
         if not common.load_from_cache(image_obj.layers[curr_layer], redo):
             # get commands that created the layer
             # for docker images this is retrieved from the image history
-            command_list = docker.get_commands_from_history(
+            command_list = dhelper.get_commands_from_history(
                 image_obj.layers[curr_layer])
             if command_list:
                 # mount diff layers from 0 till the current layer
@@ -255,7 +255,7 @@ def get_dockerfile_packages():
         4. Return stub image'''
     stub_image = Image('easteregg:cookie')
     layer_count = 0
-    for inst in docker.docker_commands:
+    for inst in dhelper.docker_commands:
         if inst[0] == 'RUN':
             layer_count = layer_count + 1
             layer = ImageLayer(layer_count)
@@ -333,10 +333,10 @@ def execute_dockerfile(args):
     logger.debug('Building Docker image...')
     # placeholder to check if we can analyze the full image
     completed = True
-    build, msg = docker.is_build()
+    build, msg = dhelper.is_build()
     if build:
         # attempt to get built image metadata
-        image_tag_string = docker.get_dockerfile_image_tag()
+        image_tag_string = dhelper.get_dockerfile_image_tag()
         full_image = load_full_image(image_tag_string)
         if full_image.origins.is_empty():
             # image loading was successful
