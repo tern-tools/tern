@@ -3,6 +3,7 @@ Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
+import docker
 import logging
 import os
 import shutil
@@ -317,8 +318,8 @@ def generate_yaml(images):
 def check_docker_daemon():
     '''Check if the Docker daemon is running. If not, exit gracefully'''
     try:
-        container.docker_command(['docker', 'ps'])
-    except subprocess.CalledProcessError as error:
+        docker.from_env()
+    except IOError as error:
         logger.error('Docker daemon is not running: {0}'.format(
             error.output.decode('utf-8')))
         sys.exit()

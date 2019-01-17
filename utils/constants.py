@@ -10,6 +10,8 @@ Constants
 # temporary folder for extracting container image
 # this is relative to where the tern executable is
 temp_folder = 'temp'
+# temporary tar file
+temp_tarfile = 'temp.tar'
 # built image name
 image = 'ternimage'
 # built image tag
