@@ -1,46 +1,43 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
+import docker
 import grp
-import io
 import logging
 import os
 import pwd
-import subprocess
 import tarfile
 import time
+from requests.exceptions import HTTPError
 
 
 from .constants import container
 from .constants import logger_name
 from .constants import temp_folder
+from .constants import temp_tarfile
 
-from .general import pushd
 
 '''
-Container operations
+Docker container operations
 '''
-# docker commands
-check_images = ['docker', 'images']
-pull = ['docker', 'pull']
-build = ['docker', 'build']
-run = ['docker', 'run', '-td']
-check_running = ['docker', 'ps', '-a']
-copy = ['docker', 'cp']
-execute = ['docker', 'exec']
-inspect = ['docker', 'inspect']
-stop = ['docker', 'stop']
-remove = ['docker', 'rm']
-delete = ['docker', 'rmi', '-f']
-save = ['docker', 'save']
 
-# docker container names
-# image = const.image
+# timestamp tag
 tag = str(int(time.time()))
 
 # global logger
 logger = logging.getLogger(logger_name)
+
+# global docker client
+client = None
+try:
+    client = docker.from_env()
+except IOError:
+    logger.critical("Docker daemon not running")
+    raise Exception("Critical Error using Docker API. See logs for details")
+except OSError:
+    logger.critical("User has no access to docker unix socket")
+    raise Exception("Critical Error using Docker API. See logs for details")
 
 
 def is_sudo():
@@ -55,130 +52,98 @@ def is_sudo():
     return sudo
 
 
-def docker_command(command, *extra):
-    '''Invoke docker command. If the command fails nothing is returned
-    If it passes then the result is returned'''
-    full_cmd = []
-    if is_sudo():
-        full_cmd.append('sudo')
-    full_cmd.extend(command)
-    for arg in extra:
-        full_cmd.append(arg)
-    # invoke
-    logger.debug("Running command: " + ' '.join(full_cmd))
-    pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-    result, error = pipes.communicate()
-    if error:
-        raise subprocess.CalledProcessError(1, cmd=full_cmd, output=error)
-    else:
-        return result
-
-
-def docker_command_check(command, *extra):
-    '''Invoke docker command using subprocess.check_output'''
-    full_cmd = []
-    if is_sudo():
-        full_cmd.append('sudo')
-    full_cmd.extend(command)
-    for arg in extra:
-        full_cmd.append(arg)
-    # invoke
-    logger.debug("Running command: " + ' '.join(full_cmd))
-    try:
-        result = subprocess.check_output(full_cmd)
-        return result
-    except subprocess.CalledProcessError:
-        raise
-
-
 def check_container():
-    '''Check if a container exists'''
-    is_container = False
-    keyvalue = 'name=' + container
-    result = docker_command(check_running, '--filter', keyvalue)
-    result_lines = result.decode('utf-8').split('\n')
-    if len(result_lines) > 2:
-        is_container = True
-    return is_container
+    '''Check is the test container is running'''
+    try:
+        client.containers.get(container)
+        return True
+    except docker.errors.NotFound:
+        return False
 
 
 def check_image(image_tag_string):
     '''Check if image exists'''
-    is_image = False
-    result = docker_command(check_images, image_tag_string)
-    result_lines = result.decode('utf-8').split('\n')
-    if len(result_lines) > 2:
-        is_image = True
-    return is_image
+    try:
+        client.images.get(image_tag_string)
+        return True
+    except docker.errors.ImageNotFound:
+        return False
 
 
 def pull_image(image_tag_string):
     '''Try to pull an image from Dockerhub'''
-    is_there = False
     try:
-        result = docker_command(pull, image_tag_string)
-        print(result)
-        is_there = True
-    except subprocess.CalledProcessError as error:
-        print(error.output)
-        is_there = False
-    return is_there
+        client.images.pull(image_tag_string)
+        return True
+    except docker.errors.ImageNotFound:
+        logger.warning("No such image: {}".format(image_tag_string))
+        return False
 
 
 def build_container(dockerfile, image_tag_string):
     '''Invoke docker command to build a docker image from the dockerfile
     It is assumed that docker is installed and the docker daemon is running'''
-    curr_path = os.getcwd()
     path = os.path.dirname(dockerfile)
     if not check_image(image_tag_string):
-        with pushd(path):
-            try:
-                docker_command(build, '-t', image_tag_string, '-f',
-                               os.path.basename(dockerfile), '.')
-            except subprocess.CalledProcessError as error:
-                os.chdir(curr_path)
-                raise subprocess.CalledProcessError(
-                    error.returncode, cmd=error.cmd,
-                    output=error.output.decode('utf-8'))
+        try:
+            client.images.build(path=path, tag=image_tag_string, nocache=True)
+        except(TypeError, docker.errors.APIError, docker.errors.BuildError):
+            raise
 
 
 def start_container(image_tag_string):
-    '''Invoke docker command to start a container
-    If one already exists then stop it
-    Use this only in the beginning of running commands within a container
-    Assumptions: Docker is installed and the docker daemon is running
-    There is no other running container from the given image'''
-    if check_container():
-        docker_command(stop, container)
-        docker_command(remove, container)
-    docker_command(run, '--name', container, image_tag_string)
+    '''Start the test container in detach state'''
+    try:
+        client.containers.run(image_tag_string, name=container, detach=True)
+    except HTTPError:
+        # container may already be running
+        pass
+    try:
+        remove_container()
+        client.containers.run(image_tag_string, name=container, detach=True)
+    except HTTPError:
+        # not sure what the error is now
+        raise Exception("Cannot remove running container")
 
 
 def remove_container():
-    '''Remove a running container'''
-    if check_container():
-        docker_command(stop, container)
-        docker_command(remove, container)
+    '''Remove the running test container'''
+    active_c = client.containers.get(container)
+    active_c.stop()
+    active_c.remove()
 
 
 def remove_image(image_tag_string):
     '''Remove an image'''
     if check_image(image_tag_string):
-        docker_command(delete, image_tag_string)
+        client.images.remove(image_tag_string)
 
 
 def get_image_id(image_tag_string):
-    '''Get the image ID by inspecting the image'''
-    result = docker_command(inspect, "-f'{{json .Id}}'", image_tag_string)
-    return result.split(':').pop()
+    '''Get the image ID by inspecting image and tag'''
+    try:
+        image = client.images.get(image_tag_string)
+        return image.id.split(':').pop()
+    except docker.errors.ImageNotFound:
+        return ''
 
 
 def extract_image_metadata(image_tag_string):
     '''Run docker save and extract the files in a temporary directory'''
     temp_path = os.path.abspath(temp_folder)
-    result = docker_command_check(save, image_tag_string)
-    with tarfile.open(fileobj=io.BytesIO(result)) as tar:
-        tar.extractall(temp_path)
-    if not os.path.exists(temp_path):
-        raise IOError('Unable to untar Docker image')
+    try:
+        image = client.images.get(image_tag_string)
+        result = image.save(chunk_size=2097152, named=True)
+        # write all of the tar byte stream into temporary tar file
+        with open(temp_tarfile, 'wb') as f:
+            for chunk in result:
+                f.write(chunk)
+        # extract tarfile into folder
+        with tarfile.open(temp_tarfile) as tar:
+            tar.extractall(temp_path)
+        # remove temporary tar file
+        os.remove(temp_tarfile)
+        if not os.path.exists(temp_path):
+            raise IOError('Unable to untar Docker image')
+    except docker.errors.APIError:
+        raise
