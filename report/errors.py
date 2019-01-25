@@ -69,8 +69,8 @@ dockerfile_fallback = '''Falling back on parsing the Dockerfile for ''' \
     '''package information\n'''
 no_running_docker_container = '''Cannot invoke commands in a container '''\
     '''as there is no running container.\n'''
-cannot_find_image = '''Cannot find image {imagetag}. Please provide image '''\
-    '''and tag that was pulled.\n'''
+cannot_find_image = '''Cannot find image {imagetag} locally or from remote '''\
+    '''registry.\n'''
 
 # not error messages but stuff for the logger
 no_base_image = '''Base image is FROM scratch. Skipping to build'''

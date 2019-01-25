@@ -58,9 +58,11 @@ def setup(dockerfile=None, image_tag_string=None):
     # check if the docker image is present
     if image_tag_string:
         if not container.check_image(image_tag_string):
-            logger.fatal(errors.cannot_find_image.format(
-                imagetag=image_tag_string))
-            sys.exit()
+            # if no docker image is present, try to pull it
+            if not container.pull_image(image_tag_string):
+                logger.fatal(errors.cannot_find_image.format(
+                    imagetag=image_tag_string))
+                sys.exit()
     # create temporary working directory
     if not os.path.exists(constants.temp_folder):
         os.mkdir(constants.temp_folder)
@@ -96,7 +98,10 @@ def load_base_image():
     base_image, dockerfile_lines = dhelper.get_dockerfile_base()
     # try to get image metadata
     if not container.check_image(base_image.repotag):
-        container.pull_image(base_image.repotag)
+        # if no base image is found, give a warning and continue
+        if not container.pull_image(base_image.repotag):
+            logger.warning(errors.cannot_find_image.format(
+                imagetag=base_image.repotag))
     try:
         base_image.load_image()
     except NameError as error:
