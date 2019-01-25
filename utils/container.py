@@ -63,8 +63,11 @@ def check_container():
 
 def check_image(image_tag_string):
     '''Check if image exists'''
+    logger.debug("Checking if image {} is available on disk...".format(
+        image_tag_string))
     try:
         client.images.get(image_tag_string)
+        logger.debug("Image {} found".format(image_tag_string))
         return True
     except docker.errors.ImageNotFound:
         return False
@@ -72,8 +75,10 @@ def check_image(image_tag_string):
 
 def pull_image(image_tag_string):
     '''Try to pull an image from Dockerhub'''
+    logger.debug("Attempting to pull image {}".format(image_tag_string))
     try:
         client.images.pull(image_tag_string)
+        logger.debug("Image {} downloaded".format(image_tag_string))
         return True
     except docker.errors.ImageNotFound:
         logger.warning("No such image: {}".format(image_tag_string))
