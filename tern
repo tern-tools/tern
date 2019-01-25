@@ -20,17 +20,13 @@ Tern executable
 logger = logging.getLogger(constants.logger_name)
 logger.setLevel(logging.DEBUG)
 
-console = logging.StreamHandler()
-console.setLevel(logging.DEBUG)
 formatter = logging.Formatter(
     '%(asctime)s - %(levelname)s - %(module)s - %(message)s')
-console.setFormatter(formatter)
 
 log_handler = logging.FileHandler(constants.logfile, mode='w')
 log_handler.setLevel(logging.DEBUG)
 log_handler.setFormatter(formatter)
 
-logger.addHandler(console)
 logger.addHandler(log_handler)
 
 
