@@ -20,6 +20,10 @@ Tern executable
 logger = logging.getLogger(constants.logger_name)
 logger.setLevel(logging.DEBUG)
 
+# console stream handler
+console = logging.StreamHandler()
+console.setLevel(logging.DEBUG)
+
 formatter = logging.Formatter(
     '%(asctime)s - %(levelname)s - %(module)s - %(message)s')
 
@@ -27,11 +31,18 @@ log_handler = logging.FileHandler(constants.logfile, mode='w')
 log_handler.setLevel(logging.DEBUG)
 log_handler.setFormatter(formatter)
 
+console.setFormatter(formatter)
+
 logger.addHandler(log_handler)
 
 
 def main(args):
     '''Execute according to subcommands'''
+    if args.log_stream:
+        # set up console logs
+        global logger
+        global console
+        logger.addHandler(console)
     logger.debug('Starting...')
     if args.clear_cache:
         logger.debug('Clearing cache...')
@@ -59,6 +70,9 @@ if __name__ == '__main__':
            Tern is a container image component curation tool. Tern retrieves
     information about packages that are installed in a container image.
     Learn more at https://github.com/vmware/tern''')
+    parser.add_argument('-l', '--log-stream', action='store_true',
+                        help="Stream logs to the console.\n"
+                        "Useful when running in a shell")
     parser.add_argument('-c', '--clear-cache', action='store_true',
                         help="Clear the cache before running")
     parser.add_argument('-k', '--keep-working-dir', action='store_true',
