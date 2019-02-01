@@ -54,6 +54,14 @@ tyum:
     - 'clean'
   packages: 'tdnf'
 
+tdnf:
+  install: 'install'
+  remove: 'remove'
+  ignore:
+    - 'check-update'
+    - 'clean'
+  packages: 'tdnf'
+
 apk:
   install: 'add'
   remove: 'del'
