@@ -86,11 +86,22 @@ def clean_image_tars(image_obj):
             rootfs.root_command(rootfs.remove, fspath)
 
 
-def clean_working_dir():
-    '''Clean up the working directory'''
+def clean_working_dir(bind_mount):
+    '''Clean up the working directory
+    If bind_mount is true then leave the upper level directory'''
     path = os.path.abspath(constants.temp_folder)
     if os.path.exists(path):
-        shutil.rmtree(path)
+        if bind_mount:
+            # clean whatever is in temp_folder without removing the folder
+            inodes = os.listdir(path)
+            for inode in inodes:
+                dir_path = os.path.join(path, inode)
+                if os.path.isdir(dir_path):
+                    shutil.rmtree(dir_path)
+                else:
+                    os.remove(dir_path)
+        else:
+            shutil.rmtree(path)
 
 
 def load_base_image():
@@ -394,7 +405,7 @@ def execute_dockerfile(args):
     logger.debug('Teardown...')
     teardown()
     if not args.keep_working_dir:
-        shutil.rmtree(os.path.abspath(constants.temp_folder))
+        clean_working_dir(args.bind_mount)
 
 
 def execute_docker_image(args):
@@ -421,4 +432,4 @@ def execute_docker_image(args):
     logger.debug('Teardown...')
     teardown()
     if not args.keep_working_dir:
-        clean_working_dir()
+        clean_working_dir(args.bind_mount)
