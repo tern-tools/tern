@@ -35,13 +35,16 @@ Create a report
 logger = logging.getLogger(constants.logger_name)
 
 
-def write_report(report, file_type='text'):
+def write_report(report, args):
     '''Write the report to a file'''
-    file_name = constants.report_file
-    if file_type == 'yaml':
+    if args.file:
+        file_name = args.file
+    elif args.yaml:
         file_name = constants.yaml_file
-    elif file_type == 'json':
+    elif args.json:
         file_name = constants.json_file
+    else:
+        file_name = constants.report_file
     with open(file_name, 'w') as f:
         f.write(report)
 
@@ -294,18 +297,14 @@ def get_dockerfile_packages():
 
 def generate_report(args, *images):
     '''Generate a report based on the command line options'''
-    if args.yaml_file:
-        report = generate_yaml(images)
-        write_report(report, 'yaml')
-    elif args.json_file:
-        report = content.print_json_report(images)
-        write_report(report, 'json')
+    if args.yaml:
+        return generate_yaml(images)
+    elif args.json:
+        return content.print_json_report(images)
     elif args.summary:
-        report = generate_verbose(True, images)
-        write_report(report)
+        return generate_verbose(True, images)
     else:
-        report = generate_verbose(False, images)
-        write_report(report)
+        return generate_verbose(False, images)
 
 
 def generate_verbose(is_summary, images):
@@ -329,6 +328,14 @@ def generate_yaml(images):
     for image in images:
         report = report + content.print_yaml_report(image)
     return report
+
+
+def report_out(args, *images):
+    report = generate_report(args, *images)
+    if args.file:
+        write_report(report, args)
+    else:
+        print(report)
 
 
 def check_docker_daemon():
@@ -399,9 +406,9 @@ def execute_dockerfile(args):
             clean_image_tars(base_image)
     # generate report based on what images were created
     if completed:
-        generate_report(args, full_image)
+        report_out(args, full_image)
     else:
-        generate_report(args, base_image, stub_image)
+        report_out(args, base_image, stub_image)
     logger.debug('Teardown...')
     teardown()
     if not args.keep_working_dir:
@@ -423,7 +430,7 @@ def execute_docker_image(args):
         # analyze image
         analyze_docker_image(full_image, args.redo)
         # generate report
-        generate_report(args, full_image)
+        report_out(args, full_image)
     else:
         # we cannot load the full image
         logger.warning('Cannot retrieve full image metadata')
