@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
@@ -30,9 +30,12 @@ class TestClassImageLayer(unittest.TestCase):
         self.assertEqual(self.layer.created_by, 'some string')
 
     def testAddPackage(self):
+        err = "Object type String, should be Package"
         p1 = Package('x')
         self.layer.add_package(p1)
         self.assertEqual(len(self.layer.packages), 1)
+        with self.assertRaises(TypeError, msg=err):
+            self.layer.add_package("not_a_package")
 
     def testRemovePackage(self):
         p1 = Package('x')

@@ -28,7 +28,7 @@ def load():
     '''Load the cache'''
     global cache
     with open(os.path.abspath(cache_file)) as f:
-        cache = yaml.load(f)
+        cache = yaml.safe_load(f)
 
 
 def get_packages(sha):

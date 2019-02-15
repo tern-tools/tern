@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 import os
@@ -88,14 +88,12 @@ class ImageLayer(object):
         self.__import_str = import_str
 
     def add_package(self, package):
-        try:
-            assert isinstance(package, Package), \
-                   'Object type is {0}, should be Package'.format(
-                       type(package))
+        if isinstance(package, Package):
             if package.name not in self.get_package_names():
                 self.__packages.append(package)
-        except AssertionError:
-            raise
+        else:
+            raise TypeError('Object type is {0}, should be Package'.format(
+                       type(package)))
 
     def remove_package(self, package_name):
         rem_index = 0
