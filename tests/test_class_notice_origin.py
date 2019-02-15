@@ -1,5 +1,5 @@
 '''
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2019 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
@@ -8,7 +8,6 @@ import unittest
 from report import formats
 
 from classes.notice import Notice
-from classes.notice import NoticeException
 from classes.notice_origin import NoticeOrigin
 
 
@@ -38,7 +37,7 @@ class TestClassNoticeOrigin(unittest.TestCase):
 
     def testAddNotice(self):
         exp = "Object type String, should be Notice"
-        with self.assertRaises(AssertionError, msg=exp) as ex:
+        with self.assertRaises(TypeError, msg=exp):
             self.notice_origin.add_notice("not_a_notice")
 
         self.notice_origin.add_notice(self.notice_info)
