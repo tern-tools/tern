@@ -1,11 +1,12 @@
 '''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
 from report import formats
 
 from .notice import Notice
+
 
 class NoticeOrigin(object):
     '''The origin of a notice
@@ -30,12 +31,11 @@ class NoticeOrigin(object):
         return self.__notices
 
     def add_notice(self, notice):
-        try:
-            assert isinstance(notice, Notice), \
-                   'Object type is {0}, should be Notice'.format(type(notice))
+        if isinstance(notice, Notice):
             self.__notices.append(notice)
-        except AssertionError:
-            raise
+        else:
+            raise TypeError('Object type is {0}, should be Notice'.format(
+                type(notice)))
 
     def print_notices(self):
         '''Using the notice format, return a formatted string'''
@@ -53,7 +53,10 @@ class NoticeOrigin(object):
             if notice.level == 'hint':
                 hints = hints + notice.message
         notice_msg = formats.notice_format.format(
-            origin=self.origin_str, info=info, warnings=warnings, errors=errors,
+            origin=self.origin_str,
+            info=info,
+            warnings=warnings,
+            errors=errors,
             hints=hints)
         return notice_msg
 
