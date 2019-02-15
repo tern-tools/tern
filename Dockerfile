@@ -11,6 +11,8 @@ COPY . .
 # install app dependencies
 RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
 
+WORKDIR /src
+
 # make a mounting directory
 RUN mkdir temp
 
