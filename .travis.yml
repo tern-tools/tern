@@ -18,6 +18,7 @@ install:
 
 before_script:
   - docker pull docker.io/photon:2.0
+  - cd src
 
 script:
   - ./tern -l report -i photon:2.0
