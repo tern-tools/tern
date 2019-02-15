@@ -31,6 +31,30 @@ Tern gives you a deeper understanding of your container's bill of materials so y
 
 ## Getting Started<a name="getting-started"/>
 
+### Getting Started with Docker
+Docker is the most widely used tool to build and run containers. If you already have Docker installed, you can run Tern by building a container with the Dockerfile provided and the `docker_run.sh` script:
+
+```
+$ git clone https://github.com/vmware/tern.git
+$ docker build -t ternd .
+$ ./docker_run workdir ternd "report -i debian:buster" > report
+```
+
+To produce a json report run
+```
+$ ./docker_run workdir ternd "report -j -i debian:buster"
+```
+
+What the `docker_run.sh` script does is create the directory `workdir` if not present in your current working directory and run the built container as privileged with `workdir` bind mounted to it.
+*WARNING:* privileged Docker containers are not secure. DO NOT run this container in production. If you want to run Tern in production, it is safer to run it in a VM.
+
+### Getting Started with Vagrant
+Vagrant is a tool to setup an isolated virtual software development environment. Follow [these steps](/docs/contributing-setup.md) to set up your Vagrant environment. This is a requirement if you are using Windows or Mac OSs.
+
+
+### Getting Started on Linux
+If you have a Linux OS you will need to install the following requirements:
+
 ### Requirements
 Tern is currently developed on a Linux distro with a kernel version >= 4.0. Possible development distros are Ubuntu 16.04 or newer or Fedora 25 or newer.
 Install the following:
@@ -44,11 +68,7 @@ If you happen to be using Docker containers
 
 Make sure the docker daemon is running.
 
-### Getting Started with Vagrant
-Vagrant is a tool to setup an isolated virtual software development environment. Follow [these steps](/docs/contributing-setup.md) to set up your Vagrant environment. This is a requirement if you are using Windows or Mac OSs. 
-
-### Getting Started on Linux
-If you have a Linux OS with the above requirements, you can start by setting up a python virtual environment to run the code.
+Create a python3 virtual environment and install requirements
 
 ```
 $ python3 -m venv ternenv
@@ -58,6 +78,7 @@ $ source bin/activate
 $ cd tern
 $ git checkout -b release v0.1.0
 $ pip install -r requirements.txt
+$ ./tern -l report -f output.txt -i debian:buster
 ```
 
 ### To run against a Docker image
@@ -84,13 +105,13 @@ WARNING: Tern is meant to give guidance on what may be installed in a container 
 ### To get the results in YAML form
 To get the results in a YAML file to be consumed by a downstream tool or script
 ```
-$ ./tern report -Y -i debian:jessie
+$ ./tern report -y -i debian:jessie
 ```
 
 ### To get the results in JSON form
 To get the results in a JSON file for web use
 ```
-$ ./tern report -J -i debian:jessie
+$ ./tern report -j -i debian:jessie
 ```
 
 ### To run a test
