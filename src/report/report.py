@@ -7,7 +7,7 @@ import docker
 import logging
 import os
 import shutil
-import subprocess
+import subprocess  # nosec
 import sys
 
 from report import content

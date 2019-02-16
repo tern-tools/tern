@@ -5,7 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 import os
 import random
 import re
-import subprocess
+import subprocess  # nosec
 
 from contextlib import contextmanager
 
@@ -22,7 +22,7 @@ def pushd(path):
 
 
 def initialize_names():
-    randint = random.randint(10000, 99999)
+    randint = random.randint(10000, 99999)  # nosec
     constants.image = constants.image + "_" + str(randint)
     constants.tag = constants.tag + "_" + str(randint)
     constants.container = constants.container + "_" + str(randint)
@@ -77,7 +77,7 @@ def get_git_rev():
     '''Assuming we are operating within a git repository, get the SHA
     of the current commit'''
     command = ['git', 'show', '--format=%H', 'HEAD']
-    output = subprocess.check_output(command)
+    output = subprocess.check_output(command)  # nosec
     if type(output) == bytes:
         output = output.decode('utf-8')
     return output.split('\n').pop(0)
