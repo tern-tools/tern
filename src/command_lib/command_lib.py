@@ -5,7 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import logging
 import os
-import subprocess
+import subprocess  # nosec
 import yaml
 
 from utils import container

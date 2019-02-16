@@ -5,7 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import json
 import os
-import subprocess
+import subprocess  # nosec
 
 from utils.general import pushd
 from utils.constants import temp_folder

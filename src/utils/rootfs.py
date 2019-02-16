@@ -5,7 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 import hashlib
 import logging
 import os
-import subprocess
+import subprocess  # nosec
 import tarfile
 
 from . import constants
@@ -50,9 +50,9 @@ def root_command(command, *extra):
         full_cmd.append(arg)
     # invoke
     logger.debug("Running command: " + ' '.join(full_cmd))
-    pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,
+    pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,  # nosec
                              stderr=subprocess.PIPE)
-    result, error = pipes.communicate()
+    result, error = pipes.communicate()  # nosec
     if error:
         raise subprocess.CalledProcessError(1, cmd=full_cmd, output=error)
     else:

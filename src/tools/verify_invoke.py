@@ -4,7 +4,7 @@ SPDX-License-Identifier: BSD-2-Clause
 '''
 
 import argparse
-import subprocess
+import subprocess  # nosec
 
 from utils import constants
 from command_lib import command_lib

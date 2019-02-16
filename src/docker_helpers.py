@@ -5,7 +5,7 @@ SPDX-License-Identifier: BSD-2-Clause
 import logging
 import os
 import re
-import subprocess
+import subprocess  # nosec
 
 from classes.docker_image import DockerImage
 from classes.notice import Notice
