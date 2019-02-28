@@ -77,7 +77,7 @@ $ cd ternenv
 $ git clone https://github.com/vmware/tern.git
 $ source bin/activate
 $ cd tern
-$ git checkout -b release v0.2.0
+$ git checkout -b release v0.3.0 <-- optional stable placeholder
 $ pip install -r requirements.txt
 $ cd src
 $ ./tern -l report -f output.txt -i debian:buster
@@ -131,17 +131,18 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Release 0.3.0 is coming up. Some items for the release have been moved back to the backlog.
+Release 0.3.0 is here! Some items for the release have been moved back to the backlog.
 
 - I am moving the [PyPI package issue](https://github.com/vmware/tern/issues/136) to the near future backlog. I would like to have a build and release pipeline set before implementing this. This is the same reason why I haven't pushed any Docker images to Dockerhub yet and have rather defaulted to folks building the container themselves.
 - I've moved the [install script issue](https://github.com/vmware/tern/issues/21) to the far future backlog. We may not even implement this if the pip package and docker containers are in place. Install scripts are notoriously hard to maintain.
 - I'll be closing all Travis CI issues due to the [news](https://twitter.com/ReinH/status/1098663375985229825). I'll be reopening the same issues with Circle CI. Expect the travis.yml to go away soon. This makes me feel angry-sad, but for the sake of the project's health, I think this is a reasonable decision to make.
 
-We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 0.3.0
+We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 0.4.0
 
 ## Releases
 * [v0.1.0](docs/releases/v0_1_0.md)
 * [v0.2.0](docs/releases/v0_2_0.md)
+* [v0.3.0](docs/releases/v0_3_0.md)
 
 ## Documentation<a name="documentation"/>
 Architecture, function blocks, code descriptions and the project roadmap are located in the docs folder. Contributions to the documentation are welcome! See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
