@@ -19,6 +19,8 @@ Tern is an inspection tool to find the metadata of the packages installed in a c
 
 Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies. It's also a good tool if you are curious about the contents of the container images you have built.
 
+![Tern quick demo](/docs/img/tern_demo_fast.gif)
+
 ## Table of Contents
 - [FAQ](/docs/faq.md)
 - [Getting Started](#getting-started)
