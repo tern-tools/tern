@@ -90,3 +90,31 @@ apk:
             container:
               - 'apk -R info python 2>/dev/null | tail -n +2 | head -n -1 | cut -f2 -d":" | cut -f1 -d"."'
         delimiter: "\n"
+
+
+pacman:
+  install: '-Syu'
+  remove: '-Rcs'
+  packages:
+    - name: default
+      version:
+        invoke:
+          1:
+            container:
+              - "pacman -Qi {package} 2> /dev/null/ | sed -n '/Version/p' | cut -d : -f 2"
+      license:
+        invoke:
+          1:
+            container:
+              - "pacman -Qi {package} 2> /dev/null | sed -n '/Licenses/p' | cut -d : -f 2"
+      src_url:
+        invoke:
+          1:
+            container:
+              - "pacman -Qi {package} 2> /dev/null | sed -n '/URL/p' | cut -d : -f 2"
+      deps:
+        invoke:
+          1:
+            container:
+              - "pacman -Qi {package} 2> /dev/null | sed -n '/Depends On/p' | cut -d : -f 2"
+        delimiter: " "
