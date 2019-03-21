@@ -116,3 +116,33 @@ apk:
           - 'pkgs=`apk info 2>/dev/null`'
           - 'for p in $pkgs; do apk info $p 2>/dev/null | head -5 | tail -1; done'
     delimiter: "\n"
+
+# pacman ----------------------------------------------------------------------
+pacman:
+  path:
+    - 'usr/bin/pacman'
+  shell: '/usr/bin/sh'
+  names:
+    invoke:
+      1:
+        container:
+          - 'pacman -Qq 2>/dev/null'
+    delimiter: "\n"
+  versions:
+    invoke:
+      1:
+        container:
+          - 'pacman -Q 2>/dev/null | cut -f 2 -d " "'
+    delimiter: "\n"
+  licenses:
+    invoke:
+      1:
+        container:
+          - 'pacman -Qi 2>/dev/null | sed -n "/Licenses/p" | cut -d ":" -f 2'
+    delimiter: "\n"
+  src_urls:
+    invoke:
+      1:
+        container:
+          - 'pacman -Qi 2>/dev/null | sed -n "/URL/s/URL.*: //p" '
+    delimiter: "\n"
