@@ -9,9 +9,9 @@ import argparse
 import logging
 import os
 
-from report import report
-from utils import cache
-from utils import constants
+from tern.report import report
+from tern.utils import cache
+from tern.utils import constants
 '''
 Tern executable
 '''
