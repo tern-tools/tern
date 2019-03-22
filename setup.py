@@ -7,6 +7,11 @@ def _read_long_desc():
     with open("README.md") as fp:
         return fp.read()
 
+def _get_requirements():
+
+    with open("requirements.txt") as fp:
+        return [requirement for requirement in fp]
+
 setup(
   name="tern",
   version=version,
@@ -15,7 +20,7 @@ setup(
   url="https://github.com/vmware/tern/",
   description=("An inspection tool to find the metadata of the packages" 
     " installed in a container image"),
-  long_description=_read_long_desc()
+  long_description=_read_long_desc(),
   license="BSD-2.0",
   keywords="Distribution, Container, Cloud-Native",
   classifiers = [
@@ -30,11 +35,10 @@ setup(
     'Programming Language :: Python :: Implementation :: CPython',
     'Topic :: Software Development'
   ],
-  packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests",
-      "debian"]),
-  install_requires=["pyyaml"],
+  packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+  install_requires=_get_requirements(),
   test_suite="tests.runtests",
   entry_points={
-    "console_scripts": ["tern = tern.__init__.py:main"]
+    "console_scripts": ["tern = tern.__main__:main"]
   },
 )
