@@ -7,11 +7,11 @@ import json
 import os
 import subprocess  # nosec
 
-from utils.general import pushd
-from utils.constants import temp_folder
-from utils.constants import manifest_file
-from utils.container import extract_image_metadata
-from utils.dockerfile import tag_separator
+from tern.utils.general import pushd
+from tern.utils.constants import temp_folder
+from tern.utils.constants import manifest_file
+from tern.utils.container import extract_image_metadata
+from tern.utils.dockerfile import tag_separator
 
 from .image_layer import ImageLayer
 from .image import Image
