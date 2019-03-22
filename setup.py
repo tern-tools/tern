@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
-version = "0.2.0"
+from tern import Version
 
 def _read_long_desc():
     with open("README.md") as fp:
@@ -14,7 +14,7 @@ def _get_requirements():
 
 setup(
   name="tern",
-  version=version,
+  version=Version,
   author="VMWare Inc",
   author_email="FIXME@FIXWHAT.THEEMAIL",
   url="https://github.com/vmware/tern/",
