@@ -309,7 +309,7 @@ def generate_report(args, *images):
 
 def generate_verbose(is_summary, images):
     '''Generate a verbose report'''
-    report = formats.disclaimer.format(commit_sha=general.get_git_rev())
+    report = formats.disclaimer.format(version_info=general.get_git_rev_or_version())
     if is_summary:
         logger.debug('Creating a summary of components in image...')
         for image in images:
@@ -324,7 +324,7 @@ def generate_verbose(is_summary, images):
 def generate_yaml(images):
     '''Generate a yaml report'''
     logger.debug('Creating YAML report...')
-    report = formats.disclaimer_yaml.format(commit_sha=general.get_git_rev())
+    report = formats.disclaimer_yaml.format(version_info=general.get_git_rev_or_version())
     for image in images:
         report = report + content.print_yaml_report(image)
     return report
