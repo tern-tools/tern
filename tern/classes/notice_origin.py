@@ -3,7 +3,7 @@ Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
-from report import formats
+from tern.report import formats
 
 from .notice import Notice
 

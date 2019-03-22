@@ -8,10 +8,10 @@ import os
 import subprocess  # nosec
 import yaml
 
-from utils import container
-from utils import constants
-from utils import rootfs
-from report import errors
+from tern.utils import container
+from tern.utils import constants
+from tern.utils import rootfs
+from tern.report import errors
 
 '''
 Invoking commands in the command library

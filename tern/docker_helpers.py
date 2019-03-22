@@ -7,14 +7,14 @@ import os
 import re
 import subprocess  # nosec
 
-from classes.docker_image import DockerImage
-from classes.notice import Notice
-from utils import dockerfile
-from utils import container
-from utils import constants
-from report import errors
-from report import formats
-import common
+from tern.classes.docker_image import DockerImage
+from tern.classes.notice import Notice
+from tern.utils import dockerfile
+from tern.utils import container
+from tern.utils import constants
+from tern.report import errors
+from tern.report import formats
+import tern.common as common
 
 '''
 Docker specific functions - used when trying to retrieve packages when
