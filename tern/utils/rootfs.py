@@ -7,6 +7,7 @@ import logging
 import os
 import subprocess  # nosec
 import tarfile
+import pkg_resources
 
 from . import constants
 '''
@@ -172,8 +173,10 @@ def calc_fs_hash(fs_path):
     directory.
     Note that this file will be deleted if the -k flag is not given'''
     try:
+        fs_hash_path = pkg_resources.resource_filename("tern",
+                "tools/fs_hash.sh")
         hash_contents = root_command(
-            ['./tools/fs_hash.sh'], os.path.abspath(fs_path))
+            [fs_hash_path], os.path.abspath(fs_path))
         file_name = hashlib.sha256(hash_contents).hexdigest()
         # write file to an appropriate location
         hash_file = os.path.join(os.path.dirname(fs_path), file_name) + '.txt'
