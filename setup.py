@@ -35,6 +35,7 @@ setup(
     'Programming Language :: Python :: Implementation :: CPython',
     'Topic :: Software Development'
   ],
+  include_package_data=True,
   packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
   install_requires=_get_requirements(),
   test_suite="tests.runtests",

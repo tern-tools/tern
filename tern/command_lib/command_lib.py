@@ -7,6 +7,7 @@ import logging
 import os
 import subprocess  # nosec
 import yaml
+import pkg_resources
 
 from tern.utils import container
 from tern.utils import constants
@@ -18,9 +19,9 @@ Invoking commands in the command library
 '''
 
 # base image command library
-base_file = 'tern/command_lib/base.yml'
+base_file = pkg_resources.resource_filename('tern', 'command_lib/base.yml')
 # general snippets in command library
-snippet_file = 'tern/command_lib/snippets.yml'
+snippet_file = pkg_resources.resource_filename('tern', 'command_lib/snippets.yml')
 # command library
 command_lib = {'base': {}, 'snippets': {}}
 with open(os.path.abspath(base_file)) as f:
