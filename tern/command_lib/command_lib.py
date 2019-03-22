@@ -18,9 +18,9 @@ Invoking commands in the command library
 '''
 
 # base image command library
-base_file = 'command_lib/base.yml'
+base_file = 'tern/command_lib/base.yml'
 # general snippets in command library
-snippet_file = 'command_lib/snippets.yml'
+snippet_file = 'tern/command_lib/snippets.yml'
 # command library
 command_lib = {'base': {}, 'snippets': {}}
 with open(os.path.abspath(base_file)) as f:
