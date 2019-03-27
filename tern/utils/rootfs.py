@@ -1,7 +1,11 @@
-'''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
+Operations to mount container filesystems and run commands against them
+"""
+
 import hashlib
 import logging
 import os
@@ -10,9 +14,6 @@ import tarfile
 import pkg_resources
 
 from . import constants
-'''
-Operations to mount container filesystems and run commands against them
-'''
 
 # remove root filesystems
 remove = ['rm', '-rf']
@@ -50,7 +51,7 @@ def root_command(command, *extra):
     for arg in extra:
         full_cmd.append(arg)
     # invoke
-    logger.debug("Running command: " + ' '.join(full_cmd))
+    logger.debug("Running command: %s", ' '.join(full_cmd))
     pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,  # nosec
                              stderr=subprocess.PIPE)
     result, error = pipes.communicate()  # nosec
@@ -98,7 +99,7 @@ def prep_rootfs(rootfs_dir):
         root_command(host_dns, os.path.join(
             rootfs_path, constants.resolv_path[1:]))
     except subprocess.CalledProcessError as error:
-        logger.error(error.output)
+        logger.error("%s", error.output)
         raise
 
 
@@ -183,5 +184,5 @@ def calc_fs_hash(fs_path):
         with open(hash_file, 'w') as f:
             f.write(hash_contents.decode('utf-8'))
         return file_name
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError:  # pylint: disable=try-except-raise
         raise
