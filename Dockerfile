@@ -6,15 +6,13 @@ FROM photon:3.0
 RUN tdnf remove -y toybox && tdnf install -y findutils attr util-linux python3 python3-pip python3-setuptools git
 
 # copy tern repo into root
-COPY . .
+COPY . tern
 
 # install app dependencies
-RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
-
-WORKDIR /src
+RUN pip3 install --upgrade pip && pip3 install ./tern
 
 # make a mounting directory
 RUN mkdir temp
 
-ENTRYPOINT ["./tern", "-b"]
+ENTRYPOINT ["tern", "-b"]
 CMD ["-h"]
