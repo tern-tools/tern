@@ -77,63 +77,52 @@ $ cd ternenv
 $ git clone https://github.com/vmware/tern.git
 $ source bin/activate
 $ cd tern
-$ git checkout -b release v0.3.0 <-- optional stable placeholder
-$ pip install -r requirements.txt
-$ cd src
-$ ./tern -l report -f output.txt -i debian:buster
+$ pip install .
+$ tern -l report -f output.txt -i debian:buster
 ```
 
 ### To run against a Docker image
 If you have a Docker image pulled locally and want to inspect it
 ```
-$ ./src/tern report -i debian:jessie
+$ tern report -i debian:jessie
 ```
 Take a look at report.txt to see what packages are installed in the Docker image and how Tern got this information. If you encounter any errors, please file an issue.
 
 ### To run against a Dockerfile
 You can run Tern against a Dockerfile. Tern will build the image for you and then analyze it with respect to the Dockerfile
 ```
-$ cd src
-$ ./tern report -d samples/photon_git/Dockerfile
+$ tern report -d samples/photon_git/Dockerfile
 ```
 Take a look at report.txt to see what packages are installed in the created Docker image and how Tern got this information. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
 
 ### To get a summary report
 To get just a list of packages, you can use the `-s` option to get a summary report.
 ```
-$ cd src
-$ ./tern report -s -d samples/photon_git/Dockerfile
+$ tern report -s -d samples/photon_git/Dockerfile
 ```
 WARNING: Tern is meant to give guidance on what may be installed in a container image, so it is recommended that for the purpose of investigation, the default report is used. The summary report may be used as the output of a build artifact or something to submit to a compliance or legal team.
 
 ### To get the results in YAML form
 To get the results in a YAML file to be consumed by a downstream tool or script
 ```
-$ cd src
-$ ./tern report -y -i debian:jessie
+$ tern report -y -i debian:jessie
 ```
 
 ### To get the results in JSON form
 To get the results in a JSON file for web use
 ```
-$ cd src
-$ ./tern report -j -i debian:jessie
+$ tern report -j -i debian:jessie
 ```
 
 ### To run a test
 ```
-$ cd ternenv
-$ source bin/activate
-$ git clone https://github.com/vmware/tern.git
-$ cd tern
-$ export PYTHONPATH=`pwd`/src
 $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
 Release 0.3.0 is here! Some items for the release have been moved back to the backlog.
 
-- I am moving the [PyPI package issue](https://github.com/vmware/tern/issues/136) to the near future backlog. I would like to have a build and release pipeline set before implementing this. This is the same reason why I haven't pushed any Docker images to Dockerhub yet and have rather defaulted to folks building the container themselves.
+- [PyPI package issue](https://github.com/vmware/tern/issues/136) is now fixed. I would like to have a build and release pipeline set before making PyPI distributions though. This is the same reason why I haven't pushed any Docker images to Dockerhub yet and have rather defaulted to folks building the container themselves.
 - I've moved the [install script issue](https://github.com/vmware/tern/issues/21) to the far future backlog. We may not even implement this if the pip package and docker containers are in place. Install scripts are notoriously hard to maintain.
 - I'll be closing all Travis CI issues due to the [news](https://twitter.com/ReinH/status/1098663375985229825). I'll be reopening the same issues with Circle CI. Expect the travis.yml to go away soon. This makes me feel angry-sad, but for the sake of the project's health, I think this is a reasonable decision to make.
 
