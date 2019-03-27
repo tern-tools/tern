@@ -14,11 +14,10 @@ before_install:
   - sudo apt-get install -y attr
 
 install:
-  - pip install -r requirements.txt
+  - pip install .
 
 before_script:
   - docker pull docker.io/photon:2.0
-  - cd src
 
 script:
-  - ./tern -l report -i photon:2.0
+  - tern -l report -i photon:2.0

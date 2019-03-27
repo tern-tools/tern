@@ -9,9 +9,9 @@ import argparse
 import logging
 import os
 
-from report import report
-from utils import cache
-from utils import constants
+from tern.report import report
+from tern.utils import cache
+from tern.utils import constants
 '''
 Tern executable
 '''
@@ -36,7 +36,7 @@ console.setFormatter(formatter)
 logger.addHandler(log_handler)
 
 
-def main(args):
+def do_main(args):
     '''Execute according to subcommands'''
     if args.log_stream:
         # set up console logs
@@ -56,7 +56,7 @@ def main(args):
     logger.debug('Finished')
 
 
-if __name__ == '__main__':
+def main():
 
     def check_file_existence(path):
         if not os.path.isfile(path):
@@ -108,4 +108,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # execute
-    main(args)
+    do_main(args)
+
+if __name__ == "__main__":
+    main()

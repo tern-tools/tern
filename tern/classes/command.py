@@ -2,7 +2,7 @@
 Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
-from utils.general import parse_command
+from tern.utils.general import parse_command
 
 
 class Command(object):

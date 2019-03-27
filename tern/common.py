@@ -6,15 +6,15 @@ SPDX-License-Identifier: BSD-2-Clause
 import logging
 import os
 
-from classes.package import Package
-from classes.notice import Notice
-from classes.command import Command
-from command_lib import command_lib
-from report import formats
-from report import errors
-from report import content
-from utils import cache
-from utils import constants
+from tern.classes.package import Package
+from tern.classes.notice import Notice
+from tern.classes.command import Command
+from tern.command_lib import command_lib
+from tern.report import formats
+from tern.report import errors
+from tern.report import content
+from tern.utils import cache
+from tern.utils import constants
 '''
 Common functions
 '''

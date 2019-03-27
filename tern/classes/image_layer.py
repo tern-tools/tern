@@ -6,7 +6,7 @@ import os
 
 from .package import Package
 from .origins import Origins
-from utils import rootfs
+from tern.utils import rootfs
 
 
 class ImageLayer(object):

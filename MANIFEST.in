@@ -1,0 +1,3 @@
+include tern/command_lib/*.yml
+include tern/tools/fs_hash.sh
+recursive-include tern/scripts *.sh *.list

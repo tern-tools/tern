@@ -10,22 +10,22 @@ import shutil
 import subprocess  # nosec
 import sys
 
-from report import content
-from report import errors
-from report import formats
-from utils import container
-from utils import constants
-from utils import cache
-from utils import general
-from utils import rootfs
-from classes.docker_image import DockerImage
-from classes.image import Image
-from classes.image_layer import ImageLayer
-from classes.notice import Notice
-from classes.package import Package
-import common
-import docker_helpers as dhelper
-from command_lib import command_lib
+from tern.report import content
+from tern.report import errors
+from tern.report import formats
+from tern.utils import container
+from tern.utils import constants
+from tern.utils import cache
+from tern.utils import general
+from tern.utils import rootfs
+from tern.classes.docker_image import DockerImage
+from tern.classes.image import Image
+from tern.classes.image_layer import ImageLayer
+from tern.classes.notice import Notice
+from tern.classes.package import Package
+import tern.common as common
+import tern.docker_helpers as dhelper
+from tern.command_lib import command_lib
 
 '''
 Create a report
@@ -309,7 +309,7 @@ def generate_report(args, *images):
 
 def generate_verbose(is_summary, images):
     '''Generate a verbose report'''
-    report = formats.disclaimer.format(commit_sha=general.get_git_rev())
+    report = formats.disclaimer.format(version_info=general.get_git_rev_or_version())
     if is_summary:
         logger.debug('Creating a summary of components in image...')
         for image in images:
@@ -324,7 +324,7 @@ def generate_verbose(is_summary, images):
 def generate_yaml(images):
     '''Generate a yaml report'''
     logger.debug('Creating YAML report...')
-    report = formats.disclaimer_yaml.format(commit_sha=general.get_git_rev())
+    report = formats.disclaimer_yaml.format(version_info=general.get_git_rev_or_version())
     for image in images:
         report = report + content.print_yaml_report(image)
     return report
