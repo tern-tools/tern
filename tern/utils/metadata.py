@@ -1,15 +1,14 @@
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
+Container metadata operations
+"""
 
 import os
 import shutil
-from utils.constants import temp_folder
-
-'''
-Container metadata operations
-'''
+from tern.utils.constants import temp_folder
 
 
 def clean_temp():
