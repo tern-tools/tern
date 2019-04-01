@@ -1,7 +1,7 @@
-'''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
 import os
 import random
 import re
@@ -13,7 +13,7 @@ from tern import Version
 
 from contextlib import contextmanager
 
-from . import constants
+from tern.utils import constants
 
 
 # from https://stackoverflow.com/questions/6194499/pushd-through-os-system
@@ -63,8 +63,7 @@ def parse_command(command):
         if options.match(command_tokens[0]):
             option_flag = command_tokens.pop(0).strip()
             # we have to check if this is the end of the command
-            if len(command_tokens) > 0 \
-                    and not options.match(command_tokens[0]):
+            if command_tokens and not options.match(command_tokens[0]):
                 option_arg = command_tokens[0].strip()
             else:
                 option_arg = ''
@@ -83,11 +82,11 @@ def get_git_rev_or_version():
     command = ['git', 'show', '--format=%H', 'HEAD']
     try:
         output = subprocess.check_output(command)  # nosec
-        if type(output) == bytes:
+        if isinstance(output, bytes):
             output = output.decode('utf-8')
 
         output = commit_version.format(commit_sha=output)
 
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         output = packaged_version.format(version=Version)
     return output.split('\n').pop(0)
