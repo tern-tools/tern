@@ -91,8 +91,24 @@ apk:
               - 'apk -R info python 2>/dev/null | tail -n +2 | head -n -1 | cut -f2 -d":" | cut -f1 -d"."'
         delimiter: "\n"
 
-
 pacman:
   install: '-Syu'
   remove: '-Rcs'
   packages: 'pacman'
+
+yum:
+  install: 'install'
+  remove: 'remove'
+  ignore:
+    - 'check-update'
+    - 'clean'
+  packages: 'rpm'
+
+dnf:
+  install: 'install'
+  remove: 'remove'
+  ignore:
+    - 'check-update'
+    - 'clean'
+  packages: 'rpm'
+
