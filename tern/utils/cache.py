@@ -1,13 +1,8 @@
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
-
-
-import os
-import yaml
-from .constants import cache_file
-'''
+#
+# Copyright (c) 2017, 2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
 Docker layer cache related modules
 The cache is currently stored in a yaml file called cache.yml
 It is organized in this way:
@@ -18,7 +13,11 @@ It is organized in this way:
              license:
              src_url:
         .....
-'''
+"""
+
+import os
+import yaml
+from tern.utils.constants import cache_file
 
 # known base image database
 cache = {}
@@ -41,8 +40,7 @@ def get_packages(sha):
     list'''
     if sha in cache.keys():
         return cache[sha]['packages']
-    else:
-        return []
+    return []
 
 
 def get_layers():
