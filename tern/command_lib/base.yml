@@ -146,3 +146,33 @@ pacman:
         container:
           - 'pacman -Qi 2>/dev/null | sed -n "/URL/s/URL.*: //p" '
     delimiter: "\n"
+
+# rpm ----------------------------------------------------------------------
+rpm:
+  path:
+    - 'usr/bin/rpm'
+  shell: '/usr/bin/sh'
+  names:
+    invoke:
+      1:
+        container:
+          - 'rpm --query --all --queryformat "%{name}\n" 2>/dev/null'
+    delimiter: "\n"
+  versions:
+    invoke:
+      1:
+        container:
+          - 'rpm --query --all --queryformat "%{version}\n" 2>/dev/null'
+    delimiter: "\n"
+  licenses:
+    invoke:
+      1:
+        container:
+          - 'rpm --query --all --queryformat "%{license}\n" 2>/dev/null'
+    delimiter: "\n"
+  src_urls:
+    invoke:
+      1:
+        container:
+          - 'rpm --query --all --queryformat "%{url}\n" 2>/dev/null'
+    delimiter: "\n"
