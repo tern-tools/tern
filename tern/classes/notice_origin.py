@@ -1,14 +1,14 @@
-'''
-Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
 
 from tern.report import formats
 
-from .notice import Notice
+from tern.classes.notice import Notice
 
 
-class NoticeOrigin(object):
+class NoticeOrigin:
     '''The origin of a notice
     attributes:
         origin_str: the origin string, from the input or the environment or
