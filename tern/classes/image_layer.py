@@ -1,15 +1,15 @@
-'''
-Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
 import os
 
-from .package import Package
-from .origins import Origins
+from tern.classes.package import Package
+from tern.classes.origins import Origins
 from tern.utils import rootfs
 
 
-class ImageLayer(object):
+class ImageLayer:
     '''A representation of a container filesystem layer
     attributes:
         diff_id: the sha256 of the layer filesystem
