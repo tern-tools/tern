@@ -1,11 +1,11 @@
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
 
-from .notice_origin import NoticeOrigin
+from tern.classes.notice_origin import NoticeOrigin
 
-class Origins(object):
+class Origins:
     '''An class containing a list of NoticeOrigin objects
     attributes:
         origins: a list of NoticeOrigin objects
@@ -33,6 +33,7 @@ class Origins(object):
         for orij in self.__origins:
             if orij.origin_str == string:
                 return orij
+        return None
 
     def add_notice_to_origins(self, orig_string, notice):
         orij = self.get_origin(orig_string)
@@ -48,9 +49,9 @@ class Origins(object):
 
     def is_empty(self):
         empty = True
-        if len(self.__origins) != 0:
+        if self.__origins:
             for orij in self.__origins:
-                if len(orij.notices) != 0:
+                if orij.notices:
                     empty = False
                     break
         return empty
