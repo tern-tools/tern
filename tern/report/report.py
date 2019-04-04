@@ -1,7 +1,10 @@
-'''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
+Create a report
+"""
 
 import docker
 import logging
@@ -23,13 +26,9 @@ from tern.classes.image import Image
 from tern.classes.image_layer import ImageLayer
 from tern.classes.notice import Notice
 from tern.classes.package import Package
-import tern.common as common
+from tern import common
 import tern.docker_helpers as dhelper
 from tern.command_lib import command_lib
-
-'''
-Create a report
-'''
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -63,7 +62,7 @@ def setup(dockerfile=None, image_tag_string=None):
         if not container.check_image(image_tag_string):
             # if no docker image is present, try to pull it
             if not container.pull_image(image_tag_string):
-                logger.fatal(errors.cannot_find_image.format(
+                logger.fatal("%s", errors.cannot_find_image.format(
                     imagetag=image_tag_string))
                 sys.exit()
     # create temporary working directory
@@ -114,21 +113,21 @@ def load_base_image():
     if not container.check_image(base_image.repotag):
         # if no base image is found, give a warning and continue
         if not container.pull_image(base_image.repotag):
-            logger.warning(errors.cannot_find_image.format(
+            logger.warning("%s", errors.cannot_find_image.format(
                 imagetag=base_image.repotag))
     try:
         base_image.load_image()
     except NameError as error:
-        logger.warning('Error in loading base image: ' + str(error))
+        logger.warning('Error in loading base image: %s', str(error))
         base_image.origins.add_notice_to_origins(
             dockerfile_lines, Notice(str(error), 'error'))
     except subprocess.CalledProcessError as error:
         logger.warning(
-            'Error in loading base image: ' + str(error.output, 'utf-8'))
+            'Error in loading base image: %s', str(error.output, 'utf-8'))
         base_image.origins.add_notice_to_origins(
             dockerfile_lines, Notice(str(error.output, 'utf-8'), 'error'))
     except IOError as error:
-        logger.warning('Error in loading base image: ' + str(error))
+        logger.warning('Error in loading base image: %s', str(error))
         base_image.origins.add_notice_to_origin(
             dockerfile_lines, Notice(str(error), 'error'))
     return base_image
@@ -174,7 +173,7 @@ def mount_overlay_fs(image_obj, top_layer):
     rootfs.prep_rootfs(target)
 
 
-def analyze_docker_image(image_obj, redo=False, dockerfile=False):
+def analyze_docker_image(image_obj, redo=False, dockerfile=False):  # pylint: disable=too-many-locals
     '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
@@ -195,7 +194,7 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):
     # set up a notice origin for the first layer
     origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
     # find the shell to invoke commands in
-    shell, msg = command_lib.get_image_shell(
+    shell, _ = command_lib.get_image_shell(
         command_lib.get_base_listing(binary))
     if not shell:
         # add a warning notice for no shell in the command library
@@ -248,7 +247,7 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):
             # for each command look up the snippet library
             for command in command_list:
                 pkg_listing = command_lib.get_package_listing(command.name)
-                if type(pkg_listing) is str:
+                if isinstance(pkg_listing, str):
                     common.add_base_packages(
                         image_obj.layers[curr_layer], pkg_listing, shell)
                 else:
@@ -299,12 +298,11 @@ def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     if args.yaml:
         return generate_yaml(images)
-    elif args.json:
+    if args.json:
         return content.print_json_report(images)
-    elif args.summary:
+    if args.summary:
         return generate_verbose(True, images)
-    else:
-        return generate_verbose(False, images)
+    return generate_verbose(False, images)
 
 
 def generate_verbose(is_summary, images):
@@ -343,8 +341,8 @@ def check_docker_daemon():
     try:
         docker.from_env()
     except IOError as error:
-        logger.error('Docker daemon is not running: {0}'.format(
-            error.output.decode('utf-8')))
+        logger.error('Docker daemon is not running: %s',
+            error.output.decode('utf-8'))
         sys.exit()
 
 
@@ -357,7 +355,7 @@ def execute_dockerfile(args):
     logger.debug('Building Docker image...')
     # placeholder to check if we can analyze the full image
     completed = True
-    build, msg = dhelper.is_build()
+    build, _ = dhelper.is_build()
     if build:
         # attempt to get built image metadata
         image_tag_string = dhelper.get_dockerfile_image_tag()
