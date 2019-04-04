@@ -1,15 +1,15 @@
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
+Functions to generate content for the report
+"""
+
 import json
 import yaml
-import tern.command_lib.command_lib as command_lib
+from tern.command_lib import command_lib
 from tern.report import formats
-
-'''
-Functions to generate content for the report
-'''
 
 
 def print_invoke_list(info_dict, info):
