@@ -1,7 +1,7 @@
-'''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
 
 import json
 import os
@@ -13,8 +13,8 @@ from tern.utils.constants import manifest_file
 from tern.utils.container import extract_image_metadata
 from tern.utils.dockerfile import tag_separator
 
-from .image_layer import ImageLayer
-from .image import Image
+from tern.classes.image_layer import ImageLayer
+from tern.classes.image import Image
 
 
 class DockerImage(Image):
@@ -25,7 +25,7 @@ class DockerImage(Image):
         history: a list of commands used to create the filesystem layers
         to_dict: return a dict representation of the object
     '''
-    def __init__(self, repotag=None, id=None):
+    def __init__(self, repotag=None, id=None):  # pylint: disable=redefined-builtin
         '''Initialize using repotag and id'''
         super().__init__(id)
         self.__repotag = repotag
@@ -64,12 +64,11 @@ class DockerImage(Image):
         NameError. If both were used return the id'''
         if self.repotag is not None and self.id is not None:
             return self.id
-        elif self.repotag is not None:
+        if self.repotag is not None:
             return self.repotag
-        elif self.id is not None:
+        if self.id is not None:
             return self.id
-        else:
-            raise NameError("Image object initialized with no repotag or ID")
+        raise NameError("Image object initialized with no repotag or ID")
 
     def get_image_manifest(self):
         '''Assuming that there is a temp folder with a manifest.json of
@@ -122,8 +121,7 @@ class DockerImage(Image):
         '''If the config has the image history return it. Else return None'''
         if 'history' in config.keys():
             return config['history']
-        else:
-            return None
+        return None
 
     def get_diff_ids(self, config):
         '''Given the image config, return the filesystem diff ids'''
@@ -164,9 +162,9 @@ class DockerImage(Image):
                 layer.gen_fs_hash()
                 self._layers.append(layer)
             self.set_layer_created_by()
-        except NameError:
+        except NameError:  # pylint: disable=try-except-raise
             raise
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError:  # pylint: disable=try-except-raise
             raise
-        except IOError:
+        except IOError:  # pylint: disable=try-except-raise
             raise
