@@ -1,12 +1,12 @@
-'''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
 
-from .origins import Origins
+from tern.classes.origins import Origins
 
 
-class Image(object):
+class Image:
     '''A representation of the image to be analyzed
     attributes:
         id: this is a unique identifier for the image - for OCI spec this could
@@ -19,7 +19,7 @@ class Image(object):
         get_layer_diff_ids: returns a list of layer diff ids only
         to_dict: return a python dictionary representation of the image
     '''
-    def __init__(self, id=None):
+    def __init__(self, id=None):  # pylint: disable=redefined-builtin
         '''Either initialize using id'''
         self._id = id
         self._name = ''
@@ -92,6 +92,7 @@ class Image(object):
         for layer in self.layers[::-1]:
             if layer.import_image:
                 return self.layers.index(layer)
+        return None
 
     def get_layer_object(self, diff_id):
         '''Given a layer diff id, return the layer object that contains this
