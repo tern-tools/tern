@@ -5,8 +5,8 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import unittest
 
-from classes.image_layer import ImageLayer
-from classes.package import Package
+from tern.classes.image_layer import ImageLayer
+from tern.classes.package import Package
 
 
 class TestClassImageLayer(unittest.TestCase):

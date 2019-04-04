@@ -1,30 +1,31 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
 import unittest
 
-from classes.image import Image
+from tern.classes.image import Image
+from tern.classes.origins import Origins
 
 
 class TestClassImage(unittest.TestCase):
 
     def setUp(self):
         '''Test a generic Image class'''
-        self.image = Image('debian:jessie')
+        self.image = Image('1234abcd')
 
     def tearDown(self):
         del self.image
 
     def testInstance(self):
-        self.assertEqual(self.image.repotag, 'debian:jessie')
-        self.assertFalse(self.image.id)
+        self.assertEqual(self.image.id, '1234abcd')
+        self.assertFalse(self.image.name)
         self.assertFalse(self.image.manifest)
-        self.assertFalse(self.image.repotags)
+        self.assertFalse(self.image.tag)
         self.assertFalse(self.image.config)
         self.assertFalse(self.image.layers)
-        self.assertFalse(self.image.history)
+        self.assertIsInstance(self.image.origins, Origins)
 
 
 if __name__ == '__main__':
