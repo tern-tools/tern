@@ -1,7 +1,7 @@
-'''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
 
 
 class NoticeException(Exception):
@@ -16,7 +16,7 @@ class LevelException(NoticeException):
         self.message = message
 
 
-class Notice(object):
+class Notice:
     '''A notice for reporting purposes
     attributes:
         message: the notice message
