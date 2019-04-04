@@ -1,12 +1,12 @@
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
 
-from .origins import Origins
+from tern.classes.origins import Origins
 
 
-class Package(object):
+class Package:
     '''A package installed within a Docker image layer
     attributes:
         name: package name
@@ -43,7 +43,7 @@ class Package(object):
         return self.__license
 
     @license.setter
-    def license(self, license):
+    def license(self, license):  # pylint: disable=redefined-builtin
         self.__license = license
 
     @property
