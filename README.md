@@ -39,12 +39,12 @@ Docker is the most widely used tool to build and run containers. If you already 
 ```
 $ git clone https://github.com/vmware/tern.git
 $ docker build -t ternd .
-$ ./docker_run workdir ternd "report -i debian:buster" > output.txt
+$ ./docker_run.sh workdir ternd "report -i debian:buster" > output.txt
 ```
 
 To produce a json report run
 ```
-$ ./docker_run workdir ternd "report -j -i debian:buster"
+$ ./docker_run.sh workdir ternd "report -j -i debian:buster"
 ```
 
 What the `docker_run.sh` script does is create the directory `workdir` if not present in your current working directory and run the built container as privileged with `workdir` bind mounted to it.
