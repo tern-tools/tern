@@ -1,11 +1,10 @@
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
-
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
 Error messages
-'''
+"""
 
 unrecognized_base = '''Unable to determine the base OS of the image ''' \
     '''{image_name}:{image_tag}\n'''
