@@ -5,10 +5,9 @@ SPDX-License-Identifier: BSD-2-Clause
 
 import unittest
 
-from report import formats
-
-from classes.notice import Notice
-from classes.notice_origin import NoticeOrigin
+from tern.report import formats
+from tern.classes.notice import Notice
+from tern.classes.notice_origin import NoticeOrigin
 
 
 class TestClassNoticeOrigin(unittest.TestCase):

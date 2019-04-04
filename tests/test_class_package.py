@@ -1,11 +1,11 @@
 '''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 SPDX-License-Identifier: BSD-2-Clause
 '''
 
 import unittest
 
-from classes.package import Package
+from tern.classes.package import Package
 
 
 class TestClassPackage(unittest.TestCase):
