@@ -1,11 +1,12 @@
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
 from tern.utils.general import parse_command
 
 
-class Command(object):
+class Command:
     '''A representation of a shell command
     attributes:
         shell_command: the actual shell command
