@@ -1,7 +1,11 @@
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
+Docker specific functions - used when trying to retrieve packages when
+given a Dockerfile
+"""
 import logging
 import os
 import re
@@ -14,12 +18,7 @@ from tern.utils import container
 from tern.utils import constants
 from tern.report import errors
 from tern.report import formats
-import tern.common as common
-
-'''
-Docker specific functions - used when trying to retrieve packages when
-given a Dockerfile
-'''
+from tern import common
 
 # dockerfile
 dockerfile_global = ''
@@ -89,7 +88,7 @@ def get_dockerfile_base():
                 dockerfile_lines, Notice(message_string, 'warning'))
         return base_image, dockerfile_lines
     except ValueError as e:
-        logger.warning(errors.cannot_parse_base_image.format(
+        logger.warning("%s", errors.cannot_parse_base_image.format(
             dockerfile=dockerfile_global, error_msg=e))
         return None
 
@@ -113,7 +112,7 @@ def is_build():
         print(errors.docker_build_failed.format(
             dockerfile=dockerfile_global, error_msg=error.output))
         success = False
-        logger.error('Error building image: ' + error.output)
+        logger.error('Error building image: %s', error.output)
         msg = error.output
     else:
         logger.debug('Successfully built image')
@@ -157,13 +156,12 @@ def get_commands_from_history(image_layer):
             errors.unknown_content.format(files=command_line), 'warning'))
         # return an empty list as we cannot find any commands
         return []
-    else:
-        # for RUN instructions we can return a list of commands
-        command_list, msg = common.filter_install_commands(command_line)
-        if msg:
-            image_layer.origins.add_notice_to_origins(origin_layer, Notice(
-                msg, 'warning'))
-        return command_list
+    # for RUN instructions we can return a list of commands
+    command_list, msg = common.filter_install_commands(command_line)
+    if msg:
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            msg, 'warning'))
+    return command_list
 
 
 def set_imported_layers(docker_image):
