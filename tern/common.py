@@ -1,6 +1,9 @@
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
 '''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
+Common functions
 '''
 
 import logging
@@ -15,9 +18,6 @@ from tern.report import errors
 from tern.report import content
 from tern.utils import cache
 from tern.utils import constants
-'''
-Common functions
-'''
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -44,8 +44,7 @@ def load_from_cache(layer, redo=False):
         # cache, try to get it from the cache
         raw_pkg_list = cache.get_packages(layer.fs_hash)
         if raw_pkg_list:
-            logger.debug('Loaded from cache: layer {}'.format(
-                layer.fs_hash[:10]))
+            logger.debug('Loaded from cache: layer \"%s\"', layer.fs_hash[:10])
             message = formats.loading_from_cache.format(
                 layer_id=layer.fs_hash[:10])
             # add notice to the origin
@@ -66,22 +65,22 @@ def save_to_cache(image):
             cache.add_layer(layer)
 
 
-def get_base_bin(base_layer):
+def get_base_bin(base_layer):  # pylint: disable=unused-argument
     '''Given the base layer object, find the binary used to identify the
     base OS layer. Assume that the layer filesystem is mounted'''
     binary = ''
     # the path to where the filesystem is mounted
     # look at utils/rootfs.py mount_base_layer module
     cwd = os.path.join(os.getcwd(), constants.temp_folder, constants.mergedir)
-    for key in command_lib.command_lib['base'].keys():
-        for path in command_lib.command_lib['base'][key]['path']:
+    for key, value in command_lib.command_lib['base'].items():
+        for path in value['path']:
             if os.path.exists(os.path.join(cwd, path)):
                 binary = key
                 break
     return binary
 
 
-def add_base_packages(image_layer, binary, shell):
+def add_base_packages(image_layer, binary, shell):  # pylint: disable=too-many-locals
     '''Given the image layer, the binary to invoke and shell:
         1. get the listing from the base.yml
         2. Invoke any commands against the base layer
@@ -103,7 +102,7 @@ def add_base_packages(image_layer, binary, shell):
             content.print_base_invoke(binary)
         image_layer.origins.add_notice_to_origins(
             origin_layer, Notice(snippet_msg, 'info'))
-        shell, msg = command_lib.get_image_shell(listing)
+        shell, _ = command_lib.get_image_shell(listing)
         if not shell:
             shell = constants.shell
         # get all the packages in the base layer
@@ -120,8 +119,8 @@ def add_base_packages(image_layer, binary, shell):
             image_layer.origins.add_notice_to_origins(
                 origin_layer, Notice(invoke_msg, 'error'))
         if names and len(names) > 1:
-            for index in range(0, len(names)):
-                pkg = Package(names[index])
+            for index, name in enumerate(names):
+                pkg = Package(name)
                 if len(versions) == len(names):
                     pkg.version = versions[index]
                 if len(licenses) == len(names):
@@ -199,10 +198,8 @@ def get_package_dependencies(package_listing, package_name, shell):
             shell, deps_listing, package_name=package_name)
         if deps_list:
             return list(set(deps_list)), ''
-        else:
-            return [], invoke_msg
-    else:
-        return [], deps_msg
+        return [], invoke_msg
+    return [], deps_msg
 
 
 def get_installed_package_names(command):
@@ -311,7 +308,7 @@ def update_master_list(master_list, layer_obj):
     layer object'''
     # temporary placement of package objects
     unique = []
-    for i in range(len(layer_obj.packages)):
+    for _ in range(len(layer_obj.packages)):
         item = layer_obj.packages.pop(0)
         # check for whether the package exists on the master list
         exists = False
