@@ -1,7 +1,10 @@
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
+Invoking commands in the command library
+"""
 
 import logging
 import os
@@ -14,9 +17,6 @@ from tern.utils import constants
 from tern.utils import rootfs
 from tern.report import errors
 
-'''
-Invoking commands in the command library
-'''
 
 # base image command library
 base_file = pkg_resources.resource_filename('tern', 'command_lib/base.yml')
@@ -51,7 +51,7 @@ def get_base_listing(key):
     if key in command_lib['base'].keys():
         listing = command_lib['base'][key]
     else:
-        logger.warning(errors.no_listing_for_base_key.format(
+        logger.warning("%s", errors.no_listing_for_base_key.format(
             listing_key=key))
     return listing
 
@@ -62,7 +62,7 @@ def get_command_listing(command_name):
     if command_name in command_lib['snippets'].keys():
         listing = command_lib['snippets'][command_name]
     else:
-        logger.warning(errors.no_listing_for_snippet_key.format(
+        logger.warning("%s", errors.no_listing_for_snippet_key.format(
             listing_key=command_name))
     return listing
 
@@ -145,8 +145,7 @@ def set_command_attrs(command_obj):
                     command_obj.set_ignore()
                     break
         return True
-    else:
-        return False
+    return False
 
 
 def collate_snippets(snippet_list, package=''):
@@ -201,7 +200,7 @@ def invoke_in_rootfs(snippet_list, shell, package=''):
             pass
         return result
     except subprocess.CalledProcessError as error:
-        logger.warning('Error executing snippets: {0}'.format(error))
+        logger.warning('Error executing snippets: %s', error)
         raise
 
 
