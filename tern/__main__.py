@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-'''
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
+Tern executable
+"""
 
 
 import argparse
@@ -12,9 +15,6 @@ import os
 from tern.report import report
 from tern.utils import cache
 from tern.utils import constants
-'''
-Tern executable
-'''
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -109,6 +109,7 @@ def main():
 
     # execute
     do_main(args)
+
 
 if __name__ == "__main__":
     main()
