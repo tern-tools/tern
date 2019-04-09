@@ -65,8 +65,9 @@ class Package:
         If given an object which is a subclass of Template then map
         the keys to the Package class properties'''
         pkg_dict = {}
+        mapping = {}
         # get a key mapping
-        if issubclass(template, Template):
+        if template and issubclass(template, Template):
             mapping = template.package()
         # loop through object properties
         for key, prop in prop_names(self):
@@ -80,6 +81,7 @@ class Package:
             pkg_dict.update({mapping['origins']: self.origins.to_dict()})
         else:
             pkg_dict.update({'origins': self.origins.to_dict()})
+        del mapping
         return pkg_dict
 
     def fill(self, package_dict):
