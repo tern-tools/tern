@@ -7,8 +7,8 @@ sudo apt-get update
 # Upgrade all currently installed packages
 sudo apt-get -y upgrade
 
-# Python3 versions
-sudo apt-get install -y python3 python3-pip python3-venv
+# Python3 versions and system dependencies
+sudo apt-get install -y python3 python3-pip python3-venv attr
 
 # Install Docker
 sudo apt-get install -y docker.io
