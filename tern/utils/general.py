@@ -6,13 +6,10 @@ import os
 import random
 import re
 import subprocess  # nosec
-
-from tern.report.formats import commit_version, packaged_version
-
-from tern import Version
-
 from contextlib import contextmanager
 
+from tern.report.formats import commit_version, packaged_version
+from tern import Version
 from tern.utils import constants
 
 
@@ -95,5 +92,10 @@ def get_git_rev_or_version():
 def prop_names(obj):
     '''Given an object, return a generator that will produce the object's
     property key in its __dict__ representation and it's name'''
+    prop_decorators = r'^__|^_'
     for key in obj.__dict__.keys():
-        yield key, key.split('_')[-1]
+        # remove private and protected decorator characters if any
+        priv_name = '_' + obj.__class__.__name__
+        prop_name = re.sub(priv_name, '', key)
+        prop_name = re.sub(prop_decorators, '', prop_name, 1)
+        yield key, prop_name
