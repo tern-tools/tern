@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 #
 import os
@@ -90,3 +90,10 @@ def get_git_rev_or_version():
     except subprocess.CalledProcessError:
         output = packaged_version.format(version=Version)
     return output.split('\n').pop(0)
+
+
+def prop_names(obj):
+    '''Given an object, return a generator that will produce the object's
+    property key in its __dict__ representation and it's name'''
+    for key in obj.__dict__.keys():
+        yield key, key.split('_')[-1]
