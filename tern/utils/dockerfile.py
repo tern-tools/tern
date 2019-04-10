@@ -1,11 +1,12 @@
-'''
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
-import re
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
 Dockerfile parser and information retrieval
-'''
+"""
+
+import re
 
 directives = ['FROM',
               'ARG',
@@ -27,7 +28,7 @@ tabs = re.compile('\t')
 
 # regex strings
 cleaning = '[\t\\\\]'
-bash_var = '[\$\{\}]'
+bash_var = '[\$\{\}]'  # noqa
 
 # strings
 tag_separator = ':'
@@ -51,10 +52,7 @@ def get_command_list(dockerfile_name):
                 command = command + line
         # check if this line has an indentation
         # comments don't count
-        if line_indent.match(line):
-            command_cont = True
-        else:
-            command_cont = False
+        command_cont = bool(line_indent.match(line))
 
         # check if there is a command or not
         if command == '':
@@ -149,8 +147,8 @@ def get_base_image_tag(base_instructions):
             build_args.update({key_value[0]: key_value[1]})
     # replace any variables in FROM with value
     from_instruction = re.sub(bash_var, '', from_instruction)
-    for key in build_args.keys():
-        from_instruction = from_instruction.replace(key, build_args[key])
+    for key, value in build_args.items():
+        from_instruction = from_instruction.replace(key, value)
     # check if the base image has a tag
     image_tag_list = from_instruction.split(tag_separator)
     if len(image_tag_list) == 1:
