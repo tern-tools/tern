@@ -1,7 +1,11 @@
-'''
-Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
-SPDX-License-Identifier: BSD-2-Clause
-'''
+#
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+"""
+Test script for running commands in a chroot environment to check if the
+results produced are expected
+"""
 
 import argparse
 import subprocess  # nosec
@@ -9,11 +13,6 @@ import subprocess  # nosec
 from tern.command_lib import command_lib
 from tern.utils import rootfs
 from tern.report import report
-
-'''
-Test script for running commands in a chroot environment to check if the
-results produced are expected
-'''
 
 
 def look_up_lib(keys):
