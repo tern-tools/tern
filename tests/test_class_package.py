@@ -6,6 +6,8 @@ SPDX-License-Identifier: BSD-2-Clause
 import unittest
 
 from tern.classes.package import Package
+from test_fixtures import TestTemplate1
+from test_fixtures import TestTemplate2
 
 
 class TestClassPackage(unittest.TestCase):
@@ -50,6 +52,20 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(a_dict['license'], 'Apache 2.0')
         self.assertEqual(a_dict['src_url'], 'github.com')
         self.assertFalse(a_dict['origins'])
+
+    def testToDictTemplate(self):
+        template1 = TestTemplate1()
+        template2 = TestTemplate2()
+        dict1 = self.p1.to_dict(template1)
+        print(dict1)
+        dict2 = self.p1.to_dict(template2)
+        print(dict2)
+        self.assertEqual(len(dict1.keys()), 3)
+        self.assertEqual(dict1['package.name'], 'p1')
+        self.assertEqual(dict1['package.version'], '1.0')
+        self.assertEqual(dict1['package.license'], 'Apache 2.0')
+        self.assertEqual(len(dict2.keys()), 5)
+        self.assertFalse(dict2['notes'])
 
     def testIsEqual(self):
         p = Package('p2')
