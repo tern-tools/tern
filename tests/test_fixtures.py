@@ -26,7 +26,9 @@ class TestImage(Image):
 class TestTemplate1(Template):
     '''Template with no origins mapping'''
     def package(self):
-        return {'name': 'package.name'}
+        return {'name': 'package.name',
+                'version': 'package.version',
+                'license': 'package.license'}
 
     def image_layer(self):
         return {'diff_id': 'layer.diff',
@@ -41,16 +43,28 @@ class TestTemplate1(Template):
 class TestTemplate2(Template):
     '''Template with origins mapping'''
     def package(self):
-        return {'name': 'package.name'}
+        mapping = {'name': 'package.name',
+                   'version': 'package.version',
+                   'license': 'package.license',
+                   'src_url': 'package.url'}
+        # we update the mapping with another defined mapping
+        mapping.update(self.origins())
+        return mapping
 
     def image_layer(self):
-        return {'diff_id': 'layer.diff',
-                'tar_file': 'layer.tarfile',
-                'packages': 'layer.packages'}
+        mapping = {'diff_id': 'layer.diff',
+                   'tar_file': 'layer.tarfile',
+                   'packages': 'layer.packages'}
+        # we update the mapping with another defined mapping
+        mapping.update(self.origins())
+        return mapping
 
     def image(self):
-        return {'id': 'image.id',
-                'layers': 'image.layers'}
+        mapping = {'id': 'image.id',
+                   'layers': 'image.layers'}
+        # we update the mapping with another defined mapping
+        mapping.update(self.origins())
+        return mapping
 
     def notice(self):
         return {'level': 'note.level',

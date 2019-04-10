@@ -67,20 +67,22 @@ class Package:
         pkg_dict = {}
         mapping = {}
         # get a key mapping
-        if template and issubclass(template, Template):
+        if template and issubclass(template.__class__, Template):
             mapping = template.package()
-        # loop through object properties
-        for key, prop in prop_names(self):
-            # check if the property is in the mapping
-            if mapping and prop in mapping.keys():
-                pkg_dict.update({mapping[prop]: self.__dict__[key]})
-            else:
+        if mapping:
+            # loop through object properties
+            for key, prop in prop_names(self):
+                # check if the property is in the mapping
+                if prop in mapping.keys():
+                    pkg_dict.update({mapping[prop]: self.__dict__[key]})
+        else:
+            # don't map, just use the property name as the key
+            for key, prop in prop_names(self):
                 pkg_dict.update({prop: self.__dict__[key]})
-        # update the 'origins' part if it exists
+            pkg_dict.update({'origins': self.origins.to_dict()})
+        # update the 'origins' part if it exists in the mapping
         if 'origins' in mapping.keys():
             pkg_dict.update({mapping['origins']: self.origins.to_dict()})
-        else:
-            pkg_dict.update({'origins': self.origins.to_dict()})
         del mapping
         return pkg_dict
 
