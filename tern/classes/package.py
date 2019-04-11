@@ -4,7 +4,6 @@
 #
 
 from tern.classes.origins import Origins
-from tern.classes.template import Template
 from tern.utils.general import prop_names
 
 
@@ -65,25 +64,22 @@ class Package:
         If given an object which is a subclass of Template then map
         the keys to the Package class properties'''
         pkg_dict = {}
-        mapping = {}
-        # get a key mapping
-        if template and issubclass(template.__class__, Template):
-            mapping = template.package()
-        if mapping:
+        if template:
             # loop through object properties
             for key, prop in prop_names(self):
                 # check if the property is in the mapping
-                if prop in mapping.keys():
-                    pkg_dict.update({mapping[prop]: self.__dict__[key]})
+                if prop in template.package().keys():
+                    pkg_dict.update(
+                        {template.package()[prop]: self.__dict__[key]})
         else:
             # don't map, just use the property name as the key
             for key, prop in prop_names(self):
                 pkg_dict.update({prop: self.__dict__[key]})
             pkg_dict.update({'origins': self.origins.to_dict()})
         # update the 'origins' part if it exists in the mapping
-        if 'origins' in mapping.keys():
-            pkg_dict.update({mapping['origins']: self.origins.to_dict()})
-        del mapping
+        if template and 'origins' in template.package().keys():
+            pkg_dict.update(
+                {template.package()['origins']: self.origins.to_dict()})
         return pkg_dict
 
     def fill(self, package_dict):
