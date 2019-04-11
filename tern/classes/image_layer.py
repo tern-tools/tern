@@ -7,6 +7,7 @@ import os
 from tern.classes.package import Package
 from tern.classes.origins import Origins
 from tern.utils import rootfs
+from tern.utils.general import prop_names
 
 
 class ImageLayer:
@@ -107,18 +108,34 @@ class ImageLayer:
             self.__packages.remove(self.__packages[rem_index])
         return success
 
-    def to_dict(self):
+    def to_dict(self, template=None):
         layer_dict = {}
         pkg_list = []
+        # for packages call each package object's to_dict method
         for pkg in self.__packages:
-            pkg_list.append(pkg.to_dict_notes())
-        layer_dict.update({self.fs_hash: {'packages': pkg_list,
-                                          'tar_file': self.tar_file,
-                                          'created_by': self.created_by,
-                                          'diff_id': self.diff_id,
-                                          'import_str': self.import_str,
-                                          'notes': self.origins.to_dict()
-                                          }})
+            pkg_list.append(pkg.to_dict(template))
+        if template:
+            # use the template mapping for key names
+            for key, prop in prop_names(self):
+                if prop in template.image_layer().keys():
+                    layer_dict.update(
+                        {template.image_layer()[prop]: self.__dict__[key]})
+        else:
+            # directly use property names
+            for key, prop in prop_names(self):
+                layer_dict.update({prop: self.__dict__[key]})
+            # update with 'packages' info
+            layer_dict.update({'packages': pkg_list})
+            # take care of the 'origins' property
+            layer_dict.update({'origins': self.origins.to_dict()})
+        # update the 'origins' if it exists in the mapping
+        if template and 'origins' in template.image_layer().keys():
+            layer_dict.update(
+                {template.image_layer()['origins']: self.origins.to_dict()})
+        # update the 'packages' if it exists in the mapping
+        if template and 'packages' in template.image_layer().keys():
+            layer_dict.update(
+                {template.image_layer()['packages']: pkg_list})
         return layer_dict
 
     def get_package_names(self):
