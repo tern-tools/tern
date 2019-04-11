@@ -27,7 +27,7 @@ class Template(metaclass=ABCMeta):
 
     @abstractmethod
     def image_layer(self):
-        '''Must implement a mapping for 'Layer' class properties'''
+        '''Must implement a mapping for 'ImageLayer' class properties'''
         pass
 
     @abstractmethod
