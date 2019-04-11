@@ -4,6 +4,7 @@
 #
 
 from tern.classes.origins import Origins
+from tern.utils.general import prop_names
 
 
 class Package:
@@ -58,19 +59,28 @@ class Package:
     def origins(self):
         return self.__origins
 
-    def to_dict(self):
+    def to_dict(self, template=None):
+        '''Return a dictionary version of the Package object
+        If given an object which is a subclass of Template then map
+        the keys to the Package class properties'''
         pkg_dict = {}
-        pkg_dict.update({'name': self.name})
-        pkg_dict.update({'version': self.version})
-        pkg_dict.update({'license': self.license})
-        pkg_dict.update({'src_url': self.src_url})
+        if template:
+            # loop through object properties
+            for key, prop in prop_names(self):
+                # check if the property is in the mapping
+                if prop in template.package().keys():
+                    pkg_dict.update(
+                        {template.package()[prop]: self.__dict__[key]})
+        else:
+            # don't map, just use the property name as the key
+            for key, prop in prop_names(self):
+                pkg_dict.update({prop: self.__dict__[key]})
+            pkg_dict.update({'origins': self.origins.to_dict()})
+        # update the 'origins' part if it exists in the mapping
+        if template and 'origins' in template.package().keys():
+            pkg_dict.update(
+                {template.package()['origins']: self.origins.to_dict()})
         return pkg_dict
-
-    def to_dict_notes(self):
-        '''Return the package dictionary with the notices and their origins'''
-        notes_dict = self.to_dict()
-        notes_dict.update({'notes': self.origins.to_dict()})
-        return notes_dict
 
     def fill(self, package_dict):
         '''The package dict looks like this:

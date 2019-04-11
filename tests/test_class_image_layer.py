@@ -7,6 +7,8 @@ import unittest
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.package import Package
+from test_fixtures import TestTemplate1
+from test_fixtures import TestTemplate2
 
 
 class TestClassImageLayer(unittest.TestCase):
@@ -49,10 +51,25 @@ class TestClassImageLayer(unittest.TestCase):
         p1 = Package('x')
         self.layer.add_package(p1)
         a_dict = self.layer.to_dict()
-        self.assertTrue(a_dict[''])
-        self.assertEqual(len(a_dict['']['packages']), 1)
-        self.assertEqual(a_dict['']['packages'][0]['name'], 'x')
-        self.assertEqual(a_dict['']['tar_file'], 'path/to/tar')
+        self.assertEqual(a_dict['diff_id'], '123abc')
+        self.assertEqual(len(a_dict['packages']), 1)
+        self.assertEqual(a_dict['packages'][0]['name'], 'x')
+        self.assertEqual(a_dict['tar_file'], 'path/to/tar')
+
+    def testToDictTemplate(self):
+        template1 = TestTemplate1()
+        template2 = TestTemplate2()
+        p1 = Package('x')
+        self.layer.add_package(p1)
+        dict1 = self.layer.to_dict(template1)
+        dict2 = self.layer.to_dict(template2)
+        self.assertEqual(len(dict1.keys()), 3)
+        self.assertEqual(dict1['layer.diff'], '123abc')
+        self.assertEqual(dict1['layer.tarfile'], 'path/to/tar')
+        self.assertEqual(len(dict1['layer.packages']), 1)
+        self.assertEqual(len(dict2.keys()), 4)
+        self.assertFalse(dict2['notes'])
+        self.assertFalse(dict2['layer.packages'][0]['notes'])
 
     def testGetPackageNames(self):
         p1 = Package('x')
