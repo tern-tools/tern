@@ -4,7 +4,7 @@
 #
 
 import unittest
-import subprocess
+import subprocess  # nosec
 
 from classes.docker_image import DockerImage
 from utils.container import docker_command
