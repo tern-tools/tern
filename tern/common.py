@@ -65,7 +65,7 @@ def save_to_cache(image):
             cache.add_layer(layer)
 
 
-def get_base_bin(base_layer):  # pylint: disable=unused-argument
+def get_base_bin():
     '''Given the base layer object, find the binary used to identify the
     base OS layer. Assume that the layer filesystem is mounted'''
     binary = ''
