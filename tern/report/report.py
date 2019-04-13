@@ -188,7 +188,7 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):  # pylint: di
     master_list = []
     # find the binary by mounting the base layer
     target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
-    binary = common.get_base_bin(image_obj.layers[0])
+    binary = common.get_base_bin()
     # set up a notice origin referring to the base command library listing
     origin_command_lib = formats.invoking_base_commands
     # set up a notice origin for the first layer
