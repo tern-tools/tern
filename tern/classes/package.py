@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
@@ -71,15 +72,15 @@ class Package:
                 if prop in template.package().keys():
                     pkg_dict.update(
                         {template.package()[prop]: self.__dict__[key]})
+            # update the 'origins' part if it exists in the mapping
+            if 'origins' in template.package().keys():
+                pkg_dict.update(
+                    {template.package()['origins']: self.origins.to_dict()})
         else:
             # don't map, just use the property name as the key
             for key, prop in prop_names(self):
                 pkg_dict.update({prop: self.__dict__[key]})
             pkg_dict.update({'origins': self.origins.to_dict()})
-        # update the 'origins' part if it exists in the mapping
-        if template and 'origins' in template.package().keys():
-            pkg_dict.update(
-                {template.package()['origins']: self.origins.to_dict()})
         return pkg_dict
 
     def fill(self, package_dict):

@@ -1,16 +1,19 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
 from tern.classes.origins import Origins
+from tern.utils.general import prop_names
 
 
 class Image:
     '''A representation of the image to be analyzed
     attributes:
-        id: this is a unique identifier for the image - for OCI spec this could
-        be the digest. For now this is the sha256sum of the config.json
+        image_id: this is a unique identifier for the image - for OCI spec
+        this could be the digest. For now this is the sha256sum of the
+        config.json
         manifest: the json object representing the image manifest
         config: the image config metadata
         layers: list of layer objects in the image
@@ -19,9 +22,9 @@ class Image:
         get_layer_diff_ids: returns a list of layer diff ids only
         to_dict: return a python dictionary representation of the image
     '''
-    def __init__(self, id=None):  # pylint: disable=redefined-builtin
+    def __init__(self, image_id=None):
         '''Either initialize using id'''
-        self._id = id
+        self._image_id = image_id
         self._name = ''
         self._tag = ''
         self._manifest = {}
@@ -34,8 +37,8 @@ class Image:
         return self._manifest
 
     @property
-    def id(self):
-        return self._id
+    def image_id(self):
+        return self._image_id
 
     @property
     def config(self):
@@ -108,14 +111,28 @@ class Image:
         Inherit from this class and override this method'''
         pass
 
-    def to_dict(self):
+    def to_dict(self, template=None):
         '''Return a dictionary representation of the image'''
-        d = {'id': self.id,
-             'name': self.name,
-             'tag': self.tag,
-             'manifest': self.manifest,
-             'config': self.config,
-             'layers': [layer.to_dict() for layer in self.layers],
-             'notes': self.origins.to_dict()
-             }
-        return d
+        # send template to layer's to_dict method
+        layer_list = [layer.to_dict(template) for layer in self.layers]
+        image_dict = {}
+        if template:
+            # use the template mapping for the key name
+            for key, prop in prop_names(self):
+                if prop in template.image().keys():
+                    image_dict.update(
+                        {template.image()[prop]: self.__dict__[key]})
+            # update 'origins' and 'layers' values if mapping exists
+            if 'origins' in template.image().keys():
+                image_dict.update(
+                    {template.image()['origins']: self.origins.to_dict()})
+            if 'layers' in template.image().keys():
+                image_dict.update({template.image()['layers']: layer_list})
+        else:
+            # use the property name
+            for key, prop in prop_names(self):
+                image_dict.update({prop: self.__dict__[key]})
+            # update 'origins' and 'layers' lists
+            image_dict.update({'layers': layer_list})
+            image_dict.update({'origins': self.origins.to_dict()})
+        return image_dict
