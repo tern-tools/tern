@@ -19,7 +19,7 @@ class TestClassImage(unittest.TestCase):
         del self.image
 
     def testInstance(self):
-        self.assertEqual(self.image.id, '1234abcd')
+        self.assertEqual(self.image.image_id, '1234abcd')
         self.assertFalse(self.image.name)
         self.assertFalse(self.image.manifest)
         self.assertFalse(self.image.tag)

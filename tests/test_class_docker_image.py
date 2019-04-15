@@ -51,7 +51,7 @@ class TestClassDockerImage(unittest.TestCase):
 
     def testLoadImage(self):
         self.image.load_image()
-        self.assertEqual(self.image.id, self.id)
+        self.assertEqual(self.image.image_id, self.id)
         self.assertEqual(self.image.layers[0].diff_id, self.layer)
         self.assertEqual(len(self.image.layers), self.no_layers)
         self.assertEqual(self.image.layers[0].created_by, self.created_by)
