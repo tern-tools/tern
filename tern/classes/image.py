@@ -9,7 +9,7 @@ from tern.classes.origins import Origins
 class Image:
     '''A representation of the image to be analyzed
     attributes:
-        id: this is a unique identifier for the image - for OCI spec this could
+       image_id: this is a unique identifier for the image - for OCI spec this could
         be the digest. For now this is the sha256sum of the config.json
         manifest: the json object representing the image manifest
         config: the image config metadata
@@ -19,9 +19,9 @@ class Image:
         get_layer_diff_ids: returns a list of layer diff ids only
         to_dict: return a python dictionary representation of the image
     '''
-    def __init__(self, id=None):  # pylint: disable=redefined-builtin
+    def __init__(self, image_id=None):  # pylint: disable=redefined-builtin
         '''Either initialize using id'''
-        self._id = id
+        self._image_id = image_id
         self._name = ''
         self._tag = ''
         self._manifest = {}
@@ -34,8 +34,8 @@ class Image:
         return self._manifest
 
     @property
-    def id(self):
-        return self._id
+    def image_id(self):
+        return self._image_id
 
     @property
     def config(self):
@@ -110,7 +110,7 @@ class Image:
 
     def to_dict(self):
         '''Return a dictionary representation of the image'''
-        d = {'id': self.id,
+        d = {'id': self.image_id,
              'name': self.name,
              'tag': self.tag,
              'manifest': self.manifest,

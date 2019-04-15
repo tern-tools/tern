@@ -25,9 +25,9 @@ class DockerImage(Image):
         history: a list of commands used to create the filesystem layers
         to_dict: return a dict representation of the object
     '''
-    def __init__(self, repotag=None, id=None):  # pylint: disable=redefined-builtin
-        '''Initialize using repotag and id'''
-        super().__init__(id)
+    def __init__(self, repotag=None, image_id=None):  # pylint: disable=redefined-builtin
+        '''Initialize using repotag and image_id'''
+        super().__init__(image_id)
         self.__repotag = repotag
         self.__repotags = []
         self.__history = None
@@ -62,13 +62,13 @@ class DockerImage(Image):
         '''Check to see which value was used to init the image object
         Return the value that was used. If neither one was used raise
         NameError. If both were used return the id'''
-        if self.repotag is not None and self.id is not None:
-            return self.id
+        if self.repotag is not None and self.image_id is not None:
+            return self.image_id
         if self.repotag is not None:
             return self.repotag
-        if self.id is not None:
-            return self.id
-        raise NameError("Image object initialized with no repotag or ID")
+        if self.image_id is not None:
+            return self.image_id
+        raise NameError("Image object initialized with no repotag or image ID")
 
     def get_image_manifest(self):
         '''Assuming that there is a temp folder with a manifest.json of
@@ -77,7 +77,7 @@ class DockerImage(Image):
         with pushd(temp_path):
             with open(manifest_file) as f:
                 json_obj = json.loads(f.read())
-        return json_obj
+        return son_obj
 
     def get_image_layers(self, manifest):
         '''Given the manifest, return the layers'''
@@ -151,7 +151,7 @@ class DockerImage(Image):
             option = self.get_image_option()
             extract_image_metadata(option)
             self._manifest = self.get_image_manifest()
-            self._id = self.get_image_id(self._manifest)
+            self._image_id = self.get_image_id(self._manifest)
             self.__repotags = self.get_image_repotags(self._manifest)
             self._config = self.get_image_config(self._manifest)
             self.__history = self.get_image_history(self._config)
