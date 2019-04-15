@@ -25,7 +25,7 @@ class TestClassDockerImage(unittest.TestCase):
                 print(error.output)
         self.image = DockerImage('debian:jessie')
         # constants for this image
-        self.id = ('2fe79f06fa6d3fa9e877b4415fb189f89ca8a4ff4a954a3d84b2c84129'
+        self.image_id = ('2fe79f06fa6d3fa9e877b4415fb189f89ca8a4ff4a954a3d84b2c84129'
                    '9cd127')
         self.layer = ('4bcdffd70da292293d059d2435c7056711fab2655f8b74f48ad0abe'
                       '042b63687')
@@ -42,7 +42,7 @@ class TestClassDockerImage(unittest.TestCase):
         self.assertEqual(self.image.repotag, 'debian:jessie')
         self.assertEqual(self.image.name, 'debian')
         self.assertEqual(self.image.tag, 'jessie')
-        self.assertFalse(self.image.id)
+        self.assertFalse(self.image.image_id)
         self.assertFalse(self.image.manifest)
         self.assertFalse(self.image.repotags)
         self.assertFalse(self.image.config)
@@ -51,7 +51,7 @@ class TestClassDockerImage(unittest.TestCase):
 
     def testLoadImage(self):
         self.image.load_image()
-        self.assertEqual(self.image.id, self.id)
+        self.assertEqual(self.image.image_id, self.image_id)
         self.assertEqual(self.image.layers[0].diff_id, self.layer)
         self.assertEqual(len(self.image.layers), self.no_layers)
         self.assertEqual(self.image.layers[0].created_by, self.created_by)
