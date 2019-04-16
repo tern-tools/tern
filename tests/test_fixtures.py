@@ -28,7 +28,7 @@ class TestTemplate1(Template):
     def package(self):
         return {'name': 'package.name',
                 'version': 'package.version',
-                'license': 'package.license'}
+                'pkg_license': 'package.license'}
 
     def image_layer(self):
         return {'diff_id': 'layer.diff',
@@ -45,7 +45,7 @@ class TestTemplate2(Template):
     def package(self):
         mapping = {'name': 'package.name',
                    'version': 'package.version',
-                   'license': 'package.license',
+                   'pkg_license': 'package.license',
                    'src_url': 'package.url'}
         # we update the mapping with another defined mapping
         mapping.update(self.origins())

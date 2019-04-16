@@ -12,7 +12,7 @@ class Package:
     attributes:
         name: package name
         version: package version
-        license: package license
+        pkg_license: package license
         src_url: package source url
         origins: a list of NoticeOrigin objects
 
@@ -23,7 +23,7 @@ class Package:
     def __init__(self, name):
         self.__name = name
         self.__version = ''
-        self.__license = ''
+        self.__pkg_license = ''
         self.__src_url = ''
         self.__origins = Origins()
 
@@ -40,12 +40,12 @@ class Package:
         self.__version = version
 
     @property
-    def license(self):
-        return self.__license
+    def pkg_license(self):
+        return self.__pkg_license
 
-    @license.setter
-    def license(self, license):  # pylint: disable=redefined-builtin
-        self.__license = license
+    @pkg_license.setter
+    def pkg_license(self, pkg_license):  
+        self.__pkg_license =pkg_license
 
     @property
     def src_url(self):
@@ -86,7 +86,7 @@ class Package:
         '''The package dict looks like this:
             name: <name>
             version: <version>
-            license: <license string>
+            pkg_license: <packagelicense string>
             src_url: <source url>
         the way to use this method is to instantiate the class with the
         name and then give it a package dictionary to fill in the rest
@@ -95,7 +95,7 @@ class Package:
         success = True
         if self.name == package_dict['name']:
             self.version = package_dict['version']
-            self.license = package_dict['license']
+            self.pkg_license = package_dict['pkg_license']
             self.src_url = package_dict['src_url']
         else:
             success = False
