@@ -110,7 +110,7 @@ class Image:
         Inherit from this class and override this method'''
         pass
 
-    def to_dict(self, template):
+    def to_dict(self, template=None):
         '''Return a dictionary representation of the image'''
         # send template to layer's to_dict method
         layer_list = [layer.to_dict(template) for layer in self.layers]

@@ -51,12 +51,11 @@ class DockerImage(Image):
     def history(self):
         return self.__history
 
-    def to_dict(self):
-        super_dict = super().to_dict()
-        super_dict.update({'repotag': self.repotag})
-        super_dict.update({'repotags': self.repotags})
-        super_dict.update({'history': self.history})
-        return super_dict
+    def to_dict(self, template=None):
+        '''Return a dictionary representation of the Docker image'''
+        # this should take care of 'origins' and 'layers'
+        di_dict = super().to_dict()
+        return di_dict
 
     def get_image_option(self):
         '''Check to see which value was used to init the image object
