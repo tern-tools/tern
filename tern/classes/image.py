@@ -19,7 +19,7 @@ class Image:
         get_layer_diff_ids: returns a list of layer diff ids only
         to_dict: return a python dictionary representation of the image
     '''
-    def __init__(self, image_id=None):  # pylint: disable=redefined-builtin
+    def __init__(self, image_id=None):
         '''Either initialize using id'''
         self._image_id = image_id
         self._name = ''
