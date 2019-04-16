@@ -4,13 +4,15 @@
 #
 
 from tern.classes.origins import Origins
+from tern.utils.general import prop_names
 
 
 class Image:
     '''A representation of the image to be analyzed
     attributes:
-        image_id: this is a unique identifier for the image - for OCI spec this could
-        be the digest. For now this is the sha256sum of the config.json
+        image_id: this is a unique identifier for the image - for OCI spec
+        this could be the digest. For now this is the sha256sum of the
+        config.json
         manifest: the json object representing the image manifest
         config: the image config metadata
         layers: list of layer objects in the image
@@ -108,14 +110,28 @@ class Image:
         Inherit from this class and override this method'''
         pass
 
-    def to_dict(self):
+    def to_dict(self, template):
         '''Return a dictionary representation of the image'''
-        d = {'image_id': self.image_id,
-             'name': self.name,
-             'tag': self.tag,
-             'manifest': self.manifest,
-             'config': self.config,
-             'layers': [layer.to_dict() for layer in self.layers],
-             'notes': self.origins.to_dict()
-             }
-        return d
+        # send template to layer's to_dict method
+        layer_list = [layer.to_dict(template) for layer in self.layers]
+        image_dict = {}
+        if template:
+            # use the template mapping for the key name
+            for key, prop in prop_names(self):
+                if prop in template.image().keys():
+                    image_dict.update(
+                        {template.image()[prop]: self.__dict__[key]})
+            # update 'origins' and 'layers' values if mapping exists
+            if 'origins' in template.image.keys():
+                image_dict.update(
+                    {template.image()['origins']: self.origins.to_dict()})
+            if 'layers' in template.image.keys():
+                image_dict.update({template.image()['layers']: layer_list})
+        else:
+            # use the property name
+            for key, prop in prop_names(self):
+                image_dict.update({prop: self.__dict__[key]})
+            # update 'origins' and 'layers' lists
+            image_dict.update({'layers': layer_list})
+            image_dict.update({'origins': self.origins.to_dict()})
+        return image_dict
