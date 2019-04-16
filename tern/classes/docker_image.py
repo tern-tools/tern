@@ -25,7 +25,7 @@ class DockerImage(Image):
         history: a list of commands used to create the filesystem layers
         to_dict: return a dict representation of the object
     '''
-    def __init__(self, repotag=None, image_id=None):  # pylint: disable=redefined-builtin
+    def __init__(self, repotag=None, image_id=None):
         '''Initialize using repotag and image_id'''
         super().__init__(image_id)
         self.__repotag = repotag
