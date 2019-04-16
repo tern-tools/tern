@@ -109,17 +109,25 @@ class ImageLayer:
         return success
 
     def to_dict(self, template=None):
+        '''Return a dictionary representation of the image layer object'''
         layer_dict = {}
-        pkg_list = []
         # for packages call each package object's to_dict method
-        for pkg in self.__packages:
-            pkg_list.append(pkg.to_dict(template))
+        pkg_list = [pkg.to_dict(template) for pkg in self.packages]
         if template:
             # use the template mapping for key names
             for key, prop in prop_names(self):
                 if prop in template.image_layer().keys():
                     layer_dict.update(
                         {template.image_layer()[prop]: self.__dict__[key]})
+            # update the 'origins' if it exists in the mapping
+            if 'origins' in template.image_layer().keys():
+                layer_dict.update(
+                    {template.image_layer()['origins']: self.origins.to_dict(
+                    )})
+            # update the 'packages' if it exists in the mapping
+            if 'packages' in template.image_layer().keys():
+                layer_dict.update(
+                    {template.image_layer()['packages']: pkg_list})
         else:
             # directly use property names
             for key, prop in prop_names(self):
@@ -128,14 +136,6 @@ class ImageLayer:
             layer_dict.update({'packages': pkg_list})
             # take care of the 'origins' property
             layer_dict.update({'origins': self.origins.to_dict()})
-        # update the 'origins' if it exists in the mapping
-        if template and 'origins' in template.image_layer().keys():
-            layer_dict.update(
-                {template.image_layer()['origins']: self.origins.to_dict()})
-        # update the 'packages' if it exists in the mapping
-        if template and 'packages' in template.image_layer().keys():
-            layer_dict.update(
-                {template.image_layer()['packages']: pkg_list})
         return layer_dict
 
     def get_package_names(self):
