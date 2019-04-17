@@ -122,10 +122,10 @@ class Image:
                     image_dict.update(
                         {template.image()[prop]: self.__dict__[key]})
             # update 'origins' and 'layers' values if mapping exists
-            if 'origins' in template.image.keys():
+            if 'origins' in template.image().keys():
                 image_dict.update(
                     {template.image()['origins']: self.origins.to_dict()})
-            if 'layers' in template.image.keys():
+            if 'layers' in template.image().keys():
                 image_dict.update({template.image()['layers']: layer_list})
         else:
             # use the property name
