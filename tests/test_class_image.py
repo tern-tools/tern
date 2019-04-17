@@ -8,6 +8,8 @@ import unittest
 from tern.classes.image import Image
 from tern.classes.origins import Origins
 from test_fixtures import TestImage
+from test_fixtures import TestTemplate1
+from test_fixtures import TestTemplate2
 
 
 class TestClassImage(unittest.TestCase):
@@ -44,7 +46,30 @@ class TestClassImage(unittest.TestCase):
     def testGetLayerObject(self):
         self.image2.load_image()
         self.assertEqual(
-            self.image2.get_layer_object('123abc'), self.image2.layers[0])
+             self.image2.get_layer_object('123abc'), self.image2.layers[0])
+
+    def testToDict(self):
+        self.image2.load_image()
+        a_dict = self.image2.to_dict()
+        self.assertEqual(a_dict['image_id'], '5678efgh')
+        self.assertEqual(len(a_dict['layers']), 1)
+        self.assertEqual(len(a_dict['layers'][0]['packages']), 2)
+
+    def testToDictTemplate(self):
+        self.image2.load_image()
+        template1 = TestTemplate1()
+        template2 = TestTemplate2()
+        dict1 = self.image2.to_dict(template1)
+        print(dict1)
+        dict2 = self.image2.to_dict(template2)
+        print(dict2)
+        self.assertEqual(len(dict1.keys()), 2)
+        self.assertEqual(dict1['image.id'], '5678efgh')
+        self.assertEqual(len(dict1['image.layers']), 1)
+        self.assertEqual(len(dict2.keys()), 3)
+        self.assertFalse(dict2['notes'])
+        self.assertFalse(dict2['image.layers'][0]['notes'])
+        self.assertEqual(len(dict2['image.layers'][0]['layer.packages']), 2)
 
 
 if __name__ == '__main__':
