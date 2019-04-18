@@ -5,6 +5,7 @@
 
 from tern.classes.notice_origin import NoticeOrigin
 
+
 class Origins:
     '''An class containing a list of NoticeOrigin objects
     attributes:
@@ -56,5 +57,5 @@ class Origins:
                     break
         return empty
 
-    def to_dict(self):
-        return [origin.to_dict() for origin in self.origins]
+    def to_dict(self, template=None):
+        return [origin.to_dict(template) for origin in self.origins]
