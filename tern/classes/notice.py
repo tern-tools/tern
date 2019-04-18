@@ -68,4 +68,6 @@ class Notice:
             # don't map, just use the property name as the key
             for key, prop in prop_names(self):
                 notice_dict.update({prop: self.__dict__[key]})
+            # special case - don't include 'levels'
+            notice_dict.pop('levels')
         return notice_dict
