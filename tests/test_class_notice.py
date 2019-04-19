@@ -7,6 +7,7 @@ import unittest
 
 from tern.classes.notice import Notice
 from tern.classes.notice import NoticeException
+from test_fixtures import TestTemplate2
 
 
 class TestClassNotice(unittest.TestCase):
@@ -37,9 +38,17 @@ class TestClassNotice(unittest.TestCase):
     def testToDict(self):
         self.notice.message = 'tag'
         self.notice.level = 'warning'
-        dict = self.notice.to_dict()
-        self.assertEqual(dict['message'], 'tag')
-        self.assertEqual(dict['level'], 'warning')
+        a_dict = self.notice.to_dict()
+        self.assertEqual(a_dict['message'], 'tag')
+        self.assertEqual(a_dict['level'], 'warning')
+
+    def testToDictTemplate(self):
+        template = TestTemplate2()
+        self.notice.message = 'tag'
+        self.notice.level = 'warning'
+        a_dict = self.notice.to_dict(template)
+        self.assertEqual(a_dict['note.message'], 'tag')
+        self.assertEqual(a_dict['note.level'], 'warning')
 
 
 if __name__ == '__main__':

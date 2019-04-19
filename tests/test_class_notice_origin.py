@@ -8,6 +8,7 @@ import unittest
 from tern.report import formats
 from tern.classes.notice import Notice
 from tern.classes.notice_origin import NoticeOrigin
+from test_fixtures import TestTemplate2
 
 
 class TestClassNoticeOrigin(unittest.TestCase):
@@ -109,6 +110,28 @@ class TestClassNoticeOrigin(unittest.TestCase):
         for note in self.notices:
             self.notice_origin.add_notice(note)
         self.assertEqual(self.notice_origin.to_dict(), exp)
+
+    def testToDictTemplate(self):
+        exp = {
+            'note.source': 'origin_str',
+            'note.messages': [{
+                'note.message': 'info',
+                'note.level': 'info'
+            }, {
+                'note.message': 'warning',
+                'note.level': 'warning'
+            }, {
+                'note.message': 'error',
+                'note.level': 'error'
+            }, {
+                'note.message': 'hint',
+                'note.level': 'hint'
+            }]
+        }
+        template = TestTemplate2()
+        for note in self.notices:
+            self.notice_origin.add_notice(note)
+        self.assertEqual(self.notice_origin.to_dict(template), exp)
 
 
 if __name__ == '__main__':
