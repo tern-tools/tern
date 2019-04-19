@@ -4,7 +4,7 @@
 #
 
 from tern.report import formats
-
+from tern.utils.general import prop_names
 from tern.classes.notice import Notice
 
 
@@ -60,11 +60,24 @@ class NoticeOrigin:
             hints=hints)
         return notice_msg
 
-    def to_dict(self):
+    def to_dict(self, template=None):
         no_dict = {}
-        notice_dicts = []
-        no_dict.update({'origin_str': self.origin_str})
-        for notice in self.notices:
-            notice_dicts.append(notice.to_dict())
-        no_dict.update({'notices': notice_dicts})
+        # for packages call each package object's to_dict method
+        notice_list = [notice.to_dict(template) for notice in self.notices]
+        if template:
+            # use the template mapping for key names
+            for key, prop in prop_names(self):
+                if prop in template.notice_origin().keys():
+                    no_dict.update(
+                        {template.notice_origin()[prop]: self.__dict__[key]})
+            # update the 'notices' if it exists in the mapping
+            if 'notices' in template.notice_origin().keys():
+                no_dict.update(
+                    {template.notice_origin()['notices']: notice_list})
+        else:
+            # directly use property names
+            for key, prop in prop_names(self):
+                no_dict.update({prop: self.__dict__[key]})
+            # update with 'notices' info
+            no_dict.update({'notices': notice_list})
         return no_dict
