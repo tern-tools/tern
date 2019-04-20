@@ -13,7 +13,7 @@ import os
 import pwd
 import tarfile
 import time
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, ConnectionError
 
 
 from tern.utils.constants import container
@@ -59,6 +59,8 @@ def check_container():
         return True
     except docker.errors.NotFound:
         return False
+    except (ConnectionRefusedError, ConnectionError):
+        return False
 
 
 def check_image(image_tag_string):
@@ -71,6 +73,9 @@ def check_image(image_tag_string):
         return True
     except docker.errors.ImageNotFound:
         return False
+    except (ConnectionRefusedError, ConnectionError):
+        return False
+
 
 
 def pull_image(image_tag_string):
@@ -83,6 +88,9 @@ def pull_image(image_tag_string):
     except docker.errors.ImageNotFound:
         logger.warning("No such image: \"%s\"", image_tag_string)
         return False
+    except (ConnectionRefusedError, ConnectionError):
+        return False
+
 
 
 def build_container(dockerfile, image_tag_string):
