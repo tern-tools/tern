@@ -13,10 +13,14 @@ import shutil
 import subprocess  # nosec
 import sys
 
+try:
+    from tern.utils import container
+except Exception:
+    raise
+
 from tern.report import content
 from tern.report import errors
 from tern.report import formats
-from tern.utils import container
 from tern.utils import constants
 from tern.utils import cache
 from tern.utils import general

@@ -32,12 +32,17 @@ logger = logging.getLogger(logger_name)
 client = None
 try:
     client = docker.from_env()
+    client.ping()
 except IOError:
     logger.critical("Docker daemon not running")
     raise Exception("Critical Error using Docker API. See logs for details")
 except OSError:  # pylint: disable=duplicate-except
     logger.critical("User has no access to docker unix socket")
     raise Exception("Critical Error using Docker API. See logs for details")
+except ConnectionError:
+    logger.critical("Can't connect to the Docker daemon!")
+    raise Exception("Critical Error using Docker API. See logs for details")
+
 
 
 def is_sudo():
