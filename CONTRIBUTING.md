@@ -104,6 +104,7 @@ import common
 from utils import rootfs
 ```
 - Minimize [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity). Most python style checkers also come with McCabe complexity checkers. A good rule of thumb is to limit the number of if-then-else statements to 3 and return once in a module.
+- Tern uses `prospector` to analyze the source code for style issues.  Contributions should resolve any new issues reported.  `prospector` is available via the `dev-requirements.txt` pip package file, i.e., `pip install -r dev-requirements.txt`.
 
 
 ## Commit message format
