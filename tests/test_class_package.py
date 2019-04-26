@@ -17,6 +17,7 @@ class TestClassPackage(unittest.TestCase):
         self.p1 = Package('p1')
         self.p1.version = '1.0'
         self.p1.pkg_license = 'Apache 2.0'
+        self.p1.copyright = 'All Rights Reserved'
         self.p1.src_url = 'github.com'
 
         self.p2 = Package('p2')
@@ -30,6 +31,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertFalse(self.p2.version)
         self.assertFalse(self.p2.src_url)
         self.assertFalse(self.p2.pkg_license)
+        self.assertFalse(self.p2.copyright)
 
     def testSetters(self):
         self.assertRaises(AttributeError, setattr, self.p2, 'name', 'y')
@@ -37,6 +39,8 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p2.version, '2.0')
         self.p2.pkg_license = 'Apache 2.0'
         self.assertEqual(self.p2.pkg_license, 'Apache 2.0')
+        self.p2.copyright = "All Rights Reserved"
+        self.assertEqual(self.p2.copyright, 'All Rights Reserved')
         self.p2.src_url = 'github.com'
         self.assertEqual(self.p2.src_url, 'github.com')
 
@@ -44,6 +48,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p1.name, 'p1')
         self.assertEqual(self.p1.version, '1.0')
         self.assertEqual(self.p1.pkg_license, 'Apache 2.0')
+        self.assertEqual(self.p1.copyright, 'All Rights Reserved')
         self.assertEqual(self.p1.src_url, 'github.com')
 
     def testToDict(self):
@@ -51,6 +56,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(a_dict['name'], 'p1')
         self.assertEqual(a_dict['version'], '1.0')
         self.assertEqual(a_dict['pkg_license'], 'Apache 2.0')
+        self.assertEqual(a_dict['copyright'], 'All Rights Reserved')
         self.assertEqual(a_dict['src_url'], 'github.com')
         self.assertFalse(a_dict['origins'])
 
