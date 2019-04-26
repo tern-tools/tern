@@ -13,7 +13,8 @@ class Package:
     attributes:
         name: package name
         version: package version
-        pkg_license: package license
+        pkg_license: package license that is declared
+        copyright: copyright text
         src_url: package source url
         origins: a list of NoticeOrigin objects
 
@@ -25,6 +26,7 @@ class Package:
         self.__name = name
         self.__version = ''
         self.__pkg_license = ''
+        self.__copyright = ''
         self.__src_url = ''
         self.__origins = Origins()
 
@@ -45,8 +47,16 @@ class Package:
         return self.__pkg_license
 
     @pkg_license.setter
-    def pkg_license(self, pkg_license):  
-        self.__pkg_license =pkg_license
+    def pkg_license(self, pkg_license):
+        self.__pkg_license = pkg_license
+
+    @property
+    def copyright(self):
+        return self.__copyright
+
+    @copyright.setter
+    def copyright(self, text):
+        self.__copyright = text
 
     @property
     def src_url(self):
