@@ -13,12 +13,6 @@ import logging
 import os
 import sys
 
-try:
-    from tern.report import report
-except Exception as e:
-    print("Couldn't set up the report module:\n\t{}".format(e))
-    sys.exit(1)
-
 from tern.utils import cache
 from tern.utils import constants
 
@@ -40,6 +34,13 @@ log_handler.setFormatter(formatter)
 console.setFormatter(formatter)
 
 logger.addHandler(log_handler)
+
+try:
+    from tern.report import report
+except Exception as e:
+    logger.addHandler(console)
+    logger.critical("Couldn't set up the report module:\n\t%s", e)
+    sys.exit(1)
 
 
 def do_main(args):

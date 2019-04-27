@@ -13,7 +13,7 @@ import os
 import pwd
 import tarfile
 import time
-from requests.exceptions import HTTPError, ConnectionError
+from requests.exceptions import HTTPError
 
 
 from tern.utils.constants import container
@@ -33,16 +33,15 @@ client = None
 try:
     client = docker.from_env()
     client.ping()
+except ConnectionError:
+    logger.critical("Can't connect to the Docker daemon!")
+    raise Exception("Critical Error using Docker API. See logs for details")
 except IOError:
     logger.critical("Docker daemon not running")
     raise Exception("Critical Error using Docker API. See logs for details")
 except OSError:  # pylint: disable=duplicate-except
     logger.critical("User has no access to docker unix socket")
     raise Exception("Critical Error using Docker API. See logs for details")
-except ConnectionError:
-    logger.critical("Can't connect to the Docker daemon!")
-    raise Exception("Critical Error using Docker API. See logs for details")
-
 
 
 def is_sudo():
@@ -65,6 +64,7 @@ def check_container():
     except docker.errors.NotFound:
         return False
     except (ConnectionRefusedError, ConnectionError):
+        logger.warning("Lost connection to the docker socket!")
         return False
 
 
@@ -79,6 +79,7 @@ def check_image(image_tag_string):
     except docker.errors.ImageNotFound:
         return False
     except (ConnectionRefusedError, ConnectionError):
+        logger.warning("Lost connection to the docker socket!")
         return False
 
 
@@ -94,6 +95,7 @@ def pull_image(image_tag_string):
         logger.warning("No such image: \"%s\"", image_tag_string)
         return False
     except (ConnectionRefusedError, ConnectionError):
+        logger.warning("Lost connection to the docker socket!")
         return False
 
 
