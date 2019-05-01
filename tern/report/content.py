@@ -73,7 +73,7 @@ def print_package(pkg_obj, prefix):
     notes = notes + prefix + formats.package_url.format(
         package_url=pkg_obj.src_url)
     notes = notes + prefix + formats.package_license.format(
-        package_license=pkg_obj.license)
+        package_license=pkg_obj.pkg_license)
     notes = notes + '\n'
     return notes
 
