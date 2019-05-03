@@ -11,41 +11,8 @@ apt-get:
   remove: 'purge' # subcommand to remove a package
   ignore: # list of subcommands that don't add or remove packages
     - 'update' 
-  packages:
-    - name: default
-      version:
-        # either a version number or a script snippet
-        invoke:
-          1:
-            container:
-              - "dpkg -l {package} | awk 'NR>5 {print $3}'"
-      src_url:
-        invoke:
-          1:
-            container:
-              - "apt-get download --print-uris {package}"
-      license:
-        invoke:
-          1:
-            container:
-              - "cat /usr/share/doc/{package}/copyright"
-      deps:
-        invoke:
-          1:
-            container:
-              - "apt-cache depends --installed --no-suggests {package} | awk 'NR>1 {print $2}'"
-        delimiter: "\n"
-      src:
-        # copy_in: used to copy into the running container
-        copy_in:
-            - from: 'config/{image}/{tag}/sources.list'
-              to: '/etc/apt/sources.list'
-            - from: 'config/image/apt_get_sources.sh'
-              to: '/'
-        invoke:
-            1:
-              container:
-                - './apt_get_sources.sh {package}'
+  packages: 'dpkg' # refer to base.yml's method of collection
+
 tyum:
   install: 'install'
   remove: 'remove'
@@ -65,31 +32,7 @@ tdnf:
 apk:
   install: 'add'
   remove: 'del'
-  # ignore:
-  packages:
-    - name: default
-      version:
-        invoke:
-          1:
-            container:
-                # use double quotes when using awk
-              - "apk info {package} 2>/dev/null | head -1 | awk '{print $1}'"
-      license:
-        invoke:
-          1:
-            container:
-              - 'apk -a info {package} 2>/dev/null | tail -2 | head -1'
-      src_url:
-        invoke:
-          1:
-            container:
-              - 'apk info {package} 2>/dev/null | head -5 | tail -1'
-      deps:
-        invoke:
-          1:
-            container:
-              - 'apk -R info python 2>/dev/null | tail -n +2 | head -n -1 | cut -f2 -d":" | cut -f1 -d"."'
-        delimiter: "\n"
+  packages: 'apk'
 
 pacman:
   install: '-Syu'

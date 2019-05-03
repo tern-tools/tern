@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
+from tern.classes.notice import Notice
 from tern.classes.origins import Origins
 from tern.utils.general import prop_names
 
@@ -13,7 +14,8 @@ class Package:
     attributes:
         name: package name
         version: package version
-        pkg_license: package license
+        pkg_license: package license that is declared
+        copyright: copyright text
         src_url: package source url
         origins: a list of NoticeOrigin objects
 
@@ -25,6 +27,7 @@ class Package:
         self.__name = name
         self.__version = ''
         self.__pkg_license = ''
+        self.__copyright = ''
         self.__src_url = ''
         self.__origins = Origins()
 
@@ -45,8 +48,16 @@ class Package:
         return self.__pkg_license
 
     @pkg_license.setter
-    def pkg_license(self, pkg_license):  
-        self.__pkg_license =pkg_license
+    def pkg_license(self, pkg_license):
+        self.__pkg_license = pkg_license
+
+    @property
+    def copyright(self):
+        return self.__copyright
+
+    @copyright.setter
+    def copyright(self, text):
+        self.__copyright = text
 
     @property
     def src_url(self):
@@ -83,11 +94,25 @@ class Package:
             pkg_dict.update({'origins': self.origins.to_dict()})
         return pkg_dict
 
+    def __fill_properties(self, package_dict):
+        '''Check to see if the dictionary keys have all the properties
+        listed. If not then put a Notice object in the list of Origins
+        package_dict should not contain 'name' '''
+        for key, prop in prop_names(self):
+            if prop not in ('name', 'origins'):
+                if prop not in package_dict.keys():
+                    self.origins.add_notice_to_origins(
+                        self.name, Notice(
+                            "No metadata for key: {}".format(prop), 'warning'))
+                else:
+                    self.__dict__[key] = package_dict[prop]
+
     def fill(self, package_dict):
         '''The package dict looks like this:
             name: <name>
             version: <version>
-            pkg_license: <packagelicense string>
+            pkg_license: <package license string>
+            copyright: <package copyright text>
             src_url: <source url>
         the way to use this method is to instantiate the class with the
         name and then give it a package dictionary to fill in the rest
@@ -95,9 +120,7 @@ class Package:
         the object, false if not'''
         success = True
         if self.name == package_dict['name']:
-            self.version = package_dict['version']
-            self.pkg_license = package_dict['pkg_license']
-            self.src_url = package_dict['src_url']
+            self.__fill_properties(package_dict)
         else:
             success = False
         return success

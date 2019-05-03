@@ -22,7 +22,8 @@ from tern.report import errors
 # base image command library
 base_file = pkg_resources.resource_filename('tern', 'command_lib/base.yml')
 # general snippets in command library
-snippet_file = pkg_resources.resource_filename('tern', 'command_lib/snippets.yml')
+snippet_file = pkg_resources.resource_filename('tern',
+                                               'command_lib/snippets.yml')
 # command library
 command_lib = {'base': {}, 'snippets': {}}
 with open(os.path.abspath(base_file)) as f:
@@ -30,8 +31,8 @@ with open(os.path.abspath(base_file)) as f:
 with open(os.path.abspath(snippet_file)) as f:
     command_lib['snippets'] = yaml.safe_load(f)
 # list of package information keys that the command library can accomodate
-base_keys = {'names', 'versions', 'licenses', 'src_urls', 'srcs'}
-package_keys = {'name', 'version', 'src_url', 'license', 'src'}
+base_keys = {'names', 'versions', 'licenses', 'copyrights', 'src_urls', 'srcs'}
+package_keys = {'name', 'version', 'license', 'copyright', 'src_url', 'src'}
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
