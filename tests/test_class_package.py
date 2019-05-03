@@ -84,6 +84,26 @@ class TestClassPackage(unittest.TestCase):
         p.version = '2.0'
         self.assertTrue(self.p2.is_equal(p))
 
+    def testFill(self):
+        p_dict = {'name': 'p1',
+                  'version': '1.0',
+                  'pkg_license': 'Apache 2.0'}
+        p = Package('p1')
+        p.fill(p_dict)
+        self.assertEqual(p.name, 'p1')
+        self.assertEqual(p.version, '1.0')
+        self.assertEqual(p.pkg_license, 'Apache 2.0')
+        self.assertFalse(p.copyright)
+        self.assertFalse(p.src_url)
+        self.assertEqual(len(p.origins.origins), 1)
+        self.assertEqual(p.origins.origins[0].origin_str, 'p1')
+        self.assertEqual(len(p.origins.origins[0].notices), 2)
+        self.assertEqual(p.origins.origins[0].notices[0].message,
+                         "No metadata for key: copyright")
+        self.assertEqual(p.origins.origins[0].notices[0].level, 'warning')
+        self.assertEqual(p.origins.origins[0].notices[1].message,
+                         "No metadata for key: src_url")
+
 
 if __name__ == '__main__':
     unittest.main()
