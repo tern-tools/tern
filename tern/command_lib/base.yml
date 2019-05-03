@@ -73,7 +73,7 @@ dpkg:
           - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
           - "for p in $pkgs; do dpkg -l $p | awk 'NR>5 {print $3}'; done"
     delimiter: "\n"
-  licenses:
+  copyrights:
     invoke:
       1:
         container:
