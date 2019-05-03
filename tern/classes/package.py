@@ -136,3 +136,9 @@ class Package:
             if value != other_pkg_dict[key]:
                 return False
         return True
+
+    def get_package_id(self):
+        '''This method returns a string of the name and version for a package
+        represented as "name.version". This method might be helpful when working
+        with SPDX documents that require a unique package identifier.'''
+        return "{0}.{1}".format(self.name, self.version)
