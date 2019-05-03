@@ -18,7 +18,7 @@ def print_invoke_list(info_dict, info):
     package information.
     info_dict: get_base_listing or get_command_listing from
     command_lib/command_lib.py
-    info: the required key (niames, versions, licenses, etc)'''
+    see command_lib/command_lib.py for a list of supported info items'''
     report = ''
     if 'invoke' in info_dict[info]:
         report = report + info + ':\n'
@@ -39,10 +39,9 @@ def print_base_invoke(key):
     the command_lib/base.yml'''
     info = command_lib.get_base_listing(key)
     report = ''
-    report = report + print_invoke_list(info, 'names')
-    report = report + print_invoke_list(info, 'versions')
-    report = report + print_invoke_list(info, 'licenses')
-    report = report + print_invoke_list(info, 'src_urls')
+    for item in command_lib.base_keys:
+        if item in info.keys():
+            report = report + print_invoke_list(info, item)
     report = report + '\n'
     return report
 
@@ -74,7 +73,9 @@ def print_package(pkg_obj, prefix):
         package_url=pkg_obj.src_url)
     notes = notes + prefix + formats.package_license.format(
         package_license=pkg_obj.pkg_license)
-    notes = notes + '\n'
+    notes = notes + prefix + formats.package_copyright.format(
+        package_copyright=pkg_obj.copyright)
+    notes = notes + '\n\n'
     return notes
 
 

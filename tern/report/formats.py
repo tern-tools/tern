@@ -41,7 +41,8 @@ invoke_on_host = '''\ton host:\n'''
 package_name = '''Package: {package_name}\n'''
 package_version = '''Version: {package_version}\n'''
 package_url = '''Project URL: {package_url}\n'''
-package_license = '''License: {package_license}\n\n'''
+package_license = '''License: {package_license}\n'''
+package_copyright = '''Copyright Text: {package_copyright}\n'''
 # notes
 package_notes = '''Errors: {package_info_retrieval_errors}\n''' \
     '''Improvements: {package_info_reporting_improvements}\n'''
