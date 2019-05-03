@@ -308,7 +308,8 @@ def generate_report(args, *images):
 
 def generate_verbose(is_summary, images):
     '''Generate a verbose report'''
-    report = formats.disclaimer.format(version_info=general.get_git_rev_or_version())
+    report = formats.disclaimer.format(
+        version_info=general.get_git_rev_or_version())
     if is_summary:
         logger.debug('Creating a summary of components in image...')
         for image in images:
@@ -323,7 +324,8 @@ def generate_verbose(is_summary, images):
 def generate_yaml(images):
     '''Generate a yaml report'''
     logger.debug('Creating YAML report...')
-    report = formats.disclaimer_yaml.format(version_info=general.get_git_rev_or_version())
+    report = formats.disclaimer_yaml.format(
+        version_info=general.get_git_rev_or_version())
     for image in images:
         report = report + content.print_yaml_report(image)
     return report
@@ -343,7 +345,7 @@ def check_docker_daemon():
         docker.from_env()
     except IOError as error:
         logger.error('Docker daemon is not running: %s',
-            error.output.decode('utf-8'))
+                     error.output.decode('utf-8'))
         sys.exit()
 
 
