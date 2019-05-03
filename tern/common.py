@@ -81,7 +81,54 @@ def get_base_bin():
     return binary
 
 
-def add_base_packages(image_layer, binary, shell):  # pylint: disable=too-many-locals
+def collate_list_metadata(shell, listing):
+    '''Given the shell and the listing for the package manager, collect
+    metadata that gets returned as a list'''
+    pkg_dict = {}
+    msgs = ''
+    warnings = ''
+    for item in command_lib.base_keys:
+        if item in listing.keys():
+            items, msg = command_lib.get_pkg_attr_list(shell, listing[item])
+            msgs = msgs + msg
+            pkg_dict.update({item: items})
+        else:
+            warnings = warnings + errors.no_listing_for_base_key.format(
+                listing_key=item)
+    return pkg_dict, msgs, warnings
+
+
+def convert_to_pkg_dicts(pkg_dict):
+    '''The pkg_dict is what gets returned after collecting individual
+    metadata as a list. It looks like this if property collected:
+        {'names': [....], 'versions': [...], 'licenses': [...], ....}
+    Convert these into a package dictionary expected by the Package
+    Object'''
+    mapping = {'name': 'names',
+               'version': 'versions',
+               'pkg_license': 'licenses',
+               'copyright': 'copyrights',
+               'src_url': 'src_urls'}
+    pkg_list = []
+    len_names = len(pkg_dict['names'])
+    # make a list of keys that correspond with package property names
+    new_dict = {}
+    for key, value in mapping.items():
+        if value in pkg_dict.keys():
+            if len(pkg_dict[value]) == len_names:
+                new_dict.update({key: pkg_dict[value]})
+            else:
+                logger.warning("Inconsistent lengths for key: %s", value)
+    # convert each of the keys into package dictionaries
+    for index, _ in enumerate(new_dict['name']):
+        a_pkg = {}
+        for key, value in new_dict.items():
+            a_pkg.update({key: value[index]})
+        pkg_list.append(a_pkg)
+    return pkg_list
+
+
+def add_base_packages(image_layer, binary, shell):
     '''Given the image layer, the binary to invoke and shell:
         1. get the listing from the base.yml
         2. Invoke any commands against the base layer
@@ -107,27 +154,18 @@ def add_base_packages(image_layer, binary, shell):  # pylint: disable=too-many-l
         if not shell:
             shell = constants.shell
         # get all the packages in the base layer
-        names, n_msg = command_lib.get_pkg_attr_list(shell, listing['names'])
-        versions, v_msg = command_lib.get_pkg_attr_list(
-            shell, listing['versions'])
-        licenses, l_msg = command_lib.get_pkg_attr_list(
-            shell, listing['licenses'])
-        src_urls, u_msg = command_lib.get_pkg_attr_list(
-            shell, listing['src_urls'])
-        # add a notice to the image if something went wrong
-        invoke_msg = n_msg + v_msg + l_msg + u_msg
+        pkg_dict, invoke_msg, warnings = collate_list_metadata(shell, listing)
         if invoke_msg:
             image_layer.origins.add_notice_to_origins(
                 origin_layer, Notice(invoke_msg, 'error'))
-        if names and len(names) > 1:
-            for index, name in enumerate(names):
-                pkg = Package(name)
-                if len(versions) == len(names):
-                    pkg.version = versions[index]
-                if len(licenses) == len(names):
-                    pkg.license = licenses[index]
-                if len(src_urls) == len(names):
-                    pkg.src_url = src_urls[index]
+        if warnings:
+            image_layer.origins.add_notice_to_origins(
+                origin_command_lib, Notice(warnings, 'warning'))
+        if 'names' in pkg_dict and len(pkg_dict['names']) > 1:
+            pkg_list = convert_to_pkg_dicts(pkg_dict)
+            for pkg_dict in pkg_list:
+                pkg = Package(pkg_dict['name'])
+                pkg.fill(pkg_dict)
                 image_layer.add_package(pkg)
     # if there is no listing add a notice
     else:
