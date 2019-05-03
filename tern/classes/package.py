@@ -99,7 +99,7 @@ class Package:
         listed. If not then put a Notice object in the list of Origins
         package_dict should not contain 'name' '''
         for key, prop in prop_names(self):
-            if prop != 'name' and prop != 'origins':
+            if prop not in ('name', 'origins'):
                 if prop not in package_dict.keys():
                     self.origins.add_notice_to_origins(
                         self.name, Notice(
