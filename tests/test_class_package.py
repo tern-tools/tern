@@ -19,6 +19,7 @@ class TestClassPackage(unittest.TestCase):
         self.p1.pkg_license = 'Apache 2.0'
         self.p1.copyright = 'All Rights Reserved'
         self.p1.src_url = 'github.com'
+        self.p1.download_url = 'https://github.com'
 
         self.p2 = Package('p2')
 
@@ -32,6 +33,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertFalse(self.p2.src_url)
         self.assertFalse(self.p2.pkg_license)
         self.assertFalse(self.p2.copyright)
+        self.assertFalse(self.p2.download_url)
 
     def testSetters(self):
         self.assertRaises(AttributeError, setattr, self.p2, 'name', 'y')
@@ -43,6 +45,8 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p2.copyright, 'All Rights Reserved')
         self.p2.src_url = 'github.com'
         self.assertEqual(self.p2.src_url, 'github.com')
+        self.p2.download_url = 'https://github.com'
+        self.assertEqual(self.p2.download_url, 'https://github.com')
 
     def testGetters(self):
         self.assertEqual(self.p1.name, 'p1')
@@ -50,6 +54,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p1.pkg_license, 'Apache 2.0')
         self.assertEqual(self.p1.copyright, 'All Rights Reserved')
         self.assertEqual(self.p1.src_url, 'github.com')
+        self.assertEqual(self.p1.download_url, 'https://github.com')
 
     def testToDict(self):
         a_dict = self.p1.to_dict()
@@ -58,6 +63,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(a_dict['pkg_license'], 'Apache 2.0')
         self.assertEqual(a_dict['copyright'], 'All Rights Reserved')
         self.assertEqual(a_dict['src_url'], 'github.com')
+        self.assertEqual(a_dict['download_url'], 'https://github.com')
         self.assertFalse(a_dict['origins'])
 
     def testToDictTemplate(self):
@@ -97,12 +103,14 @@ class TestClassPackage(unittest.TestCase):
         self.assertFalse(p.src_url)
         self.assertEqual(len(p.origins.origins), 1)
         self.assertEqual(p.origins.origins[0].origin_str, 'p1')
-        self.assertEqual(len(p.origins.origins[0].notices), 2)
+        self.assertEqual(len(p.origins.origins[0].notices), 3)
         self.assertEqual(p.origins.origins[0].notices[0].message,
                          "No metadata for key: copyright")
         self.assertEqual(p.origins.origins[0].notices[0].level, 'warning')
         self.assertEqual(p.origins.origins[0].notices[1].message,
                          "No metadata for key: src_url")
+        self.assertEqual(p.origins.origins[0].notices[2].message,
+                         "No metadata for key: download_url")
 
 
 if __name__ == '__main__':
