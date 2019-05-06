@@ -7,14 +7,16 @@
 from tern.classes.template import Template
 
 
-class SPDXTagValue(Template):
+class SPDX(Template):
     '''This is the SPDX Template class
     It provides mappings for the SPDX tag-value document format'''
 
     def package(self):
         return {'name': 'PackageName',
                 'version': 'PackageVersion',
-                'license': 'PackageLicenseDeclared'}
+                'pkg_license': 'PackageLicenseDeclared',
+                'copyright': 'PackageCopyrightText',
+                'download_url': 'PackageDownloadLocation'}
 
     def image_layer(self):
         return {'diff_id': 'PackageName',
@@ -23,4 +25,4 @@ class SPDXTagValue(Template):
     def image(self):
         return {'name': 'PackageName',
                 'tag': 'PackageVersion',
-                'id': 'PackageChecksum'}
+                'repotag': 'PackageDownloadLocation'}
