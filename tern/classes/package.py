@@ -17,6 +17,7 @@ class Package:
         pkg_license: package license that is declared
         copyright: copyright text
         src_url: package source url
+        download_url: package download url
         origins: a list of NoticeOrigin objects
 
     methods:
@@ -29,6 +30,7 @@ class Package:
         self.__pkg_license = ''
         self.__copyright = ''
         self.__src_url = ''
+        self.__download_url = ''
         self.__origins = Origins()
 
     @property
@@ -66,6 +68,14 @@ class Package:
     @src_url.setter
     def src_url(self, src_url):
         self.__src_url = src_url
+
+    @property
+    def download_url(self):
+        return self.__download_url
+
+    @download_url.setter
+    def download_url(self, url):
+        self.__download_url = url
 
     @property
     def origins(self):
