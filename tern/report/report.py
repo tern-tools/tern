@@ -309,7 +309,7 @@ def generate_report(args, *images):
 def generate_verbose(is_summary, images):
     '''Generate a verbose report'''
     report = formats.disclaimer.format(
-        version_info=general.get_git_rev_or_version())
+        version_info=content.get_tool_version())
     if is_summary:
         logger.debug('Creating a summary of components in image...')
         for image in images:
