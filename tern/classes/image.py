@@ -136,3 +136,14 @@ class Image:
             image_dict.update({'layers': layer_list})
             image_dict.update({'origins': self.origins.to_dict()})
         return image_dict
+
+    def get_human_readable_id(self):
+        '''Some reports like SPDX want a unique name for the full image
+        and this is currently not supported by any image tool. So using
+        a combination of image id, name and tag instead'''
+        name = self.image_id
+        if self.name:
+            name = name + '-{}'.format(self.name)
+        if self.tag:
+            name = name + '-{}'.format(self.tag)
+        return name

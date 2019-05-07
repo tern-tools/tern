@@ -19,6 +19,8 @@ class TestImage(Image):
 
     def load_image(self):
         l1 = ImageLayer('123abc', 'path/to/tar')
+        self.name = 'testimage'
+        self.tag = 'testtag'
         l1.add_package(Package('p1'))
         l1.add_package(Package('p2'))
         self._layers.append(l1)
