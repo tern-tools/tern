@@ -8,6 +8,64 @@ SPDX document generator
 """
 
 from tern.classes.templates.spdx import SPDX
+from tern.report import formats as g_formats
+from tern.report.spdxtagvalue import formats as spdx_formats
+
+
+def get_package_spdxref(package_obj):
+    '''Given the package object, return an SPDX reference ID'''
+    return 'SPDXRef-{}'.format(package_obj.get_package_id())
+
+
+def get_layer_spdxref(layer_obj):
+    '''Given the layer object, return an SPDX reference ID'''
+    # here we return the shortened diff_id of the layer
+    return 'SPDXRef-{}'.format(layer_obj.diff_id[:10])
+
+
+def get_image_spdxref(image_obj):
+    '''Given the image object, return an SPDX reference ID'''
+    # here we return the image name, tag and id
+    spdxref = 'SPDXRef-{}'.format(image_obj.image_id)
+    if image_obj.name:
+        spdxref = spdxref + '-{}'.format(image_obj.name)
+    if image_obj.tag:
+        spdxref = spdxref + '-{}'.format(image_obj.tag)
+
+
+def get_document_block():
+    '''Return document related SPDX tag-values'''
+
+
+def get_image_comment(image_obj_origins):
+    '''Return a PackageComment tag-value text block for the image level
+    notices'''
+
+
+def get_layer_comment(layer_obj_origins):
+    '''Return a PackageComment tag-value text block for the layer level
+    notices'''
+
+
+def get_package_comment(package_obj_origins):
+    '''Return a PackageComment tag-value text block for package level
+    notices'''
+
+
+def get_image_block(image_dict, image_origins):
+    '''Given the image dictionary and the list of notices for the image,
+    return the SPDX tag-value for image level information'''
+
+
+def get_layer_block(layer_dict, layer_origins, prev_layer_SPDX=None):
+    '''Given the layer dictionary, the list of notices for the layer and
+    the previous layer's SPDXref if there is a previous layer, return the
+    SPDX tag-value for the layer level information'''
+
+
+def get_package_block(package_dict, package_origins):
+    '''Given the package dictionary, and the list of notices for the package,
+    return the SPDX tag-value for the package level information'''
 
 
 def generate(image_obj):
@@ -55,6 +113,8 @@ def generate(image_obj):
         ....
 
         # package1
+        tag-values
+        PackageComment
 
         # package2
 
@@ -68,6 +128,31 @@ def generate(image_obj):
 
     For the sake of SPDX, an image is a 'Package' which 'CONTAINS'
     each layer which is also a 'Package' which 'CONTAINS' the real Package'''
+    report = ''
     template = SPDX()
     spdx_dict = image_obj.to_dict(template)
-    return spdx_dict
+    # first part is the document tag-value
+    # this doesn't change at all
+    report = report + get_document_block()
+    # this part is the image part and needs
+    # the image object
+    report = report + get_image_block(spdx_dict, image_obj.origins.origins)
+    # Add the layer part for each layer
+    for index, layer_dict in enumerate(spdx_dict['layers']):
+        if index == 0:
+            # no previous layer dependencies
+            report = report + get_layer_block(
+                layer_dict,
+                image_obj.layers[index].origins.origins)
+        else:
+            # block should contain previous layer dependency
+            report = report + get_layer_block(
+                layer_dict,
+                image_obj.layers[index].origins.origins,
+                get_layer_spdxref(image_obj.layers[index - 1]))
+    # Add the package part for each package
+    for i, _ in enumerate(spdx_dict['layers']):
+        for j, package_dict in enumerate(spdx_dict['layers'][i]['packages']):
+            report = report + get_package_block(
+                package_dict, image_obj.layers[i].packages[j].origins.origins)
+    return report
