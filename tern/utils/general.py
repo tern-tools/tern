@@ -9,7 +9,6 @@ import re
 import subprocess  # nosec
 from contextlib import contextmanager
 
-from tern.report.formats import commit_version, packaged_version
 from tern import Version
 from tern.utils import constants
 
@@ -77,17 +76,17 @@ def parse_command(command):
 def get_git_rev_or_version():
     '''Assuming we are operating within a git repository, get the SHA
     of the current commit'''
-    command = ['git', 'show', '--format=%H', 'HEAD']
+    command = ['git', 'rev-parse', 'HEAD']
     try:
         output = subprocess.check_output(command)  # nosec
         if isinstance(output, bytes):
             output = output.decode('utf-8')
-
-        output = commit_version.format(commit_sha=output)
+        ver_type = 'commit'
 
     except subprocess.CalledProcessError:
-        output = packaged_version.format(version=Version)
-    return output.split('\n').pop(0)
+        ver_type = 'package'
+        output = Version
+    return ver_type, output.split('\n').pop(0)
 
 
 def prop_names(obj):
