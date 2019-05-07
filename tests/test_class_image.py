@@ -36,7 +36,11 @@ class TestClassImage(unittest.TestCase):
     def testLoadImage(self):
         self.assertEqual(self.image2.image_id, '5678efgh')
         self.assertFalse(self.image2.layers)
+        self.assertFalse(self.image2.name)
+        self.assertFalse(self.image2.tag)
         self.image2.load_image()
+        self.assertEqual(self.image2.name, 'testimage')
+        self.assertEqual(self.image2.tag, 'testtag')
         self.assertEqual(len(self.image2.layers), 1)
         self.assertEqual(len(self.image2.layers[0].packages), 2)
 
@@ -69,6 +73,12 @@ class TestClassImage(unittest.TestCase):
         self.assertFalse(dict2['notes'])
         self.assertFalse(dict2['image.layers'][0]['notes'])
         self.assertEqual(len(dict2['image.layers'][0]['layer.packages']), 2)
+
+    def testGetHumanReadableId(self):
+        self.assertEqual(self.image1.get_human_readable_id(), '1234abcd')
+        self.image2.load_image()
+        self.assertEqual(
+            self.image2.get_human_readable_id(), '5678efgh-testimage-testtag')
 
 
 if __name__ == '__main__':
