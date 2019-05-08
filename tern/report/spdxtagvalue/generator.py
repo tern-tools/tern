@@ -19,7 +19,7 @@ def get_document_namespace(image_obj):
     '''Given the image object, return a unique SPDX document uri.
     This is a combination of the human readable id from the image
     object and the tool name'''
-    return spdx_formats.format(
+    return spdx_formats.document_namespace.format(
         image_id=image_obj.get_human_readable_id(),
         version=get_git_rev_or_version()[1])
 
@@ -49,12 +49,14 @@ def get_document_block(image_obj):
     block = block + spdx_formats.spdx_id + '\n'
     block = block + spdx_formats.document_name.format(
         image_name=image_obj.get_human_readable_id()) + '\n'
-    block = block + get_document_namespace(image_obj)
-    block = block + spdx_formats.license_list_version
+    block = block + get_document_namespace(image_obj) + '\n'
+    block = block + spdx_formats.license_list_version + '\n'
     block = block + spdx_formats.creator.format(
-        version=get_git_rev_or_version()[1])
+        version=get_git_rev_or_version()[1]) + '\n'
     block = block + spdx_formats.created.format(
-        timestamp=datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"))
+        timestamp=datetime.datetime.utcnow().strftime(
+            "%Y-%m-%dT%H:%M:%SZ")) + '\n'
+    return block
 
 
 def get_image_comment(image_obj_origins):
@@ -153,7 +155,7 @@ def generate(image_obj):
     spdx_dict = image_obj.to_dict(template)
     # first part is the document tag-value
     # this doesn't change at all
-    report = report + get_document_block()
+    report = report + get_document_block(image_obj)
     # this part is the image part and needs
     # the image object
     report = report + get_image_block(spdx_dict, image_obj.origins.origins)
