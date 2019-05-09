@@ -47,7 +47,7 @@ class TestTemplate2(Template):
         mapping = {'name': 'package.name',
                    'version': 'package.version',
                    'pkg_license': 'package.license',
-                   'src_url': 'package.url'}
+                   'proj_url': 'package.url'}
         # we update the mapping with another defined mapping
         mapping.update(self.origins())
         return mapping

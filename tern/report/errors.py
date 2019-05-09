@@ -18,7 +18,7 @@ no_version = '''No version for package {package_name}. Consider either ''' \
 no_license = '''No license for package {package_name}. Consider either ''' \
     '''entering the license manually or creating a script to retrieve it ''' \
     '''in the command library\n'''
-no_src_url = '''No source url for package {package_name}. Consider either ''' \
+no_proj_url = '''No project url for package {package_name}. Consider either ''' \
     '''entering the source url manually or creating a script to retrieve ''' \
     '''it in the command library\n'''
 env_dep_dockerfile = '''Docker build failed: {build_fail_msg} \n Since ''' \
