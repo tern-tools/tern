@@ -145,7 +145,7 @@ packages with a unique name. In this case, there is only the default listing:
           1:
             container:
               - "dpkg -l {package} | awk 'NR>5 {print $3}'"
-      src_url:
+      proj_url:
         invoke:
           1:
             container:
@@ -273,7 +273,7 @@ $ export PYTHONPATH=`pwd`
 ```
 3. Run verify_invoke with the following flags
 ```
-$ python tools/verify_invoke.py --container test --keys snippets <command> packages <version/license/src_url> --shell '/usr/bin/bash' --package <package name>
+$ python tools/verify_invoke.py --container test --keys snippets <command> packages <version/license/proj_url> --shell '/usr/bin/bash' --package <package name>
 ```
 
 This should give you a result that looks something like this:
@@ -286,7 +286,7 @@ Number of elements: 1
 
 For snippets.yml the first key is 'snippets'. If you look up tyum > packages in
 snippets.yml, you should see a list of dictionaries. Go ahead and give the required
-attribute (version, license or src_url) as the next key. The listing containing the
+attribute (version, license or proj_url) as the next key. The listing containing the
 'invoke' key should look something like this:
 ```
       version:

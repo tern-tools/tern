@@ -18,7 +18,7 @@ class TestClassPackage(unittest.TestCase):
         self.p1.version = '1.0'
         self.p1.pkg_license = 'Apache 2.0'
         self.p1.copyright = 'All Rights Reserved'
-        self.p1.src_url = 'github.com'
+        self.p1.proj_url = 'github.com'
         self.p1.download_url = 'https://github.com'
 
         self.p2 = Package('p2')
@@ -30,7 +30,7 @@ class TestClassPackage(unittest.TestCase):
     def testInstance(self):
         self.assertEqual(self.p2.name, 'p2')
         self.assertFalse(self.p2.version)
-        self.assertFalse(self.p2.src_url)
+        self.assertFalse(self.p2.proj_url)
         self.assertFalse(self.p2.pkg_license)
         self.assertFalse(self.p2.copyright)
         self.assertFalse(self.p2.download_url)
@@ -43,8 +43,8 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p2.pkg_license, 'Apache 2.0')
         self.p2.copyright = "All Rights Reserved"
         self.assertEqual(self.p2.copyright, 'All Rights Reserved')
-        self.p2.src_url = 'github.com'
-        self.assertEqual(self.p2.src_url, 'github.com')
+        self.p2.proj_url = 'github.com'
+        self.assertEqual(self.p2.proj_url, 'github.com')
         self.p2.download_url = 'https://github.com'
         self.assertEqual(self.p2.download_url, 'https://github.com')
 
@@ -53,7 +53,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p1.version, '1.0')
         self.assertEqual(self.p1.pkg_license, 'Apache 2.0')
         self.assertEqual(self.p1.copyright, 'All Rights Reserved')
-        self.assertEqual(self.p1.src_url, 'github.com')
+        self.assertEqual(self.p1.proj_url, 'github.com')
         self.assertEqual(self.p1.download_url, 'https://github.com')
 
     def testToDict(self):
@@ -62,7 +62,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(a_dict['version'], '1.0')
         self.assertEqual(a_dict['pkg_license'], 'Apache 2.0')
         self.assertEqual(a_dict['copyright'], 'All Rights Reserved')
-        self.assertEqual(a_dict['src_url'], 'github.com')
+        self.assertEqual(a_dict['proj_url'], 'github.com')
         self.assertEqual(a_dict['download_url'], 'https://github.com')
         self.assertFalse(a_dict['origins'])
 
@@ -82,10 +82,10 @@ class TestClassPackage(unittest.TestCase):
         p = Package('p2')
         p.pkg_license = 'Testpkg_license'
         p.version = '1.0'
-        p.src_url = 'TestUrl'
+        p.proj_url = 'TestUrl'
         self.p2.pkg_license = 'Testpkg_license'
         self.p2.version = '2.0'
-        self.p2.src_url = 'TestUrl'
+        self.p2.proj_url = 'TestUrl'
         self.assertFalse(self.p2.is_equal(p))
         p.version = '2.0'
         self.assertTrue(self.p2.is_equal(p))
@@ -100,7 +100,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(p.version, '1.0')
         self.assertEqual(p.pkg_license, 'Apache 2.0')
         self.assertFalse(p.copyright)
-        self.assertFalse(p.src_url)
+        self.assertFalse(p.proj_url)
         self.assertEqual(len(p.origins.origins), 1)
         self.assertEqual(p.origins.origins[0].origin_str, 'p1')
         self.assertEqual(len(p.origins.origins[0].notices), 3)
@@ -108,7 +108,7 @@ class TestClassPackage(unittest.TestCase):
                          "No metadata for key: copyright")
         self.assertEqual(p.origins.origins[0].notices[0].level, 'warning')
         self.assertEqual(p.origins.origins[0].notices[1].message,
-                         "No metadata for key: src_url")
+                         "No metadata for key: proj_url")
         self.assertEqual(p.origins.origins[0].notices[2].message,
                          "No metadata for key: download_url")
 

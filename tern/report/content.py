@@ -57,7 +57,7 @@ def print_package_invoke(command_name):
         for pkg_dict in pkg_list:
             report = report + print_invoke_list(pkg_dict, 'version')
             report = report + print_invoke_list(pkg_dict, 'license')
-            report = report + print_invoke_list(pkg_dict, 'src_url')
+            report = report + print_invoke_list(pkg_dict, 'proj_url')
             report = report + print_invoke_list(pkg_dict, 'deps')
     return report
 
@@ -70,7 +70,7 @@ def print_package(pkg_obj, prefix):
     notes = notes + prefix + formats.package_version.format(
         package_version=pkg_obj.version)
     notes = notes + prefix + formats.package_url.format(
-        package_url=pkg_obj.src_url)
+        package_url=pkg_obj.proj_url)
     notes = notes + prefix + formats.package_license.format(
         package_license=pkg_obj.pkg_license)
     notes = notes + prefix + formats.package_copyright.format(

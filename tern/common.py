@@ -108,7 +108,7 @@ def convert_to_pkg_dicts(pkg_dict):
                'version': 'versions',
                'pkg_license': 'licenses',
                'copyright': 'copyrights',
-               'src_url': 'src_urls'}
+               'proj_url': 'proj_urls'}
     pkg_list = []
     len_names = len(pkg_dict['names'])
     # make a list of keys that correspond with package property names
@@ -178,7 +178,7 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
     '''Given a Package object and the Package listing from the command
     library, fill in the attribute value returned from looking up the
     data and methods of the package listing.
-    Fill out: version, license and src_url
+    Fill out: version, license and proj_url
     If there are errors, fill out notices'''
     # create a NoticeOrigin for the package
     origin_str = 'command_lib/snippets.yml'
@@ -210,14 +210,14 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
     else:
         pkg_obj.origins.add_notice_to_origins(
             origin_str, Notice(listing_msg, 'warning'))
-    # src_urls
+    # proj_urls
     url_listing, listing_msg = command_lib.check_library_key(
-        pkg_listing, 'src_url')
+        pkg_listing, 'proj_url')
     if url_listing:
         url_list, invoke_msg = command_lib.get_pkg_attr_list(
             shell, url_listing, package_name=pkg_obj.name)
         if url_list:
-            pkg_obj.src_url = url_list[0]
+            pkg_obj.proj_url = url_list[0]
         else:
             pkg_obj.origins.add_notice_to_origins(
                 origin_str, Notice(invoke_msg, 'error'))
