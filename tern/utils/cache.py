@@ -12,7 +12,7 @@ It is organized in this way:
            - name:
              version:
              license:
-             src_url:
+             proj_url:
         .....
 """
 

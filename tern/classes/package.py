@@ -16,7 +16,7 @@ class Package:
         version: package version
         pkg_license: package license that is declared
         copyright: copyright text
-        src_url: package source url
+        proj_url: package source url
         download_url: package download url
         origins: a list of NoticeOrigin objects
 
@@ -29,7 +29,7 @@ class Package:
         self.__version = ''
         self.__pkg_license = ''
         self.__copyright = ''
-        self.__src_url = ''
+        self.__proj_url = ''
         self.__download_url = ''
         self.__origins = Origins()
 
@@ -62,12 +62,12 @@ class Package:
         self.__copyright = text
 
     @property
-    def src_url(self):
-        return self.__src_url
+    def proj_url(self):
+        return self.__proj_url
 
-    @src_url.setter
-    def src_url(self, src_url):
-        self.__src_url = src_url
+    @proj_url.setter
+    def proj_url(self, proj_url):
+        self.__proj_url = proj_url
 
     @property
     def download_url(self):
@@ -123,7 +123,7 @@ class Package:
             version: <version>
             pkg_license: <package license string>
             copyright: <package copyright text>
-            src_url: <source url>
+            proj_url: <project url>
         the way to use this method is to instantiate the class with the
         name and then give it a package dictionary to fill in the rest
         return true if package name is the same as the one used to instantiate
