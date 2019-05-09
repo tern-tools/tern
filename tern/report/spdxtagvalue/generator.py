@@ -12,6 +12,7 @@ import datetime
 from tern.classes.templates.spdx import SPDX
 from tern.utils.general import get_git_rev_or_version
 from tern.report import formats as g_formats
+from tern.report import content
 from tern.report.spdxtagvalue import formats as spdx_formats
 
 
@@ -59,24 +60,43 @@ def get_document_block(image_obj):
     return block
 
 
-def get_image_comment(image_obj_origins):
-    '''Return a PackageComment tag-value text block for the image level
-    notices'''
+def get_package_comment(origins):
+    '''Return a PackageComment tag-value text block for a list of
+    NoticeOrigin objects'''
+    comment = ''
+    if origins:
+        for notice_origin in origins:
+            comment = comment + content.print_notices(
+                notice_origin, '', '\t')
+        return spdx_formats.package_comment.format(comment=comment)
+    return comment
 
 
-def get_layer_comment(layer_obj_origins):
-    '''Return a PackageComment tag-value text block for the layer level
-    notices'''
+def get_main_block(level_dict, origins, **kwargs):
+    '''Given the dictionary for the level, the list of notices and a list of
+    key-value pairs, return the SPDX tag-value information for this level'''
+    block = ''
+    # insert package comment first
+    block = get_package_comment(origins) + '\n'
+    # list image key and values
+    for key, value in level_dict.items():
+        block = block + spdx_formats.tag_value.format(
+            tag=key, value=value if value else 'NOASSERTION') + '\n'
+    # list image specific tag-values
+    for key, value in kwargs.items():
+        block = block + spdx_formats.tag_value.format(
+            tag=key, value=value) + '\n'
+    return block
 
 
-def get_package_comment(package_obj_origins):
-    '''Return a PackageComment tag-value text block for package level
-    notices'''
-
-
-def get_image_block(image_dict, image_origins):
-    '''Given the image dictionary and the list of notices for the image,
-    return the SPDX tag-value for image level information'''
+def get_image_relationships(image_obj):
+    '''Given the image object, return the relationships to other objects'''
+    block = ''
+    image_reference = get_image_spdxref(image_obj)
+    for layer in image_obj.layers:
+        block = block + spdx_formats.contains.format(
+            outer=image_reference, inner=get_layer_spdxref(layer)) + '\n'
+    return block
 
 
 def get_layer_block(layer_dict, layer_origins, prev_layer_SPDX=None):
@@ -158,7 +178,13 @@ def generate(image_obj):
     report = report + get_document_block(image_obj)
     # this part is the image part and needs
     # the image object
-    report = report + get_image_block(spdx_dict, image_obj.origins.origins)
+    report = report + get_main_block(
+        image_obj.to_dict(template),
+        image_obj.origins.origins,
+        SPDXID=get_image_spdxref(image_obj),
+        PackageDownloadLocation='NOASSERTION',
+        FilesAnalyzed='false') + '\n'
+    report = report + get_image_relationships(image_obj) + '\n'
     # Add the layer part for each layer
     for index, layer_dict in enumerate(spdx_dict['layers']):
         if index == 0:
