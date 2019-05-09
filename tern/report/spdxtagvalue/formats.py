@@ -7,6 +7,9 @@
 SPDX document formatting
 """
 
+# basic strings
+tag_value = '{tag}: {value}'
+
 # document level strings
 spdx_version = 'SPDXVersion: SPDX-2.1'
 data_license = 'DataLicense: CC0-1.0'
@@ -19,3 +22,10 @@ document_namespace = 'DocumentNamespace: https://spdx.org/spdxdocs/tern'
 license_list_version = 'LicenseListVersion: 3.4'
 creator = 'Creator: Tool: tern-{version}'
 created = 'Created: {timestamp}'
+
+# Package level strings
+package_comment = 'PackageComment: <text>{comment}</text>'
+
+# Relationship strings
+contains = '{outer} CONTAINS {inner}'
+prereq = '{after} HAS_PREREQUISITE {before}'
