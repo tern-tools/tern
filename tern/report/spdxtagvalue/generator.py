@@ -11,7 +11,6 @@ import datetime
 
 from tern.classes.templates.spdx import SPDX
 from tern.utils.general import get_git_rev_or_version
-from tern.report import formats as g_formats
 from tern.report import content
 from tern.report.spdxtagvalue import formats as spdx_formats
 
@@ -90,7 +89,7 @@ def get_main_block(level_dict, origins, **kwargs):
 
 
 def get_image_relationships(image_obj):
-    '''Given the image object, return the relationships to other objects'''
+    '''Given the image object, return the relationships to the layers'''
     block = ''
     image_reference = get_image_spdxref(image_obj)
     for layer in image_obj.layers:
@@ -99,15 +98,18 @@ def get_image_relationships(image_obj):
     return block
 
 
-def get_layer_block(layer_dict, layer_origins, prev_layer_SPDX=None):
-    '''Given the layer dictionary, the list of notices for the layer and
-    the previous layer's SPDXref if there is a previous layer, return the
-    SPDX tag-value for the layer level information'''
-
-
-def get_package_block(package_dict, package_origins):
-    '''Given the package dictionary, and the list of notices for the package,
-    return the SPDX tag-value for the package level information'''
+def get_layer_relationships(layer_obj, prev_layer_spdxref=None):
+    '''Given the layer object, return the relationships of the layer
+    objects to packages and to the previous layer'''
+    block = ''
+    layer_reference = get_layer_spdxref(layer_obj)
+    if prev_layer_spdxref:
+        block = block + spdx_formats.prereq.format(
+            after=layer_reference, before=prev_layer_spdxref)
+    for package in layer_obj.packages:
+        block = block + spdx_formats.contains.format(
+            outer=layer_reference, inner=get_package_spdxref(package)) + '\n'
+    return block
 
 
 def generate(image_obj):
@@ -172,35 +174,52 @@ def generate(image_obj):
     each layer which is also a 'Package' which 'CONTAINS' the real Package'''
     report = ''
     template = SPDX()
-    spdx_dict = image_obj.to_dict(template)
+    # The image's PackageDownloadLocation is from a container registry
+    # This includes all the layers but the packages' download location
+    # is unknown if the download_url is blank
+    registry_repotag = image_obj.repotag if hasattr(
+        image_obj, '__repotag') else 'NOASSERTION'
+
     # first part is the document tag-value
     # this doesn't change at all
     report = report + get_document_block(image_obj)
+
     # this part is the image part and needs
     # the image object
     report = report + get_main_block(
         image_obj.to_dict(template),
         image_obj.origins.origins,
         SPDXID=get_image_spdxref(image_obj),
-        PackageDownloadLocation='NOASSERTION',
+        PackageDownloadLocation=registry_repotag,
         FilesAnalyzed='false') + '\n'
+    # Add image relationships
     report = report + get_image_relationships(image_obj) + '\n'
+
     # Add the layer part for each layer
-    for index, layer_dict in enumerate(spdx_dict['layers']):
+    for index, layer_obj in enumerate(image_obj.layers):
+        # this is the main block for the layer
+        report = report + get_main_block(
+            layer_obj.to_dict(template),
+            layer_obj.origins.origins,
+            SDPXID=get_layer_spdxref(layer_obj),
+            PackageDownloadLocation=registry_repotag,
+            FilesAnalyzed='false') + '\n'
+        # Add layer relationships
         if index == 0:
-            # no previous layer dependencies
-            report = report + get_layer_block(
-                layer_dict,
-                image_obj.layers[index].origins.origins)
+            report = report + get_layer_relationships(layer_obj)
         else:
             # block should contain previous layer dependency
-            report = report + get_layer_block(
-                layer_dict,
-                image_obj.layers[index].origins.origins,
-                get_layer_spdxref(image_obj.layers[index - 1]))
+            report = report + get_layer_relationships(
+                layer_obj, get_layer_spdxref(image_obj.layers[index - 1]))
+
     # Add the package part for each package
-    for i, _ in enumerate(spdx_dict['layers']):
-        for j, package_dict in enumerate(spdx_dict['layers'][i]['packages']):
-            report = report + get_package_block(
-                package_dict, image_obj.layers[i].packages[j].origins.origins)
+    # There are no relationships to be listed here
+    for layer_obj in image_obj.layers:
+        for package_obj in layer_obj.packages:
+            report = report + get_main_block(
+                package_obj.to_dict(template),
+                package_obj.origins.origins,
+                SPDXID=get_package_spdxref(package_obj),
+                PackageDownloadLocation='NOASSERTION',
+                FilesAnalyzed='false') + '\n'
     return report
