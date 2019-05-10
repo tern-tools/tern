@@ -21,8 +21,7 @@ def get_tool_version():
     ver_type, ver = get_git_rev_or_version()
     if ver_type == 'commit':
         return formats.commit_version.format(commit_sha=ver)
-    else:
-        return formats.packaged_version.format(version=Version)
+    return formats.packaged_version.format(version=Version)
 
 
 def print_invoke_list(info_dict, info):
