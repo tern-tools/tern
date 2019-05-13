@@ -38,6 +38,13 @@ console.setFormatter(formatter)
 logger.addHandler(log_handler)
 
 
+def check_file_existence(path):
+    if not os.path.isfile(path):
+        msg = "{}: does not exist".format(path)
+        raise argparse.ArgumentTypeError(msg)
+    return path
+
+
 def check_format_type(format_type):
     '''Check if the format type is supported'''
     import_string = 'tern.report.{}.generator'.format(format_type)
@@ -69,13 +76,6 @@ def do_main(args):
 
 
 def main():
-
-    def check_file_existence(path):
-        if not os.path.isfile(path):
-            msg = "{}: does not exist".format(path)
-            raise argparse.ArgumentTypeError(msg)
-        return path
-
     parser = argparse.ArgumentParser(
         prog='Tern',
         description='''
