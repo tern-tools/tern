@@ -47,6 +47,7 @@ def get_document_block(image_obj):
     block = spdx_formats.spdx_version + '\n'
     block = block + spdx_formats.data_license + '\n'
     block = block + spdx_formats.spdx_id + '\n'
+    block = block + spdx_formats.document_comment + '\n'
     block = block + spdx_formats.document_name.format(
         image_name=image_obj.get_human_readable_id()) + '\n'
     block = block + get_document_namespace(image_obj) + '\n'
@@ -77,11 +78,10 @@ def get_main_block(level_dict, origins, **kwargs):
     block = ''
     # insert package comment first
     block = get_package_comment(origins) + '\n'
-    # list image key and values
     for key, value in level_dict.items():
         block = block + spdx_formats.tag_value.format(
             tag=key, value=value if value else 'NOASSERTION') + '\n'
-    # list image specific tag-values
+    # list specifically defined tag-values
     for key, value in kwargs.items():
         block = block + spdx_formats.tag_value.format(
             tag=key, value=value) + '\n'
@@ -183,11 +183,11 @@ def generate(image_obj_list):
     # This includes all the layers but the packages' download location
     # is unknown if the download_url is blank
     registry_repotag = image_obj.repotag if hasattr(
-        image_obj, '__repotag') else 'NOASSERTION'
+        image_obj, 'repotag') else 'NOASSERTION'
 
     # first part is the document tag-value
     # this doesn't change at all
-    report = report + get_document_block(image_obj)
+    report = report + get_document_block(image_obj) + '\n'
 
     # this part is the image part and needs
     # the image object
@@ -195,7 +195,6 @@ def generate(image_obj_list):
         image_obj.to_dict(template),
         image_obj.origins.origins,
         SPDXID=get_image_spdxref(image_obj),
-        PackageDownloadLocation=registry_repotag,
         FilesAnalyzed='false') + '\n'
     # Add image relationships
     report = report + get_image_relationships(image_obj) + '\n'
@@ -211,11 +210,12 @@ def generate(image_obj_list):
             FilesAnalyzed='false') + '\n'
         # Add layer relationships
         if index == 0:
-            report = report + get_layer_relationships(layer_obj)
+            report = report + get_layer_relationships(layer_obj) + '\n'
         else:
             # block should contain previous layer dependency
             report = report + get_layer_relationships(
-                layer_obj, get_layer_spdxref(image_obj.layers[index - 1]))
+                layer_obj, get_layer_spdxref(image_obj.layers[index - 1])) + \
+                '\n'
 
     # Add the package part for each package
     # There are no relationships to be listed here
@@ -225,6 +225,5 @@ def generate(image_obj_list):
                 package_obj.to_dict(template),
                 package_obj.origins.origins,
                 SPDXID=get_package_spdxref(package_obj),
-                PackageDownloadLocation='NOASSERTION',
                 FilesAnalyzed='false') + '\n'
     return report
