@@ -8,6 +8,7 @@ Create a report
 """
 
 import docker
+import importlib
 import logging
 import os
 import shutil
@@ -297,6 +298,8 @@ def get_dockerfile_packages():
 
 def generate_report(args, *images):
     '''Generate a report based on the command line options'''
+    if args.report_format:
+        return generate_format(images, args.report_format)
     if args.yaml:
         return generate_yaml(images)
     if args.json:
@@ -329,6 +332,15 @@ def generate_yaml(images):
     for image in images:
         report = report + content.print_yaml_report(image)
     return report
+
+
+def generate_format(images, format_string):
+    '''Generate a report in the format of format_string given one or more
+    image objects. Here we will load the required module and run the generate
+    function to get back a report'''
+    generator = importlib.import_module('tern.report.{}.generator'.format(
+        format_string))
+    return generator.generate(images)
 
 
 def report_out(args, *images):
