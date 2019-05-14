@@ -112,8 +112,12 @@ def get_layer_relationships(layer_obj, prev_layer_spdxref=None):
     return block
 
 
-def generate(image_obj):
-    '''Given an Image object, generate an SPDX document
+def generate(image_obj_list):
+    '''Generate an SPDX document
+    WARNING: This assumes that the list consists of one image or the base
+    image and a stub image, in which case, the information in the stub
+    image is not applicable in the SPDX case as it is an empty image
+    object with no metadata as nothing got built.
     The whole document should be stored in a string which can be written
     to a file using the write_report function in report.py
     First convert the image object into a dictionary. The dictionary
@@ -173,6 +177,7 @@ def generate(image_obj):
     For the sake of SPDX, an image is a 'Package' which 'CONTAINS'
     each layer which is also a 'Package' which 'CONTAINS' the real Package'''
     report = ''
+    image_obj = image_obj_list[0]
     template = SPDX()
     # The image's PackageDownloadLocation is from a container registry
     # This includes all the layers but the packages' download location
