@@ -55,7 +55,7 @@ class DockerImage(Image):
     def to_dict(self, template=None):
         '''Return a dictionary representation of the Docker image'''
         # this should take care of 'origins' and 'layers'
-        di_dict = super().to_dict()
+        di_dict = super().to_dict(template)
         return di_dict
 
     def get_image_option(self):

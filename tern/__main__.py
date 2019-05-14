@@ -108,8 +108,8 @@ def main():
     parser_report.add_argument('-s', '--summary', action='store_true',
                                help="Summarize the report as a list of"
                                " packages with associated information")
-    parser_report.add_argument('-m', '--format', metavar='REPORT_MODULE',
-                               type=check_format_type,
+    parser_report.add_argument('-m', '--report-format',
+                               metavar='REPORT_MODULE', type=check_format_type,
                                help="Format the report using one of the "
                                "available formats: "
                                "spdxtagvalue")
