@@ -43,11 +43,9 @@ def get_image_spdxref(image_obj):
 
 def get_document_block(image_obj):
     '''Return document related SPDX tag-values'''
-    block = ''
     block = spdx_formats.spdx_version + '\n'
     block = block + spdx_formats.data_license + '\n'
     block = block + spdx_formats.spdx_id + '\n'
-    block = block + spdx_formats.document_comment + '\n'
     block = block + spdx_formats.document_name.format(
         image_name=image_obj.get_human_readable_id()) + '\n'
     block = block + get_document_namespace(image_obj) + '\n'
@@ -57,6 +55,7 @@ def get_document_block(image_obj):
     block = block + spdx_formats.created.format(
         timestamp=datetime.datetime.utcnow().strftime(
             "%Y-%m-%dT%H:%M:%SZ")) + '\n'
+    block = block + spdx_formats.document_comment + '\n'
     return block
 
 
@@ -76,8 +75,6 @@ def get_main_block(level_dict, origins, **kwargs):
     '''Given the dictionary for the level, the list of notices and a list of
     key-value pairs, return the SPDX tag-value information for this level'''
     block = ''
-    # insert package comment first
-    block = get_package_comment(origins) + '\n'
     for key, value in level_dict.items():
         block = block + spdx_formats.tag_value.format(
             tag=key, value=value if value else 'NOASSERTION') + '\n'
@@ -85,6 +82,7 @@ def get_main_block(level_dict, origins, **kwargs):
     for key, value in kwargs.items():
         block = block + spdx_formats.tag_value.format(
             tag=key, value=value) + '\n'
+    block = block + get_package_comment(origins) + '\n'
     return block
 
 
