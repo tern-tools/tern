@@ -103,7 +103,7 @@ def get_layer_relationships(layer_obj, prev_layer_spdxref=None):
     layer_reference = get_layer_spdxref(layer_obj)
     if prev_layer_spdxref:
         block = block + spdx_formats.prereq.format(
-            after=layer_reference, before=prev_layer_spdxref)
+            after=layer_reference, before=prev_layer_spdxref) + '\n'
     for package in layer_obj.packages:
         block = block + spdx_formats.contains.format(
             outer=layer_reference, inner=get_package_spdxref(package)) + '\n'
@@ -203,7 +203,7 @@ def generate(image_obj_list):
         report = report + get_main_block(
             layer_obj.to_dict(template),
             layer_obj.origins.origins,
-            SDPXID=get_layer_spdxref(layer_obj),
+            SPDXID=get_layer_spdxref(layer_obj),
             PackageDownloadLocation=registry_repotag,
             FilesAnalyzed='false') + '\n'
         # Add layer relationships
