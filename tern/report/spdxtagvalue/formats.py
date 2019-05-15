@@ -27,5 +27,5 @@ created = 'Created: {timestamp}'
 package_comment = 'PackageComment: <text>{comment}</text>'
 
 # Relationship strings
-contains = '{outer} CONTAINS {inner}'
-prereq = '{after} HAS_PREREQUISITE {before}'
+contains = 'Relationship: {outer} CONTAINS {inner}'
+prereq = 'Relationship: {after} HAS_PREREQUISITE {before}'
