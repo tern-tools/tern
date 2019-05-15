@@ -180,7 +180,7 @@ def generate(image_obj_list):
     # The image's PackageDownloadLocation is from a container registry
     # This includes all the layers but the packages' download location
     # is unknown if the download_url is blank
-    registry_repotag = image_obj.repotag if hasattr(
+    registry_repotag = image_obj.get_download_location() if hasattr(
         image_obj, 'repotag') else 'NOASSERTION'
 
     # first part is the document tag-value

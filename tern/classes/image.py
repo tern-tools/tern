@@ -141,9 +141,14 @@ class Image:
         '''Some reports like SPDX want a unique name for the full image
         and this is currently not supported by any image tool. So using
         a combination of image id, name and tag instead'''
-        name = self.image_id
+        name = self.image_id[:10]
         if self.name:
             name = name + '-{}'.format(self.name)
         if self.tag:
             name = name + '-{}'.format(self.tag)
         return name
+
+    def get_download_location(self):
+        '''Return the registry information from where the image came from.
+        Currently, the image's metadata doesn't have this information'''
+        pass
