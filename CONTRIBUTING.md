@@ -2,7 +2,7 @@
 
 Once again, we hope you have read our [code of conduct](/CODE_OF_CONDUCT.md) before starting.
 
-We are excited to work with anyone at any level contributing their time and efforts towards the project.
+We are excited to work with anyone at any level contributing their time and effort towards the project.
 
 You can contribute in the following ways:
 
@@ -87,6 +87,21 @@ Look for issues without the label `assigned` on it. This indicates that someone 
 - arch: An issue requiring some architectural change
 
 To start, comment on the issue asking if you can work on it. A maintainer will tag your username to the issue and apply the `assigned` label on it.
+
+## Setting up a Development Environment
+For hassle-free code contribution, follow the steps below. NOTE: I mostly work in a Linux environment using a basic text editor (vim). Your set-up could be different. If it is, please feel free to submit an issue regarding your development environment and a pull request to add to this documentation.
+
+### Before you clone the project
+You may have already cloned the project and started working on it. If you're reading this after the fact, I would highly recommed you save your work and set up a new development environment in this way.
+1. Set up a Python virtual environment that has either the Python 3.6 or Python 3.7 executable. See [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments) for instructions on how to set this up using your host machine's Python3. There are also a guide to [managing virtual environments using pipenv](https://docs.python-guide.org/dev/virtualenvs/) but I haven't used it. Once done, you should have a folder created. Change to that folder.
+2. Clone *your fork* of Tern in the virtual environment folder.
+3. Activate your virtual environment `source bin/activate`
+4. Change directory into the clone. Then run `pip install -r dev-requirements.txt`. This will install the project dependencies and [Prospector](https://github.com/PyCQA/prospector) which is a tool to check for style and linting errors.
+5. Highly recommended: If you want to set up your project for long-term open source contribution, I highly suggest following [this setup](https://github.com/nishakm/puns).
+
+### After making changes
+6. Run prospector from the project's root directory `prospector .`
+7. Fix any issues prospector brings up.
 
 ## Coding Style
 
