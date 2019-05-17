@@ -1,44 +1,68 @@
 ![Tern](/docs/img/tern_logo.png)
 
 [![Build Status](https://travis-ci.com/vmware/tern.svg?branch=master)](https://travis-ci.com/vmware/tern)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2689/badge)](https://bestpractices.coreinfrastructure.org/projects/2689)
+[![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
 # Welcome to the Tern Project
 
 Tern is a software package inspection tool for containers. It's written in Python3 with a smattering of shell scripts.
 
-## Quick Links
-- [Quick Start](#getting-started)
-- [Start Contributing](CONTRIBUTING.md)
+# Table of Contents
+- [Introduction](#what-is-tern)
+  - [FAQ](/docs/faq.md)
+  - [Glossary of Terms](/docs/glossary.md)
+  - [Architecture](/docs/architecture.md)
+  - [Navigating the Code](/docs/navigating-the-code.md)
+- [Getting Started](#getting-started)
+  - [Getting Started with Docker](#getting-started-with-docker)
+  - [Getting Started with Vagrant](#getting-started-with-vagrant)
+  - [Getting Started on Linux](#getting-started-on-linux)
+- [Using Tern](#using-tern)
+  - [Generating a BoM report for a Docker image](#bom-for-docker-image)
+  - [Generating a BoM report from a Dockerfile](#bom-for-dockerfile)
+- [Report Formats](#report-formats)
+  - [Human Readable Format](#report-human-readable)
+  - [Summary Format](#report-summary)
+  - [JSON Format](#report-json)
+  - [YAML Format](#report-yaml)
+  - [SPDX tag-value Format](#report-spdxtagvalue)
+- [Running tests](#running-tests)
+- [Project Status](#project-status)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
 
-## What is Tern?
+# What is Tern?<a name="what-is-tern">
 Tern is an inspection tool to find the metadata of the packages installed in a container image. The overall operation looks like this:
-1. It uses overlayfs to mount the first filesystem layer in a container image
+1. It uses overlayfs to mount the first filesystem layer (also known as the BaseOS) used to build the container image
 2. It then executes scripts from the "command library" in a chroot environment to collect information about packages installed in that layer
-3. With that information as a base, it continues to iterate over steps 1 and 2 for the rest of the layers in the container image
+3. With that information as a starting point, it continues to iterate over steps 1 and 2 for the rest of the layers in the container image
 4. Once done, it generates a report in different formats. The default report is a verbose explanation of what layers brought in what software components. If a Dockerfile is provided then it will also provide what lines in the Dockerfile was used to create the layers.
 
 Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies. It's also a good tool if you are curious about the contents of the container images you have built.
 
 ![Tern quick demo](/docs/img/tern_demo_fast.gif)
 
-## Table of Contents
-- [FAQ](/docs/faq.md)
-- [Getting Started](#getting-started)
-- [Project Status](#project-status)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [Glossary of Terms](/docs/glossary.md)
-- [Architecture](/docs/architecture.md)
-- [Navigating the Code](/docs/navigating-the-code.md)
 
-## Getting Started<a name="getting-started"/>
+# Getting Started<a name="getting-started"/>
+Tern is not distributed on PyPI or as Docker images yet. This is coming soon. See the [Project Status](#project-status) for details.
 
-### Getting Started with Docker
+## Getting Started with Docker<a name="getting-started-with-docker">
 Docker is the most widely used tool to build and run containers. If you already have Docker installed, you can run Tern by building a container with the Dockerfile provided and the `docker_run.sh` script:
 
+Clone this repository:
 ```
 $ git clone https://github.com/vmware/tern.git
+```
+
+Build the Docker image (called `ternd` here):
+```
 $ docker build -t ternd .
+```
+
+Run the script `docker_run.sh`
+
+```
 $ ./docker_run.sh workdir ternd "report -i debian:buster" > output.txt
 ```
 
@@ -51,70 +75,135 @@ What the `docker_run.sh` script does is create the directory `workdir` if not pr
 
 *WARNING:* privileged Docker containers are not secure. DO NOT run this container in production unless you have secured the node (VM or bare metal machine) that the docker daemon is running on.
 
-### Getting Started with Vagrant
-Vagrant is a tool to setup an isolated virtual software development environment. Follow [these steps](/docs/contributing-setup.md) to set up your Vagrant environment. This is a requirement if you are using Windows or Mac OSs.
+## Getting Started with Vagrant<a name="getting-started-with-vagrant">
+Vagrant is a tool to setup an isolated virtual software development environment. If you are using Windows or Mac OSs, this is a good way to get started.
 
+### Install
+Follow the instructions on the [VirtualBox](https://www.virtualbox.org/wiki/Downloads) website to download VirtualBox on your OS.
 
-### Getting Started on Linux
+Follow the instructions on the website to install [Vagrant](https://www.vagrantup.com/downloads.html) for your OS. 
+
+### Create a Vagrant environment
+In your terminal app, run the following commands.
+
+Clone this repository:
+```
+$ git clone https://github.com/vmware/tern.git
+```
+
+Bring up the Vagrant box: 
+```
+$ cd tern/vagrant
+$ vagrant up
+```
+
+SSH into the created VM: 
+ ```
+ $ vagrant ssh
+ ```
+
+Run the program:
+```
+$ python -m tern -l report -i debian:buster -f output.txt
+```
+
+## Getting Started on Linux<a name="getting-started-on-linux">
 If you have a Linux OS you will need a distro with a kernel version >= 4.0 (Ubuntu 16.04 or newer or Fedora 25 or newer are good selections) and will need to install the following requirements:
 
 - Git (Installation instructions can be found here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - attr (sudo apt-get install attr or sudo dnf install attr)
 - Python 3.6 or newer (sudo apt-get install python3.6(3.7) or sudo dnf install python36(37))
 
-If you happen to be using Docker containers
+For Docker containers
 - Docker CE (Installation instructions can be found here: https://docs.docker.com/engine/installation/#server)
 
 Make sure the docker daemon is running.
 
 *NOTE:* Tern currently supports containers built with Docker but it is architected to support other container image formats.
 
-Create a python3 virtual environment and install requirements
-
+Create a python3 virtual environment:
 ```
 $ python3 -m venv ternenv
 $ cd ternenv
+```
+
+Clone this repository:
+```
 $ git clone https://github.com/vmware/tern.git
+```
+
+Activate the virtual environment:
+```
 $ source bin/activate
+```
+
+Install requirements:
+```
 $ cd tern
-$ pip install .
+$ pip install -r requirements.txt
+```
+
+Run Tern:
+```
 $ tern -l report -f output.txt -i debian:buster
 ```
 
-### To run against a Docker image
+# Using Tern<a name="using-tern">
+
+Tern creates a report containing the Bill of Materials (BoM) of a container image, including notes about how it collects this information, and files for which it has no information about. Currently, Tern supports only containers built using Docker. This is the most ubiquitous type of container image that exists so the project started with a focus on those. However, it is architected to support other images that closely follow the [OCI image spec](https://github.com/opencontainers/image-spec/blob/master/spec.md).
+
+## Generating a BoM report for a Docker image<a name="bom-for-docker-image">
 If you have a Docker image pulled locally and want to inspect it
 ```
-$ tern report -i debian:jessie
+$ tern -l report -i debian:jessie
 ```
 Take a look at report.txt to see what packages are installed in the Docker image and how Tern got this information. If you encounter any errors, please file an issue.
 
-### To run against a Dockerfile
-You can run Tern against a Dockerfile. Tern will build the image for you and then analyze it with respect to the Dockerfile
+## Generating a BoM report from a Dockerfile<a name="bom-for-dockerfile">
+You can provide a Dockerfile to Tern to figure out the Bill of Materials and other information. Tern will build the image, analyze it with respect to the Dockerfile and discard the image. This is useful to engineers who are developing a Dockerfile for their app or in a container build and release pipeline.
 ```
-$ tern report -d samples/photon_git/Dockerfile
+$ tern -l report -d samples/photon_git/Dockerfile
 ```
-Take a look at report.txt to see what packages are installed in the created Docker image and how Tern got this information. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
+Take a look at report.txt to see what packages you would be shipping if you were to use the given Dockerfile. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
 
-### To get a summary report
-To get just a list of packages, you can use the `-s` option to get a summary report.
-```
-$ tern report -s -d samples/photon_git/Dockerfile
-```
-WARNING: Tern is meant to give guidance on what may be installed in a container image, so it is recommended that for the purpose of investigation, the default report is used. The summary report may be used as the output of a build artifact or something to submit to a compliance or legal team.
 
-### To get the results in YAML form
-To get the results in a YAML file to be consumed by a downstream tool or script
+# Report Formats<a name="report-formats">
+Tern creates BoM reports suitable to read over or to provide to another tool for consumption.
+
+## Human Readable Format<a name="report-human-readable">
+The default report Tern produces is a human readable report. The object of this report is to give the container developer a deeper understanding of what is installed in a container image during development. This allows a developer to glean basic information about the container such as what the true base operating system is, what the app dependencies are, if the container is using an official or personal repository for sources or binaries, whether the dependencies are at the correct versions, etc.
 ```
-$ tern report -y -i debian:jessie
+$ tern -l report -i golang:1.12-alpine -f output.txt
 ```
 
-### To get the results in JSON form
-To get the results in a JSON file for web use
+## Summary Format<a name="report-summary">
+To get just a list of packages, you can use the `-s` option to get a summary report. This is useful to provide to a legal or OSS compliance team.
 ```
-$ tern report -j -i debian:jessie
+$ tern -l report -s -i golang:1.12 -f output.txt
+```
+WARNING: Tern is meant to give guidance on what may be installed in a container image, so we recommended that for the purpose of investigation, to use the default report format.
+
+
+## JSON Format<a name="report-json">
+You can get the results in a JSON file to pass around in a network.
+```
+$ tern report -j -i golang:1.12-alpine
 ```
 
-### To run a test
+## YAML Format<a name="report-yaml">
+You can get the results in a YAML file to be consumed by a downstream tool or script.
+```
+$ tern -l report -y -i golang:1.12-alpine -f output.yaml
+```
+
+## SPDX tag-value Format<a name="report-spdxtagvalue">
+[SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. Many compliance tools are compatible with SPDX. Tern follows the [SPDX specifications](https://spdx.org/specifications) specifically the tag-value format which is the most compatible format with the toolkit the organization provides. The tag-value format is the only SPDX format Tern supports. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](./docs/spdx-tag-value-overview) and about how Tern maps its properties to the keys mandated by the spec [here](./docs/spdx-tag-value-mapping.md).
+```
+$ tern -l report -m spdxtagvalue -i golang:1.12-alpine -f spdx.txt
+```
+ 
+# Running tests<a name="running-tests">
+WARNING: The `test_util_*` tests are not up to date. We are working on it :). From the Tern repository root directory run:
 ```
 $ python tests/<test file>.py
 ```
