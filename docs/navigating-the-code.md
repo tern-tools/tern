@@ -1,67 +1,86 @@
 # Navigating Tern's Code
 
-To help with code navigation, looking up the [glossary](/docs/glossary.md) is useful
+To help with code navigation, looking up the [glossary](/docs/glossary.md) is useful. All the code lives in the directory `tern`. The rest of the stuff in the root directory have to do with configurations for build and packaging. If you want to try each of the modules in the Python repl (Read Eval Print Loop), you can reference them from the module `tern`.
 
 Here is a layout of the directory structure:
 
 ```
-|--- classes
-|    |--- package.py (Package class)
-|    |--- image_layer.py (ImageLayer class)
-|    |--- image.py (abstract Image class)
-|    |--- docker_image.py (DockerImage class)
-|    |--- command.py (Command class)
-|    |--- notice.py (Notice class)
-|    |--- notice_origin.py (NoticeOrigin class)
-|    └--- origins.py (Origins class)
-|
-|--- command_lib
-|    |--- command_lib.py (operations on the command library)
-|    |--- base.yml (command library for base images)
-|    └--- snippets.yml (command library for code snippets)
-|
-|--- docs (where all the documentation lives)
-|
-|--- report
-|    |--- content.py (content generation)
-|    |--- errors.py (error messages)
-|    |--- formats.py (report formats or string snippets)
-|    └--- report.py (report collation operations)
-|
-|--- samples (sample Dockerfiles)
-|
-|--- scripts (where container or host runnable scripts live)
-|
-|--- tests (unit and functional tests)
-|
-|--- utils
-|    |--- cache.py (cache operations)
-|    |--- constants.py (constants)
-|    |--- container.py (container operations - currently docker related)
-|    |--- dockerfile.py (dockerfile parser)
-|    |--- general.py (general operations)
-|    └--- metadata.py (container image metadata operations)
-|
-|--- cache.yml (container layer cache)
-|
-|--- common.py (common subroutines)
-|
-|--- docker.py (docker related subroutines)
-|
-└--- tern (the main executable)
+▾ tern/
+  ▾ classes/  <-- These are individual objects. Each has a corresponding test in the tests directory
+      command.py
+      docker_image.py
+      image.py
+      image_layer.py
+      notice.py
+      notice_origin.py
+      origins.py
+      package.py
+      template.py
+    ▾ templates/
+        spdx.py
+  ▾ command_lib/ <-- These are the bash commands that get run to collect information about the container image
+      base.yml <-- System wide scripts for package managers and such
+      snippets.yml <-- scripts for one off commands
+      command_lib.py <-- Command Library modules
+  ▾ report/
+      content.py
+      errors.py
+      formats.py
+      report.py <-- Main reporting module
+    ▾ spdxtagvalue/ <-- A Template module
+        formats.py
+        generator.py
+  ▾ scripts/debian/ <-- Example script to pull sources for debian based images
+    ▾ jessie/
+        sources.list
+      apt_get_sources.sh
+  ▾ tools/ <-- Tools that can be used individually or by Tern
+      fs_hash.sh
+      verify_invoke.py
+  ▾ utils/ <-- general utility modules used throughout the code
+      cache.py
+      constants.py
+      container.py
+      dockerfile.py
+      general.py
+      metadata.py
+      rootfs.py
+    __main__.py <-- Tern entry point
+    common.py <-- Common modules used at a high level throughout the code
+    docker_helpers.py <-- modules specific to Docker
 ```
 
+Tests live outside of the `tern` folder, in a folder called `tests`.
+
+```
+▾ tests/
+    test_class_command.py
+    test_class_docker_image.py
+    test_class_image.py
+    test_class_image_layer.py
+    test_class_notice.py
+    test_class_notice_origin.py
+    test_class_origins.py
+    test_class_package.py
+    test_class_template.py
+    test_fixtures.py
+    test_util_commands.py
+    test_util_metadata.py
+```
+
+Documentation lives in a folder called `docs`. Sample Dockerfile live in a folder called `samples`.
+
 Some general rules about where the code is located:
-- Utilities used anywhere in the project go in utils
-- Class definitions go in classes. For clarity, the name of the file is also the name of the class but with an underscore separating the words rather than CamelCase
-- Any operation related to look up and operations with the Command Library go in command_lib
-- Any documentation goes in docs.
-- Any operations related to reporting go in report.
-- Any sample Dockerfiles go in samples. The directory structure needs to be such that the Dockerfile exists along with the image context. This means that when you use "docker build" only the Dockerfile gets sent to the docker daemon rather than the whole directory structure. This saves on build time.
-- The scripts directory is not used by the project yet, but there is potential to use it for complicated operations such as extracting source tarballs
-- All unit and functional tests go in tests
+- Utilities used anywhere in the project go in `utils`.
+- Class definitions go in `classes`. For clarity, the name of the file is also the name of the class but with an underscore separating the words rather than CamelCase.
+- Any operation related to look up and operations with the Command Library go in `command_lib`.
+- Any documentation goes in `docs`.
+- Any operations related to reporting go in `report`.
+- Any sample Dockerfiles go in `samples`. The directory structure needs to be such that the Dockerfile exists along with the image context. This means that when you use "docker build" only the Dockerfile gets sent to the docker daemon rather than the whole directory structure. This saves on build time.
+- The `scripts` directory is not used by the project yet, but there is potential to use it for complicated operations such as extracting source tarballs.
+- All unit and functional tests go in `tests`.
 
 Code organization follows these general rules:
-- Each class is in its own file
-- Utils are organized based on what they operate on
-- Subroutines that require the use of modules from all over the project live in high level files like common.py and docker.py 
+- Each class is in its own file.
+- Utils are organized based on what they operate on.
+- Subroutines that require the use of modules from all over the project live in high level files like `common.py` and `docker_helpers.py` 
