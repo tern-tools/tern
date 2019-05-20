@@ -113,6 +113,7 @@ If you have a Linux OS you will need a distro with a kernel version >= 4.0 (Ubun
 - Git (Installation instructions can be found here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - attr (sudo apt-get install attr or sudo dnf install attr)
 - Python 3.6 or newer (sudo apt-get install python3.6(3.7) or sudo dnf install python36(37))
+- Pip (sudo apt-get install python3-pip). Note that you don't have to do this for Fedora OSs.
 
 For Docker containers
 - Docker CE (Installation instructions can be found here: https://docs.docker.com/engine/installation/#server)
@@ -127,6 +128,8 @@ $ python3 -m venv ternenv
 $ cd ternenv
 ```
 
+*NOTE:* Your OS might distribute each Python version separately. For example, on Ubuntu LTS, Python 2.7 is linked to `python2` and Python 3.6 is linked to `python3`. I develop with Python 3.7 which is installed separately with no symlinks. In this case, I use the binary. The binaries are usually installed in `/usr/bin/python`.
+
 Clone this repository:
 ```
 $ git clone https://github.com/vmware/tern.git
@@ -140,7 +143,7 @@ $ source bin/activate
 Install requirements:
 ```
 $ cd tern
-$ pip install -r requirements.txt
+$ pip install .
 ```
 
 Run Tern:

@@ -100,8 +100,10 @@ You may have already cloned the project and started working on it. If you're rea
 5. Highly recommended: If you want to set up your project for long-term open source contribution, I highly suggest following [this setup](https://github.com/nishakm/puns).
 
 ### After making changes
-6. Run prospector from the project's root directory `prospector .`
-7. Fix any issues prospector brings up.
+1. Run prospector from the project's root directory `prospector .`
+2. Fix any issues prospector brings up.
+3. Run `pip install .`. Don't worry about the already satisfied dependencies.
+4. Test your changes.
 
 ## Coding Style
 
@@ -188,39 +190,5 @@ Signed-off-by: Some Dev <somedev@example.com>
 
 ## Troubleshooting
 
-* Unable to find module 'yaml': make sure to activate the python virtualenv first and then run pip install -r requirements.txt
-
-## Dealing with cache.yml
-
-cache.yml is actually a stand-in for a more sophisticated database. Tern is still not there yet. Git does not allow you to ignore this file as it is tracked. So here are some steps to deal with changes in cache.yml that you don't want to commit but still want to use:
-
-1. Before updating your work branch, stash the changes
-```
-$ git stash push
-Saved working directory and index state WIP on master: 71e923f Fixed bug in reporting urls for installed packages
-$ git stash list
-stash@{0}: WIP on master: 71e923f Fixed bug in reporting urls for installed packages
-$ git status
-On branch master
-Your branch is up to date with 'origin/master'.
-
-nothing to commit, working tree clean
-```
-
-2. Now you can work on the branch. When you are ready to test, apply the changes back and drop the stash from the stack.
-
-```
-$ git stash pop
-On branch master
-Your branch is up to date with 'origin/master'.
-
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git checkout -- <file>..." to discard changes in working directory)
-
-	modified:   cache.yml
-
-no changes added to commit (use "git add" and/or "git commit -a")
-```
-
-3. Commit all your changes except for cache.yml. When done committing, you can apply the uncommitted changes to the stack again before proceeding.
+* Unable to find module 'yaml': make sure to activate the python virtualenv first and then run `pip install .`
+* Cannot find bdist_wheel: This usually happens when there is a mismatch between the python version and the virtualenv version. Make sure the symlinks you are using point to the right versions in `/usr/bin/python`.
