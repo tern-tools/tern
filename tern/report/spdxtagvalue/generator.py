@@ -110,14 +110,53 @@ def get_layer_relationships(layer_obj, prev_layer_spdxref=None):
     return block
 
 
+def get_license_ref(license):
+    '''Given one license, return a LicenseRef'''
+    return 'LicenseRef-' + license
+
+
+def get_package_licenses(license_string):
+    '''Return a list of strings from the original license in the Package
+    object. This takes in the string'''
+    return license_string.split(' ')
+
+
+def update_license_list(license_list, license_string):
+    '''SPDX has a LicenseRef block at the end of the document that has
+    all the license references in the document. To make this work,
+    take in a list containing all the licenses seen thus far, and a license
+    string from the package manager. If the individual license in the license
+    string is not in the list, add it'''
+    licenses = get_package_licenses(license_string)
+    for license in licenses:
+        if license not in license_list:
+            license_list.append(license)
+
+
 def format_license(license_string):
     '''Given a license string, return an SPDX formatted license string.
     NOTE: this is a quickfix
     We will split up the licenses by spaces, prepend each string with a
     "LicenseRef-" and then join the strings with an " AND "'''
-    license_list = license_string.split(' ')
-    amended_license_list = ['LicenseRef-' + l for l in license_list]
+    license_list = get_package_licenses(license_string)
+    amended_license_list = [get_license_ref(l) for l in license_list]
     return ' AND '.join(amended_license_list)
+
+
+def get_license_block(license_list):
+    '''Given a list of individual licenses, return a LicenseRef block of text
+    this is of the format:
+        ## License Information
+        LicenseID: LicenseRef-MIT
+        ExtractedText: <text> </text>'''
+    # make a list of individual licenses
+    block = ''
+    for license in license_list:
+        block = block + spdx_formats.license_id.format(
+            license_ref=get_license_ref(license)) + '\n'
+        block = block + spdx_formats.extracted_text.format(
+            orig_license=license) + '\n\n'
+    return block
 
 
 def generate(image_obj_list):
@@ -185,6 +224,7 @@ def generate(image_obj_list):
     For the sake of SPDX, an image is a 'Package' which 'CONTAINS'
     each layer which is also a 'Package' which 'CONTAINS' the real Package'''
     report = ''
+    licenses_found = []  # This is needed for unrecognized license strings
     image_obj = image_obj_list[0]
     template = SPDX()
     # The image's PackageDownloadLocation is from a container registry
@@ -236,13 +276,16 @@ def generate(image_obj_list):
     for layer_obj in image_obj.layers:
         for package_obj in layer_obj.packages:
             package_dict = package_obj.to_dict(template)
+            # update the PackageLicenseDeclared with a LicenseRef string
             if 'PackageLicenseDeclared' in package_dict.keys():
                 package_dict['PackageLicenseDeclared'] = format_license(
                     package_obj.pkg_license)
+            # collect all the individual licenses
+            update_license_list(licenses_found, package_obj.pkg_license)
             report = report + get_main_block(
                 package_dict,
                 package_obj.origins.origins,
                 SPDXID=get_package_spdxref(package_obj),
                 PackageLicenseConcluded='NOASSERTION',
                 FilesAnalyzed='false') + '\n'
-    return report
+    return report + get_license_block(licenses_found)
