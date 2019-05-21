@@ -7,6 +7,6 @@
 # what should be updated.
 #
 
-docker==3.7.0
-PyYAML==3.13
-requests==2.21.0
+PyYAML==5.1
+docker==4.0.1
+requests==2.22.0
