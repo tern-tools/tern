@@ -29,3 +29,7 @@ package_comment = 'PackageComment: <text>{comment}</text>'
 # Relationship strings
 contains = 'Relationship: {outer} CONTAINS {inner}'
 prereq = 'Relationship: {after} HAS_PREREQUISITE {before}'
+
+# License Reference Information
+license_id = 'LicenseID: {license_ref}'
+extracted_text = 'ExtractedText: <text>Original license: {orig_license}</text>'
