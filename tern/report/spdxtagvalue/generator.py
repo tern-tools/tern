@@ -193,6 +193,9 @@ def generate(image_obj_list):
         image_obj.to_dict(template),
         image_obj.origins.origins,
         SPDXID=get_image_spdxref(image_obj),
+        PackageLicenseDeclared='NOASSERTION',
+        PackageLicenseConcluded='NOASSERTION',
+        PackageCopyrightText='NOASSERTION',
         FilesAnalyzed='false') + '\n'
     # Add image relationships
     report = report + get_image_relationships(image_obj) + '\n'
@@ -205,6 +208,9 @@ def generate(image_obj_list):
             layer_obj.origins.origins,
             SPDXID=get_layer_spdxref(layer_obj),
             PackageDownloadLocation=registry_repotag,
+            PackageLicenseDeclared='NOASSERTION',
+            PackageLicenseConcluded='NOASSERTION',
+            PackageCopyrightText='NOASSERTION',
             FilesAnalyzed='false') + '\n'
         # Add layer relationships
         if index == 0:
@@ -223,5 +229,6 @@ def generate(image_obj_list):
                 package_obj.to_dict(template),
                 package_obj.origins.origins,
                 SPDXID=get_package_spdxref(package_obj),
+                PackageLicenseConcluded='NOASSERTION',
                 FilesAnalyzed='false') + '\n'
     return report
