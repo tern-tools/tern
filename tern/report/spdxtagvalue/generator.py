@@ -110,6 +110,16 @@ def get_layer_relationships(layer_obj, prev_layer_spdxref=None):
     return block
 
 
+def format_license(license_string):
+    '''Given a license string, return an SPDX formatted license string.
+    NOTE: this is a quickfix
+    We will split up the licenses by spaces, prepend each string with a
+    "LicenseRef-" and then join the strings with an " AND "'''
+    license_list = license_string.split(' ')
+    amended_license_list = ['LicenseRef-' + l for l in license_list]
+    return ' AND '.join(amended_license_list)
+
+
 def generate(image_obj_list):
     '''Generate an SPDX document
     WARNING: This assumes that the list consists of one image or the base
@@ -225,8 +235,12 @@ def generate(image_obj_list):
     # There are no relationships to be listed here
     for layer_obj in image_obj.layers:
         for package_obj in layer_obj.packages:
+            package_dict = package_obj.to_dict(template)
+            if 'PackageLicenseDeclared' in package_dict.keys():
+                package_dict['PackageLicenseDeclared'] = format_license(
+                    package_obj.pkg_license)
             report = report + get_main_block(
-                package_obj.to_dict(template),
+                package_dict,
                 package_obj.origins.origins,
                 SPDXID=get_package_spdxref(package_obj),
                 PackageLicenseConcluded='NOASSERTION',
