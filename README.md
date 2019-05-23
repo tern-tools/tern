@@ -184,7 +184,7 @@ To get just a list of packages, you can use the `-s` option to get a summary rep
 ```
 $ tern -l report -s -i golang:1.12 -f output.txt
 ```
-WARNING: Tern is meant to give guidance on what may be installed in a container image, so we recommended that for the purpose of investigation, to use the default report format.
+WARNING: Tern is meant to give guidance on what may be installed in a container image. We recommend that you use the default report format for the purpose of investigation.
 
 
 ## JSON Format<a name="report-json">
