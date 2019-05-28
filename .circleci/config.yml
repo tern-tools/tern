@@ -1,0 +1,28 @@
+# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+
+version: 2.1
+# set up executor
+executors:
+  ubuntu1604:
+    machine:
+      image: ubuntu-1604:201903-01
+      
+jobs:
+  # full functional test for photonOS
+  funcphoton:
+    executor: ubuntu1604
+    # checkout the code and set up the environment
+    steps:
+      - run: sudo apt-get install -y attr
+      - checkout
+      - run: pyenv global 3.6.5
+      - run: pip install --upgrade pip
+      - run: pip install .
+      - run: tern -l report -i photon:3.0
+workflows:
+  # run a full functional test for photonOS
+  version: 2
+  functests:
+    jobs:
+      - funcphoton
