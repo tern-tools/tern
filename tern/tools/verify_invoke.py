@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Test script for running commands in a chroot environment to check if the
 results produced are expected
