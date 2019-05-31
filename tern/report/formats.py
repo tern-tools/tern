@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Report formatting for different types of reports and report content
 """

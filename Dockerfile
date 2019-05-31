@@ -1,3 +1,6 @@
+# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+
 FROM photon:3.0
 
 # install system dependencies
