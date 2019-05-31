@@ -2,7 +2,6 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
 
 from tern.report import formats
 from tern.utils.general import prop_names

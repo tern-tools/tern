@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Objects to use for testing
 """

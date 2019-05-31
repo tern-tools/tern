@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2018-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 #
 # Given a file path, create a list of file stats and their sha256sums
