@@ -7,22 +7,36 @@ executors:
   ubuntu1604:
     machine:
       image: ubuntu-1604:201903-01
-      
-jobs:
-  # full functional test for photonOS
-  funcphoton:
-    executor: ubuntu1604
-    # checkout the code and set up the environment
+
+commands:
+  setup:
     steps:
       - run: sudo apt-get install -y attr
       - checkout
       - run: pyenv global 3.6.5
       - run: pip install --upgrade pip
+
+jobs:
+  # linting using Prospector
+  linting:
+    executor: ubuntu1604
+    # steps to run Prospector
+    steps:
+      - setup
+      - run: pip install -r dev-requirements.txt
+      - run: pip install .
+      - run: prospector .
+  # full functional test for photonOS
+  funcphoton:
+    executor: ubuntu1604
+    # checkout the code and set up the environment
+    steps:
+      - setup
       - run: pip install .
       - run: tern -l report -i photon:3.0
 workflows:
   # run a full functional test for photonOS
   version: 2
-  functests:
+  PRs:
     jobs:
-      - funcphoton
+      - linting
