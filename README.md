@@ -1,6 +1,6 @@
 ![Tern](/docs/img/tern_logo.png)
 
-[![Build Status](https://travis-ci.com/vmware/tern.svg?branch=master)](https://travis-ci.com/vmware/tern)
+[![CircleCI](https://circleci.com/gh/vmware/tern.svg?style=svg)](https://circleci.com/gh/vmware/tern)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2689/badge)](https://bestpractices.coreinfrastructure.org/projects/2689)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
