@@ -110,9 +110,9 @@ def get_layer_relationships(layer_obj, prev_layer_spdxref=None):
     return block
 
 
-def get_license_ref(license):
+def get_license_ref(pkg_license):
     '''Given one license, return a LicenseRef'''
-    return 'LicenseRef-' + license
+    return 'LicenseRef-' + pkg_license
 
 
 def get_package_licenses(license_string):
@@ -128,9 +128,9 @@ def update_license_list(license_list, license_string):
     string from the package manager. If the individual license in the license
     string is not in the list, add it'''
     licenses = get_package_licenses(license_string)
-    for license in licenses:
-        if license not in license_list:
-            license_list.append(license)
+    for l in licenses:
+        if l not in license_list:
+            license_list.append(l)
 
 
 def format_license(license_string):
@@ -151,11 +151,11 @@ def get_license_block(license_list):
         ExtractedText: <text> </text>'''
     # make a list of individual licenses
     block = ''
-    for license in license_list:
+    for l in license_list:
         block = block + spdx_formats.license_id.format(
-            license_ref=get_license_ref(license)) + '\n'
+            license_ref=get_license_ref(l)) + '\n'
         block = block + spdx_formats.extracted_text.format(
-            orig_license=license) + '\n\n'
+            orig_license=l) + '\n\n'
     return block
 
 
