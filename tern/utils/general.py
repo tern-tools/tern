@@ -15,6 +15,7 @@ from tern.utils import constants
 
 # regex strings
 cleaning = '[\t\\\\]'
+concat = '&&|;'
 
 
 # from https://stackoverflow.com/questions/6194499/pushd-through-os-system
@@ -38,6 +39,11 @@ def clean_command(command):
     indentations
     Leave && alone'''
     return re.sub(cleaning, '', command).strip()
+
+
+def split_command(command):
+    '''Given a string of concatenated commands, return a list of commands'''
+    return re.split(concat, command)
 
 
 def parse_command(command):

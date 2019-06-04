@@ -26,7 +26,6 @@ directives = ['FROM',
 # regex for matching lines in a dockerfile
 comments = re.compile('^#')
 line_indent = re.compile('.*\\\\$')
-concatenation = re.compile('&&')
 tabs = re.compile('\t')
 
 # regex strings
