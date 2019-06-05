@@ -19,6 +19,7 @@ from tern.report import errors
 from tern.report import content
 from tern.utils import cache
 from tern.utils import constants
+from tern.utils import general
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -26,10 +27,10 @@ logger = logging.getLogger(constants.logger_name)
 
 def get_shell_commands(shell_command_line):
     '''Given a shell command line, get a list of Command objects'''
-    comm_list = shell_command_line.split('&&')
+    comm_list = general.split_command(shell_command_line)
     cleaned_list = []
     for comm in comm_list:
-        cleaned_list.append(Command(comm.strip()))
+        cleaned_list.append(Command(general.clean_command(comm)))
     return cleaned_list
 
 
