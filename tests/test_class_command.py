@@ -5,7 +5,7 @@
 
 import unittest
 
-from classes.command import Command
+from tern.classes.command import Command
 
 
 class TestClassCommand(unittest.TestCase):
@@ -15,12 +15,14 @@ class TestClassCommand(unittest.TestCase):
         self.untar = Command('tar -x -C file tarfile.tar')
         self.download = Command('wget url')
         self.remove = Command('apt-get purge git')
+        self.install2 = Command('apt-get install -y ca-certificates')
 
     def tearDown(self):
         del self.install
         del self.untar
         del self.download
         del self.remove
+        del self.install2
 
     def testInstance(self):
         self.assertEqual(self.install.shell_command, 'apt-get install -y git')
@@ -97,6 +99,28 @@ class TestClassCommand(unittest.TestCase):
         self.remove.set_remove()
         self.assertTrue(self.remove.is_set())
         self.assertTrue(self.remove.is_remove())
+
+    def testMerge(self):
+        self.install.reassign_word('install', 'subcommand')
+        self.install.set_install()
+        self.install2.reassign_word('install', 'subcommand')
+        self.install2.set_install()
+        self.remove.reassign_word('purge', 'subcommand')
+        self.remove.set_remove()
+        # merge the second install into the first install
+        self.assertTrue(self.install.merge(self.install2))
+        self.assertTrue(self.install.words, ['git', 'ca-certificates'])
+        # merge the remove command
+        self.assertTrue(self.install.merge(self.remove))
+        self.assertTrue(self.install.words, ['ca-certificates'])
+        # try to merge the download command
+        self.assertFalse(self.install.merge(self.download))
+        # try to merge an ignored command
+        self.download.set_ignore()
+        self.assertFalse(self.install.merge(self.download))
+        # try to merge some other object
+        with self.assertRaises(TypeError):
+            self.install.merge('test')
 
 
 if __name__ == '__main__':
