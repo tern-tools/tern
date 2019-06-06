@@ -22,6 +22,9 @@ Here is a layout of the directory structure:
       base.yml <-- System wide scripts for package managers and such
       snippets.yml <-- scripts for one off commands
       command_lib.py <-- Command Library modules
+  ▾ helpers/
+      common.py <-- Common modules used at a high level throughout the code
+      docker.py <-- modules specific to Docker
   ▾ report/
       content.py
       errors.py
@@ -46,8 +49,6 @@ Here is a layout of the directory structure:
       metadata.py
       rootfs.py
     __main__.py <-- Tern entry point
-    common.py <-- Common modules used at a high level throughout the code
-    docker_helpers.py <-- modules specific to Docker
 ```
 
 Tests live outside of the `tern` folder, in a folder called `tests`.
@@ -83,4 +84,4 @@ Some general rules about where the code is located:
 Code organization follows these general rules:
 - Each class is in its own file.
 - Utils are organized based on what they operate on.
-- Subroutines that require the use of modules from all over the project live in high level files like `common.py` and `docker_helpers.py` 
+- Subroutines that require the use of modules from all over the project live under the helper folder in high level files like `common.py` and `docker.py` 

@@ -19,7 +19,7 @@ from tern.utils import container
 from tern.utils import constants
 from tern.report import errors
 from tern.report import formats
-from tern import common
+from tern.helpers import common
 
 # dockerfile
 dockerfile_global = ''

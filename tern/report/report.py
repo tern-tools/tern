@@ -28,8 +28,8 @@ from tern.classes.image import Image
 from tern.classes.image_layer import ImageLayer
 from tern.classes.notice import Notice
 from tern.classes.package import Package
-from tern import common
-import tern.docker_helpers as dhelper
+from tern.helpers import common
+import tern.helpers.docker as dhelper
 from tern.command_lib import command_lib
 
 # global logger
