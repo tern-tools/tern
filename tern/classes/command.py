@@ -117,3 +117,26 @@ class Command:
     def is_ignore(self):
         '''Is this a command to ignore?'''
         return self.flags == 0b001
+
+    def merge(self, other):
+        '''Given another Command object, add and remove words based on whether
+        that command is an install command or a remove command'''
+        # check if the object is an instance of Command first
+        if isinstance(other, Command):
+            # check if names are the same
+            if self.name == other.name:
+                # check if the other command is an install command
+                if other.is_install:
+                    for word in other.words:
+                        self.__words.append(word)
+                    self.__words = list(set(self.__words))
+                    return True
+                # check if the other command is a remove command
+                if other.is_remove:
+                    for word in other.words:
+                        if word in self.__words:
+                            self.__words.remove(word)
+                    return True
+            return False
+        raise TypeError('Object type is {0}, should be Command'.format(
+            type(other)))
