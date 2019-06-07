@@ -284,6 +284,20 @@ def remove_unrecognized_commands(command_list):
     return unrec_commands, filtered_list
 
 
+def consolidate_commands(command_list):
+    '''Given a list of Command objects, consolidate the install and remove
+    commands into one and return a list of resulting command objects'''
+    new_list = []
+    while command_list:
+        first = command_list.pop(0)
+        for _ in range(0, len(command_list)):
+            second = command_list.pop(0)
+            if not first.merge(second):
+                command_list.append(first)
+        new_list.append(first)
+    return new_list
+
+
 def filter_install_commands(shell_command_line):
     '''Given a shell command line:
         1. Create a list of Command objects
@@ -301,7 +315,8 @@ def filter_install_commands(shell_command_line):
         report = report + formats.ignored + ignore_msgs
     if unrec_msgs:
         report = report + formats.unrecognized + unrec_msgs
-    return filter2, report
+
+    return consolidate_commands(filter2), report
 
 
 def add_snippet_packages(image_layer, command, pkg_listing, shell):
