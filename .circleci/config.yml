@@ -26,6 +26,7 @@ jobs:
       - run: pip install -r dev-requirements.txt
       - run: pip install .
       - run: prospector .
+      - run: bandit -r .
   # full functional test for photonOS
   funcphoton:
     executor: ubuntu1604
