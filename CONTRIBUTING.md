@@ -102,7 +102,9 @@ You may have already cloned the project and started working on it. If you're rea
 ### After making changes
 1. Run prospector from the project's root directory `prospector .`
 2. Fix any issues prospector brings up.
-3. Run `pip install .`. Don't worry about the already satisfied dependencies.
+3. Run bandit from the project's root directory `bandit -r .`
+4. Fix any issues bandit brings up.
+5. Run `pip uninstall tern`, then run `pip install .` to install tern with your changes. Don't worry about the already satisfied dependencies.
 4. Test your changes.
 
 ## Coding Style
