@@ -6,6 +6,8 @@
 # transitive dependencies listed make it more difficult to figure out
 # what should be updated.
 
+# This is only a drill. Do not merge this commit.
+
 PyYAML==5.1
 docker==4.0.1
 requests==2.22.0
