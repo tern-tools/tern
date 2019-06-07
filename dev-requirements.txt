@@ -6,3 +6,5 @@
 
 # For development work, pull in dev support utilities
 prospector==1.1.6.2
+# For security linting, use Bandit
+bandit==1.6.0
