@@ -57,7 +57,7 @@ def check_format_type(format_type):
 
 def do_main(args):
     '''Execute according to subcommands'''
-    print("Don't merge this change!")
+    print("Really Don't merge this change!")
     if args.log_stream:
         # set up console logs
         global logger
