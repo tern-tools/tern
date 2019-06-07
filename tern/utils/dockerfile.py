@@ -9,6 +9,8 @@ Dockerfile parser and information retrieval
 
 import re
 
+from tern.utils.general import clean_command
+
 directives = ['FROM',
               'ARG',
               'ADD',
@@ -24,11 +26,9 @@ directives = ['FROM',
 # regex for matching lines in a dockerfile
 comments = re.compile('^#')
 line_indent = re.compile('.*\\\\$')
-concatenation = re.compile('&&')
 tabs = re.compile('\t')
 
 # regex strings
-cleaning = '[\t\\\\]'
 bash_var = '[\$\{\}]'  # noqa
 
 # strings
@@ -67,13 +67,6 @@ def get_command_list(dockerfile_name):
             command = ''
 
     return command_list
-
-
-def clean_command(command):
-    '''Given a command string, clean out all whitespaces, tabs and line
-    indentations
-    Leave && alone'''
-    return re.sub(cleaning, '', command).strip()
 
 
 def get_directive(line):

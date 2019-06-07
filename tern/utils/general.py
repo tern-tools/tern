@@ -13,6 +13,11 @@ from tern import Version
 from tern.utils import constants
 
 
+# regex strings
+cleaning = '[\t\\\\]'
+concat = '&&|;'
+
+
 # from https://stackoverflow.com/questions/6194499/pushd-through-os-system
 @contextmanager
 def pushd(path):
@@ -27,6 +32,18 @@ def initialize_names():
     constants.image = constants.image + "_" + str(randint)
     constants.tag = constants.tag + "_" + str(randint)
     constants.container = constants.container + "_" + str(randint)
+
+
+def clean_command(command):
+    '''Given a command string, clean out all whitespaces, tabs and line
+    indentations
+    Leave && alone'''
+    return re.sub(cleaning, '', command).strip()
+
+
+def split_command(command):
+    '''Given a string of concatenated commands, return a list of commands'''
+    return re.split(concat, command)
 
 
 def parse_command(command):
