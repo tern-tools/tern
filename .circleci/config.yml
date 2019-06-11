@@ -26,7 +26,15 @@ jobs:
       - run: pip install -r dev-requirements.txt
       - run: pip install .
       - run: prospector .
+  # security linting using Bandit
+  security:
+    executor: ubuntu1604
+    # steps to run Bandit
+    steps:
+      - setup
+      - run: pip install -r dev-requirements.txt
       - run: bandit -r .
+  # linting for PR commit messages
   commit_check:
     executor: ubuntu1604
     # Steps to run commit message linting
@@ -49,3 +57,4 @@ workflows:
     jobs:
       - linting
       - commit_check
+      - security
