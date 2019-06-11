@@ -27,6 +27,13 @@ jobs:
       - run: pip install .
       - run: prospector .
       - run: bandit -r .
+  commit_check:
+    executor: ubuntu1604
+    # Steps to run commit message linting
+    steps:
+      - setup
+      - run: pip install -r dev-requirements.txt
+      - run: python tests/test_commit_message.py
   # full functional test for photonOS
   funcphoton:
     executor: ubuntu1604
@@ -41,3 +48,4 @@ workflows:
   PRs:
     jobs:
       - linting
+      - commit_check
