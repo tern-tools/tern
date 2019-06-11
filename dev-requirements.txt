@@ -8,3 +8,6 @@
 prospector==1.1.6.2
 # For security linting, use Bandit
 bandit==1.6.0
+
+# For commit message linting in circleci we need GitPython
+GitPython==2.1.11
