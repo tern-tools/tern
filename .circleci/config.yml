@@ -47,5 +47,5 @@ workflows:
   version: 2
   PRs:
     jobs:
-      - linting
       - commit_check
+      - linting
