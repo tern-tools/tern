@@ -7,7 +7,7 @@
 """
 Tern executable
 """
-# Don't merge
+# Really Don't merge
 
 
 import argparse
