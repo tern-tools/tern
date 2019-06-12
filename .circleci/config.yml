@@ -41,7 +41,7 @@ jobs:
     steps:
       - setup
       - run: pip install -r dev-requirements.txt
-      - run: python tests/test_commit_message.py
+      - run: python ci/test_commit_message.py
   # full functional test for photonOS
   funcphoton:
     executor: ubuntu1604
