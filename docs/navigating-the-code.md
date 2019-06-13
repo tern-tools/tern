@@ -69,6 +69,13 @@ Tests live outside of the `tern` folder, in a folder called `tests`.
     test_util_metadata.py
 ```
 
+Scripts used by our CI/CD setup live outside the `tern` folder, in a folder called `ci`.
+
+```
+▾ ci/
+    test_commit_message.py
+```
+
 Documentation lives in a folder called `docs`. Sample Dockerfile live in a folder called `samples`.
 
 Some general rules about where the code is located:
