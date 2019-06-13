@@ -41,6 +41,8 @@ logger.addHandler(log_handler)
 def check_file_existence(path):
     if not os.path.isfile(path):
         msg = "{}: does not exist".format(path)
+        print("Does circleci AND precaution trigger?")
+        print("Do not merge!")
         raise argparse.ArgumentTypeError(msg)
     return path
 
