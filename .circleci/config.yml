@@ -42,6 +42,14 @@ jobs:
       - setup
       - run: pip install -r dev-requirements.txt
       - run: python ci/test_commit_message.py
+  test_changes:
+    executor: ubuntu1604
+    # Steps to run tests on files changed
+    steps:
+      - setup
+      - run: pip install -r dev-requirements.txt
+      - run: pip install .
+      - run: python ci/test_files_touched.py
   # full functional test for photonOS
   funcphoton:
     executor: ubuntu1604
@@ -58,3 +66,4 @@ workflows:
       - linting
       - commit_check
       - security
+      - test_changes
