@@ -26,7 +26,7 @@ for d in diff:
 
 # check that changes has entries
 if not changes:
-    printf('No changes to run tests for.')
+    print('No changes to run tests for.')
     sys.exit(0)
 
 test_suite = {

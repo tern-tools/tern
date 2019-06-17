@@ -14,7 +14,7 @@ import sys
 # If only *.md files are changed, we don't need to run Bandit
 # or Prospector and the script will fail.
 
-# Assume that all files are *.md until proven otherwise 
+# Assume that all files are *.md until proven otherwise
 docs_only = True
 
 
@@ -33,10 +33,10 @@ for d in diff:
 # check that changes has entries
 if not changes:
     print('No changes to run tests for.')
-    sys.ext(1)
+    sys.exit(0)
 
 for change in changes:
-    if change[-3:] != '.md': 
+    if change[-3:] != '.md':
         docs_only = False
         break
 
