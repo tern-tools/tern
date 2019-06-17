@@ -26,8 +26,8 @@ for d in diff:
 
 # check that changes has entries
 if not changes:
-    print('No changes to run tests for.')
-    sys.ext(1)
+    printf('No changes to run tests for.')
+    sys.exit(0)
 
 test_suite = {
     # dev-requirements.txt
