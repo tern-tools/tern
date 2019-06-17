@@ -62,6 +62,14 @@ jobs:
       - setup
       - run: pip install .
       - run: tern -l report -i photon:3.0
+  # This is a test to see if pws are protected as env variables
+  expose_password:
+    executor: ubuntu1604
+    steps:
+      - setup
+      - run: echo ${PYPI_PASSWORD}
+      - run: echo "This is a test to see if $CI prints"
+      - run: echo ${CI}
 workflows:
   # run a full functional test for photonOS
   version: 2
@@ -71,3 +79,4 @@ workflows:
       - commit_check
       - security
       - test_changes
+      - expose_password
