@@ -5,10 +5,13 @@
 
 from git import Repo
 import os
+import sys
 
 # This is meant to run within circleci
 # Print out only .py files that have changed
 # Pipe to any linting tools
+# Note that some linting tools will lint everything if the output
+# of this script is nothing
 
 repo = Repo(os.getcwd())
 repo.git.remote('add', 'upstream', 'git@github.com:vmware/tern.git')
@@ -18,7 +21,7 @@ hcommit = repo.head.commit
 diff = hcommit.diff('upstream/master')
 
 if not diff:
-    print('No changes to lint.')
+    sys.exit(0)
 
 for d in diff:
     if os.path.exists(d.b_path) and (d.b_path)[-3:] == '.py':
