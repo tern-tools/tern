@@ -25,7 +25,7 @@ jobs:
       - setup
       - run: pip install -r dev-requirements.txt
       - run: pip install .
-      - run: python ci/evaluate_docs.py | xargs prospector
+      - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi
   # security linting using Bandit
   security:
     executor: ubuntu1604
@@ -33,7 +33,7 @@ jobs:
     steps:
       - setup
       - run: pip install -r dev-requirements.txt
-      - run: python ci/evaluate_docs.py | xargs bandit
+      - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
   # linting for PR commit messages
   commit_check:
     executor: ubuntu1604
