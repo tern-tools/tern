@@ -25,11 +25,7 @@ jobs:
       - setup
       - run: pip install -r dev-requirements.txt
       - run: pip install .
-      - run: python ci/evaluate_docs.py
-      - run:
-         name: Prospector
-         when: on_success
-         command: prospector .
+      - run: python ci/evaluate_docs.py | xargs prospector
   # security linting using Bandit
   security:
     executor: ubuntu1604
@@ -37,7 +33,7 @@ jobs:
     steps:
       - setup
       - run: pip install -r dev-requirements.txt
-      - run: bandit -r .
+      - run: python ci/evaluate_docs.py | xargs bandit
   # linting for PR commit messages
   commit_check:
     executor: ubuntu1604
