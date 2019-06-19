@@ -26,10 +26,6 @@ jobs:
       - run: pip install -r dev-requirements.txt
       - run: pip install .
       - run: python ci/evaluate_docs.py
-      - run:
-         name: Prospector
-         when: on_success
-         command: prospector .
   # security linting using Bandit
   security:
     executor: ubuntu1604
