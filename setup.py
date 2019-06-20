@@ -23,8 +23,8 @@ setup(
   author="VMWare Inc",
   author_email="FIXME@FIXWHAT.THEEMAIL",
   url="https://github.com/vmware/tern/",
-  description=("An inspection tool to find the metadata of the packages" 
-    " installed in a container image"),
+  description=("An inspection tool to find the OSS compliance metadata of"
+  " the packages installed in a container image."),
   long_description=_read_long_desc(),
   license="BSD-2.0",
   keywords="Distribution, Container, Cloud-Native",
