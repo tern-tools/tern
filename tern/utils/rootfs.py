@@ -174,8 +174,8 @@ def calc_fs_hash(fs_path):
     directory.
     Note that this file will be deleted if the -k flag is not given'''
     try:
-        fs_hash_path = pkg_resources.resource_filename("tern",
-                "tools/fs_hash.sh")
+        fs_hash_path = pkg_resources.resource_filename(
+            "tern", "tools/fs_hash.sh")
         hash_contents = root_command(
             [fs_hash_path], os.path.abspath(fs_path))
         file_name = hashlib.sha256(hash_contents).hexdigest()
