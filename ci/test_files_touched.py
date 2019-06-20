@@ -74,7 +74,7 @@ test_suite = {
     # tern/report
     re.compile('tern/report'): [
         'tern -l report -i golang:alpine',
-        'tern -l report -j photon:3.0',
+        'tern -l report -j -i photon:3.0',
         'tern -l report -y -i photon:3.0',
         'tern -l report -s -i photon:3.0',
         'tern -l report -m spdxtagvalue -i photon:3.0',
