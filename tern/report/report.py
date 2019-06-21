@@ -171,8 +171,7 @@ def mount_overlay_fs(image_obj, top_layer):
     for index in range(0, top_layer + 1):
         tar_layers.append(image_obj.layers[index].tar_file)
     target = rootfs.mount_diff_layers(tar_layers)
-    # mount dev, sys and proc after mounting diff layers
-    rootfs.prep_rootfs(target)
+    return target
 
 
 def analyze_docker_image(image_obj, redo=False, dockerfile=False):  # pylint: disable=too-many-locals
@@ -245,7 +244,9 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):  # pylint: di
                 image_obj.layers[curr_layer])
             if command_list:
                 # mount diff layers from 0 till the current layer
-                mount_overlay_fs(image_obj, curr_layer)
+                target = mount_overlay_fs(image_obj, curr_layer)
+                # mount dev, sys and proc after mounting diff layers
+                rootfs.prep_rootfs(target)
             # for each command look up the snippet library
             for command in command_list:
                 pkg_listing = command_lib.get_package_listing(command.name)
