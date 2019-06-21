@@ -37,14 +37,21 @@ def lint_commit(commit_id):
         check = False
 
     # Check 3: Each line of the body is less than 72
-    body = re.split('\n\n|\r', message, 1)[1]
-    for i in range(len(body)):
-        if len(body[i]) > 72:
-            print("Line {0} of commit {1} exceeds 72 characters.".format(
-                i+1, sha_short))
-            check = False
+    msg_list = re.split('\n\n|\r', message)
+    msg_list.pop(0)
+    msg_list.pop()
+    for msg in msg_list:
+        for line in msg.split('\n'):
+            if len(line) > 72:
+                print("Line exceeds 72 characters.\n"
+                      "Line: {0}\n"
+                      "Commit: {1}\n\n".format(line, sha_short))
+                check = False
 
-    if not check:
+    if check:
+        print("Commit message checks pass")
+        sys.exit(0)
+    else:
         sys.exit(1)
 
 
