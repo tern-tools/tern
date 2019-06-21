@@ -29,6 +29,7 @@ setup(
     description=("An inspection tool to find the OSS compliance metadata of"
                  " the packages installed in a container image."),
     long_descrition=_read_long_desc(),
+    long_description_content_type='text/markdown',
     license="BSD-2.0",
     keywords="Distribution, Container, Cloud-Native",
     classifiers=[
