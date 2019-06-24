@@ -44,6 +44,7 @@ class ImageLayer:
         self.__origins = Origins()
         self.__import_image = None
         self.__import_str = ''
+        self.__pkg_format = ''
 
     @property
     def diff_id(self):
@@ -88,6 +89,14 @@ class ImageLayer:
     @import_str.setter
     def import_str(self, import_str):
         self.__import_str = import_str
+
+    @property
+    def pkg_format(self):
+        return self.__pkg_format
+
+    @pkg_format.setter
+    def pkg_format(self, pkg_format):
+        self.__pkg_format = pkg_format
 
     def add_package(self, package):
         if isinstance(package, Package):
