@@ -269,8 +269,8 @@ def check_sourcable(command, package_name):
     return sourcable
 
 
-def check_pkg_format(pkgmanager):
+def check_pkg_format(binary):
     try:
-        return command_lib['base'][pkgmanager]['pkg_format']
+        return command_lib['base'][binary]['pkg_format']
     except KeyError:
         return ''
