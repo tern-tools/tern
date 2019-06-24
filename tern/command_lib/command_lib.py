@@ -31,7 +31,8 @@ with open(os.path.abspath(base_file)) as f:
 with open(os.path.abspath(snippet_file)) as f:
     command_lib['snippets'] = yaml.safe_load(f)
 # list of package information keys that the command library can accomodate
-base_keys = {'names', 'versions', 'licenses', 'copyrights', 'proj_urls', 'srcs'}
+base_keys = {'names', 'versions', 'licenses', 'copyrights', 'proj_urls',
+             'srcs'}
 package_keys = {'name', 'version', 'license', 'copyright', 'proj_url', 'src'}
 
 # global logger
@@ -266,3 +267,10 @@ def check_sourcable(command, package_name):
                         'src' in package.keys():
                     sourcable = True
     return sourcable
+
+
+def check_pkg_format(pkgmanager):
+    try:
+        return command_lib['base'][pkgmanager]['pkg_format']
+    except KeyError:
+        return ''
