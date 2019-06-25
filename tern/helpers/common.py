@@ -380,3 +380,18 @@ def update_master_list(master_list, layer_obj):
     while unique:
         layer_obj.packages.append(unique.pop(0))
     del unique
+
+
+def get_os_style(image_layer, binary):
+    '''Given an ImageLayer object and a binary package manager, determine if
+    the package manager has a pkg_format associated with it. If the binary
+    does not exist in base.yml, add a notice to the layer's origins'''
+    origin_command_lib = formats.invoking_base_commands
+    pkg_format = command_lib.check_pkg_format(binary)
+    if not pkg_format:
+        # empty string means binary is not found in base.yml
+        image_layer.origins.add_notice_to_origins(
+            origin_command_lib, Notice(errors.no_listing_for_base_key.format(
+                listing_key=binary), 'warning'))
+    else:
+        image_layer.pkg_format = pkg_format
