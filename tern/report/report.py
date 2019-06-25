@@ -174,7 +174,8 @@ def mount_overlay_fs(image_obj, top_layer):
     return target
 
 
-def analyze_docker_image(image_obj, redo=False, dockerfile=False):  # pylint: disable=too-many-locals
+def analyze_docker_image(image_obj, redo=False,
+                         dockerfile=False):  # pylint: disable=too-many-locals
     '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
@@ -215,6 +216,8 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):  # pylint: di
     # cached
     if binary:
         if not common.load_from_cache(image_obj.layers[0], redo):
+            # Determine pacakge/os style from binary in the image layer
+            common.get_os_style(image_obj.layers[0], binary)
             # get the packages of the first layer
             rootfs.prep_rootfs(target)
             common.add_base_packages(image_obj.layers[0], binary, shell)
