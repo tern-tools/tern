@@ -270,7 +270,23 @@ def check_sourcable(command, package_name):
 
 
 def check_pkg_format(binary):
+    '''Given a binary package manager, return the associated pkg_format from
+    base.yml. If the binary is not valid in base.yml, return an empty
+    string.'''
     try:
         return command_lib['base'][binary]['pkg_format']
+    except KeyError:
+        return ''
+
+
+def check_os_guess(binary):
+    '''Given a binary package manager, return the associated os_guess from
+    base.yml. If the binary is not valid in base.yml, return an empty
+    string.'''
+    os_list = []
+    try:
+        for o in command_lib['base'][binary]['os_guess']:
+            os_list.append(o)
+        return ', '.join(os_list)
     except KeyError:
         return ''
