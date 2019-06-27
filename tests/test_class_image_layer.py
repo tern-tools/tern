@@ -32,6 +32,8 @@ class TestClassImageLayer(unittest.TestCase):
         self.assertEqual(self.layer.created_by, 'some string')
         self.layer.pkg_format = 'rpm'
         self.assertEqual(self.layer.pkg_format, 'rpm')
+        self.layer.os_guess = 'operating system'
+        self.assertEqual(self.layer.os_guess, 'operating system')
 
     def testAddPackage(self):
         err = "Object type String, should be Package"
