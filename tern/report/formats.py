@@ -57,6 +57,10 @@ invoking_snippet_commands = '''Invoking commands from ''' \
     '''command_lib/snippets.yml'''
 ignored = '''\nIgnored Commands:'''
 unrecognized = '''\nUnrecognized Commands:'''
+os_style_guess = '''Found {package_manager} package manager with '''\
+    '''{package_format} package format. Possible OS(es) for this layer '''\
+    '''might be: {os_list}'''
+os_release = '''Found '{os_style}' in /etc/os-release.'''
 
 # report formatting for dockerfiles
 
