@@ -4,52 +4,31 @@
 # Copyright (c) 2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
-from setuptools import setup, find_packages
+import os
+import sys
 
 from tern import Version
+from setuptools.command.install import install
+from setuptools import setup
 
 
-def _read_long_desc():
-    with open("README.md") as fp:
-        return fp.read()
+class VerifyVersion(install):
+    """Run a custom verify command"""
+    description = "Verify that the git tag matches current release version."
 
-
-def _get_requirements():
-
-    with open("requirements.txt") as fp:
-        return [requirement for requirement in fp]
+    def run(self):
+        tag = os.getenv('CIRCLE_TAG')
+        if tag.lstrip('v') != Version:
+            info = "Git tag {0} does not match Tern version {1}".format(
+                tag, Version)
+            sys.exit(info)
 
 
 setup(
-    name="tern",
-    version=Version,
-    author="VMWare Inc",
-    author_email="FIXME@FIXWHAT.THEEMAIL",
-    url="https://github.com/vmware/tern/",
-    description=("An inspection tool to find the OSS compliance metadata of"
-                 " the packages installed in a container image."),
-    long_descrition=_read_long_desc(),
-    long_description_content_type='text/markdown',
-    license="BSD-2.0",
-    keywords="Distribution, Container, Cloud-Native",
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Natural Language :: English',
-        'Operating System :: POSIX',
-        'Operating System :: POSIX :: Linux',
-        'Operating System :: MacOS :: MacOS X',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Topic :: Software Development'
-    ],
-    include_package_data=True,
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*",
-                                    "tests"]),
-    install_requires=_get_requirements(),
+    setup_requires=['pbr'],
+    pbr=True,
     test_suite="tests.runtests",
-    entry_points={
-        "console_scripts": ["tern = tern.__main__:main"]
-    },
+    cmdclass={
+        "verify": VerifyVersion,
+    }
 )

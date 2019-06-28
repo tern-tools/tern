@@ -15,6 +15,14 @@ commands:
       - checkout
       - run: pyenv global 3.6.5
       - run: pip install --upgrade pip
+  create_pypirc:
+    steps:
+      - run:
+          name: Create pypirc file
+          command: |
+           echo -e "[pypi]" >> ~/.pypirc
+           echo -e "username = $R_PYPI_UN" >> ~/.pypirc
+           echo -e "password = $PYPI_PW" >> ~/.pypiruc
 
 jobs:
   # linting using Prospector
@@ -58,8 +66,20 @@ jobs:
       - setup
       - run: pip install .
       - run: tern -l report -i photon:3.0
+  # Deploy to PyPi
+  pypi_deploy:
+   executor: ubuntu1604
+   steps:
+      - setup
+      - run: pip install .
+      - run: pip install twine
+      # make sure git tag matches release version
+      - run: python setup.py verify
+      - create_pypirc 
+      - run: python setup.py sdist
+      - run: twine upload dist/* 
+
 workflows:
-  # run a full functional test for photonOS
   version: 2
   PRs:
     jobs:
@@ -67,3 +87,13 @@ workflows:
       - commit_check
       - security
       - test_changes
+  Release:
+    jobs:
+      - pypi_deploy:
+          filters:
+            # ignore all commits on any branch by default
+            branches:
+              ignore: /.*/
+            # only run on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
