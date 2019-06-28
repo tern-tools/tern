@@ -4,8 +4,11 @@
 # Copyright (c) 2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
-from setuptools import setup, find_packages
+import os
+import sys
 
+from setuptools import setup, find_packages
+from setuptools.command.install import install
 from tern import Version
 
 
@@ -20,6 +23,18 @@ def _get_requirements():
         return [requirement for requirement in fp]
 
 
+class VerifyVersion(install):
+    """Run a custom command"""
+    description = "Verify that the git tag matches current version"
+
+    def run(self):
+        tag = os.getenv('CIRCLE_TAG')
+        if tag != Version:
+            info = "Git tag {0} does not match Tern version {1}".format(
+                tag, Version)
+            sys.exit(info)
+
+
 setup(
     name="tern",
     version=Version,
@@ -29,7 +44,7 @@ setup(
     description=("An inspection tool to find the OSS compliance metadata of"
                  " the packages installed in a container image."),
     long_descrition=_read_long_desc(),
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     license="BSD-2.0",
     keywords="Distribution, Container, Cloud-Native",
     classifiers=[
@@ -52,4 +67,7 @@ setup(
     entry_points={
         "console_scripts": ["tern = tern.__main__:main"]
     },
+    cmdclass={
+        "verify": VerifyVersion,
+    }
 )

@@ -15,7 +15,24 @@ commands:
       - checkout
       - run: pyenv global 3.6.5
       - run: pip install --upgrade pip
-
+  # TODO: remove this command before commit
+  create_test_pypirc:
+    steps:
+      - run:
+          name: Create testpypirc file
+          command: |
+           echo -e "[testpypi]" >> ~/.pypirc
+           echo -e "repository = https://test.pypi.org/legacy/" >> ~/.pypirc 
+           echo -e "username = $R_PYPI_UN" >> ~/.pypirc
+           echo -e "password = $TESTPYPI_PW" >> ~/.pypirc
+  create_pypirc:
+    steps:
+      - run:
+          name: Create pypirc file
+          command: |
+           echo -e "[pypi]" >> ~/.pypirc
+           echo -e "username = $R_PYPI_UN" >> ~/.pypirc
+           echo -e "password = $PYPI_PW" >> ~/.pypirc
 jobs:
   # linting using Prospector
   linting:
@@ -58,8 +75,22 @@ jobs:
       - setup
       - run: pip install .
       - run: tern -l report -i photon:3.0
+  # Deploy to PyPi
+  pypi_deploy:
+   executor: ubuntu1604
+   steps:
+      - setup
+      - run: pip install .
+      - run: pip install twine
+        # make sure git tag matches release version
+        #- run: python setup.py verify
+      - create_test_pypirc #TODO change to create_pypirc
+      - run: python setup.py sdist
+      - run: twine upload -r testpypi dist/* --verbose # TODO: remove this line after testing
+      ## Below is the code to run after we cut a release
+      ##- run: twine upload dist/* 
+
 workflows:
-  # run a full functional test for photonOS
   version: 2
   PRs:
     jobs:
@@ -67,3 +98,11 @@ workflows:
       - commit_check
       - security
       - test_changes
+      - pypi_deploy:
+          filters:
+            # ignore all commits on any branch by default
+            branches:
+              ignore: /.*/
+            # only run on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
