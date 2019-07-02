@@ -13,10 +13,13 @@ import argparse
 import importlib
 import logging
 import os
+import sys
 
 from tern.report import report
 from tern.utils import cache
 from tern.utils import constants
+from tern import Version
+
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -77,6 +80,7 @@ def do_main(args):
 
 def main():
     parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
         prog='Tern',
         description='''
            Tern is a container image component curation tool. Tern retrieves
@@ -95,6 +99,11 @@ def main():
                         "Needed when running from within a container")
     parser.add_argument('-r', '--redo', action='store_true',
                         help="Repopulate the cache for found layers")
+    # sys.version gives more information than we care to print
+    py_ver = sys.version.replace('\n', '').split('[')[0]
+    parser.add_argument('-V', '--version', action='version',
+                        version="%(prog)s {0}\n   python version = {1}".format(
+                            Version, py_ver))
     subparsers = parser.add_subparsers(help='Subcommands')
     # subparser for report
     parser_report = subparsers.add_parser('report',
