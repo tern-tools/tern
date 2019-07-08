@@ -64,8 +64,10 @@ def check_container():
 
 def check_image(image_tag_string):
     '''Check if image exists'''
-    logger.debug("Checking if image \"%s\" is available on disk...",
-        image_tag_string)
+    logger.debug(
+        "Checking if image \"%s\" is available on disk...",
+        image_tag_string
+    )
     try:
         client.images.get(image_tag_string)
         logger.debug("Image \"%s\" found", image_tag_string)

@@ -5,7 +5,7 @@
 -r requirements.txt
 
 # For development work, pull in dev support utilities
-prospector==1.1.6.2
+prospector==1.1.6.4
 # For security linting, use Bandit
 bandit==1.6.0
 

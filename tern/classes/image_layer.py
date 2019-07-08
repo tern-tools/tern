@@ -104,7 +104,8 @@ class ImageLayer:
                 self.__packages.append(package)
         else:
             raise TypeError('Object type is {0}, should be Package'.format(
-                       type(package)))
+                type(package)
+            ))
 
     def remove_package(self, package_name):
         rem_index = 0

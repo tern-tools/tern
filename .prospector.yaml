@@ -1,0 +1,23 @@
+# -*- coding: utf-8 -*-
+# Copyright © 2019, VMware, Inc.  All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+
+strictness: medium
+test-warnings: false
+# doc-warnings: true
+
+#ignore-paths:
+#  - migrations
+
+pep8:
+  full: true
+  #disable:
+  #  - W602
+  #  - W603
+  #enable:
+  #  - E302
+  #options:
+  #  max-line-length: 79
+
+pep257:
+  run: false
