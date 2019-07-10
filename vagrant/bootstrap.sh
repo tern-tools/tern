@@ -25,4 +25,4 @@ sudo usermod -a -G docker vagrant
 
 # Install dependencies
 cd /tern
-pip3 install -r requirements.txt
+pip3 install .
