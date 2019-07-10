@@ -18,6 +18,7 @@ class Package:
         proj_url: package source url
         download_url: package download url
         origins: a list of NoticeOrigin objects
+        checksum: checksum as package property
 
     methods:
         to_dict: returns a dict representation of the instance
@@ -31,6 +32,7 @@ class Package:
         self.__proj_url = ''
         self.__download_url = ''
         self.__origins = Origins()
+        self.__checksum = ''
 
     @property
     def name(self):
@@ -79,6 +81,14 @@ class Package:
     @property
     def origins(self):
         return self.__origins
+
+    @property
+    def checksum(self):
+        return self.__checksum
+
+    @checksum.setter
+    def checksum(self, checksum):
+        self.__checksum = checksum;
 
     def to_dict(self, template=None):
         '''Return a dictionary version of the Package object

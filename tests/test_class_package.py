@@ -19,6 +19,7 @@ class TestClassPackage(unittest.TestCase):
         self.p1.copyright = 'All Rights Reserved'
         self.p1.proj_url = 'github.com'
         self.p1.download_url = 'https://github.com'
+        self.p1.checksum = '123abc456'
 
         self.p2 = Package('p2')
 
@@ -32,6 +33,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertFalse(self.p2.proj_url)
         self.assertFalse(self.p2.pkg_license)
         self.assertFalse(self.p2.copyright)
+        self.assertFalse(self.p2.checksum)
         self.assertFalse(self.p2.download_url)
 
     def testSetters(self):
@@ -46,6 +48,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p2.proj_url, 'github.com')
         self.p2.download_url = 'https://github.com'
         self.assertEqual(self.p2.download_url, 'https://github.com')
+        self.assertEqual(self.p2.checksum, '123abc456')
 
     def testGetters(self):
         self.assertEqual(self.p1.name, 'p1')
@@ -54,6 +57,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p1.copyright, 'All Rights Reserved')
         self.assertEqual(self.p1.proj_url, 'github.com')
         self.assertEqual(self.p1.download_url, 'https://github.com')
+        self.assertEqual(self.p1.checksum, '123abc456')
 
     def testToDict(self):
         a_dict = self.p1.to_dict()
