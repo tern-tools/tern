@@ -56,7 +56,8 @@ def root_command(command, *extra):
                              stderr=subprocess.PIPE)
     result, error = pipes.communicate()  # nosec
     if error:
-        raise subprocess.CalledProcessError(1, cmd=full_cmd, output=error)
+        logger.error("Command failed. %s", error.decode())
+        raise subprocess.CalledProcessError(1, cmd=full_cmd, output=error)  # nosec
     else:
         return result
 
