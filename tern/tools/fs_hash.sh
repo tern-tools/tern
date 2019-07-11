@@ -10,6 +10,13 @@
 # extended attributes list
 #
 # repeat for each file
+#
+# Check that all commands to collect metadata exist on the
+# system otherwise exit.
+
+command -v find || { echo "'find' not found on system." >&2 ; exit 1; }
+command -v sha256sum || { echo "'sha256sum' not found on system." >&2 ; exit 1; }
+command -v getfattr || { echo "'getfattr' not found on system." >&2 ; exit 1; }
 
 cwd=`pwd`
 cd $1
