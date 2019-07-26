@@ -45,6 +45,7 @@ class ImageLayer:
         self.__import_image = None
         self.__import_str = ''
         self.__pkg_format = ''
+        self.__os_guess = ''
 
     @property
     def diff_id(self):
@@ -97,6 +98,14 @@ class ImageLayer:
     @pkg_format.setter
     def pkg_format(self, pkg_format):
         self.__pkg_format = pkg_format
+
+    @property
+    def os_guess(self):
+        return self.__os_guess
+
+    @os_guess.setter
+    def os_guess(self, os_guess):
+        self.__os_guess = os_guess
 
     def add_package(self, package):
         if isinstance(package, Package):

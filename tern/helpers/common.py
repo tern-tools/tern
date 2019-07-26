@@ -82,6 +82,34 @@ def get_base_bin():
     return binary
 
 
+def get_os_release():
+    '''Given the base layer object, determine if an os-release file exists and
+    return the PRETTY_NAME string from it. If no release file exists,
+    return an empty string. Assume that the layer filesystem is mounted'''
+    # os-release may exist under /etc/ or /usr/lib. We should first check
+    # for the preferred /etc/os-release and fall back on /usr/lib/os-release
+    # if it does not exist under /etc
+    etc_path = os.path.join(os.getcwd(), constants.temp_folder,
+                            constants.mergedir, constants.etc_release_path)
+    lib_path = os.path.join(os.getcwd(), constants.temp_folder,
+                            constants.mergedir, constants.lib_release_path)
+    if not os.path.exists(etc_path):
+        if not os.path.exists(lib_path):
+            return ''
+        etc_path = lib_path
+    # file exists at this point, try to read it
+    with open(etc_path, 'r') as f:
+        lines = f.readlines()
+    pretty_name = ''
+    # iterate through os-release file to find OS
+    for l in lines:
+        key, val = l.rstrip().split('=', 1)
+        if key == "PRETTY_NAME":
+            pretty_name = val
+            break
+    return pretty_name.strip('"')
+
+
 def collate_list_metadata(shell, listing):
     '''Given the shell and the listing for the package manager, collect
     metadata that gets returned as a list'''
@@ -380,3 +408,36 @@ def update_master_list(master_list, layer_obj):
     while unique:
         layer_obj.packages.append(unique.pop(0))
     del unique
+
+
+def get_os_style(image_layer, binary):
+    '''Given an ImageLayer object and a binary package manager, check for the
+    OS identifier in the os-release file first. If the os-release file
+    is not available, make an educated guess as to what kind of OS the layer
+    might be based off of given the pkg_format + package manager. If the binary
+    provided does not exist in base.yml, add a warning notice'''
+    origin_command_lib = formats.invoking_base_commands
+    origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
+    pkg_format = command_lib.check_pkg_format(binary)
+    os_guess = command_lib.check_os_guess(binary)
+    if get_os_release():
+        # We know with high degree of certainty what the OS is
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            formats.os_release.format(os_style=get_os_release()), 'info'))
+    else:
+        # We make a guess about the OS based on pkg_format + binary
+        # First check that binary exists in base.yml
+        if not pkg_format or not os_guess:
+            image_layer.origins.add_notice_to_origins(
+                origin_command_lib, Notice(
+                    errors.no_listing_for_base_key.format(listing_key=binary),
+                    'warning'))
+        else:
+            # Assign image layer attributes
+            image_layer.pkg_format = pkg_format
+            image_layer.os_guess = os_guess
+            image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+                formats.os_style_guess.format(
+                    package_manager=binary,
+                    package_format=image_layer.pkg_format,
+                    os_list=image_layer.os_guess), 'info'))

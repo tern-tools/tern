@@ -30,6 +30,9 @@ cache_file = 'cache.yml'
 shell = '/bin/sh'
 # path where resolv.conf lives
 resolv_path = '/etc/resolv.conf'
+# paths where os-release could be
+etc_release_path = 'etc/os-release'
+lib_release_path = 'usr/lib/os-release'
 # directory where layer.tar can be extracted to
 untar_dir = 'contents'
 # rootfs working directory
