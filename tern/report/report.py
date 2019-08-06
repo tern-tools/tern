@@ -223,11 +223,11 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False): # pylint: dis
             # unmount proc, sys and dev
             rootfs.undo_mount()
     else:
-        no_base = errors.unrecognized_base.format(
-            image_name=image_obj.name, image_tag=image_obj.tag)
-        logger.warning(no_base)
+        logger.warning(errors.no_package_manager)
+        # /etc/os-release may still be present even if binary is not
+        common.get_os_style(image_obj.layers[0], None)
         image_obj.layers[0].origins.add_notice_to_origins(
-            origin_first_layer, Notice(no_base, 'warning'))
+            origin_first_layer, Notice(errors.no_package_manager, 'warning'))
         # no binary means there is no shell so set to default shell
         logger.warning('Unknown filesystem. Using default shell')
         shell = constants.shell
