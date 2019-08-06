@@ -424,6 +424,10 @@ def get_os_style(image_layer, binary):
         # We know with high degree of certainty what the OS is
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             formats.os_release.format(os_style=get_os_release()), 'info'))
+    elif binary is None:
+        # No binary and no os-release means we have no idea about base OS
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            errors.no_etc_release, 'warning'))
     else:
         # We make a guess about the OS based on pkg_format + binary
         # First check that binary exists in base.yml
@@ -433,7 +437,7 @@ def get_os_style(image_layer, binary):
                     errors.no_listing_for_base_key.format(listing_key=binary),
                     'warning'))
         else:
-            # Assign image layer attributes
+            # Assign image layer attributes and guess OS
             image_layer.pkg_format = pkg_format
             image_layer.os_guess = os_guess
             image_layer.origins.add_notice_to_origins(origin_layer, Notice(
