@@ -18,7 +18,7 @@ import sys
 from tern.report import report
 from tern.utils import cache
 from tern.utils import constants
-from tern import Version
+from tern.utils import general
 
 
 # global logger
@@ -56,6 +56,17 @@ def check_format_type(format_type):
     except ModuleNotFoundError:
         raise argparse.ArgumentTypeError('Invalid report formatting type')
     return format_type
+
+
+def get_version():
+    '''Return the version string for the --version command line option'''
+    ver_type, commit_or_ver = general.get_git_rev_or_version()
+    message = ''
+    if ver_type == "package":
+        message = "Tern version {}".format(commit_or_ver)
+    else:
+        message = "Tern at commit {}".format(commit_or_ver)
+    return message
 
 
 def do_main(args):
@@ -102,8 +113,8 @@ def main():
     # sys.version gives more information than we care to print
     py_ver = sys.version.replace('\n', '').split('[')[0]
     parser.add_argument('-V', '--version', action='version',
-                        version="%(prog)s {0}\n   python version = {1}".format(
-                            Version, py_ver))
+                        version="{ver_str}\n   python version = {py_v}".format(
+                            ver_str=get_version(), py_v=py_ver))
     subparsers = parser.add_subparsers(help='Subcommands')
     # subparser for report
     parser_report = subparsers.add_parser('report',
