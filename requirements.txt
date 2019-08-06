@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 # Please only add direct dependencies here, i.e., do not update with the
-# output of `pip freeze`.  When updating dependency versions, have the
+# output of `pip freeze`.  When updating dependency versions, having the
 # transitive dependencies listed make it more difficult to figure out
 # what should be updated.
 
-PyYAML==5.1
-docker==4.0.1
-requests==2.22.0
+PyYAML>=5.1
+docker~=4.0
+requests~=2.22
