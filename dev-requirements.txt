@@ -5,9 +5,9 @@
 -r requirements.txt
 
 # For development work, pull in dev support utilities
-prospector==1.1.6.2
+prospector>=1.1
 # For security linting, use Bandit
-bandit==1.6.0
+bandit~=1.6
 
 # For commit message linting in circleci we need GitPython
-GitPython==2.1.11
+GitPython~=2.1
