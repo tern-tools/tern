@@ -73,11 +73,11 @@ jobs:
       - setup
       - run: pip install .
       - run: pip install twine
+      - run: pip install wheel
       # make sure git tag matches release version
       - run: python setup.py verify
       - create_pypirc 
-      - run: python setup.py sdist
-      - run: twine upload dist/* 
+      - run: python setup.py sdist bdist_wheel upload
 
 workflows:
   version: 2
