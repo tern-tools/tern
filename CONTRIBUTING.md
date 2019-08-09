@@ -96,7 +96,9 @@ You may have already cloned the project and started working on it. If you're rea
 1. Set up a Python virtual environment that has either the Python 3.6 or Python 3.7 executable. See [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments) for instructions on how to set this up using your host machine's Python3. There are also a guide to [managing virtual environments using pipenv](https://docs.python-guide.org/dev/virtualenvs/) but I haven't used it. Once done, you should have a folder created. Change to that folder.
 2. Clone *your fork* of Tern in the virtual environment folder.
 3. Activate your virtual environment `source bin/activate`
-4. Change directory into the clone. Then run `pip install -r dev-requirements.txt`. This will install the project dependencies and [Prospector](https://github.com/PyCQA/prospector) which is a tool to check for style and linting errors.
+4. Change directory into the clone.
+5. Run `pip install wheel`. This is needed because some dependencies for development fail to build python wheels.
+6. Run `pip install -r dev-requirements.txt`. This will install the project dependencies and [Prospector](https://github.com/PyCQA/prospector) which is a tool to check for style and linting errors.
 5. Highly recommended: If you want to set up your project for long-term open source contribution, I highly suggest following [this setup](https://github.com/nishakm/puns).
 
 ### After making changes
