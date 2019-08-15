@@ -10,7 +10,6 @@ Tern executable
 
 
 import argparse
-import importlib
 import logging
 import os
 import sys
@@ -46,16 +45,6 @@ def check_file_existence(path):
         msg = "{}: does not exist".format(path)
         raise argparse.ArgumentTypeError(msg)
     return path
-
-
-def check_format_type(format_type):
-    '''Check if the format type is supported'''
-    import_string = 'tern.report.{}.generator'.format(format_type)
-    try:
-        importlib.import_module(import_string)
-    except ModuleNotFoundError:
-        raise argparse.ArgumentTypeError('Invalid report formatting type')
-    return format_type
 
 
 def get_version():
@@ -129,7 +118,7 @@ def main():
                                help="Summarize the report as a list of"
                                " packages with associated information")
     parser_report.add_argument('-m', '--report-format',
-                               metavar='REPORT_MODULE', type=check_format_type,
+                               metavar='REPORT_MODULE',
                                help="Format the report using one of the "
                                "available formats: "
                                "spdxtagvalue")
