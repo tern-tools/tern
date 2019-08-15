@@ -23,13 +23,22 @@ commands:
            echo -e "[pypi]" >> ~/.pypirc
            echo -e "username = $R_PYPI_UN" >> ~/.pypirc
            echo -e "password = $PYPI_PW" >> ~/.pypiruc
-
+  timeout:
+    steps:
+      - run:
+          no_output_timeout: 1h
+          command: |
+           set -e
+           sudo killall apt-get
+           sudo apt-get -y update
+           
 jobs:
   # linting using Prospector
   linting:
     executor: ubuntu1604
     # steps to run Prospector
     steps:
+      - timeout
       - setup
       - run: pip install -r dev-requirements.txt
       - run: pip install .
@@ -39,6 +48,7 @@ jobs:
     executor: ubuntu1604
     # steps to run Bandit
     steps:
+      - timeout
       - setup
       - run: pip install -r dev-requirements.txt
       - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
@@ -47,6 +57,7 @@ jobs:
     executor: ubuntu1604
     # Steps to run commit message linting
     steps:
+      - timeout
       - setup
       - run: pip install -r dev-requirements.txt
       - run: python ci/test_commit_message.py
@@ -54,6 +65,7 @@ jobs:
     executor: ubuntu1604
     # Steps to run tests on files changed
     steps:
+      - timeout
       - setup
       - run: pip install -r dev-requirements.txt
       - run: pip install .
@@ -63,6 +75,7 @@ jobs:
     executor: ubuntu1604
     # checkout the code and set up the environment
     steps:
+      - timeout
       - setup
       - run: pip install .
       - run: tern -l report -i photon:3.0
@@ -70,6 +83,7 @@ jobs:
   pypi_deploy:
    executor: ubuntu1604
    steps:
+      - timeout
       - setup
       - run: pip install .
       - run: pip install twine
