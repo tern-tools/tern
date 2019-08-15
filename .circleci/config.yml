@@ -28,6 +28,7 @@ jobs:
   # linting using Prospector
   linting:
     executor: ubuntu1604
+    parallelism: 4
     # steps to run Prospector
     steps:
       - setup
@@ -37,6 +38,7 @@ jobs:
   # security linting using Bandit
   security:
     executor: ubuntu1604
+    parallelism: 4
     # steps to run Bandit
     steps:
       - setup
@@ -45,6 +47,7 @@ jobs:
   # linting for PR commit messages
   commit_check:
     executor: ubuntu1604
+    parallelism: 4
     # Steps to run commit message linting
     steps:
       - setup
@@ -52,6 +55,7 @@ jobs:
       - run: python ci/test_commit_message.py
   test_changes:
     executor: ubuntu1604
+    parallelism: 4
     # Steps to run tests on files changed
     steps:
       - setup
@@ -61,6 +65,7 @@ jobs:
   # full functional test for photonOS
   funcphoton:
     executor: ubuntu1604
+    parallelism: 4
     # checkout the code and set up the environment
     steps:
       - setup
