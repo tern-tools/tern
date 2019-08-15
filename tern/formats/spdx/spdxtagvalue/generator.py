@@ -9,10 +9,11 @@ SPDX document generator
 
 import datetime
 
-from tern.classes.templates.spdx import SPDX
+from tern.formats.spdx.spdx import SPDX
 from tern.utils.general import get_git_rev_or_version
 from tern.report import content
-from tern.report.spdxtagvalue import formats as spdx_formats
+from tern.formats.spdx import formats as spdx_formats
+from tern.formats import generator
 
 
 def get_document_namespace(image_obj):
@@ -159,133 +160,134 @@ def get_license_block(license_list):
     return block
 
 
-def generate(image_obj_list):
-    '''Generate an SPDX document
-    WARNING: This assumes that the list consists of one image or the base
-    image and a stub image, in which case, the information in the stub
-    image is not applicable in the SPDX case as it is an empty image
-    object with no metadata as nothing got built.
-    The whole document should be stored in a string which can be written
-    to a file using the write_report function in report.py
-    First convert the image object into a dictionary. The dictionary
-    should be in this form:
-        image:{
-          origins: [...]
-          layers: [
-            {origins: [...],
-             packages: [
-               {origins: [...], package1: {...}},
-               {origins: [...], package2: {...}}...]}, ...]}
-    Then convert this into a flat format starting from top to bottom
-    So:
-        ## image
-        List all the tag-values here
-        make a PackageComment: <text> </text>
+class SpdxTagValue(generator.Generate):
+    def generate(self, image_obj_list):
+        '''Generate an SPDX document
+        WARNING: This assumes that the list consists of one image or the base
+        image and a stub image, in which case, the information in the stub
+        image is not applicable in the SPDX case as it is an empty image
+        object with no metadata as nothing got built.
+        The whole document should be stored in a string which can be written
+        to a file using the write_report function in report.py
+        First convert the image object into a dictionary. The dictionary
+        should be in this form:
+            image:{
+              origins: [...]
+              layers: [
+                {origins: [...],
+                 packages: [
+                   {origins: [...], package1: {...}},
+                   {origins: [...], package2: {...}}...]}, ...]}
+        Then convert this into a flat format starting from top to bottom
+        So:
+            ## image
+            List all the tag-values here
+            make a PackageComment: <text> </text>
 
-        ## relationships
-        spdx-ref CONTAINS layer1
-        spdx-ref CONTAINS layer2
-        ...
+            ## relationships
+            spdx-ref CONTAINS layer1
+            spdx-ref CONTAINS layer2
+            ...
 
-        ## layer1
-        List all the tag-values here
-        make a PackageComment here
+            ## layer1
+            List all the tag-values here
+            make a PackageComment here
 
-        # relationships
-        spdx-ref CONTAINS package1
-        spdx-ref CONTAINS package2
-        ....
+            # relationships
+            spdx-ref CONTAINS package1
+            spdx-ref CONTAINS package2
+            ....
 
-        # layer2
-        tag-values
-        PackageComment
+            # layer2
+            tag-values
+            PackageComment
 
-        # relationships
-        spdx-ref HAS_PREREQUISITE layer1
-        spdx-ref CONTAINS package3
-        spdx-ref CONTAINS package4
+            # relationships
+            spdx-ref HAS_PREREQUISITE layer1
+            spdx-ref CONTAINS package3
+            spdx-ref CONTAINS package4
 
-        ....
+            ....
 
-        # package1
-        tag-values
-        PackageComment
+            # package1
+            tag-values
+            PackageComment
 
-        # package2
+            # package2
 
-        # package3
+            # package3
 
-        # package4
+            # package4
 
 
-    Everything in Origins can be in a tag-value format as
-    PackageComment: <text> </text>
+        Everything in Origins can be in a tag-value format as
+        PackageComment: <text> </text>
 
-    For the sake of SPDX, an image is a 'Package' which 'CONTAINS'
-    each layer which is also a 'Package' which 'CONTAINS' the real Package'''
-    report = ''
-    licenses_found = []  # This is needed for unrecognized license strings
-    image_obj = image_obj_list[0]
-    template = SPDX()
-    # The image's PackageDownloadLocation is from a container registry
-    # This includes all the layers but the packages' download location
-    # is unknown if the download_url is blank
-    registry_repotag = image_obj.get_download_location() if hasattr(
-        image_obj, 'repotag') else 'NOASSERTION'
+        For the sake of SPDX, an image is a 'Package' which 'CONTAINS' each
+        layer which is also a 'Package' which 'CONTAINS' the real Package'''
+        report = ''
+        licenses_found = []  # This is needed for unrecognized license strings
+        image_obj = image_obj_list[0]
+        template = SPDX()
+        # The image's PackageDownloadLocation is from a container registry
+        # This includes all the layers but the packages' download location
+        # is unknown if the download_url is blank
+        registry_repotag = image_obj.get_download_location() if hasattr(
+            image_obj, 'repotag') else 'NOASSERTION'
 
-    # first part is the document tag-value
-    # this doesn't change at all
-    report = report + get_document_block(image_obj) + '\n'
+        # first part is the document tag-value
+        # this doesn't change at all
+        report = report + get_document_block(image_obj) + '\n'
 
-    # this part is the image part and needs
-    # the image object
-    report = report + get_main_block(
-        image_obj.to_dict(template),
-        image_obj.origins.origins,
-        SPDXID=get_image_spdxref(image_obj),
-        PackageLicenseDeclared='NOASSERTION',
-        PackageLicenseConcluded='NOASSERTION',
-        PackageCopyrightText='NOASSERTION',
-        FilesAnalyzed='false') + '\n'
-    # Add image relationships
-    report = report + get_image_relationships(image_obj) + '\n'
-
-    # Add the layer part for each layer
-    for index, layer_obj in enumerate(image_obj.layers):
-        # this is the main block for the layer
+        # this part is the image part and needs
+        # the image object
         report = report + get_main_block(
-            layer_obj.to_dict(template),
-            layer_obj.origins.origins,
-            SPDXID=get_layer_spdxref(layer_obj),
-            PackageDownloadLocation=registry_repotag,
+            image_obj.to_dict(template),
+            image_obj.origins.origins,
+            SPDXID=get_image_spdxref(image_obj),
             PackageLicenseDeclared='NOASSERTION',
             PackageLicenseConcluded='NOASSERTION',
             PackageCopyrightText='NOASSERTION',
             FilesAnalyzed='false') + '\n'
-        # Add layer relationships
-        if index == 0:
-            report = report + get_layer_relationships(layer_obj) + '\n'
-        else:
-            # block should contain previous layer dependency
-            report = report + get_layer_relationships(
-                layer_obj, get_layer_spdxref(image_obj.layers[index - 1])) + \
-                '\n'
+        # Add image relationships
+        report = report + get_image_relationships(image_obj) + '\n'
 
-    # Add the package part for each package
-    # There are no relationships to be listed here
-    for layer_obj in image_obj.layers:
-        for package_obj in layer_obj.packages:
-            package_dict = package_obj.to_dict(template)
-            # update the PackageLicenseDeclared with a LicenseRef string
-            if 'PackageLicenseDeclared' in package_dict.keys():
-                package_dict['PackageLicenseDeclared'] = format_license(
-                    package_obj.pkg_license)
-            # collect all the individual licenses
-            update_license_list(licenses_found, package_obj.pkg_license)
+        # Add the layer part for each layer
+        for index, layer_obj in enumerate(image_obj.layers):
+            # this is the main block for the layer
             report = report + get_main_block(
-                package_dict,
-                package_obj.origins.origins,
-                SPDXID=get_package_spdxref(package_obj),
+                layer_obj.to_dict(template),
+                layer_obj.origins.origins,
+                SPDXID=get_layer_spdxref(layer_obj),
+                PackageDownloadLocation=registry_repotag,
+                PackageLicenseDeclared='NOASSERTION',
                 PackageLicenseConcluded='NOASSERTION',
+                PackageCopyrightText='NOASSERTION',
                 FilesAnalyzed='false') + '\n'
-    return report + get_license_block(licenses_found)
+            # Add layer relationships
+            if index == 0:
+                report = report + get_layer_relationships(layer_obj) + '\n'
+            else:
+                # block should contain previous layer dependency
+                report = report + get_layer_relationships(
+                    layer_obj, get_layer_spdxref(image_obj.layers[index - 1]))\
+                    + '\n'
+
+        # Add the package part for each package
+        # There are no relationships to be listed here
+        for layer_obj in image_obj.layers:
+            for package_obj in layer_obj.packages:
+                package_dict = package_obj.to_dict(template)
+                # update the PackageLicenseDeclared with a LicenseRef string
+                if 'PackageLicenseDeclared' in package_dict.keys():
+                    package_dict['PackageLicenseDeclared'] = format_license(
+                        package_obj.pkg_license)
+                # collect all the individual licenses
+                update_license_list(licenses_found, package_obj.pkg_license)
+                report = report + get_main_block(
+                    package_dict,
+                    package_obj.origins.origins,
+                    SPDXID=get_package_spdxref(package_obj),
+                    PackageLicenseConcluded='NOASSERTION',
+                    FilesAnalyzed='false') + '\n'
+        return report + get_license_block(licenses_found)
