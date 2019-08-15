@@ -25,47 +25,17 @@ commands:
            echo -e "password = $PYPI_PW" >> ~/.pypiruc
 
 jobs:
-  # linting using Prospector
-  linting:
+ # Run these tests for PRs
+  prjobs:
     executor: ubuntu1604
-    # steps to run Prospector
     steps:
-      - setup
-      - run: pip install -r dev-requirements.txt
-      - run: pip install .
-      - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi
-  # security linting using Bandit
-  security:
-    executor: ubuntu1604
-    # steps to run Bandit
-    steps:
-      - setup
-      - run: pip install -r dev-requirements.txt
-      - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
-  # linting for PR commit messages
-  commit_check:
-    executor: ubuntu1604
-    # Steps to run commit message linting
-    steps:
-      - setup
-      - run: pip install -r dev-requirements.txt
-      - run: python ci/test_commit_message.py
-  test_changes:
-    executor: ubuntu1604
-    # Steps to run tests on files changed
-    steps:
-      - setup
-      - run: pip install -r dev-requirements.txt
-      - run: pip install .
-      - run: python ci/test_files_touched.py
-  # full functional test for photonOS
-  funcphoton:
-    executor: ubuntu1604
-    # checkout the code and set up the environment
-    steps:
-      - setup
-      - run: pip install .
-      - run: tern -l report -i photon:3.0
+      - setup # install dependencies and set python global environment
+      - run: pip install -r dev-requirements.txt # install python dependencies
+      - run: pip install . # install codebase
+      - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi # run prospector
+      - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi # run bandit
+      - run: python ci/test_commit_message.py # check if commit message follows project guidelines
+      - run: python ci/test_files_touched.py # run tests based on changes in PR
   # Deploy to PyPi
   pypi_deploy:
    executor: ubuntu1604
@@ -83,10 +53,7 @@ workflows:
   version: 2
   PRs:
     jobs:
-      - linting
-      - commit_check
-      - security
-      - test_changes
+      - prjobs
   Release:
     jobs:
       - pypi_deploy:
