@@ -8,7 +8,7 @@ from git import GitCommandError
 import os
 import sys
 
-# This is meant to run within circleci
+# This is meant to run within CI Integration
 # Print out only .py files that have changed
 # Pipe to any linting tools
 # Note that some linting tools will lint everything if the output
