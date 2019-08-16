@@ -9,8 +9,7 @@ import os
 import re
 import sys
 
-# This script is written to be used with circleci and
-# is not meant to be run locally
+# This script is written to be used with CI Integration
 
 
 def lint_commit(commit_id):

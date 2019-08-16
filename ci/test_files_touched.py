@@ -11,7 +11,7 @@ import sys
 import subprocess  # nosec
 
 
-# This script is written to be used with circleci
+# This script is written to be used with CI integration
 
 repo = Repo(os.getcwd())
 try:
