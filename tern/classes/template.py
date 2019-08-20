@@ -23,26 +23,20 @@ class Template(metaclass=ABCMeta):
     @abstractmethod
     def package(self):
         '''Must implement a mapping for 'Package' class properties'''
-        pass
 
     @abstractmethod
     def image_layer(self):
         '''Must implement a mapping for 'ImageLayer' class properties'''
-        pass
 
     @abstractmethod
     def image(self):
         '''Must implement a mapping for 'Image' class properties'''
-        pass
 
     def notice(self):
         '''Should implement a mapping for 'Notice' class properties'''
-        pass
 
     def notice_origin(self):
         '''Should implement a mapping for 'NoticeOrigin' class properties'''
-        pass
 
     def origins(self):
         '''Should implement a mapping for 'Origins' class properties'''
-        pass
