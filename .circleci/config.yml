@@ -11,6 +11,11 @@ executors:
 commands:
   setup:
     steps:
+      - run: |
+         sudo rm /etc/apt/sources.list
+         echo "deb http://ubuntu.mirror.constant.com/ xenial main" | sudo tee -a /etc/apt/sources.list
+         echo "deb-src http://ubuntu.mirror.constant.com/ xenial main" | sudo tee -a /etc/apt/sources.list
+         sudo apt-get update
       - run: sudo apt-get install -y attr
       - checkout
       - run: pyenv global 3.6.5
