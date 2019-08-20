@@ -28,6 +28,11 @@ commands:
            echo -e "[pypi]" >> ~/.pypirc
            echo -e "username = $R_PYPI_UN" >> ~/.pypirc
            echo -e "password = $PYPI_PW" >> ~/.pypiruc
+  pre_deploy:
+    steps:
+      - run:
+          name: Ensure that PyPI packages Tern with the same requirements used when the release was cut
+          command: cp docs/releases/${CIRCLE_TAG//./_}-requirements.txt requirements.txt
 
 jobs:
   # linting using Prospector
@@ -77,6 +82,7 @@ jobs:
    steps:
       - setup
       - run: pip install .
+      - pre_deploy
       - run: pip install twine
       - run: pip install wheel
       # make sure git tag matches release version
