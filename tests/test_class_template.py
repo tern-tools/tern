@@ -25,7 +25,7 @@ class TestClassTemplate(unittest.TestCase):
         mapping = self.template1.package()
         self.assertEqual(mapping['name'], 'package.name')
         self.assertEqual(mapping['version'], 'package.version')
-        self.assertEqual(mapping['pkg_license'], 'package.pkg_license')
+        self.assertEqual(mapping['pkg_license'], 'package.license')
 
     def testImageLayer(self):
         mapping = self.template1.image_layer()
