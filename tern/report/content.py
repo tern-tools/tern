@@ -7,7 +7,6 @@
 Functions to generate content for the report
 """
 
-import json
 import yaml
 
 from tern.command_lib import command_lib
@@ -139,12 +138,3 @@ def print_yaml_report(image):
     image_dict = {}
     image_dict.update({'image': image.to_dict()})
     return yaml.dump(image_dict, default_flow_style=False)
-
-
-def print_json_report(images):
-    '''Given a list of image objects, create a json object string'''
-    image_list = []
-    for image in images:
-        image_list.append({'image': image.to_dict()})
-    image_dict = {'images': image_list}
-    return json.dumps(image_dict)

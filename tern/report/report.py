@@ -44,8 +44,6 @@ def write_report(report, args):
         file_name = args.file
     elif args.yaml:
         file_name = constants.yaml_file
-    elif args.json:
-        file_name = constants.json_file
     else:
         file_name = constants.report_file
     with open(file_name, 'w') as f:
@@ -307,8 +305,6 @@ def generate_report(args, *images):
         return generate_format(images, args.report_format)
     if args.yaml:
         return generate_yaml(images)
-    if args.json:
-        return content.print_json_report(images)
     if args.summary:
         return generate_verbose(True, images)
     return generate_verbose(False, images)

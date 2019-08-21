@@ -121,11 +121,9 @@ def main():
                                metavar='REPORT_MODULE',
                                help="Format the report using one of the "
                                "available formats: "
-                               "spdxtagvalue")
+                               "spdxtagvalue, json")
     parser_report.add_argument('-y', '--yaml', action='store_true',
                                help="Create a report in yaml format")
-    parser_report.add_argument('-j', '--json', action='store_true',
-                               help="Create a report in json format")
     parser_report.add_argument('-f', '--file', default=None,
                                help="Write the report to a file; "
                                "If no file is given the default file in "
