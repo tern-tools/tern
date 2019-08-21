@@ -29,7 +29,7 @@ line_indent = re.compile('.*\\\\$')
 tabs = re.compile('\t')
 
 # regex strings
-bash_var = '[\$\{\}]'  # noqa
+bash_var = R'[\$\{\}]'
 
 # strings
 tag_separator = ':'
