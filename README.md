@@ -68,7 +68,7 @@ $ ./docker_run.sh workdir ternd "report -i debian:buster" > output.txt
 
 To produce a json report run
 ```
-$ ./docker_run.sh workdir ternd "report -j -i debian:buster"
+$ ./docker_run.sh workdir ternd "report -m json -i debian:buster"
 ```
 
 What the `docker_run.sh` script does is create the directory `workdir` if not present in your current working directory and run the built container as privileged with `workdir` bind mounted to it.
@@ -190,7 +190,7 @@ WARNING: Tern is meant to give guidance on what may be installed in a container 
 ## JSON Format<a name="report-json">
 You can get the results in a JSON file to pass around in a network.
 ```
-$ tern report -j -i golang:1.12-alpine
+$ tern report -m json -i golang:1.12-alpine
 ```
 
 ## YAML Format<a name="report-yaml">
