@@ -42,8 +42,6 @@ def write_report(report, args):
     '''Write the report to a file'''
     if args.file:
         file_name = args.file
-    elif args.yaml:
-        file_name = constants.yaml_file
     else:
         file_name = constants.report_file
     with open(file_name, 'w') as f:
@@ -303,8 +301,6 @@ def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     if args.report_format:
         return generate_format(images, args.report_format)
-    if args.yaml:
-        return generate_yaml(images)
     if args.summary:
         return generate_verbose(True, images)
     return generate_verbose(False, images)
@@ -322,16 +318,6 @@ def generate_verbose(is_summary, images):
         logger.debug('Creating a detailed report of components in image...')
         for image in images:
             report = report + content.print_full_report(image)
-    return report
-
-
-def generate_yaml(images):
-    '''Generate a yaml report'''
-    logger.debug('Creating YAML report...')
-    report = formats.disclaimer_yaml.format(
-        version_info=general.get_git_rev_or_version())
-    for image in images:
-        report = report + content.print_yaml_report(image)
     return report
 
 
