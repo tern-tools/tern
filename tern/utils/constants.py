@@ -43,4 +43,3 @@ workdir = 'workdir'
 mergedir = 'mergedir'
 # report file
 report_file = 'report.txt'
-yaml_file = 'report.yml'
