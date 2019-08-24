@@ -98,16 +98,26 @@ You may have already cloned the project and started working on it. If you're rea
 3. Activate your virtual environment `source bin/activate`
 4. Change directory into the clone.
 5. Run `pip install wheel`. This is needed because some dependencies for development fail to build python wheels.
-6. Run `pip install -r dev-requirements.txt`. This will install the project dependencies and [Prospector](https://github.com/PyCQA/prospector) which is a tool to check for style and linting errors.
-5. Highly recommended: If you want to set up your project for long-term open source contribution, I highly suggest following [this setup](https://github.com/nishakm/puns).
+6. Run `pip install -e.[dev]`. This will install tern in development mode. This will install the project dependencies and [Prospector](https://github.com/PyCQA/prospector) which is a tool to check for style and linting errors.
+7. Highly recommended: If you want to set up your project for long-term open source contribution, I highly suggest following [this setup](https://github.com/nishakm/puns).
+
+### Setting up a development environment on Mac and Windows
+1. [Install](https://github.com/vmware/tern#install) VirtualBox and Vagrant for mac or windows
+2. Run `git clone https://github.com/vmware/tern.git`
+3. Run `cd tern/vagrant`
+4. Run `vagrant up`
+5. Run `vagrant ssh`
+6. Run `pip3 install wheel`
+7. Run `cd /tern`
+8. Run `pip3 install -e.[dev]`
+This will install tern in development mode on windows and mac.
 
 ### After making changes
 1. Run prospector from the project's root directory `prospector .`
 2. Fix any issues prospector brings up.
 3. Run bandit from the project's root directory `bandit -r .`
 4. Fix any issues bandit brings up.
-5. Run `pip uninstall tern`, then run `pip install .` to install tern with your changes. Don't worry about the already satisfied dependencies.
-4. Test your changes.
+5. Test your changes.
 
 ## Coding Style
 
