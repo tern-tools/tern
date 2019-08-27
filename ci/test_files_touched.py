@@ -34,8 +34,6 @@ if not changes:
     sys.exit(0)
 
 test_suite = {
-    # dev-requirements.txt
-    re.compile('dev-requirements.txt'): ['tern -l report -i photon:3.0'],
     # requirements.txt
     re.compile('requirements.txt'): ['tern -l report -i photon:3.0'],
     # Dockerfile
