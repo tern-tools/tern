@@ -14,7 +14,7 @@ This is a checklist for cutting a release
     * Compare the release versions of the requirements to the current requirements.txt file. Upgrade if necessary.
     * Run `pip install .` to install tern.
     * Run appropriate tests. Roll back requirements if necessary.
-    * When satisfied, run `pip-compile --output-file docs/releases/v<release>-requirements.txt`.
+    * When satisfied, run `pip-compile --generate-hashes --output-file docs/releases/v<release>-requirements.txt`.
 
 - [ ] Write release notes.
     * Summary
