@@ -89,7 +89,9 @@ jobs:
       - run: pip install twine
       - run: pip install wheel
       - create_pypirc 
-      - run: python setup.py sdist bdist_wheel upload
+      - run: python setup.py sdist bdist_wheel
+      - run: twine check dist/*
+      - run: twine upload dist/*
 
 workflows:
   version: 2
