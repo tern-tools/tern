@@ -44,8 +44,7 @@ jobs:
     # steps to run Prospector
     steps:
       - setup
-      - run: pip install -r dev-requirements.txt
-      - run: pip install .
+      - run: pip install prospector>=1.1 GitPython~=2.1
       - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi
   # security linting using Bandit
   security:
@@ -53,7 +52,7 @@ jobs:
     # steps to run Bandit
     steps:
       - setup
-      - run: pip install -r dev-requirements.txt
+      - run: pip install bandit~=1.6 GitPython~=2.1
       - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
   # linting for PR commit messages
   commit_check:
@@ -61,14 +60,14 @@ jobs:
     # Steps to run commit message linting
     steps:
       - setup
-      - run: pip install -r dev-requirements.txt
+      - run: pip install GitPython~=2.1
       - run: python ci/test_commit_message.py
   test_changes:
     executor: ubuntu1604
     # Steps to run tests on files changed
     steps:
       - setup
-      - run: pip install -r dev-requirements.txt
+      - run: pip install GitPython~=2.1
       - run: pip install .
       - run: python ci/test_files_touched.py
   # full functional test for photonOS

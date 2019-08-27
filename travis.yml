@@ -17,8 +17,7 @@ before_install:
   - sudo apt-get install -y attr
 
 install:
-  - pip install -r dev-requirements.txt
-  - pip install .
+  - pip install .[dev]
 
 matrix:
   include:
