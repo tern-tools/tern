@@ -8,12 +8,14 @@ Create a report
 """
 
 import docker
-import importlib
 import logging
 import os
 import shutil
 import subprocess  # nosec
 import sys
+
+from stevedore import driver
+from stevedore.exception import NoMatches
 
 from tern.report import content
 from tern.report import errors
@@ -40,10 +42,6 @@ def write_report(report, args):
     '''Write the report to a file'''
     if args.file:
         file_name = args.file
-    elif args.yaml:
-        file_name = constants.yaml_file
-    elif args.json:
-        file_name = constants.json_file
     else:
         file_name = constants.report_file
     with open(file_name, 'w') as f:
@@ -174,7 +172,7 @@ def mount_overlay_fs(image_obj, top_layer):
     return target
 
 
-def analyze_docker_image(image_obj, redo=False, dockerfile=False): # pylint: disable=too-many-locals
+def analyze_docker_image(image_obj, redo=False, dockerfile=False):  # pylint: disable=too-many-locals
     '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
@@ -303,10 +301,6 @@ def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     if args.report_format:
         return generate_format(images, args.report_format)
-    if args.yaml:
-        return generate_yaml(images)
-    if args.json:
-        return content.print_json_report(images)
     if args.summary:
         return generate_verbose(True, images)
     return generate_verbose(False, images)
@@ -327,28 +321,25 @@ def generate_verbose(is_summary, images):
     return report
 
 
-def generate_yaml(images):
-    '''Generate a yaml report'''
-    logger.debug('Creating YAML report...')
-    report = formats.disclaimer_yaml.format(
-        version_info=general.get_git_rev_or_version())
-    for image in images:
-        report = report + content.print_yaml_report(image)
-    return report
-
-
 def generate_format(images, format_string):
     '''Generate a report in the format of format_string given one or more
     image objects. Here we will load the required module and run the generate
     function to get back a report'''
-    generator = importlib.import_module('tern.report.{}.generator'.format(
-        format_string))
-    return generator.generate(images)
-
+    try:
+        mgr = driver.DriverManager(
+            namespace='tern.formats',
+            name=format_string,
+            invoke_on_load=True,
+        )
+        return mgr.driver.generate(images)
+    except NoMatches:
+        pass
 
 def report_out(args, *images):
     report = generate_report(args, *images)
-    if args.file:
+    if not report:
+        logger.error("%s not a recognized plugin.", args.report_format)
+    elif args.file:
         write_report(report, args)
     else:
         print(report)
