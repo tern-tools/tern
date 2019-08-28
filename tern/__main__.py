@@ -145,7 +145,11 @@ def main():
     args = parser.parse_args()
 
     # execute
-    do_main(args)
+    if sys.version_info < (3, 0):
+        sys.stderr.write("Error running Tern. Please check that python3 "
+                         "is configured as default.\n")
+    else:
+        do_main(args)
 
 
 if __name__ == "__main__":
