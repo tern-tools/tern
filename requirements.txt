@@ -9,3 +9,4 @@
 PyYAML>=5.1
 docker~=4.0
 requests~=2.22
+stevedore>=1.30
