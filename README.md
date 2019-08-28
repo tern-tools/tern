@@ -196,7 +196,7 @@ $ tern report -m json -i golang:1.12-alpine
 ## YAML Format<a name="report-yaml">
 You can get the results in a YAML file to be consumed by a downstream tool or script.
 ```
-$ tern -l report -y -i golang:1.12-alpine -f output.yaml
+$ tern -l report -m yaml -i golang:1.12-alpine -f output.yaml
 ```
 
 ## SPDX tag-value Format<a name="report-spdxtagvalue">
