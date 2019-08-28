@@ -10,7 +10,6 @@ Functions to generate content for the report
 from tern.command_lib import command_lib
 from tern.report import formats
 from tern.utils.general import get_git_rev_or_version
-from tern import Version
 
 
 def get_tool_version():
@@ -18,7 +17,7 @@ def get_tool_version():
     ver_type, ver = get_git_rev_or_version()
     if ver_type == 'commit':
         return formats.commit_version.format(commit_sha=ver)
-    return formats.packaged_version.format(version=Version)
+    return formats.packaged_version.format(version=ver)
 
 
 def print_invoke_list(info_dict, info):
