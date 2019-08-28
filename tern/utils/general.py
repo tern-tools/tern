@@ -9,7 +9,7 @@ import re
 import subprocess  # nosec
 from contextlib import contextmanager
 
-from tern import Version
+from pbr.version import VersionInfo
 from tern.utils import constants
 
 
@@ -91,18 +91,19 @@ def parse_command(command):
 
 
 def get_git_rev_or_version():
-    '''Assuming we are operating within a git repository, get the SHA
-    of the current commit'''
+    '''Either get the current git commit or the PyPI distribution
+    Use pbr to get the package version'''
     command = ['git', 'rev-parse', 'HEAD']
     try:
-        output = subprocess.check_output(command)  # nosec
+        output = subprocess.check_output(  # nosec
+            command, stderr=subprocess.DEVNULL)
         if isinstance(output, bytes):
             output = output.decode('utf-8')
         ver_type = 'commit'
 
     except subprocess.CalledProcessError:
         ver_type = 'package'
-        output = Version
+        output = VersionInfo('tern').version_string()
     return ver_type, output.split('\n').pop(0)
 
 
