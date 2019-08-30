@@ -64,7 +64,7 @@ Maintainers are people with lives of their own. The typical time to get a respon
 
 **Project Maintainers**
 - @nishakm
-- @tpepper
+- @rnjudge
 
 ## Other Communication Channels
 
