@@ -10,7 +10,6 @@ import hashlib
 import logging
 import os
 import subprocess  # nosec
-import tarfile
 import pkg_resources
 
 from tern.utils import constants
@@ -24,6 +23,7 @@ mount_proc = ['mount', '-t', 'proc', '/proc']
 mount_sys = ['mount', '-o', 'bind', '/sys']
 mount_dev = ['mount', '-o', 'bind', '/dev']
 unmount = ['umount']
+extract_tar = ['tar', '-xvf']
 
 # enable host DNS settings
 host_dns = ['cp', constants.resolv_path]
@@ -58,8 +58,7 @@ def root_command(command, *extra):
     if error:
         logger.error("Command failed. %s", error.decode())
         raise subprocess.CalledProcessError(1, cmd=full_cmd, output=error)  # nosec
-    else:
-        return result
+    return result
 
 
 def get_untar_dir(layer_tarfile):
@@ -86,8 +85,12 @@ def set_up():
 def extract_layer_tar(layer_tar_path, directory_path):
     '''Assuming all the metadata for an image has been extracted into the
     temp folder, extract the tarfile into the required directory'''
-    with tarfile.open(layer_tar_path) as tar:
-        tar.extractall(directory_path)
+    os.makedirs(directory_path)
+    with open(os.devnull, 'w') as test:
+        result = subprocess.call(['tar', '-tf', layer_tar_path],
+                                 stdout=test, stderr=test)
+    if not result:
+        root_command(extract_tar, layer_tar_path, '-C', directory_path)
 
 
 def prep_rootfs(rootfs_dir):
@@ -125,7 +128,7 @@ def mount_diff_layers(diff_layers_tar):
     merge_dir_path = os.path.join(constants.temp_folder, constants.mergedir)
     workdir_path = os.path.join(constants.temp_folder, constants.workdir)
     args = 'lowerdir=' + lower_dir + ',upperdir=' + upper_dir + \
-        ',workdir=' + workdir_path
+           ',workdir=' + workdir_path
     root_command(union_mount, args, merge_dir_path)
     return merge_dir_path
 
