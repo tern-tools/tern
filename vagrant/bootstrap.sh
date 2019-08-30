@@ -23,6 +23,5 @@ sudo apt-get install -y docker.io
 
 sudo usermod -a -G docker vagrant
 
-# Install dependencies
-cd /tern
-pip3 install .
+# Install tern
+pip3 install tern
