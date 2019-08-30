@@ -22,12 +22,9 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):
     # set up empty master list of packages
     master_list = []
     prepare_for_analysis(image_obj, dockerfile)
-    binary = common.get_base_bin()
-    # Get the shell to be used
-    shell = get_shell(image_obj, binary)
-    # Analyse the first layer
-    analyze_first_layer(binary, image_obj, shell, master_list, redo)
-    # Analyse the remaining layers
+    # Analyze the first layer and get the shell
+    shell = analyze_first_layer(image_obj, master_list, redo)
+    # Analyze the remaining layers
     analyze_subsequent_layers(image_obj, shell, master_list, redo)
     common.save_to_cache(image_obj)
 
@@ -64,10 +61,11 @@ def prepare_for_analysis(image_obj, dockerfile):
     image_setup(image_obj)
 
 
-def analyze_first_layer(binary, image_obj, shell, master_list, redo):
-    # find the binary by mounting the base layer
+def analyze_first_layer(image_obj, master_list, redo):
+    # find the binary and shell by mounting the base layer
     target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
-
+    binary = common.get_base_bin()
+    shell = get_shell(image_obj, binary)
     # set up a notice origin for the first layer
     origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
     # only extract packages if there is a known binary and the layer is not
@@ -95,6 +93,7 @@ def analyze_first_layer(binary, image_obj, shell, master_list, redo):
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)
+    return shell
 
 
 def analyze_subsequent_layers(image_obj, shell, master_list, redo):
