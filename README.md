@@ -45,7 +45,6 @@ Tern gives you a deeper understanding of your container's bill of materials so y
 
 
 # Getting Started<a name="getting-started"/>
-Tern is not distributed on PyPI or as Docker images yet. This is coming soon. See the [Project Status](#project-status) for details.
 
 ## Getting Started with Docker<a name="getting-started-with-docker">
 Docker is the most widely used tool to build and run containers. If you already have Docker installed, you can run Tern by building a container with the Dockerfile provided and the `docker_run.sh` script:
@@ -75,6 +74,8 @@ What the `docker_run.sh` script does is create the directory `workdir` if not pr
 
 *WARNING:* privileged Docker containers are not secure. DO NOT run this container in production unless you have secured the node (VM or bare metal machine) that the docker daemon is running on.
 
+Tern is not distributed as Docker images yet. This is coming soon. Watch the [Project Status](#project-status) for updates.
+
 ## Getting Started with Vagrant<a name="getting-started-with-vagrant">
 Vagrant is a tool to setup an isolated virtual software development environment. If you are using Windows or Mac OSes, this is the best way to get started as Tern does not run natively in a Mac OS or Windows environment at this time.
 
@@ -99,12 +100,12 @@ $ vagrant up
 
 SSH into the created VM: 
 ```
- $ vagrant ssh
+$ vagrant ssh
 ```
 
-Run the program:
+Run:
 ```
-$ python3 -m tern -l report -i debian:buster -f output.txt
+$ tern -l report -i debian:buster -f output.txt
 ```
 
 ## Getting Started on Linux<a name="getting-started-on-linux">
@@ -113,14 +114,14 @@ If you have a Linux OS you will need a distro with a kernel version >= 4.0 (Ubun
 - Git (Installation instructions can be found here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - attr (sudo apt-get install attr or sudo dnf install attr)
 - Python 3.6 or newer (sudo apt-get install python3.6(3.7) or sudo dnf install python36(37))
-- Pip (sudo apt-get install python3-pip). Note that you don't have to do this for Fedora OSs.
+- Pip (sudo apt-get install python3-pip).
+
+Some distro versions have all of these except `attr` preinstalled but `attr` is a common utility and is available via the package manager.
 
 For Docker containers
 - Docker CE (Installation instructions can be found here: https://docs.docker.com/engine/installation/#server)
 
 Make sure the docker daemon is running.
-
-*NOTE:* Tern currently supports containers built with Docker but it is architected to support other container image formats.
 
 Create a python3 virtual environment:
 ```
@@ -130,20 +131,14 @@ $ cd ternenv
 
 *NOTE:* Your OS might distribute each Python version separately. For example, on Ubuntu LTS, Python 2.7 is linked to `python2` and Python 3.6 is linked to `python3`. I develop with Python 3.7 which is installed separately with no symlinks. In this case, I use the binary. The binaries are usually installed in `/usr/bin/python`.
 
-Clone this repository:
-```
-$ git clone https://github.com/vmware/tern.git
-```
-
 Activate the virtual environment:
 ```
 $ source bin/activate
 ```
 
-Install requirements:
+Install tern:
 ```
-$ cd tern
-$ pip install .
+$ pip install tern
 ```
 
 Run Tern:
@@ -152,6 +147,8 @@ $ tern -l report -f output.txt -i debian:buster
 ```
 
 # Using Tern<a name="using-tern">
+
+*WARNING*: The CLI has changed since the last release. Visit [Tern's PyPI project page](https://pypi.org/project/tern/) to find the correct CLI options or just run `tern -h`.
 
 Tern creates a report containing the Bill of Materials (BoM) of a container image, including notes about how it collects this information, and files for which it has no information about. Currently, Tern supports only containers built using Docker. This is the most ubiquitous type of container image that exists so the project started with a focus on those. However, it is architected to support other images that closely follow the [OCI image spec](https://github.com/opencontainers/image-spec/blob/master/spec.md).
 
@@ -212,17 +209,20 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Release 0.4.0 is here!
+Release 0.5.4 is here!
 
-See the [release notes](docs/releases/v0_4_0.md) for more information.
+See the [release notes](docs/releases/v0_5_0.md) for more information. See the [update notes](docs/releases/v0_5_4.md) for patches on top of this release.
 
-We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 0.5.0
+We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 1.0.0.
+
+Somewhere along the line of development, we accidentally rewrote git history on the master branch. Some merge commits are gone but the commits that have all the changes and the tags are still there. We're truly sorry about this mistake and we are working on ways in which we, the ones with admin privileges on the project, will not shoot ourselves in the foot again.
 
 ## Releases
-* [v0.1.0](docs/releases/v0_1_0.md)
-* [v0.2.0](docs/releases/v0_2_0.md)
-* [v0.3.0](docs/releases/v0_3_0.md)
+* [v0.5.4](docs/releases/v0_5_4.md)
 * [v0.4.0](docs/releases/v0_4_0.md)
+* [v0.3.0](docs/releases/v0_3_0.md)
+* [v0.2.0](docs/releases/v0_2_0.md)
+* [v0.1.0](docs/releases/v0_1_0.md)
 
 ## Documentation<a name="documentation"/>
 Architecture, function blocks, code descriptions and the project roadmap are located in the docs folder. Contributions to the documentation are welcome! See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
