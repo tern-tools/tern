@@ -27,7 +27,10 @@ def get_document_namespace(image_obj):
 
 def get_package_spdxref(package_obj):
     '''Given the package object, return an SPDX reference ID'''
-    return 'SPDXRef-{}'.format(package_obj.get_package_id())
+    return 'SPDXRef-{}'.format(
+        spdx_formats.package_id.format(
+            name=package_obj.name,
+            ver=package_obj.version).replace(':', '-', 1))
 
 
 def get_layer_spdxref(layer_obj):
@@ -130,7 +133,7 @@ def update_license_list(license_list, license_string):
     string is not in the list, add it'''
     licenses = get_package_licenses(license_string)
     for l in licenses:
-        if l not in license_list:
+        if l and l not in license_list:
             license_list.append(l)
 
 
@@ -154,9 +157,9 @@ def get_license_block(license_list):
     block = ''
     for l in license_list:
         block = block + spdx_formats.license_id.format(
-            license_ref=get_license_ref(l)) + '\n'
+            license_ref=get_license_ref(l) if l else 'NOASSERTION') + '\n'
         block = block + spdx_formats.extracted_text.format(
-            orig_license=l) + '\n\n'
+            orig_license=l if l else 'NOASSERTION') + '\n\n'
     return block
 
 
@@ -279,9 +282,16 @@ class SpdxTagValue(generator.Generate):
             for package_obj in layer_obj.packages:
                 package_dict = package_obj.to_dict(template)
                 # update the PackageLicenseDeclared with a LicenseRef string
-                if 'PackageLicenseDeclared' in package_dict.keys():
-                    package_dict['PackageLicenseDeclared'] = format_license(
-                        package_obj.pkg_license)
+                # only if the license data exists
+                if ('PackageLicenseDeclared' in package_dict.keys() and
+                        package_obj.pkg_license):
+                    package_dict['PackageLicenseDeclared'] = \
+                            format_license(package_obj.pkg_license)
+                if ('PackageCopyrightText' in package_dict.keys() and
+                        package_obj.copyright):
+                    package_dict['PackageCopyrightText'] = \
+                        spdx_formats.block_text.format(
+                            message=package_obj.copyright)
                 # collect all the individual licenses
                 update_license_list(licenses_found, package_obj.pkg_license)
                 report = report + get_main_block(
