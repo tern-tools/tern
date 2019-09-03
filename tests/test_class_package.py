@@ -121,9 +121,6 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(p.origins.origins[0].notices[2].message,
                          "No metadata for key: download_url")
 
-    def testGetPackageId(self):
-        self.assertEqual(self.p1.get_package_id(), 'p1.1.0')
-
 
 if __name__ == '__main__':
     unittest.main()
