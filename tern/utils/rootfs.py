@@ -9,6 +9,7 @@ Operations to mount container filesystems and run commands against them
 import hashlib
 import logging
 import os
+import shutil
 import subprocess  # nosec
 import pkg_resources
 
@@ -16,6 +17,9 @@ from tern.utils import constants
 
 # remove root filesystems
 remove = ['rm', '-rf']
+
+# tar commands
+extract_tar = ['tar', '-xf']
 
 # mount commands
 mount = ['mount', '-o', 'bind']
@@ -57,8 +61,26 @@ def root_command(command, *extra):
     result, error = pipes.communicate()  # nosec
     if error:
         logger.error("Command failed. %s", error.decode())
-        raise subprocess.CalledProcessError(1, cmd=full_cmd, output=error)  # nosec
+        raise subprocess.CalledProcessError(  # nosec
+            1, cmd=full_cmd, output=error)
     return result
+
+
+def check_command_permissions(command, *extra):
+    '''Invoke a shell command as the current user. If the error contains
+    'Operation not permitted' then return False. Else return True'''
+    full_cmd = []
+    full_cmd.extend(command)  # we do this because command may be used again
+    for arg in extra:
+        full_cmd.append(arg)
+    # invoke
+    logger.debug("Running command: %s", ' '.join(full_cmd))
+    pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,  # nosec
+                             stderr=subprocess.PIPE)
+    _, error = pipes.communicate()  # nosec
+    if "Operation not permitted" in error.decode():
+        return False
+    return True
 
 
 def get_untar_dir(layer_tarfile):
@@ -85,11 +107,22 @@ def set_up():
 def extract_layer_tar(layer_tar_path, directory_path):
     '''Assuming all the metadata for an image has been extracted into the
     temp folder, extract the tarfile into the required directory'''
-    os.makedirs(directory_path)
-    with open(os.devnull, 'w') as test:
-        result = subprocess.call(['tar', '-tf', layer_tar_path],
-                                 stdout=test, stderr=test)
-    if not result:
+    try:
+        os.mkdir(directory_path)
+    except FileExistsError:
+        # attempt to remove using user permissions
+        try:
+            shutil.rmtree(directory_path)
+            os.mkdir(directory_path)
+        except PermissionError:
+            # attempt to remove using root permissions
+            root_command(remove, directory_path)
+            os.mkdir(directory_path)
+    # check if user can extract tarball
+    success = check_command_permissions(
+        extract_tar, layer_tar_path, '-C', directory_path)
+    if not success:
+        # attempt to extract using root permissions
         root_command(extract_tar, layer_tar_path, '-C', directory_path)
 
 
