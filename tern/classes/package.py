@@ -88,7 +88,7 @@ class Package:
 
     @checksum.setter
     def checksum(self, checksum):
-        self.__checksum = checksum;
+        self.__checksum = checksum
 
     def to_dict(self, template=None):
         '''Return a dictionary version of the Package object
@@ -158,6 +158,7 @@ class Package:
 
     def get_package_id(self):
         '''This method returns a string of the name and version for a package
-        represented as "name.version". This method might be helpful when working
-        with SPDX documents that require a unique package identifier.'''
-        return "{0}.{1}".format(self.name, self.version)
+        represented as "name.version". This method might be helpful when
+        working with SPDX documents that require a unique package
+        identifier.'''
+        return "{0}-{1}".format(self.name, self.version)
