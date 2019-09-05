@@ -107,7 +107,9 @@ def main():
     subparsers = parser.add_subparsers(help='Subcommands')
     # subparser for report
     parser_report = subparsers.add_parser('report',
-                                          help="Create a report")
+                                          help="Create a BoM report."
+                                          " Run 'tern report -h' for"
+                                          " format options.")
     parser_report.add_argument('-d', '--dockerfile', type=check_file_existence,
                                help="Dockerfile used to build the Docker"
                                " image")
