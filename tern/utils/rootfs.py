@@ -19,6 +19,7 @@ from tern.utils import constants
 remove = ['rm', '-rf']
 
 # tar commands
+check_tar = ['tar', '-tf']
 extract_tar = ['tar', '-xf']
 
 # mount commands
@@ -27,7 +28,6 @@ mount_proc = ['mount', '-t', 'proc', '/proc']
 mount_sys = ['mount', '-o', 'bind', '/sys']
 mount_dev = ['mount', '-o', 'bind', '/dev']
 unmount = ['umount']
-extract_tar = ['tar', '-xvf']
 
 # enable host DNS settings
 host_dns = ['cp', constants.resolv_path]
@@ -66,9 +66,9 @@ def root_command(command, *extra):
     return result
 
 
-def check_command_permissions(command, *extra):
-    '''Invoke a shell command as the current user. If the error contains
-    'Operation not permitted' then return False. Else return True'''
+def shell_command(command, *extra):
+    '''Invoke a shell command as a regular user.
+    This is used to check the result and error message of the command'''
     full_cmd = []
     full_cmd.extend(command)  # we do this because command may be used again
     for arg in extra:
@@ -77,10 +77,28 @@ def check_command_permissions(command, *extra):
     logger.debug("Running command: %s", ' '.join(full_cmd))
     pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,  # nosec
                              stderr=subprocess.PIPE)
-    _, error = pipes.communicate()  # nosec
+    return pipes.communicate()  # nosec
+
+
+def check_tar_permissions(tar_file, directory_path):
+    '''Invoke a shell command as the current user. If the error contains
+    'Operation not permitted' then return False. Else return True'''
+    _, error = shell_command(extract_tar, tar_file, '-C', directory_path)
     if "Operation not permitted" in error.decode():
         return False
     return True
+
+
+def check_tar_members(tar_file):
+    '''Given the path to the tar file, check to see if there is an error with
+    the members of the tarfile or if it is empty'''
+    result, error = shell_command(check_tar, tar_file)
+    if error:
+        logger.error("Malformed tar: %s", error.decode())
+        raise EOFError("Malformed tarball: {}".format(tar_file))
+    if not result:
+        raise ValueError("Empty tarball: {}".format(tar_file))
+    return result
 
 
 def get_untar_dir(layer_tarfile):
@@ -104,9 +122,9 @@ def set_up():
         os.mkdir(mergedir_path)
 
 
-def extract_layer_tar(layer_tar_path, directory_path):
-    '''Assuming all the metadata for an image has been extracted into the
-    temp folder, extract the tarfile into the required directory'''
+def extract_tarfile(tar_path, directory_path):
+    '''Give the full path to the tar file, extract the tar file into the
+    given directory'''
     try:
         os.mkdir(directory_path)
     except FileExistsError:
@@ -118,12 +136,13 @@ def extract_layer_tar(layer_tar_path, directory_path):
             # attempt to remove using root permissions
             root_command(remove, directory_path)
             os.mkdir(directory_path)
+    # check tarball - should raise an error if anything is wrong
+    check_tar_members(tar_path)
     # check if user can extract tarball
-    success = check_command_permissions(
-        extract_tar, layer_tar_path, '-C', directory_path)
+    success = check_tar_permissions(tar_path, directory_path)
     if not success:
         # attempt to extract using root permissions
-        root_command(extract_tar, layer_tar_path, '-C', directory_path)
+        root_command(extract_tar, tar_path, '-C', directory_path)
 
 
 def prep_rootfs(rootfs_dir):

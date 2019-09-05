@@ -59,6 +59,8 @@ def prepare_for_analysis(image_obj, dockerfile):
         dhelper.set_imported_layers(image_obj)
     # add notices for each layer if it is imported
     image_setup(image_obj)
+    # set up the mount points
+    rootfs.set_up()
 
 
 def analyze_first_layer(image_obj, master_list, redo):
