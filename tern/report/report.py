@@ -65,11 +65,6 @@ def setup(dockerfile=None, image_tag_string=None):
                 logger.fatal("%s", errors.cannot_find_image.format(
                     imagetag=image_tag_string))
                 sys.exit()
-    # create temporary working directory
-    if not os.path.exists(constants.temp_folder):
-        os.mkdir(constants.temp_folder)
-    # set up folders for rootfs operations
-    rootfs.set_up()
 
 
 def teardown():
@@ -117,18 +112,13 @@ def load_base_image():
                 imagetag=base_image.repotag))
     try:
         base_image.load_image()
-    except NameError as error:
+    except (NameError,
+            subprocess.CalledProcessError,
+            IOError,
+            ValueError,
+            EOFError) as error:
         logger.warning('Error in loading base image: %s', str(error))
         base_image.origins.add_notice_to_origins(
-            dockerfile_lines, Notice(str(error), 'error'))
-    except subprocess.CalledProcessError as error:
-        logger.warning(
-            'Error in loading base image: %s', str(error.output, 'utf-8'))
-        base_image.origins.add_notice_to_origins(
-            dockerfile_lines, Notice(str(error.output, 'utf-8'), 'error'))
-    except IOError as error:
-        logger.warning('Error in loading base image: %s', str(error))
-        base_image.origins.add_notice_to_origin(
             dockerfile_lines, Notice(str(error), 'error'))
     return base_image
 
@@ -140,13 +130,12 @@ def load_full_image(image_tag_string):
         testimage=test_image.repotag)
     try:
         test_image.load_image()
-    except NameError as error:
-        test_image.origins.add_notice_to_origins(
-            failure_origin, Notice(str(error), 'error'))
-    except subprocess.CalledProcessError as error:
-        test_image.origins.add_notice_to_origins(
-            failure_origin, Notice(str(error.output, 'utf-8'), 'error'))
-    except IOError as error:
+    except (NameError,
+            subprocess.CalledProcessError,
+            IOError,
+            ValueError,
+            EOFError) as error:
+        logger.warning('Error in loading image: %s', str(error))
         test_image.origins.add_notice_to_origins(
             failure_origin, Notice(str(error), 'error'))
     return test_image

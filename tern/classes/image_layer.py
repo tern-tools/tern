@@ -3,7 +3,6 @@
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
-import os
 
 from tern.classes.package import Package
 from tern.classes.origins import Origins
@@ -170,8 +169,5 @@ class ImageLayer:
         if self.__tar_file:
             fs_dir = rootfs.get_untar_dir(self.__tar_file)
             tar_file = rootfs.get_layer_tar_path(self.__tar_file)
-            # remove the fs directory if it already exists
-            if os.path.isdir(fs_dir):
-                rootfs.root_command(rootfs.remove, fs_dir)
-            rootfs.extract_layer_tar(tar_file, fs_dir)
+            rootfs.extract_tarfile(tar_file, fs_dir)
             self.__fs_hash = rootfs.calc_fs_hash(fs_dir)
