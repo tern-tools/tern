@@ -67,7 +67,7 @@ $ ./docker_run.sh workdir ternd "report -i debian:buster" > output.txt
 
 To produce a json report run
 ```
-$ ./docker_run.sh workdir ternd "report -m json -i debian:buster"
+$ ./docker_run.sh workdir ternd "report -f json -i debian:buster"
 ```
 
 What the `docker_run.sh` script does is create the directory `workdir` if not present in your current working directory and run the built container as privileged with `workdir` bind mounted to it.
@@ -105,7 +105,7 @@ $ vagrant ssh
 
 Run:
 ```
-$ tern -l report -i debian:buster -f output.txt
+$ tern -l report -i debian:buster -o output.txt
 ```
 
 ## Getting Started on Linux<a name="getting-started-on-linux">
@@ -143,7 +143,7 @@ $ pip install tern
 
 Run Tern:
 ```
-$ tern -l report -f output.txt -i debian:buster
+$ tern -l report -o output.txt -i debian:buster
 ```
 
 # Using Tern<a name="using-tern">
@@ -173,7 +173,7 @@ Tern creates BoM reports suitable to read over or to provide to another tool for
 ## Human Readable Format<a name="report-human-readable">
 The default report Tern produces is a human readable report. The object of this report is to give the container developer a deeper understanding of what is installed in a container image during development. This allows a developer to glean basic information about the container such as what the true base operating system is, what the app dependencies are, if the container is using an official or personal repository for sources or binaries, whether the dependencies are at the correct versions, etc.
 ```
-$ tern -l report -i golang:1.12-alpine -f output.txt
+$ tern -l report -i golang:1.12-alpine -o output.txt
 ```
 
 ## Summary Format<a name="report-summary">
@@ -187,19 +187,19 @@ WARNING: Tern is meant to give guidance on what may be installed in a container 
 ## JSON Format<a name="report-json">
 You can get the results in a JSON file to pass around in a network.
 ```
-$ tern report -m json -i golang:1.12-alpine
+$ tern report -f json -i golang:1.12-alpine
 ```
 
 ## YAML Format<a name="report-yaml">
 You can get the results in a YAML file to be consumed by a downstream tool or script.
 ```
-$ tern -l report -m yaml -i golang:1.12-alpine -f output.yaml
+$ tern -l report -f yaml -i golang:1.12-alpine -o output.yaml
 ```
 
 ## SPDX tag-value Format<a name="report-spdxtagvalue">
 [SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. Many compliance tools are compatible with SPDX. Tern follows the [SPDX specifications](https://spdx.org/specifications) specifically the tag-value format which is the most compatible format with the toolkit the organization provides. The tag-value format is the only SPDX format Tern supports. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](./docs/spdx-tag-value-overview) and about how Tern maps its properties to the keys mandated by the spec [here](./docs/spdx-tag-value-mapping.md).
 ```
-$ tern -l report -m spdxtagvalue -i golang:1.12-alpine -f spdx.txt
+$ tern -l report -f spdxtagvalue -i golang:1.12-alpine -o spdx.txt
 ```
  
 # Running tests<a name="running-tests">
