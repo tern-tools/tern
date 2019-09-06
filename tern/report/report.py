@@ -40,8 +40,8 @@ logger = logging.getLogger(constants.logger_name)
 
 def write_report(report, args):
     '''Write the report to a file'''
-    if args.file:
-        file_name = args.file
+    if args.output_file:
+        file_name = args.output_file
     else:
         file_name = constants.report_file
     with open(file_name, 'w') as f:
@@ -215,7 +215,7 @@ def report_out(args, *images):
     report = generate_report(args, *images)
     if not report:
         logger.error("%s not a recognized plugin.", args.report_format)
-    elif args.file:
+    elif args.output_file:
         write_report(report, args)
     else:
         print(report)
@@ -258,7 +258,7 @@ def execute_dockerfile(args):
             completed = False
         # clean up image
         container.remove_image(full_image.repotag)
-        if not args.keep_working_dir:
+        if not args.keep_wd:
             clean_image_tars(full_image)
     else:
         # cannot build the image
@@ -285,7 +285,7 @@ def execute_dockerfile(args):
         stub_image = get_dockerfile_packages()
         # clean up image
         container.remove_image(base_image.repotag)
-        if not args.keep_working_dir:
+        if not args.keep_wd:
             clean_image_tars(base_image)
     # generate report based on what images were created
     if completed:
@@ -294,7 +294,7 @@ def execute_dockerfile(args):
         report_out(args, base_image, stub_image)
     logger.debug('Teardown...')
     teardown()
-    if not args.keep_working_dir:
+    if not args.keep_wd:
         clean_working_dir(args.bind_mount)
 
 
@@ -317,9 +317,9 @@ def execute_docker_image(args):
     else:
         # we cannot load the full image
         logger.warning('Cannot retrieve full image metadata')
-    if not args.keep_working_dir:
+    if not args.keep_wd:
         clean_image_tars(full_image)
     logger.debug('Teardown...')
     teardown()
-    if not args.keep_working_dir:
+    if not args.keep_wd:
         clean_working_dir(args.bind_mount)
