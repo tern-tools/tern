@@ -1,0 +1,31 @@
+# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+
+dist: xenial
+
+sudo: true
+
+language: python
+
+python:
+  - "3.6"
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get install -y attr
+
+install:
+  - pip install .[dev]
+
+matrix:
+  include:
+  - name: "Code Style"
+    script: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi
+  - name: "Security Linting"
+    script: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
+  - name: "Commit Message"
+    script: python ci/test_commit_message.py
+  - name: "Tests"
+    script: python ci/test_files_touched.py

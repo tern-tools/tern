@@ -11,10 +11,31 @@ executors:
 commands:
   setup:
     steps:
+      - run: |
+         sudo rm /etc/apt/sources.list
+         echo "deb http://ubuntu.mirror.constant.com/ xenial main" | sudo tee -a /etc/apt/sources.list
+         echo "deb-src http://ubuntu.mirror.constant.com/ xenial main" | sudo tee -a /etc/apt/sources.list
+         sudo apt-get update
       - run: sudo apt-get install -y attr
       - checkout
       - run: pyenv global 3.6.5
       - run: pip install --upgrade pip
+  create_pypirc:
+    steps:
+      - run:
+          name: Create pypirc file
+          command: |
+           echo -e "[distutils]" >> ~/.pypirc
+           echo -e "index-servers =" >> ~/.pypirc
+           echo -e "    pypi\n" >> ~/.pypirc
+           echo -e "[pypi]" >> ~/.pypirc
+           echo -e "username: $R_PYPI_UN" >> ~/.pypirc
+           echo -e "password: $PYPI_PW" >> ~/.pypirc
+  pre_deploy:
+    steps:
+      - run:
+          name: Ensure that PyPI packages Tern with the same requirements used when the release was cut
+          command: cp docs/releases/${CIRCLE_TAG//./_}-requirements.txt requirements.txt
 
 jobs:
   # linting using Prospector
@@ -23,7 +44,7 @@ jobs:
     # steps to run Prospector
     steps:
       - setup
-      - run: pip install -r dev-requirements.txt
+      - run: pip install prospector>=1.1 GitPython~=2.1
       - run: pip install .
       - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi
   # security linting using Bandit
@@ -32,7 +53,7 @@ jobs:
     # steps to run Bandit
     steps:
       - setup
-      - run: pip install -r dev-requirements.txt
+      - run: pip install bandit~=1.6 GitPython~=2.1
       - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
   # linting for PR commit messages
   commit_check:
@@ -40,14 +61,14 @@ jobs:
     # Steps to run commit message linting
     steps:
       - setup
-      - run: pip install -r dev-requirements.txt
+      - run: pip install GitPython~=2.1
       - run: python ci/test_commit_message.py
   test_changes:
     executor: ubuntu1604
     # Steps to run tests on files changed
     steps:
       - setup
-      - run: pip install -r dev-requirements.txt
+      - run: pip install GitPython~=2.1
       - run: pip install .
       - run: python ci/test_files_touched.py
   # full functional test for photonOS
@@ -58,8 +79,21 @@ jobs:
       - setup
       - run: pip install .
       - run: tern -l report -i photon:3.0
+  # Deploy to PyPi
+  pypi_deploy:
+   executor: ubuntu1604
+   steps:
+      - setup
+      - run: pip install .
+      - pre_deploy
+      - run: pip install twine
+      - run: pip install wheel
+      - create_pypirc 
+      - run: python setup.py sdist bdist_wheel
+      - run: twine check dist/*
+      - run: twine upload dist/*
+
 workflows:
-  # run a full functional test for photonOS
   version: 2
   PRs:
     jobs:
@@ -67,3 +101,13 @@ workflows:
       - commit_check
       - security
       - test_changes
+  Release:
+    jobs:
+      - pypi_deploy:
+          filters:
+            # ignore all commits on any branch by default
+            branches:
+              ignore: /.*/
+            # only run on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/

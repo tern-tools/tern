@@ -8,16 +8,19 @@ Create a report
 """
 
 import docker
-import importlib
 import logging
 import os
 import shutil
 import subprocess  # nosec
 import sys
 
+from stevedore import driver
+from stevedore.exception import NoMatches
+
 from tern.report import content
 from tern.report import errors
 from tern.report import formats
+from tern.report.analyze import analyze_docker_image
 from tern.utils import container
 from tern.utils import constants
 from tern.utils import cache
@@ -30,7 +33,10 @@ from tern.classes.notice import Notice
 from tern.classes.package import Package
 from tern.helpers import common
 import tern.helpers.docker as dhelper
+<<<<<<< HEAD
 from tern.command_lib import command_lib
+=======
+>>>>>>> 3dbde966b01f7be48e497c8f61a7bc0fe5edf2ed
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -38,12 +44,8 @@ logger = logging.getLogger(constants.logger_name)
 
 def write_report(report, args):
     '''Write the report to a file'''
-    if args.file:
-        file_name = args.file
-    elif args.yaml:
-        file_name = constants.yaml_file
-    elif args.json:
-        file_name = constants.json_file
+    if args.output_file:
+        file_name = args.output_file
     else:
         file_name = constants.report_file
     with open(file_name, 'w') as f:
@@ -67,11 +69,6 @@ def setup(dockerfile=None, image_tag_string=None):
                 logger.fatal("%s", errors.cannot_find_image.format(
                     imagetag=image_tag_string))
                 sys.exit()
-    # create temporary working directory
-    if not os.path.exists(constants.temp_folder):
-        os.mkdir(constants.temp_folder)
-    # set up folders for rootfs operations
-    rootfs.set_up()
 
 
 def teardown():
@@ -119,18 +116,13 @@ def load_base_image():
                 imagetag=base_image.repotag))
     try:
         base_image.load_image()
-    except NameError as error:
+    except (NameError,
+            subprocess.CalledProcessError,
+            IOError,
+            ValueError,
+            EOFError) as error:
         logger.warning('Error in loading base image: %s', str(error))
         base_image.origins.add_notice_to_origins(
-            dockerfile_lines, Notice(str(error), 'error'))
-    except subprocess.CalledProcessError as error:
-        logger.warning(
-            'Error in loading base image: %s', str(error.output, 'utf-8'))
-        base_image.origins.add_notice_to_origins(
-            dockerfile_lines, Notice(str(error.output, 'utf-8'), 'error'))
-    except IOError as error:
-        logger.warning('Error in loading base image: %s', str(error))
-        base_image.origins.add_notice_to_origin(
             dockerfile_lines, Notice(str(error), 'error'))
     return base_image
 
@@ -142,18 +134,18 @@ def load_full_image(image_tag_string):
         testimage=test_image.repotag)
     try:
         test_image.load_image()
-    except NameError as error:
-        test_image.origins.add_notice_to_origins(
-            failure_origin, Notice(str(error), 'error'))
-    except subprocess.CalledProcessError as error:
-        test_image.origins.add_notice_to_origins(
-            failure_origin, Notice(str(error.output, 'utf-8'), 'error'))
-    except IOError as error:
+    except (NameError,
+            subprocess.CalledProcessError,
+            IOError,
+            ValueError,
+            EOFError) as error:
+        logger.warning('Error in loading image: %s', str(error))
         test_image.origins.add_notice_to_origins(
             failure_origin, Notice(str(error), 'error'))
     return test_image
 
 
+<<<<<<< HEAD
 def image_setup(image_obj):
     '''Add notices for each layer'''
     for layer in image_obj.layers:
@@ -266,6 +258,8 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False):  # pylint: di
     common.save_to_cache(image_obj)
 
 
+=======
+>>>>>>> 3dbde966b01f7be48e497c8f61a7bc0fe5edf2ed
 def get_dockerfile_packages():
     '''Given a Dockerfile return an approximate image object. This is mosty
     guess work and shouldn't be relied on for accurate information. Add
@@ -301,10 +295,6 @@ def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     if args.report_format:
         return generate_format(images, args.report_format)
-    if args.yaml:
-        return generate_yaml(images)
-    if args.json:
-        return content.print_json_report(images)
     if args.summary:
         return generate_verbose(True, images)
     return generate_verbose(False, images)
@@ -325,28 +315,26 @@ def generate_verbose(is_summary, images):
     return report
 
 
-def generate_yaml(images):
-    '''Generate a yaml report'''
-    logger.debug('Creating YAML report...')
-    report = formats.disclaimer_yaml.format(
-        version_info=general.get_git_rev_or_version())
-    for image in images:
-        report = report + content.print_yaml_report(image)
-    return report
-
-
 def generate_format(images, format_string):
     '''Generate a report in the format of format_string given one or more
     image objects. Here we will load the required module and run the generate
     function to get back a report'''
-    generator = importlib.import_module('tern.report.{}.generator'.format(
-        format_string))
-    return generator.generate(images)
+    try:
+        mgr = driver.DriverManager(
+            namespace='tern.formats',
+            name=format_string,
+            invoke_on_load=True,
+        )
+        return mgr.driver.generate(images)
+    except NoMatches:
+        pass
 
 
 def report_out(args, *images):
     report = generate_report(args, *images)
-    if args.file:
+    if not report:
+        logger.error("%s not a recognized plugin.", args.report_format)
+    elif args.output_file:
         write_report(report, args)
     else:
         print(report)
@@ -389,7 +377,7 @@ def execute_dockerfile(args):
             completed = False
         # clean up image
         container.remove_image(full_image.repotag)
-        if not args.keep_working_dir:
+        if not args.keep_wd:
             clean_image_tars(full_image)
     else:
         # cannot build the image
@@ -416,7 +404,7 @@ def execute_dockerfile(args):
         stub_image = get_dockerfile_packages()
         # clean up image
         container.remove_image(base_image.repotag)
-        if not args.keep_working_dir:
+        if not args.keep_wd:
             clean_image_tars(base_image)
     # generate report based on what images were created
     if completed:
@@ -425,7 +413,7 @@ def execute_dockerfile(args):
         report_out(args, base_image, stub_image)
     logger.debug('Teardown...')
     teardown()
-    if not args.keep_working_dir:
+    if not args.keep_wd:
         clean_working_dir(args.bind_mount)
 
 
@@ -448,9 +436,9 @@ def execute_docker_image(args):
     else:
         # we cannot load the full image
         logger.warning('Cannot retrieve full image metadata')
-    if not args.keep_working_dir:
+    if not args.keep_wd:
         clean_image_tars(full_image)
     logger.debug('Teardown...')
     teardown()
-    if not args.keep_working_dir:
+    if not args.keep_wd:
         clean_working_dir(args.bind_mount)

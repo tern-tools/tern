@@ -4,16 +4,20 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 from git import Repo
+from git import GitCommandError
 import os
 import re
 import sys
 import subprocess  # nosec
 
 
-# This script is written to be used with circleci
+# This script is written to be used with CI integration
 
 repo = Repo(os.getcwd())
-repo.git.remote('add', 'upstream', 'git@github.com:vmware/tern.git')
+try:
+    repo.git.remote('add', 'upstream', 'https://github.com/vmware/tern.git')
+except GitCommandError:
+    pass
 repo.git.fetch('upstream')
 
 hcommit = repo.head.commit
@@ -30,8 +34,6 @@ if not changes:
     sys.exit(0)
 
 test_suite = {
-    # dev-requirements.txt
-    re.compile('dev-requirements.txt'): ['tern -l report -i photon:3.0'],
     # requirements.txt
     re.compile('requirements.txt'): ['tern -l report -i photon:3.0'],
     # Dockerfile
@@ -74,10 +76,10 @@ test_suite = {
     # tern/report
     re.compile('tern/report'): [
         'tern -l report -i golang:alpine',
-        'tern -l report -j -i photon:3.0',
-        'tern -l report -y -i photon:3.0',
+        'tern -l report -f yaml -i photon:3.0',
         'tern -l report -s -i photon:3.0',
-        'tern -l report -m spdxtagvalue -i photon:3.0',
+        'tern -l report -f json -i photon:3.0',
+        'tern -l report -f spdxtagvalue -i photon:3.0',
         'tern -l report -d samples/alpine_python/Dockerfile'],
     # tern/tools
     re.compile('tern/tools'):
@@ -109,7 +111,7 @@ test_suite = {
 
 alltests = []
 for change in changes:
-    for check in test_suite.keys():
+    for check, _ in test_suite.items():
         if check.match(change):
             alltests.extend(test_suite[check])
 

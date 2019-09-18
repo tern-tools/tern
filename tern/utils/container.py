@@ -12,7 +12,6 @@ import grp
 import logging
 import os
 import pwd
-import tarfile
 import time
 from requests.exceptions import HTTPError
 
@@ -21,6 +20,7 @@ from tern.utils.constants import container
 from tern.utils.constants import logger_name
 from tern.utils.constants import temp_folder
 from tern.utils.constants import temp_tarfile
+from tern.utils import rootfs
 
 
 # timestamp tag
@@ -64,8 +64,8 @@ def check_container():
 
 def check_image(image_tag_string):
     '''Check if image exists'''
-    logger.debug("Checking if image \"%s\" is available on disk...",
-        image_tag_string)
+    logger.debug(
+        "Checking if image \"%s\" is available on disk...", image_tag_string)
     try:
         client.images.get(image_tag_string)
         logger.debug("Image \"%s\" found", image_tag_string)
@@ -145,11 +145,10 @@ def extract_image_metadata(image_tag_string):
             for chunk in result:
                 f.write(chunk)
         # extract tarfile into folder
-        with tarfile.open(temp_tarfile) as tar:
-            tar.extractall(temp_path)
+        rootfs.extract_tarfile(temp_tarfile, temp_path)
         # remove temporary tar file
         os.remove(temp_tarfile)
-        if not os.path.exists(temp_path):
+        if not os.listdir(temp_path):
             raise IOError('Unable to untar Docker image')
     except docker.errors.APIError:  # pylint: disable=try-except-raise
         raise

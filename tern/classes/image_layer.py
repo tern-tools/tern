@@ -3,7 +3,6 @@
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
-import os
 
 from tern.classes.package import Package
 from tern.classes.origins import Origins
@@ -44,6 +43,8 @@ class ImageLayer:
         self.__origins = Origins()
         self.__import_image = None
         self.__import_str = ''
+        self.__pkg_format = ''
+        self.__os_guess = ''
 
     @property
     def diff_id(self):
@@ -88,6 +89,22 @@ class ImageLayer:
     @import_str.setter
     def import_str(self, import_str):
         self.__import_str = import_str
+
+    @property
+    def pkg_format(self):
+        return self.__pkg_format
+
+    @pkg_format.setter
+    def pkg_format(self, pkg_format):
+        self.__pkg_format = pkg_format
+
+    @property
+    def os_guess(self):
+        return self.__os_guess
+
+    @os_guess.setter
+    def os_guess(self, os_guess):
+        self.__os_guess = os_guess
 
     def add_package(self, package):
         if isinstance(package, Package):
@@ -152,8 +169,5 @@ class ImageLayer:
         if self.__tar_file:
             fs_dir = rootfs.get_untar_dir(self.__tar_file)
             tar_file = rootfs.get_layer_tar_path(self.__tar_file)
-            # remove the fs directory if it already exists
-            if os.path.isdir(fs_dir):
-                rootfs.root_command(rootfs.remove, fs_dir)
-            rootfs.extract_layer_tar(tar_file, fs_dir)
+            rootfs.extract_tarfile(tar_file, fs_dir)
             self.__fs_hash = rootfs.calc_fs_hash(fs_dir)

@@ -7,13 +7,9 @@
 Functions to generate content for the report
 """
 
-import json
-import yaml
-
 from tern.command_lib import command_lib
 from tern.report import formats
 from tern.utils.general import get_git_rev_or_version
-from tern import Version
 
 
 def get_tool_version():
@@ -21,7 +17,7 @@ def get_tool_version():
     ver_type, ver = get_git_rev_or_version()
     if ver_type == 'commit':
         return formats.commit_version.format(commit_sha=ver)
-    return formats.packaged_version.format(version=Version)
+    return formats.packaged_version.format(version=ver)
 
 
 def print_invoke_list(info_dict, info):
@@ -132,19 +128,3 @@ def print_summary_report(image):
                 notes = notes + print_package(package, '')
             notes = notes + formats.package_demarkation
     return notes
-
-
-def print_yaml_report(image):
-    '''Given an image object, create a yaml report'''
-    image_dict = {}
-    image_dict.update({'image': image.to_dict()})
-    return yaml.dump(image_dict, default_flow_style=False)
-
-
-def print_json_report(images):
-    '''Given a list of image objects, create a json object string'''
-    image_list = []
-    for image in images:
-        image_list.append({'image': image.to_dict()})
-    image_dict = {'images': image_list}
-    return json.dumps(image_dict)
