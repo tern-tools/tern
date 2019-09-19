@@ -119,9 +119,6 @@ def main():
                                " The option can be used to pull docker"
                                " images by digest as well -"
                                " <repo>@<digest-type>:<digest>")
-    parser_report.add_argument('-s', '--summary', action='store_true',
-                               help="Summarize the report as a list of"
-                               " packages with associated information")
     parser_report.add_argument('-f', '--report-format',
                                metavar='REPORT_FORMAT',
                                help="Format the report using one of the "

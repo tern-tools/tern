@@ -17,7 +17,6 @@ import sys
 from stevedore import driver
 from stevedore.exception import NoMatches
 
-from tern.report import content
 from tern.report import errors
 from tern.report import formats
 from tern.report.analyze import analyze_docker_image
@@ -176,24 +175,7 @@ def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     if args.report_format:
         return generate_format(images, args.report_format)
-    if args.summary:
-        return generate_verbose(True, images)
-    return generate_verbose(False, images)
-
-
-def generate_verbose(is_summary, images):
-    '''Generate a verbose report'''
-    report = formats.disclaimer.format(
-        version_info=content.get_tool_version())
-    if is_summary:
-        logger.debug('Creating a summary of components in image...')
-        for image in images:
-            report = report + content.print_summary_report(image)
-    else:
-        logger.debug('Creating a detailed report of components in image...')
-        for image in images:
-            report = report + content.print_full_report(image)
-    return report
+    return generate_format(images, 'default')
 
 
 def generate_format(images, format_string):

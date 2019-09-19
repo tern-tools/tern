@@ -77,7 +77,6 @@ test_suite = {
     re.compile('tern/report'): [
         'tern -l report -i golang:alpine',
         'tern -l report -f yaml -i photon:3.0',
-        'tern -l report -s -i photon:3.0',
         'tern -l report -f json -i photon:3.0',
         'tern -l report -f spdxtagvalue -i photon:3.0',
         'tern -l report -d samples/alpine_python/Dockerfile'],
