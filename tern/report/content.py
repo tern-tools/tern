@@ -69,23 +69,6 @@ def print_package_invoke(command_name):
     return report
 
 
-def print_package(pkg_obj, prefix):
-    '''Given a Package object, print out information with a prefix'''
-    notes = formats.package_demarkation
-    notes = notes + prefix + formats.package_name.format(
-        package_name=pkg_obj.name)
-    notes = notes + prefix + formats.package_version.format(
-        package_version=pkg_obj.version)
-    notes = notes + prefix + formats.package_url.format(
-        package_url=pkg_obj.proj_url)
-    notes = notes + prefix + formats.package_license.format(
-        package_license=pkg_obj.pkg_license)
-    notes = notes + prefix + formats.package_copyright.format(
-        package_copyright=pkg_obj.copyright)
-    notes = notes + '\n\n'
-    return notes
-
-
 def print_notices(notice_origin, origin_pfx, notice_pfx):
     '''Given a NoticeOrigin object with a prefix (like a series of tabs)
     for the origin and the notice messages, return the notes'''
@@ -93,38 +76,4 @@ def print_notices(notice_origin, origin_pfx, notice_pfx):
     for notice in notice_origin.notices:
         notes = notes + notice_pfx + notice.level + ': ' + \
             notice.message + '\n'
-    return notes
-
-
-def print_full_report(image):
-    '''Given an image, go through the Origins object and collect all the
-    notices for the image, layers and packages'''
-    notes = ''
-    for image_origin in image.origins.origins:
-        notes = notes + print_notices(image_origin, '', '\t')
-    for layer in image.layers:
-        if layer.import_image:
-            notes = notes + print_full_report(layer.import_image)
-        else:
-            for layer_origin in layer.origins.origins:
-                notes = notes + print_notices(layer_origin, '\t', '\t\t')
-            for package in layer.packages:
-                notes = notes + print_package(package, '\t\t')
-                for package_origin in package.origins.origins:
-                    notes = notes + print_notices(
-                        package_origin, '\t\t', '\t\t\t')
-            notes = notes + formats.package_demarkation
-    return notes
-
-
-def print_summary_report(image):
-    '''Given an image, only print the package information'''
-    notes = ''
-    for layer in image.layers:
-        if layer.import_image:
-            notes = notes + print_summary_report(layer.import_image)
-        else:
-            for package in layer.packages:
-                notes = notes + print_package(package, '')
-            notes = notes + formats.package_demarkation
     return notes
