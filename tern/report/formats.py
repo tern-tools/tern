@@ -43,6 +43,9 @@ package_version = '''Version: {package_version}\n'''
 package_url = '''Project URL: {package_url}\n'''
 package_license = '''License: {package_license}\n'''
 package_copyright = '''Copyright Text: {package_copyright}\n'''
+packages_list = '''Packages Found:  {list}\n'''
+licenses_list = '''Licenses Found:  {list}\n'''
+
 # notes
 package_notes = '''Errors: {package_info_retrieval_errors}\n''' \
     '''Improvements: {package_info_reporting_improvements}\n'''
