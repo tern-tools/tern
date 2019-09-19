@@ -28,6 +28,7 @@ class ImageLayer:
         last layer of the image that was imported
         import_str: The string from a build tool (like a Dockerfile) that
         created this layer by importing it from another image
+        files_analyzed: whether the files in this layer are analyzed or not
     methods:
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
@@ -45,6 +46,7 @@ class ImageLayer:
         self.__import_str = ''
         self.__pkg_format = ''
         self.__os_guess = ''
+        self.__files_analyzed = False
 
     @property
     def diff_id(self):
@@ -69,7 +71,7 @@ class ImageLayer:
     @property
     def created_by(self):
         return self.__created_by
-
+        
     @created_by.setter
     def created_by(self, create_string):
         self.__created_by = create_string
@@ -106,6 +108,17 @@ class ImageLayer:
     def os_guess(self, os_guess):
         self.__os_guess = os_guess
 
+    @property
+    def files_analyzed(self):
+        return self.__files_analyzed
+        
+    @files_analyzed.setter
+    def files_analyzed(self, x):
+        if isinstance(x, bool):
+            self.__files_analyzed = x
+        else:
+            raise ValueError('files_analyzed should be boolean')
+    
     def add_package(self, package):
         if isinstance(package, Package):
             if package.name not in self.get_package_names():
