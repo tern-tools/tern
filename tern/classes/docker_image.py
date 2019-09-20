@@ -167,8 +167,3 @@ class DockerImage(Image):
             raise
         except IOError:  # pylint: disable=try-except-raise
             raise
-
-    def get_download_location(self):
-        '''A docker image's download location is in the repotags. We will
-        return a string of repotags joined by a hyphen -'''
-        return '-'.join(self.repotags)
