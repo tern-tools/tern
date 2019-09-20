@@ -232,11 +232,6 @@ class SpdxTagValue(generator.Generate):
         licenses_found = []  # This is needed for unrecognized license strings
         image_obj = image_obj_list[0]
         template = SPDX()
-        # The image's PackageDownloadLocation is from a container registry
-        # This includes all the layers but the packages' download location
-        # is unknown if the download_url is blank
-        registry_repotag = image_obj.get_download_location() if hasattr(
-            image_obj, 'repotag') else 'NOASSERTION'
 
         # first part is the document tag-value
         # this doesn't change at all
@@ -262,7 +257,7 @@ class SpdxTagValue(generator.Generate):
                 layer_obj.to_dict(template),
                 layer_obj.origins.origins,
                 SPDXID=get_layer_spdxref(layer_obj),
-                PackageDownloadLocation=registry_repotag,
+                PackageDownloadLocation='NOASSERTION',
                 PackageLicenseDeclared='NOASSERTION',
                 PackageLicenseConcluded='NOASSERTION',
                 PackageCopyrightText='NOASSERTION',
