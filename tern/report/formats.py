@@ -43,8 +43,11 @@ package_version = '''Version: {package_version}\n'''
 package_url = '''Project URL: {package_url}\n'''
 package_license = '''License: {package_license}\n'''
 package_copyright = '''Copyright Text: {package_copyright}\n'''
-packages_list = '''Packages Found:  {list}\n'''
-licenses_list = '''Licenses Found:  {list}\n'''
+layer_packages_list = '''\tPackages found in Layer:  {list}\n'''
+layer_licenses_list = '''\tLicenses found in Layer:  {list}\n'''
+full_licenses_list = '''###########################################\n'''\
+    '''# Summary of licenses found in Container: #\n'''\
+    '''###########################################\n{list}\n'''
 
 # notes
 package_notes = '''Errors: {package_info_retrieval_errors}\n''' \
