@@ -23,8 +23,7 @@ def print_full_report(image):
     '''Given an image, go through the Origins object and collect all the
     notices for the image, layers and packages'''
     notes = ''
-    pkg_list = []
-    license_list = []
+    full_license_list = []
     for image_origin in image.origins.origins:
         notes = notes + content.print_notices(image_origin, '', '\t')
     for layer in image.layers:
@@ -34,19 +33,27 @@ def print_full_report(image):
             for layer_origin in layer.origins.origins:
                 notes = notes + content.print_notices(layer_origin,
                                                       '\t', '\t\t')
+            layer_pkg_list = []
+            layer_license_list = []
             for package in layer.packages:
                 pkg = package.name + "-" + package.version
-                if pkg not in pkg_list and pkg:
-                    pkg_list.append(pkg)
-                if package.pkg_license not in license_list and \
+                if pkg not in layer_pkg_list and pkg:
+                    layer_pkg_list.append(pkg)
+                if package.pkg_license not in layer_license_list and \
                         package.pkg_license:
-                    license_list.append(package.pkg_license)
+                    layer_license_list.append(package.pkg_license)
+                    if package.pkg_license not in full_license_list:
+                        full_license_list.append(package.pkg_license)
+            # Collect packages + licenses in the layer
+            notes = notes + formats.layer_packages_list.format(
+                list=", ".join(layer_pkg_list) if layer_pkg_list else 'None')
+            notes = notes + formats.layer_licenses_list.format(list=", ".join(
+                layer_license_list) if layer_license_list else 'None')
             notes = notes + formats.package_demarkation
-    packages = formats.packages_list.format(list=", ".join(pkg_list) if
-                                            pkg_list else 'None')
-    licenses = formats.licenses_list.format(list=", ".join(license_list) if
-                                            license_list else 'None')
-    return notes + packages + formats.package_demarkation + licenses
+    # Collect the full list of licenses from all the layers
+    licenses = formats.full_licenses_list.format(list=", ".join(
+        full_license_list) if full_license_list else 'None')
+    return notes + licenses
 
 
 class Default(generator.Generate):
