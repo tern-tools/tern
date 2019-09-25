@@ -10,8 +10,8 @@ import subprocess  # nosec
 from tern.utils.general import pushd
 from tern.utils.constants import temp_folder
 from tern.utils.constants import manifest_file
-from tern.utils.container import extract_image_metadata
-from tern.utils.dockerfile import tag_separator
+from tern.analyze.docker.container import extract_image_metadata
+from tern.analyze.docker.dockerfile import tag_separator
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image

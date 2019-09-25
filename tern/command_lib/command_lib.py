@@ -13,7 +13,7 @@ import subprocess  # nosec
 import yaml
 import pkg_resources
 
-from tern.utils import container
+from tern.analyze.docker import container
 from tern.utils import constants
 from tern.utils import rootfs
 from tern.report import errors

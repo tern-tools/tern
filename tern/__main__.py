@@ -14,7 +14,7 @@ import logging
 import os
 import sys
 
-from tern.report import report
+from tern.analyze.docker import run
 from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
@@ -71,9 +71,9 @@ def do_main(args):
         cache.clear()
     if hasattr(args, 'name') and args.name == 'report':
         if args.dockerfile:
-            report.execute_dockerfile(args)
+            run.execute_dockerfile(args)
         if args.docker_image:
-            report.execute_docker_image(args)
+            run.execute_docker_image(args)
         logger.debug('Report completed.')
     logger.debug('Finished')
 
