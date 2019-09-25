@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
-Analyze a container image
+Analyze a Docker container image
 """
 
 import logging
@@ -17,6 +17,7 @@ from tern.classes.notice import Notice
 from tern.helpers import common
 import tern.helpers.docker as dhelper
 from tern.command_lib import command_lib
+
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
