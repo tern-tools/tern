@@ -16,12 +16,23 @@ Here is a layout of the directory structure:
       origins.py
       package.py
       template.py
-    ▾ templates/
-        spdx.py
   ▾ command_lib/ <-- These are the bash commands that get run to collect information about the container image
       base.yml <-- System wide scripts for package managers and such
       snippets.yml <-- scripts for one off commands
       command_lib.py <-- Command Library modules
+  ▾ formats/ <-- This is the reporting template plugin library. Each subdirectory is a module that can be dynamically loaded at runtime based on the users report selection
+      generator.py <-- This is the abstract base class for report plugins
+    ▾ default/
+        generator.py
+    ▾ json/
+        generator.py
+    ▾ spdx/
+        formats.py
+        spdx.py
+      ▾ spdxtagvalue/
+           generator.py
+    ▾ yaml/
+         generator.py
   ▾ helpers/
       common.py <-- Common modules used at a high level throughout the code
       docker.py <-- modules specific to Docker
@@ -30,9 +41,6 @@ Here is a layout of the directory structure:
       errors.py
       formats.py
       report.py <-- Main reporting module
-    ▾ spdxtagvalue/ <-- A Template module
-        formats.py
-        generator.py
   ▾ scripts/debian/ <-- Example script to pull sources for debian based images
     ▾ jessie/
         sources.list
@@ -73,7 +81,9 @@ Scripts used by our CI/CD setup live outside the `tern` folder, in a folder call
 
 ```
 ▾ ci/
+    evaluate_docs.py
     test_commit_message.py
+    test_files_touched.py
 ```
 
 Documentation lives in a folder called `docs`. Sample Dockerfile live in a folder called `samples`.
