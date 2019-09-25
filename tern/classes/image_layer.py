@@ -29,6 +29,7 @@ class ImageLayer:
         import_str: The string from a build tool (like a Dockerfile) that
         created this layer by importing it from another image
         files_analyzed: whether the files in this layer are analyzed or not
+        analyzed_output: the result of the file analysis
     methods:
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
@@ -47,6 +48,7 @@ class ImageLayer:
         self.__pkg_format = ''
         self.__os_guess = ''
         self.__files_analyzed = False
+        self.__analyzed_output = ''
 
     @property
     def diff_id(self):
@@ -109,6 +111,17 @@ class ImageLayer:
         self.__os_guess = os_guess
 
     @property
+    def analyzed_output(self):
+        return self.__analyzed_output
+
+    @analyzed_output.setter
+    def analyzed_output(self, analyzed_output):
+        if isinstance(analyzed_output, str):
+            self.__analyzed_output = analyzed_output
+        else:
+            raise ValueError('analyzed_output should be a string')
+    
+    @property
     def files_analyzed(self):
         return self.__files_analyzed
         
@@ -118,7 +131,7 @@ class ImageLayer:
             self.__files_analyzed = x
         else:
             raise ValueError('files_analyzed should be boolean')
-    
+
     def add_package(self, package):
         if isinstance(package, Package):
             if package.name not in self.get_package_names():
