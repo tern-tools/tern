@@ -39,6 +39,11 @@ class TestClassImageLayer(unittest.TestCase):
         self.assertTrue(self.layer.files_analyzed)
         self.assertRaises(ValueError, setattr, self.layer,
                           'files_analyzed', 'some string')
+        self.assertEqual("", self.layer.analyzed_output)
+        self.layer.analyzed_output = 'some string'
+        self.assertEqual(self.layer.analyzed_output, 'some string')
+        self.assertRaises(ValueError, setattr, self.layer,
+                          'analyzed_output', 123)
 
     def testAddPackage(self):
         err = "Object type String, should be Package"
