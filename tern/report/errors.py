@@ -53,6 +53,10 @@ no_shell_listing = '''There is no listing for 'shell' under the base ''' \
 unknown_content = '''Unknown content included in layer {files}. Please ''' \
     '''analyze these files separately\n'''
 keyboard_interrupt = '''Keyboard Interrupt! Aborting analysis...'''
+invalid_raw_image = '''Invalid raw image provided: '{image}' - Check ''' \
+    '''that path to raw image is correct and in tar archive format.'''
+incorrect_raw_option = '''Expected docker image but detected file in ''' \
+    '''tar archive format.'''
 
 # Dockerfile specific errors
 dockerfile_no_tag = '''The Dockerfile provided has no tag in the line ''' \

@@ -14,10 +14,12 @@ import logging
 import os
 import sys
 
+from tern.analyze import common
 from tern.analyze.docker import run
 from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
+from tern.report import errors
 
 
 # global logger
@@ -82,8 +84,18 @@ def do_main(args):
         if args.dockerfile:
             run.execute_dockerfile(args)
         if args.docker_image:
-            run.execute_docker_image(args)
-        logger.debug('Report completed.')
+            if common.check_tar(args.docker_image):
+                logger.error("%s", errors.incorrect_raw_option)
+            else:
+                run.execute_docker_image(args)
+                logger.debug('Report completed.')
+        if args.raw_image:
+            if not common.check_tar(args.raw_image):
+                logger.error("%s", errors.invalid_raw_image.format(
+                    image=args.raw_image))
+            else:
+                run.execute_docker_image(args)
+                logger.debug('Report completed.')
     logger.debug('Finished')
 
 
@@ -128,6 +140,9 @@ def main():
                                " The option can be used to pull docker"
                                " images by digest as well -"
                                " <repo>@<digest-type>:<digest>")
+    parser_report.add_argument('-w', '--raw-image', metavar='FILE',
+                               help="Raw container image that exists locally "
+                               "in the form of a tar archive.")
     parser_report.add_argument('-f', '--report-format',
                                metavar='REPORT_FORMAT',
                                help="Format the report using one of the "
