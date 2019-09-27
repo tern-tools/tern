@@ -15,7 +15,7 @@ import pwd
 import time
 from requests.exceptions import HTTPError
 
-
+from tern.analyze import common
 from tern.utils.constants import container
 from tern.utils.constants import logger_name
 from tern.utils.constants import temp_tarfile
@@ -139,16 +139,20 @@ def extract_image_metadata(image_tag_string):
     temp_path = rootfs.get_working_dir()
     placeholder = os.path.join(general.get_top_dir(), temp_tarfile)
     try:
-        image = client.images.get(image_tag_string)
-        result = image.save(chunk_size=2097152, named=True)
-        # write all of the tar byte stream into temporary tar file
-        with open(placeholder, 'wb') as f:
-            for chunk in result:
-                f.write(chunk)
-        # extract tarfile into folder
-        rootfs.extract_tarfile(placeholder, temp_path)
-        # remove temporary tar file
-        os.remove(placeholder)
+        if common.check_tar(image_tag_string) is True:
+            # image_tag_string is the path to the tar file for raw images
+            rootfs.extract_tarfile(image_tag_string, temp_path)
+        else:
+            image = client.images.get(image_tag_string)
+            result = image.save(chunk_size=2097152, named=True)
+            # write all of the tar byte stream into temporary tar file
+            with open(placeholder, 'wb') as f:
+                for chunk in result:
+                    f.write(chunk)
+            # extract tarfile into folder
+            rootfs.extract_tarfile(placeholder, temp_path)
+            # remove temporary tar file
+            os.remove(placeholder)
         if not os.listdir(temp_path):
             raise IOError('Unable to untar Docker image')
     except docker.errors.APIError:  # pylint: disable=try-except-raise
