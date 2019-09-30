@@ -25,7 +25,7 @@ from tern.utils import general
 from tern.utils import rootfs
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
-import tern.helpers.docker as dhelper
+import tern.analyze.docker.helpers as dhelper
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
