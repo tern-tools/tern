@@ -14,12 +14,12 @@ import subprocess  # nosec
 
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
-from tern.utils import dockerfile
-from tern.utils import container
+from tern.analyze.docker import dockerfile
+from tern.analyze.docker import container
 from tern.utils import constants
 from tern.report import errors
 from tern.report import formats
-from tern.helpers import common
+from tern.analyze import common
 
 # dockerfile
 dockerfile_global = ''
