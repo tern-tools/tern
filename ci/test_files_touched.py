@@ -69,8 +69,8 @@ test_suite = {
         'tern -l report -i alpine:3.9',
         'tern -l report -i archlinux:latest',
         'tern -l report -i centos:7'],
-    # tern/helpers
-    re.compile('tern/helpers'): [
+    # tern/analyze/docker
+    re.compile('tern/analyze/docker'): [
         'tern -l report -i golang:alpine',
         'tern -l report -d samples/alpine_python/Dockerfile'],
     # tern/report

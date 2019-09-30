@@ -6,6 +6,14 @@ Here is a layout of the directory structure:
 
 ```
 ▾ tern/
+  ▾ analyze/  <-- Each container image format will have its own subdirectory for analysis
+      common.py <-- Common modules used at a high level throughout the code
+    ▾ docker/
+        analyze.py
+        container.py
+        dockerfile.py
+        docker.py <-- modules specific to Docker
+        run.py
   ▾ classes/  <-- These are individual objects. Each has a corresponding test in the tests directory
       command.py
       docker_image.py
@@ -33,9 +41,6 @@ Here is a layout of the directory structure:
            generator.py
     ▾ yaml/
          generator.py
-  ▾ helpers/
-      common.py <-- Common modules used at a high level throughout the code
-      docker.py <-- modules specific to Docker
   ▾ report/
       content.py
       errors.py
@@ -51,8 +56,6 @@ Here is a layout of the directory structure:
   ▾ utils/ <-- general utility modules used throughout the code
       cache.py
       constants.py
-      container.py
-      dockerfile.py
       general.py
       metadata.py
       rootfs.py
