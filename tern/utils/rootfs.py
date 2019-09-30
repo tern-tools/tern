@@ -222,6 +222,21 @@ def clean_up():
     root_command(remove, workdir_path)
 
 
+def recover():
+    '''Recover after some external error'''
+    # try to unmount proc, sys and dev first
+    try:
+        undo_mount()
+    except subprocess.CalledProcessError:
+        pass
+    try:
+        unmount_rootfs()
+    except subprocess.CalledProcessError:
+        pass
+    # clean up the working directory
+    clean_up()
+
+
 def calc_fs_hash(fs_path):
     '''Given the path to the filesystem, calculate the filesystem hash
     We run a shell script located in the tools directory to get the
