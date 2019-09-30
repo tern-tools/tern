@@ -14,6 +14,7 @@ import subprocess  # nosec
 import pkg_resources
 
 from tern.utils import constants
+from tern.utils import general
 
 # remove root filesystems
 remove = ['rm', '-rf']
@@ -101,21 +102,32 @@ def check_tar_members(tar_file):
     return result
 
 
+def get_working_dir():
+    '''General purpose utility to return the absolute path of the working
+    directory'''
+    return os.path.join(general.get_top_dir(), constants.temp_folder)
+
+
 def get_untar_dir(layer_tarfile):
     '''get the directory to untar the layer tar file'''
-    return os.path.join(constants.temp_folder, os.path.dirname(
+    return os.path.join(get_working_dir(), os.path.dirname(
         layer_tarfile), constants.untar_dir)
 
 
 def get_layer_tar_path(layer_tarfile):
     '''get the full path of the layer tar file'''
-    return os.path.join(constants.temp_folder, layer_tarfile)
+    return os.path.join(get_working_dir(), layer_tarfile)
 
 
 def set_up():
     '''Create required directories'''
-    workdir_path = os.path.join(constants.temp_folder, constants.workdir)
-    mergedir_path = os.path.join(constants.temp_folder, constants.mergedir)
+    op_dir = get_working_dir()
+    workdir_path = os.path.join(op_dir, constants.workdir)
+    mergedir_path = os.path.join(op_dir, constants.mergedir)
+    # create higher level directory
+    if not os.path.isdir(op_dir):
+        os.mkdir(op_dir)
+    # create mount points
     if not os.path.isdir(workdir_path):
         os.mkdir(workdir_path)
     if not os.path.isdir(mergedir_path):
@@ -164,7 +176,7 @@ def mount_base_layer(base_layer_tar):
         1. Untar the base layer tar file
         2. Mount into mergedir'''
     base_rootfs_path = get_untar_dir(base_layer_tar)
-    target_dir_path = os.path.join(constants.temp_folder, constants.mergedir)
+    target_dir_path = os.path.join(get_working_dir(), constants.mergedir)
     root_command(mount, base_rootfs_path, target_dir_path)
     return target_dir_path
 
@@ -177,8 +189,8 @@ def mount_diff_layers(diff_layers_tar):
         lower_dir_paths.append(get_untar_dir(layer_tar))
     upper_dir = lower_dir_paths.pop()
     lower_dir = ':'.join(list(reversed(lower_dir_paths)))
-    merge_dir_path = os.path.join(constants.temp_folder, constants.mergedir)
-    workdir_path = os.path.join(constants.temp_folder, constants.workdir)
+    merge_dir_path = os.path.join(get_working_dir(), constants.mergedir)
+    workdir_path = os.path.join(get_working_dir(), constants.workdir)
     args = 'lowerdir=' + lower_dir + ',upperdir=' + upper_dir + \
            ',workdir=' + workdir_path
     root_command(union_mount, args, merge_dir_path)
@@ -187,7 +199,7 @@ def mount_diff_layers(diff_layers_tar):
 
 def run_chroot_command(command_string, shell):
     '''Run the command string in a chroot jail within the rootfs namespace'''
-    target_dir = os.path.join(constants.temp_folder, constants.mergedir)
+    target_dir = os.path.join(get_working_dir(), constants.mergedir)
     mount_proc = '--mount-proc=' + os.path.join(
         os.path.abspath(target_dir), 'proc')
     try:
@@ -202,7 +214,7 @@ def run_chroot_command(command_string, shell):
 
 def undo_mount():
     '''Unmount proc, sys, and dev directories'''
-    rootfs_path = os.path.join(constants.temp_folder, constants.mergedir)
+    rootfs_path = os.path.join(get_working_dir(), constants.mergedir)
     root_command(unmount, os.path.join(rootfs_path, 'proc'))
     root_command(unmount, os.path.join(rootfs_path, 'sys'))
     root_command(unmount, os.path.join(rootfs_path, 'dev'))
@@ -210,14 +222,14 @@ def undo_mount():
 
 def unmount_rootfs():
     '''Unmount the filesystem'''
-    rootfs_path = os.path.join(constants.temp_folder, constants.mergedir)
+    rootfs_path = os.path.join(get_working_dir(), constants.mergedir)
     root_command(unmount, '-rl', rootfs_path)
 
 
 def clean_up():
     '''Remove all the setup directories'''
-    mergedir_path = os.path.join(constants.temp_folder, constants.mergedir)
-    workdir_path = os.path.join(constants.temp_folder, constants.workdir)
+    mergedir_path = os.path.join(get_working_dir(), constants.mergedir)
+    workdir_path = os.path.join(get_working_dir(), constants.workdir)
     root_command(remove, mergedir_path)
     root_command(remove, workdir_path)
 
