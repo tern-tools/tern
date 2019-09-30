@@ -16,8 +16,8 @@ from tern.report import report
 from tern.utils import constants
 from tern.analyze.docker import container
 from tern.classes.notice import Notice
-from tern.helpers import common
-import tern.helpers.docker as dhelper
+from tern.analyze import common
+import tern.analyze.docker.helpers as dhelper
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
 from tern.classes.package import Package

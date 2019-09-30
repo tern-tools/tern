@@ -47,7 +47,7 @@ A Notice object is where notice messages and the notice levels are recorded. Rig
 The utility modules are organized in files under specific operations in the utils folder. They are used across the whole project. They should be operational by themselves and can be used independent of the main tern executable. For example, cache.py can implement cache CRUD operations that could be used through some API as well as the executable. Typically, utilities raise errors that other modules may implement in a try-catch. So they can be considered as low-level modules.
 
 ## Subroutines
-The subroutines that run some common steps that could be used anywhere in the project are located in `tern/helpers/common.py` and `tern/helpers/docker.py`. There is room for these to move around as the project grows.
+The subroutines that run some common steps that could be used anywhere in the project are located in `tern/analyze/common.py` and `tern/analyze/docker/helpers.py`. There is room for these to move around as the project grows.
 
 Check out [how to navigate the code](./navigating-the-code.md) for more information on where the pieces are in the code base.
 
