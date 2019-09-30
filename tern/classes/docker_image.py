@@ -7,8 +7,8 @@ import json
 import os
 import subprocess  # nosec
 
+from tern.utils import rootfs
 from tern.utils.general import pushd
-from tern.utils.constants import temp_folder
 from tern.utils.constants import manifest_file
 from tern.analyze.docker.container import extract_image_metadata
 from tern.analyze.docker.dockerfile import tag_separator
@@ -72,7 +72,7 @@ class DockerImage(Image):
     def get_image_manifest(self):
         '''Assuming that there is a temp folder with a manifest.json of
         an image inside, get a dict of the manifest.json file'''
-        temp_path = os.path.abspath(temp_folder)
+        temp_path = rootfs.get_working_dir()
         with pushd(temp_path):
             with open(manifest_file) as f:
                 json_obj = json.loads(f.read())
@@ -110,7 +110,7 @@ class DockerImage(Image):
         config_file = self.get_image_config_file(manifest)
         # assuming that the config file path is in the same root path as the
         # manifest file
-        temp_path = os.path.abspath(temp_folder)
+        temp_path = rootfs.get_working_dir()
         with pushd(temp_path):
             with open(config_file) as f:
                 json_obj = json.loads(f.read())
