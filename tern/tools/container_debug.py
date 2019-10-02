@@ -22,7 +22,7 @@ from tern.report import report
 def cleanup():
     """Clean up the working directory"""
     rootfs.clean_up()
-    report.clean_working_dir(False)
+    rootfs.root_command(rootfs.remove, rootfs.get_working_dir())
 
 
 def unmount():
@@ -40,15 +40,14 @@ def unmount():
 
 def get_mount_path():
     """Get the path where the filesystem is mounted"""
-    return os.path.join(os.getcwd(), constants.temp_folder, constants.mergedir)
+    return os.path.join(rootfs.get_working_dir(), constants.mergedir)
 
 
 def check_shell():
     """Check if any shell binary is available in the mounted filesystem"""
     shells = ['/bin/sh', '/bin/bash', '/usr/bin/bash']
-    cwd = get_mount_path()
     for shell in shells:
-        if os.path.exists(os.path.join(cwd, shell[1:])):
+        if os.path.exists(os.path.join(get_mount_path(), shell[1:])):
             return shell
     return ''
 
