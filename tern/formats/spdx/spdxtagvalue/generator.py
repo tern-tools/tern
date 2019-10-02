@@ -8,6 +8,7 @@ SPDX document generator
 """
 
 import datetime
+import hashlib
 
 from tern.formats.spdx.spdx import SPDX
 from tern.utils.general import get_git_rev_or_version
@@ -115,36 +116,9 @@ def get_layer_relationships(layer_obj, prev_layer_spdxref=None):
 
 
 def get_license_ref(pkg_license):
-    '''Given one license, return a LicenseRef'''
-    return 'LicenseRef-' + pkg_license
-
-
-def get_package_licenses(license_string):
-    '''Return a list of strings from the original license in the Package
-    object. This takes in the string'''
-    return license_string.split(' ')
-
-
-def update_license_list(license_list, license_string):
-    '''SPDX has a LicenseRef block at the end of the document that has
-    all the license references in the document. To make this work,
-    take in a list containing all the licenses seen thus far, and a license
-    string from the package manager. If the individual license in the license
-    string is not in the list, add it'''
-    licenses = get_package_licenses(license_string)
-    for l in licenses:
-        if l and l not in license_list:
-            license_list.append(l)
-
-
-def format_license(license_string):
-    '''Given a license string, return an SPDX formatted license string.
-    NOTE: this is a quickfix
-    We will split up the licenses by spaces, prepend each string with a
-    "LicenseRef-" and then join the strings with an " AND "'''
-    license_list = get_package_licenses(license_string)
-    amended_license_list = [get_license_ref(l) for l in license_list]
-    return ' AND '.join(amended_license_list)
+    '''Given one license, return a LicenseRef with a unique SHA-256 ID'''
+    return 'LicenseRef-' + hashlib.sha256(pkg_license.encode(
+        'utf-8')).hexdigest()[-7:]
 
 
 def get_license_block(license_list):
@@ -157,7 +131,8 @@ def get_license_block(license_list):
     block = ''
     for l in license_list:
         block = block + spdx_formats.license_id.format(
-            license_ref=get_license_ref(l) if l else 'NOASSERTION') + '\n'
+            license_ref=get_license_ref(l) if l
+            else 'NOASSERTION') + '\n'
         block = block + spdx_formats.extracted_text.format(
             orig_license=l if l else 'NOASSERTION') + '\n\n'
     return block
@@ -281,14 +256,16 @@ class SpdxTagValue(generator.Generate):
                 if ('PackageLicenseDeclared' in package_dict.keys() and
                         package_obj.pkg_license):
                     package_dict['PackageLicenseDeclared'] = \
-                            format_license(package_obj.pkg_license)
+                       get_license_ref(package_obj.pkg_license)
                 if ('PackageCopyrightText' in package_dict.keys() and
                         package_obj.copyright):
                     package_dict['PackageCopyrightText'] = \
                         spdx_formats.block_text.format(
                             message=package_obj.copyright)
                 # collect all the individual licenses
-                update_license_list(licenses_found, package_obj.pkg_license)
+                if package_obj.pkg_license and package_obj.pkg_license \
+                        not in licenses_found:
+                    licenses_found.append(package_obj.pkg_license)
                 report = report + get_main_block(
                     package_dict,
                     package_obj.origins.origins,
