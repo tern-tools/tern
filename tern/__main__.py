@@ -58,8 +58,17 @@ def get_version():
     return message
 
 
+def create_top_dir():
+    '''Create the top level working directory'''
+    top_dir = general.get_top_dir()
+    if not os.path.isdir(top_dir):
+        os.mkdir(top_dir)
+
+
 def do_main(args):
     '''Execute according to subcommands'''
+    # create working directory
+    create_top_dir()
     if args.log_stream:
         # set up console logs
         global logger

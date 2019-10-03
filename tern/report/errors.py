@@ -52,6 +52,7 @@ no_shell_listing = '''There is no listing for 'shell' under the base ''' \
     '''{default_shell}\n'''
 unknown_content = '''Unknown content included in layer {files}. Please ''' \
     '''analyze these files separately\n'''
+keyboard_interrupt = '''Keyboard Interrupt! Aborting analysis...'''
 
 # Dockerfile specific errors
 dockerfile_no_tag = '''The Dockerfile provided has no tag in the line ''' \
