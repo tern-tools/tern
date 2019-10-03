@@ -8,8 +8,9 @@ import random
 import re
 import subprocess  # nosec
 from contextlib import contextmanager
-
+from pathlib import Path
 from pbr.version import VersionInfo
+
 from tern.utils import constants
 
 
@@ -25,6 +26,11 @@ def pushd(path):
     os.chdir(path)
     yield
     os.chdir(curr_path)
+
+
+def get_top_dir():
+    '''Get the hidden working directory'''
+    return os.path.join(str(Path.home()), constants.dot_folder)
 
 
 def initialize_names():

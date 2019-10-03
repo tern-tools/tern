@@ -7,8 +7,12 @@
 Constants
 '''
 
-# temporary folder for extracting container image
-# this is relative to where the tern executable is
+# paths for working on container images
+# this is relative to the user's home directory
+
+# hidden folder
+dot_folder = '.tern'
+# working folder
 temp_folder = 'temp'
 # temporary tar file
 temp_tarfile = 'temp.tar'

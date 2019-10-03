@@ -8,6 +8,7 @@ Analyze a Docker container image
 """
 
 import logging
+import sys
 
 from tern.report import errors
 from tern.report import formats
@@ -73,6 +74,12 @@ def prepare_for_analysis(image_obj, dockerfile):
     rootfs.set_up()
 
 
+def abort_analysis():
+    '''Abort due to some external event'''
+    rootfs.recover()
+    sys.exit(1)
+
+
 def analyze_first_layer(image_obj, master_list, redo):
     # find the binary and shell by mounting the base layer
     target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
@@ -87,8 +94,12 @@ def analyze_first_layer(image_obj, master_list, redo):
             # Determine pacakge/os style from binary in the image layer
             common.get_os_style(image_obj.layers[0], binary)
             # get the packages of the first layer
-            rootfs.prep_rootfs(target)
-            common.add_base_packages(image_obj.layers[0], binary, shell)
+            try:
+                rootfs.prep_rootfs(target)
+                common.add_base_packages(image_obj.layers[0], binary, shell)
+            except KeyboardInterrupt:
+                logger.critical(errors.keyboard_interrupt)
+                abort_analysis()
             # unmount proc, sys and dev
             rootfs.undo_mount()
     else:
@@ -126,12 +137,20 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo):
             for command in command_list:
                 pkg_listing = command_lib.get_package_listing(command.name)
                 if isinstance(pkg_listing, str):
-                    common.add_base_packages(
-                        image_obj.layers[curr_layer], pkg_listing, shell)
+                    try:
+                        common.add_base_packages(
+                            image_obj.layers[curr_layer], pkg_listing, shell)
+                    except KeyboardInterrupt:
+                        logger.critical(errors.keyboard_interrupt)
+                        abort_analysis()
                 else:
-                    common.add_snippet_packages(
-                        image_obj.layers[curr_layer], command, pkg_listing,
-                        shell)
+                    try:
+                        common.add_snippet_packages(
+                            image_obj.layers[curr_layer], command, pkg_listing,
+                            shell)
+                    except KeyboardInterrupt:
+                        logger.critical(errors.keyboard_interrupt)
+                        abort_analysis()
             if command_list:
                 rootfs.undo_mount()
                 rootfs.unmount_rootfs()

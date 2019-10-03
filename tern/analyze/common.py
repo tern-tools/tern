@@ -20,6 +20,7 @@ from tern.report import content
 from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
+from tern.utils import rootfs
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -73,7 +74,7 @@ def get_base_bin():
     binary = ''
     # the path to where the filesystem is mounted
     # look at utils/rootfs.py mount_base_layer module
-    cwd = os.path.join(os.getcwd(), constants.temp_folder, constants.mergedir)
+    cwd = os.path.join(rootfs.get_working_dir(), constants.mergedir)
     for key, value in command_lib.command_lib['base'].items():
         for path in value['path']:
             if os.path.exists(os.path.join(cwd, path)):
@@ -89,10 +90,10 @@ def get_os_release():
     # os-release may exist under /etc/ or /usr/lib. We should first check
     # for the preferred /etc/os-release and fall back on /usr/lib/os-release
     # if it does not exist under /etc
-    etc_path = os.path.join(os.getcwd(), constants.temp_folder,
-                            constants.mergedir, constants.etc_release_path)
-    lib_path = os.path.join(os.getcwd(), constants.temp_folder,
-                            constants.mergedir, constants.lib_release_path)
+    etc_path = os.path.join(rootfs.get_working_dir(), constants.mergedir,
+                            constants.etc_release_path)
+    lib_path = os.path.join(rootfs.get_working_dir(), constants.mergedir,
+                            constants.lib_release_path)
     if not os.path.exists(etc_path):
         if not os.path.exists(lib_path):
             return ''
