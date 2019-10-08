@@ -143,6 +143,9 @@ def main():
     parser_report.add_argument('-w', '--raw-image', metavar='FILE',
                                help="Raw container image that exists locally "
                                "in the form of a tar archive.")
+    parser_report.add_argument('-x', '--extend', metavar='EXTENSION',
+                               help="Use an extension to analyze a container "
+                               "image. Available extensions: cve-bin-tool")
     parser_report.add_argument('-f', '--report-format',
                                metavar='REPORT_FORMAT',
                                help="Format the report using one of the "

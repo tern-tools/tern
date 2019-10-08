@@ -22,6 +22,7 @@ from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
 from tern.classes.package import Package
 from tern.analyze.docker.analyze import analyze_docker_image
+from tern.analyze.passthrough import run_extension
 
 
 # global logger
@@ -69,6 +70,15 @@ def get_dockerfile_packages():
     return stub_image
 
 
+def analyze(image_obj, args, is_dockerfile=False):
+    '''Analyze the image object either using the default method or the extended
+    method'''
+    if args.extend:
+        run_extension(image_obj, args.extend)
+    else:
+        analyze_docker_image(image_obj, args.redo, is_dockerfile)
+
+
 def execute_docker_image(args):
     '''Execution path if given a Docker image'''
     logger.debug('Setting up...')
@@ -87,7 +97,7 @@ def execute_docker_image(args):
         full_image.origins.add_notice_origin(
             formats.docker_image.format(imagetag=image_string))
         # analyze image
-        analyze_docker_image(full_image, args.redo)
+        analyze(full_image, args)
         # generate report
         report.report_out(args, full_image)
     else:
@@ -121,7 +131,7 @@ def execute_dockerfile(args):
             full_image.origins.add_notice_origin(
                 formats.dockerfile_image.format(dockerfile=args.dockerfile))
             # analyze image
-            analyze_docker_image(full_image, args.redo, True)
+            analyze(full_image, args, True)
         else:
             # we cannot load the full image
             logger.warning('Cannot retrieve full image metadata')
@@ -146,7 +156,7 @@ def execute_dockerfile(args):
                 args.dockerfile, Notice(
                     formats.image_build_failure, 'warning'))
             # analyze image
-            analyze_docker_image(base_image, args.redo)
+            analyze(base_image, args)
         else:
             # we cannot load the base image
             logger.warning('Cannot retrieve base image metadata')
