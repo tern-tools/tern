@@ -22,6 +22,7 @@ from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
 from tern.classes.package import Package
 from tern.analyze.docker.analyze import analyze_docker_image
+from tern.analyze.passthrough import run_extension
 
 
 # global logger
@@ -87,7 +88,10 @@ def execute_docker_image(args):
         full_image.origins.add_notice_origin(
             formats.docker_image.format(imagetag=image_string))
         # analyze image
-        analyze_docker_image(full_image, args.redo)
+        if args.extend:
+            run_extension(full_image, args.extend)
+        else:
+            analyze_docker_image(full_image, args.redo)
         # generate report
         report.report_out(args, full_image)
     else:
@@ -121,7 +125,10 @@ def execute_dockerfile(args):
             full_image.origins.add_notice_origin(
                 formats.dockerfile_image.format(dockerfile=args.dockerfile))
             # analyze image
-            analyze_docker_image(full_image, args.redo, True)
+            if args.extend:
+                run_extension(full_image, args.extend)
+            else:
+                analyze_docker_image(full_image, args.redo, True)
         else:
             # we cannot load the full image
             logger.warning('Cannot retrieve full image metadata')
@@ -146,7 +153,10 @@ def execute_dockerfile(args):
                 args.dockerfile, Notice(
                     formats.image_build_failure, 'warning'))
             # analyze image
-            analyze_docker_image(base_image, args.redo)
+            if args.extend:
+                run_extension(base_image, args.extend)
+            else:
+                analyze_docker_image(base_image, args.redo)
         else:
             # we cannot load the base image
             logger.warning('Cannot retrieve base image metadata')
