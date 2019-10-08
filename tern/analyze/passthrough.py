@@ -9,6 +9,8 @@ Use an external tool to analyze a container image
 
 
 import logging
+from stevedore import driver
+from stevedore.exception import NoMatches
 
 from tern.classes.notice import Notice
 from tern.utils import constants
@@ -46,7 +48,7 @@ def execute_external_command(layer_obj, command):
     return True
 
 
-def analyze_image_external(image_obj, command):
+def run_on_image(image_obj, command):
     '''Given an Image object, for each layer, run the given command on the
     layer filesystem.
     The layer tarballs should already be extracted (taken care of when
@@ -68,3 +70,17 @@ def analyze_image_external(image_obj, command):
                 "Error in executing given external command: %s", command)
             return False
     return True
+
+
+def run_extension(image_obj, ext_string):
+    '''Depending on what tool the user has chosen to extend with, load that
+    extension and run it'''
+    try:
+        mgr = driver.DriverManager(
+            namespace='tern.extensions',
+            name=ext_string,
+            invoke_on_load=True,
+        )
+        return mgr.driver.execute(image_obj)
+    except NoMatches:
+        pass
