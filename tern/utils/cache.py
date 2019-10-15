@@ -50,6 +50,13 @@ def get_layers():
     return cache.keys()
 
 
+def get_origins(layer_hash):
+    '''Return the origins dictionary'''
+    if 'origins' in cache[layer_hash].keys():
+        return cache[layer_hash]['origins']
+    return []
+
+
 def add_layer(layer_obj):
     '''Given a layer object, add it to the cache
     We use the layer's to_dict object and make a dictionary such that

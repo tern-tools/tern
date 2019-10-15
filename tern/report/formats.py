@@ -33,8 +33,9 @@ retrieve_from_cache = '''Retrieving packages from cache for layer ''' \
 # command library
 base_listing = '''Direct listing in command_lib/base.yml'''
 snippet_listing = '''Direct listing in command_lib/snippets.yml'''
-invoke_for_base = '''Using invoke listing in command_lib/base.yml'''
-invoke_for_snippets = '''Using invoke listing in command_lib/snippets.yml'''
+invoke_for_base = '''Retrieved by invoking listing in command_lib/base.yml'''
+invoke_for_snippets = '''Retrieved by invoking listing in command_lib/''' \
+    '''snippets.yml'''
 invoke_in_container = '''\tin container:\n'''
 invoke_on_host = '''\ton host:\n'''
 # package information
