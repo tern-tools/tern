@@ -42,24 +42,30 @@ def load_from_cache(layer, redo=False):
     If it doesn't exist return false. Default operation is to not redo the
     cache. Add notices to the layer's origins matching the origin_str'''
     loaded = False
-    origin_layer = 'Layer: ' + layer.fs_hash[:10]
     if not layer.packages and not redo:
         # there are no packages in this layer and we are not repopulating the
         # cache, try to get it from the cache
         raw_pkg_list = cache.get_packages(layer.fs_hash)
         if raw_pkg_list:
             logger.debug('Loaded from cache: layer \"%s\"', layer.fs_hash[:10])
-            message = formats.loading_from_cache.format(
-                layer_id=layer.fs_hash[:10])
-            # add notice to the origin
-            layer.origins.add_notice_to_origins(origin_layer, Notice(
-                message, 'info'))
             for pkg_dict in raw_pkg_list:
                 pkg = Package(pkg_dict['name'])
                 pkg.fill(pkg_dict)
                 layer.add_package(pkg)
+            load_notices_from_cache(layer)
             loaded = True
     return loaded
+
+
+def load_notices_from_cache(layer):
+    '''Given a layer object, populate the notices from the cache'''
+    origins_list = cache.get_origins(layer.fs_hash)
+    for origin_dict in origins_list:
+        layer.origins.add_notice_origin(origin_dict['origin_str'])
+        for notice in origin_dict['notices']:
+            layer.origins.add_notice_to_origins(
+                origin_dict['origin_str'], Notice(
+                    notice['message'], notice['level']))
 
 
 def save_to_cache(image):
