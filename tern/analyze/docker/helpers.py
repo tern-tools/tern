@@ -7,10 +7,10 @@
 Docker specific functions - used when trying to retrieve packages when
 given a Dockerfile
 """
+import docker
 import logging
 import os
 import re
-import subprocess  # nosec
 
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
@@ -109,12 +109,10 @@ def is_build():
     msg = ''
     try:
         container.build_container(dockerfile_global, image_tag_string)
-    except subprocess.CalledProcessError as error:
-        print(errors.docker_build_failed.format(
-            dockerfile=dockerfile_global, error_msg=error.output))
+    except (docker.errors.APIError, docker.errors.BuildError) as error:
         success = False
-        logger.error('Error building image: %s', error.output)
-        msg = error.output
+        logger.error('Error building image: %s', str(error))
+        msg = str(error)
     else:
         logger.debug('Successfully built image')
         success = True
