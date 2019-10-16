@@ -91,10 +91,8 @@ def build_container(dockerfile, image_tag_string):
     It is assumed that docker is installed and the docker daemon is running'''
     path = os.path.dirname(dockerfile)
     if not check_image(image_tag_string):
-        try:
-            client.images.build(path=path, tag=image_tag_string, nocache=True)
-        except (TypeError, docker.errors.APIError, docker.errors.BuildError):  # pylint: disable=try-except-raise
-            raise
+        # let docker handle the errors
+        client.images.build(path=path, tag=image_tag_string, nocache=True)
 
 
 def start_container(image_tag_string):
