@@ -23,7 +23,6 @@ def print_full_report(image):
     '''Given an image, go through the Origins object and collect all the
     notices for the image, layers and packages'''
     notes = ''
-    full_license_list = []
     for image_origin in image.origins.origins:
         notes = notes + content.print_notices(image_origin, '', '\t')
     for layer in image.layers:
@@ -42,18 +41,28 @@ def print_full_report(image):
                 if package.pkg_license not in layer_license_list and \
                         package.pkg_license:
                     layer_license_list.append(package.pkg_license)
-                    if package.pkg_license not in full_license_list:
-                        full_license_list.append(package.pkg_license)
             # Collect packages + licenses in the layer
             notes = notes + formats.layer_packages_list.format(
                 list=", ".join(layer_pkg_list) if layer_pkg_list else 'None')
             notes = notes + formats.layer_licenses_list.format(list=", ".join(
                 layer_license_list) if layer_license_list else 'None')
             notes = notes + formats.package_demarkation
+    return notes
+
+
+def print_licenses_only(image_obj_list):
+    '''Print a complete list of licenses for all images'''
+    full_license_list = []
+    for image in image_obj_list:
+        for layer in image.layers:
+            for package in layer.packages:
+                if (package.pkg_license and
+                        package.pkg_license not in full_license_list):
+                    full_license_list.append(package.pkg_license)
     # Collect the full list of licenses from all the layers
     licenses = formats.full_licenses_list.format(list=", ".join(
         full_license_list) if full_license_list else 'None')
-    return notes + licenses
+    return licenses
 
 
 class Default(generator.Generate):
@@ -64,4 +73,4 @@ class Default(generator.Generate):
         logger.debug('Creating a detailed report of components in image...')
         for image in image_obj_list:
             report = report + print_full_report(image)
-        return report
+        return report + print_licenses_only(image_obj_list)
