@@ -163,8 +163,6 @@ def execute_dockerfile(args):
         # run through commands in the Dockerfile
         logger.debug('Parsing Dockerfile to generate report...')
         stub_image = get_dockerfile_packages()
-        # clean up image
-        container.remove_image(base_image.repotag)
         if not args.keep_wd:
             report.clean_image_tars(base_image)
     # generate report based on what images were created
