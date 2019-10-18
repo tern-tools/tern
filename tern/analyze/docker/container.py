@@ -12,8 +12,9 @@ import grp
 import logging
 import os
 import pwd
+import requests
+import sys
 import time
-from requests.exceptions import HTTPError
 
 from tern.analyze import common
 from tern.utils.constants import container
@@ -31,14 +32,24 @@ logger = logging.getLogger(logger_name)
 
 # global docker client
 client = None
-try:
-    client = docker.from_env()
-except IOError:
-    logger.critical("Docker daemon not running")
-    raise Exception("Critical Error using Docker API. See logs for details")
-except OSError:  # pylint: disable=duplicate-except
-    logger.critical("User has no access to docker unix socket")
-    raise Exception("Critical Error using Docker API. See logs for details")
+
+
+def check_docker_setup():
+    '''Check if the docker daemon is running and if the user has the
+    appropriate privileges'''
+    global client
+    try:
+        client = docker.from_env()
+        client.ping()
+    except requests.exceptions.ConnectionError as e:
+        logger.critical('Critical Docker error: %s', str(e))
+        if 'FileNotFoundError' in str(e):
+            logger.critical('Docker is not installed or the daemon is not '
+                            'running.')
+        if 'PermissionError' in str(e):
+            logger.critical('The user id is not in the docker group.')
+        logger.critical('Aborting...')
+        sys.exit(1)
 
 
 def is_sudo():
@@ -99,13 +110,13 @@ def start_container(image_tag_string):
     '''Start the test container in detach state'''
     try:
         client.containers.run(image_tag_string, name=container, detach=True)
-    except HTTPError:
+    except requests.exceptions.HTTPError:
         # container may already be running
         pass
     try:
         remove_container()
         client.containers.run(image_tag_string, name=container, detach=True)
-    except HTTPError:
+    except requests.exceptions.HTTPError:
         # not sure what the error is now
         raise Exception("Cannot remove running container")
 
