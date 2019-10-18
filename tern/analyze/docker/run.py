@@ -8,8 +8,6 @@ Execute a Docker container image
 """
 
 import logging
-import sys
-import docker
 
 from tern.report import formats
 from tern.report import report
@@ -27,16 +25,6 @@ from tern.analyze.passthrough import run_extension
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
-
-
-def check_docker_daemon():
-    '''Check if the Docker daemon is running. If not, exit gracefully'''
-    try:
-        docker.from_env()
-    except IOError as error:
-        logger.error('Docker daemon is not running: %s',
-                     error.output.decode('utf-8'))
-        sys.exit()
 
 
 def get_dockerfile_packages():
@@ -85,7 +73,7 @@ def execute_docker_image(args):
     image_string = args.docker_image
     if not args.raw_image:
         # don't check docker daemon for raw images
-        check_docker_daemon()
+        container.check_docker_setup()
     else:
         image_string = args.raw_image
     report.setup(image_tag_string=image_string)
@@ -113,7 +101,7 @@ def execute_docker_image(args):
 
 def execute_dockerfile(args):
     '''Execution path if given a dockerfile'''
-    check_docker_daemon()
+    container.check_docker_setup()
     logger.debug('Setting up...')
     report.setup(dockerfile=args.dockerfile)
     # attempt to build the image
