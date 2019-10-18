@@ -127,8 +127,8 @@ Please read our [code of conduct](https://github.com/vmware/tern/blob/master/COD
 
 ## Authors
 
-* ** Nisha Kumar** - nishak@vmware.com
-* ** Rose Judge** - rjudge@vmware.com
+* **Nisha Kumar** - nishak@vmware.com
+* **Rose Judge** - rjudge@vmware.com
 
 ## License
 
