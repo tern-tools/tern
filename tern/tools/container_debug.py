@@ -17,6 +17,8 @@ import sys
 from tern.utils import rootfs
 from tern.utils import constants
 from tern.report import report
+from tern.analyze.docker import analyze
+from tern.analyze.docker import container
 
 
 def cleanup():
@@ -62,7 +64,7 @@ def drop_into_layer(image_obj, layer_index):
             image_obj.layers[layer_index].tar_file)
     else:
         # mount all layers uptil the provided layer index
-        target = report.mount_overlay_fs(image_obj, layer_index)
+        target = analyze.mount_overlay_fs(image_obj, layer_index)
     # check if there is a shell
     shell = check_shell()
     if shell:
@@ -94,6 +96,9 @@ if __name__ == '__main__':
         unmount()
         cleanup()
         sys.exit(0)
+
+    # check if the docker is set up properly first
+    container.check_docker_setup()
 
     # first, list all the layers in the image in this format
     # [<layer number>] created_by
