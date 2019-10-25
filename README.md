@@ -14,6 +14,7 @@ Tern is a software package inspection tool for containers. It's written in Pytho
   - [Glossary of Terms](/docs/glossary.md)
   - [Architecture](/docs/architecture.md)
   - [Navigating the Code](/docs/navigating-the-code.md)
+  - [Data Model](/docs/data-model.md)
 - [Getting Started](#getting-started)
   - [Getting Started with Docker](#getting-started-with-docker)
   - [Getting Started with Vagrant](#getting-started-with-vagrant)
@@ -31,6 +32,7 @@ Tern is a software package inspection tool for containers. It's written in Pytho
 - [Project Status](#project-status)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
+  - [Creating Tool Extensions](/docs/creating-tool-extensions.md)
 
 # What is Tern?<a name="what-is-tern">
 Tern is an inspection tool to find the metadata of the packages installed in a container image. The overall operation looks like this:
