@@ -25,3 +25,5 @@ For Release 1.0.0 slated for November of 2019, we will focus on the following:
 This timetable is based on time, resources and feedback from you and will change accordingly.
 
 See archived roadmaps [here](project-roadmap-archive.md)
+
+[Back to the README](../README.md)

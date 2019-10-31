@@ -10,3 +10,5 @@
 - Cache: A database that associates container layer filesystems with the packages that were installed on them. Currently this is only represented by a yaml file and some CRUD operations against it.
 - Dockerfile: A file containing instructions to the [Docker](https://docs.docker.com/engine/reference/commandline/build/) daemon on how to build a container image.
 - Extension: An external tool Tern can use to analyze a container image
+
+[Back to the README](../README.md)

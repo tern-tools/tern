@@ -303,3 +303,5 @@ should always be 1 as you are querying for only one package name.
 
 As always, don't hesitate to ask questions by filing an issue with 'Question:'
 as the prefix of the subject, on the Slack channel or on the mailing list.
+
+[Back to the README](../README.md)

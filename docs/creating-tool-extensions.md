@@ -42,3 +42,5 @@ $ tern -l report -x custom -f <format> -i <image:tag>
 where <format> is one of Tern's supported formats. To see what formats are supported, run `tern report --help`.
 
 If you need a custom report format please refer to the document on [creating custom report formats](./creating-custom-templates.md)
+
+[Back to the README](../README.md)
