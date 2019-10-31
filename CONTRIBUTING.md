@@ -15,10 +15,11 @@ You can contribute in the following ways:
 - Contribute changes to documentation by [submitting pull requests](#submit-pr) to it.
 
 **Contribute Code**
-- [Resolve Issues](https://github.com/vmware/tern/issues).
-- Improve the robustness of the project by
-  - [Adding to the Command Library](docs/adding-to-command-library.md).
-  - [Adding a Custom Template](docs/creating-custom-templates.md).
+- [Resolve Issues](https://github.com/vmware/tern/issues)
+- Improve the robustness of the project by:
+  - [Adding to the Command Library](docs/adding-to-command-library.md)
+  - [Adding a Custom Report Format](docs/creating-custom-templates.md)
+  - [Adding an Extension](docs/creating-tool-extensions.md)
 
 ## Am I Qualified to Contribute?
 

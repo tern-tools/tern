@@ -33,9 +33,11 @@ Tern is a software package inspection tool for containers. It's written in Pytho
   - [cve-bin-tool](#cve-bin-tool)
 - [Running tests](#running-tests)
 - [Project Status](#project-status)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
+- [Contributing](/CONTRIBUTING.md)
+  - [Code of Conduct](/CODE_OF_CONDUCT.md)
+  - [Creating Report Formats](/docs/creating-custom-templates.md)
   - [Creating Tool Extensions](/docs/creating-tool-extensions.md)
+  - [Adding to the Command Library](/docs/adding-to-command-library.md)
 
 # What is Tern?<a name="what-is-tern">
 Tern is an inspection tool to find the metadata of the packages installed in a container image. The overall operation looks like this:
@@ -245,10 +247,10 @@ Somewhere along the line of development, we accidentally rewrote git history on 
 * [v0.2.0](docs/releases/v0_2_0.md)
 * [v0.1.0](docs/releases/v0_1_0.md)
 
-## Documentation<a name="documentation"/>
+## Documentation
 Architecture, function blocks, code descriptions and the project roadmap are located in the docs folder. Contributions to the documentation are welcome! See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
 
-## Get Involved<a name="contributing"/>
+## Get Involved
 
 Do you have questions about Tern? Do you think it can do better? Would you like to make it better? You can get involved by giving your feedback and contributing to the code, documentation and conversation!
 
