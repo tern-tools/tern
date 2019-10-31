@@ -6,6 +6,8 @@ Here is a layout of the directory structure:
 
 ```
 ▾ tern/
+    __main__.py <-- Tern entry point
+
   ▾ analyze/  <-- Each container image format will have its own subdirectory for analysis
       common.py <-- Common modules used at a high level throughout the code
     ▾ docker/
@@ -14,6 +16,7 @@ Here is a layout of the directory structure:
         dockerfile.py
         docker.py <-- modules specific to Docker
         run.py
+
   ▾ classes/  <-- These are individual objects. Each has a corresponding test in the tests directory
       command.py
       docker_image.py
@@ -24,10 +27,19 @@ Here is a layout of the directory structure:
       origins.py
       package.py
       template.py
+
   ▾ command_lib/ <-- These are the bash commands that get run to collect information about the container image
       base.yml <-- System wide scripts for package managers and such
       snippets.yml <-- scripts for one off commands
       command_lib.py <-- Command Library modules
+
+  ▾ extensions/ <-- This is the extension plugin library. An extension is an external tool Tern can use to analyze the filesystems in the container image
+      executor.py <-- This is the abstract base class that an extension plugin needs to inherit from
+    ▸ cve_bin_tool/
+	executor.py
+    ▾ scancode/
+        executor.py
+
   ▾ formats/ <-- This is the reporting template plugin library. Each subdirectory is a module that can be dynamically loaded at runtime based on the users report selection
       generator.py <-- This is the abstract base class for report plugins
     ▾ default/
@@ -41,25 +53,29 @@ Here is a layout of the directory structure:
            generator.py
     ▾ yaml/
          generator.py
+
   ▾ report/
       content.py
       errors.py
       formats.py
       report.py <-- Main reporting module
+
   ▾ scripts/debian/ <-- Example script to pull sources for debian based images
     ▾ jessie/
         sources.list
       apt_get_sources.sh
+
   ▾ tools/ <-- Tools that can be used individually or by Tern
       fs_hash.sh
       verify_invoke.py
+      container_debug.py
+
   ▾ utils/ <-- general utility modules used throughout the code
       cache.py
       constants.py
       general.py
       metadata.py
       rootfs.py
-    __main__.py <-- Tern entry point
 ```
 
 Tests live outside of the `tern` folder, in a folder called `tests`.
@@ -104,6 +120,6 @@ Some general rules about where the code is located:
 Code organization follows these general rules:
 - Each class is in its own file.
 - Utils are organized based on what they operate on.
-- Subroutines that require the use of modules from all over the project live under the helper folder in high level files like `common.py` and `docker.py` 
+- Subroutines for use in general or under a particular "domain" can live in a default file name called `helpers.py`. You will find plenty of `helpers.py` files within the `analyze` folder.
 
 [Back to the README](../README.md)
