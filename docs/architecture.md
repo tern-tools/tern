@@ -3,12 +3,14 @@
 You may want to look at the [glossary](./glossary.md) to understand the terms being used.
 
 ## Overall Approach
-The general approach to finding package metadata given some files is to perform static analysis on the files. Tern's approach is more brute force - using the same tools that were used to install a package to retrieve the status of the package. This involves mounting the overlay filesystem and running commands against it at the most basic level. The results of the shell commands are then collated into a nice report showing which container layers brought in what packages. For compliance purposes (as Tern is a compliance tool), shell scripts to retrieve compliance information are used. Tern is also built to be a tool for guidance and hence will point out any missing or unknown information. For example, if it cannot find information about licenses, it will inform you of this and nudge you to either add information about it or a shell script to retrieve it.
+Tern uses a "container aware" approach to analyze container images. Tern tries to find the tool or method used to install software components in the container and will use equivalent debugging methods to find the status of said software component. This involves mounting the overlay filesystem and running commands against it at the most basic level. The results of the shell commands are then collated into a nice report showing which container layers brought in what packages. Tern is also built to be a tool for guidance and hence will point out any missing or unknown information. For example, if it cannot find information about licenses, it will inform you of this or nudge you to either add information about it or a shell script to retrieve it.
+
+Tern can also use license file scanners to scan container images. This is not the "container aware" approach that the native analyzer uses. Instead Tern will just run the scanners on the filesystems in the container image. This approach works for current container distribution methods as all the layers are "pushed" to the container registry's repository belonging to the originator. As a result, the originator is obligated to provide sources for software components included in all layers. This is not the case for security scanning as the files at the lower layers may be patched in the later layers, thus invalidating the results from the lower layers. However, this doesn't stop you from using a security scanner on the container image.
 
 ## Guiding Principles
 1. OSS Compliance First: Tern is a compliance tool at heart. Hence whatever it does is meant to help the user meet their open source compliance obligations, or, at the minimum, make them aware of the licenses governing the open source software they use.
-2. Be Transparent: Tern will report on everything it is doing in order to not mislead on how it got its information
-3. Inform not Ignore: Tern will report on all exceptions it has encountered during the course of its execution
+2. Be Transparent: Tern will report on everything it is doing in order to not mislead on how it got its information. This allows Engineers to ascertain confidence in the results themselves.
+3. Inform not Ignore: Tern will report on all exceptions it has encountered during the course of its execution. This, again, is to allow Engineers to make assessments on the efficacy of the tool, the results and the container image itself. 
 
 ## Layout
 
@@ -19,7 +21,7 @@ Here is a general architecture diagram:
 There are 4 components that operate together:
 
 ### The Cache
-This is the database where filesystem identifiers can be queried against to retrieve package information. This is useful as many containers are based on other container images. If Tern had come across the same filesystem in another container, it can retrieve the package information without spinning up a container. Tern looks for filesystems here before doing any analysis. This is Tern's own data store which can be curated and culled over time. The reason that Tern keeps its own data store is because the filesystem artifacts that make up a container image are not necessarily how other compliance databases store license information.
+This is the database where filesystem identifiers can be queried against to retrieve package information. This is useful as many containers are based on other container images. If Tern had come across the same filesystem in another container, it can retrieve the package information without spinning up a container. Tern looks for filesystems here before doing any analysis. This is Tern's own data store which can be curated and culled over time. The reason that Tern keeps its own data store is because the filesystem artifacts that make up a container image are not necessarily how other compliance databases store license information. The filesystems also follow their own method of identifying themselves. A container build is not reproducible, so often, even when the content of the filesystem has not changed, the container's checksum has and that makes it difficult to identify the contents of a container image.
 
 ### The Command Library
 This is a database of shell commands that may be used to create a container's layer filesystem. There are two types of shell commands - one for system wide package managers and one for custom shell commands or install scripts. The library is split in this way to account for situations where whole root filesystems are imported in order to create a new container.
@@ -28,15 +30,17 @@ For example, in [this Dockerfile sample](../samples/debian_vim/Dockerfile), the 
 
 Some acknowledgement should be made here that this is not the only way to create a container. However, it seems to be the most prevalent way right now. In the future, the community may move away from the Copy on Write filesystems and instead use one filesystem. If this were the case, Tern's job might be a bit easier, but this is just speculation.
 
-### The Core
-Currently, the code combines the functions of report formatting and image analysis and requires refactoring. At a conceptual level, the Core is what unbundles a container image, reads the accompanying config file, untars all the filesystems, mounts them (or not, depending on what kind of analysis the Command Library says to do), and sets up a chroot to run scripts (or not, again, something that it will find out from the Command Library). The general functionality of the core looks like this:
+When Tern uses an external file scanner, it bypasses the command library altogether and instead relies on the external tool's results. The approach allows Engineers to compare results from different tools available to them as they have always done, but on container images.
+
+### The Analyzer
+At a conceptual level, the Analyzer is what unbundles a container image, reads the accompanying config file, untars all the filesystems, mounts them (or not, depending on what kind of analysis and which analyzer is used), and sets up a chroot to run scripts (or not, again, depending on the analysis type). Tern has a dedicated analyzer to the type of image being analyzed. Currently, it can analyze only images created by Docker. The inspection part can be done using Tern's native analyzer or an external tool. The general flow of the native analyzer looks like this:
 
 <img src="./img/tern_flow.png" alt="Tern process flow" width="331" height="563" />
 
-The core will collate the metadata it can get in Image objects which encapsulate data for each layer and each package found. It also encapsulates notes while execution takes place, so the report is transparent about what worked and what didn't.
+The analyzer will collate the metadata it can get in Image objects which encapsulate data for each layer and each package found. It also encapsulates notes while execution takes place, so the report is transparent about what worked and what didn't.
 
 ### The Formatter
-Tern's main purpose is to produce reports, either as an aid for understanding a container image or as a manifest for something else to consume. The default is the verbose report explaining where in the container the list of packages came from and what commands created them. The type of reports supported can be found in the project README. Also, take a look at the [template creation process](./creating-custom-templates.md) to get a better understanding of how Tern supports multiple formats.
+Tern's main purpose is to produce reports, either as an aid for understanding a container image or as a manifest for something else to consume. The default is the verbose report explaining where in the container the list of packages came from and what commands created them. The type of reports supported can be found in the project README. Also, take a look at the [custom report format creation process](./creating-custom-templates.md) to get a better understanding of how Tern supports multiple formats.
 
 ## Objects
 Tern uses Object Oriented Programming concepts to encapsulate the data that it will be referencing during thr course of execution. They can be found in the `tern/classes` directory. The general format is that an object of type Image contains a list of type ImageLayer and each ImageLayer contains a list of type Package. On top of that each of those objects contain an object of type Origins. The Origins object contains a list of type NoticeOrigin which contains a list of type Notice.

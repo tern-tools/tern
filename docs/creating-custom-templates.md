@@ -110,3 +110,5 @@ Continuing with the example from step #2, if you wanted to enable your `custom` 
      yaml = tern.formats.yaml.generator:YAML
 +    custom = tern.formats.custom.generator:Custom
 ```
+
+[Back to the README](../README.md)
