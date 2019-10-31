@@ -149,3 +149,5 @@ If the SPDX document includes a File element for the Dockerfile being analyzed b
 * `SPDXRef-Dockerfile-1 METAFILE_OF SPDXRef-Image-1`: the Dockerfile is a metadata file that describes the Image
 
 If additional relationships would be useful beyond those currently specified by SPDX, there is an `OTHER` option, or additional relationship types could be proposed for inclusion in the SPDX specification.
+
+[Back to the README](../README.md)
