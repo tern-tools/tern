@@ -135,6 +135,7 @@ Activate the virtual environment:
 ```
 $ source bin/activate
 ```
+NOTE: This specific activate script only works for Bash shells. If you need to activate a Fish Shell or C Shell you should use `source/bin/activate.fish` or `source/bin/activate.csh`, respectively.
 
 Install tern:
 ```
