@@ -95,7 +95,7 @@ For hassle-free code contribution, follow the steps below. NOTE: I mostly work i
 You may have already cloned the project and started working on it. If you're reading this after the fact, I would highly recommend you save your work and set up a new development environment in this way.
 1. Set up a Python virtual environment that has either the Python 3.6 or Python 3.7 executable. See [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments) for instructions on how to set this up using your host machine's Python3. There are also a guide to [managing virtual environments using pipenv](https://docs.python-guide.org/dev/virtualenvs/) but I haven't used it. Once done, you should have a folder created. Change to that folder.
 2. Clone *your fork* of Tern in the virtual environment folder.
-3. Activate your virtual environment `source bin/activate`
+3. Activate your virtual environment `source bin/activate`. NOTE: This specific activate script only works for Bash shells. If you need to activate a Fish Shell or C Shell you should use `source/bin/activate.fish` or `source/bin/activate.csh`, respectively.
 4. Change directory into the clone.
 5. Run `pip install wheel`. This is needed because some dependencies for development fail to build python wheels.
 6. Run `pip install -e.[dev]`. This will install tern in development mode. This will install the project dependencies and [Prospector](https://github.com/PyCQA/prospector) which is a tool to check for style and linting errors.
