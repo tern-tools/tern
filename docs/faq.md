@@ -10,3 +10,5 @@ Static analysis is a reasonable approach to find software components and there a
 
 ## Why Python?
 Python is well suited for easy string formatting which is most of the work that Tern does.
+
+[Back to the README](../README.md)
