@@ -28,6 +28,9 @@ Tern is a software package inspection tool for containers. It's written in Pytho
   - [JSON Format](#report-json)
   - [YAML Format](#report-yaml)
   - [SPDX tag-value Format](#report-spdxtagvalue)
+- [Extensions](#extensions)
+  - [Scancode](#scancode)
+  - [cve-bin-tool](#cve-bin-tool)
 - [Running tests](#running-tests)
 - [Project Status](#project-status)
 - [Documentation](#documentation)
@@ -203,6 +206,21 @@ $ tern -l report -f yaml -i golang:1.12-alpine -o output.yaml
 [SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. Many compliance tools are compatible with SPDX. Tern follows the [SPDX specifications](https://spdx.org/specifications) specifically the tag-value format which is the most compatible format with the toolkit the organization provides. The tag-value format is the only SPDX format Tern supports. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](./docs/spdx-tag-value-overview) and about how Tern maps its properties to the keys mandated by the spec [here](./docs/spdx-tag-value-mapping.md).
 ```
 $ tern -l report -f spdxtagvalue -i golang:1.12-alpine -o spdx.txt
+```
+
+# Extensions<a name="extensions">
+Tern does not have its own file level license scanner. In order to fill in the gap, Tern allows you to extend container image analysis with an external file analysis CLI tool or Python3 module.
+
+## Scancode<a name="scancode">
+[scancode-toolkit](https://github.com/nexB/scancode-toolkit) is a license analysis tool that "detects licenses, copyrights, package manifests and direct dependencies and more both in source code and binary files". To use it to analyze container images, run:
+```
+$ tern -l report -x scancode -i golang:1.12-alpine
+```
+
+## cve-bin-tool<a name="cve-bin-tool">
+[cve-bin-tool](https://github.com/intel/cve-bin-tool) is a command line tool which "scans for a number of common, vulnerable components (openssl, libpng, libxml2, expat and a few others) to let you know if your system includes common libraries with known vulnerabilities". Vulnerability scanning tools can also be extended to work on containers using Tern, although support for certain metadata pertaining to CVEs may not be available yet. As a result, you will not see any of the results in the generated reports. To try it out, run:
+```
+$ tern -l report -x cve_bin_tool -i golang:1.12-alpine
 ```
  
 # Running tests<a name="running-tests">
