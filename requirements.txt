@@ -7,7 +7,7 @@
 # what should be updated.
 
 PyYAML>=5.1
-docker~=4.0
+docker~=4.1
 requests~=2.22
-stevedore>=1.30
+stevedore>=1.31
 pbr>=5.4
