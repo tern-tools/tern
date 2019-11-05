@@ -9,3 +9,5 @@
 PyYAML
 docker
 requests
+stevedore
+pbr
