@@ -20,22 +20,6 @@ commands:
       - checkout
       - run: pyenv global 3.6.5
       - run: pip install --upgrade pip
-  create_pypirc:
-    steps:
-      - run:
-          name: Create pypirc file
-          command: |
-           echo -e "[distutils]" >> ~/.pypirc
-           echo -e "index-servers =" >> ~/.pypirc
-           echo -e "    pypi\n" >> ~/.pypirc
-           echo -e "[pypi]" >> ~/.pypirc
-           echo -e "username: $R_PYPI_UN" >> ~/.pypirc
-           echo -e "password: $PYPI_PW" >> ~/.pypirc
-  pre_deploy:
-    steps:
-      - run:
-          name: Ensure that PyPI packages Tern with the same requirements used when the release was cut
-          command: cp docs/releases/${CIRCLE_TAG//./_}-requirements.txt requirements.txt
 
 jobs:
   # linting using Prospector
@@ -79,19 +63,6 @@ jobs:
       - setup
       - run: pip install .
       - run: tern -l report -i photon:3.0
-  # Deploy to PyPi
-  pypi_deploy:
-   executor: ubuntu1604
-   steps:
-      - setup
-      - run: pip install .
-      - pre_deploy
-      - run: pip install twine
-      - run: pip install wheel
-      - create_pypirc 
-      - run: python setup.py sdist bdist_wheel
-      - run: twine check dist/*
-      - run: twine upload dist/*
 
 workflows:
   version: 2
@@ -101,13 +72,3 @@ workflows:
       - commit_check
       - security
       - test_changes
-  Release:
-    jobs:
-      - pypi_deploy:
-          filters:
-            # ignore all commits on any branch by default
-            branches:
-              ignore: /.*/
-            # only run on version tags
-            tags:
-              only: /^v[0-9]+(\.[0-9]+)*$/
