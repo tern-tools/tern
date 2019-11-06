@@ -38,7 +38,7 @@ This is a checklist for cutting a release
 - [ ] Deploy to PyPI
     * Run `git fetch --tags` to get the release tag
     * Run `git checkout -b release <release tag>
-    * Overwrite `requirements.txt` with `docs/releases/v<release>-requirements.txt`
+    * Run `pip compile`
     * Run `python setup.py sdist bdist_wheel`
     * Run `twine check dist/*`
     * Run `twine upload dist/*`. Here enter username and password and verify via 2FA.
@@ -47,3 +47,10 @@ This is a checklist for cutting a release
     * Create a fresh environment.
     * Pip install tern.
     * Run appropriate tests.
+
+- [ ] Prepare sources tarball.
+    * In the release environment, create a new directory called `vendor`
+    * Run `pip install -d vendor --require-hashes --no-binary :all: -r docs/releases/v<release>-requirements.txt`
+    * Run `tar cvzf tern-<release>-vendor.tar.gz vendor/`
+
+- [ ] Upload the wheel and sources packages to GitHub release page 
