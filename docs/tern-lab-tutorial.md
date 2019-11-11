@@ -87,7 +87,7 @@ $ tern -l report -i photon:3.0 -f spdxtagvalue -o spdx.txt
 
 #### Step 2: Check if your SPDX report validates
 
-Naviate to the [SPDX Validation Tool](http://13.57.134.254/app/validate/). Upload your recently generated `spdx.txt` file and see if it validates.
+Navigate to the [SPDX Validation Tool](http://13.57.134.254/app/validate/). Upload your recently generated `spdx.txt` file and see if it validates.
 
 Repeat steps 1 & 2 as desired for any Docker container image of your choosing.
 
