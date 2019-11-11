@@ -11,7 +11,7 @@ This lab was designed as a Strigo tutorial but can also be followed if you are w
 ### Step 1: Install environment dependencies.
 
 ```
-$ sudo apt install python3 python3-pip python3-venv attr
+$ sudo apt install python3 python3-pip python3-venv attr git
 ```
 
 ### Step 2: Create a python3 virtual environment:
