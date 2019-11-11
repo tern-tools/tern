@@ -70,7 +70,7 @@ Repeat as desired for any Docker container image of your choosing.
 ### Option 3: Generate a JSON report for the container image
 
 ```
-$ tern -l report -i photon:3.0 -f yaml -o yaml.txt
+$ tern -l report -i photon:3.0 -f json -o json.txt
 ```
 
 Repeat as desired for any Docker container image of your choosing.
