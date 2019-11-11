@@ -24,7 +24,13 @@ $ source bin/activate
 
 ## Installing Tern
 
-### Step 1: Install Tern from PyPI.
+### Step 1: Ensure required dependencies are available.
+
+```
+$ pip3 install wheel
+```
+
+### Step 2: Install Tern from PyPI.
 
 ```
 $ pip3 install tern
