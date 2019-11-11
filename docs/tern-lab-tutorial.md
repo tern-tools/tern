@@ -11,7 +11,7 @@ This lab was designed as a Strigo tutorial but can also be followed if you are w
 ### Step 1: Install environment dependencies.
 
 ```
-$ sudo apt install python3 python3-pip python3-venv attr
+$ sudo apt install python3 python3-pip python3-venv attr git
 ```
 
 ### Step 2: Create a python3 virtual environment:
@@ -24,7 +24,13 @@ $ source bin/activate
 
 ## Installing Tern
 
-### Step 1: Install Tern from PyPI.
+### Step 1: Ensure required dependencies are available.
+
+```
+$ pip3 install wheel
+```
+
+### Step 2: Install Tern from PyPI.
 
 ```
 $ pip3 install tern
@@ -70,7 +76,7 @@ Repeat as desired for any Docker container image of your choosing.
 ### Option 3: Generate a JSON report for the container image
 
 ```
-$ tern -l report -i photon:3.0 -f yaml -o yaml.txt
+$ tern -l report -i photon:3.0 -f json -o json.txt
 ```
 
 Repeat as desired for any Docker container image of your choosing.
@@ -87,7 +93,7 @@ $ tern -l report -i photon:3.0 -f spdxtagvalue -o spdx.txt
 
 #### Step 2: Check if your SPDX report validates
 
-Naviate to the [SPDX Validation Tool](http://13.57.134.254/app/validate/). Upload your recently generated `spdx.txt` file and see if it validates.
+Navigate to the [SPDX Validation Tool](http://13.57.134.254/app/validate/). Upload your recently generated `spdx.txt` file and see if it validates.
 
 Repeat steps 1 & 2 as desired for any Docker container image of your choosing.
 
