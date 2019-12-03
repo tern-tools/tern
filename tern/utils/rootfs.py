@@ -30,6 +30,8 @@ mount_sys = ['mount', '-o', 'bind', '/sys']
 mount_dev = ['mount', '-o', 'bind', '/dev']
 unmount = ['umount']
 
+mount_dir = None
+
 # enable host DNS settings
 host_dns = ['cp', constants.resolv_path]
 
@@ -41,6 +43,17 @@ union_mount = ['mount', '-t', 'overlay', 'overlay', '-o']
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
+
+
+def set_mount_dir(bind=None):
+    '''Set mount directory according to --bind-mount CLI option (or lack
+    thereof). The mount_dir value is used to set the working directory
+    properly in get_working_dir().'''
+    global mount_dir
+    if bind:
+        mount_dir = bind
+    else:
+        mount_dir = general.get_top_dir()
 
 
 def root_command(command, *extra):
@@ -105,7 +118,7 @@ def check_tar_members(tar_file):
 def get_working_dir():
     '''General purpose utility to return the absolute path of the working
     directory'''
-    return os.path.join(general.get_top_dir(), constants.temp_folder)
+    return os.path.join(mount_dir, constants.temp_folder)
 
 
 def get_untar_dir(layer_tarfile):

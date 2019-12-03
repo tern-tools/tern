@@ -96,7 +96,7 @@ def execute_docker_image(args):
     logger.debug('Teardown...')
     report.teardown()
     if not args.keep_wd:
-        report.clean_working_dir(args.bind_mount)
+        report.clean_working_dir()
 
 
 def execute_dockerfile(args):
@@ -161,4 +161,4 @@ def execute_dockerfile(args):
     logger.debug('Teardown...')
     report.teardown()
     if not args.keep_wd:
-        report.clean_working_dir(args.bind_mount)
+        report.clean_working_dir()
