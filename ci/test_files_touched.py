@@ -38,7 +38,8 @@ test_suite = {
     re.compile('requirements.txt'): ['tern -l report -i photon:3.0'],
     # Dockerfile
     re.compile('Dockerfile'): [
-        'docker build -t ternd .',
+        'python3 setup.py sdist && '
+        'docker build -t ternd -f ci/Dockerfile . && '
         './docker_run.sh workdir ternd "report -i golang:alpine"'],
     # Files under tern directory
     re.compile('tern/__init__.py|tern/__main__.py'):

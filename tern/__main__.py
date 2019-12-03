@@ -19,6 +19,7 @@ from tern.analyze.docker import run
 from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
+from tern.utils import rootfs
 from tern.report import errors
 
 
@@ -69,6 +70,8 @@ def create_top_dir():
 
 def do_main(args):
     '''Execute according to subcommands'''
+    # set bind mount location if working in a container
+    rootfs.set_mount_dir(args.bind_mount)
     # create working directory
     create_top_dir()
     if args.log_stream:
@@ -115,9 +118,9 @@ def main():
     parser.add_argument('-k', '--keep-wd', action='store_true',
                         help="Keep the working directory after execution."
                         " Useful when debugging container images")
-    parser.add_argument('-b', '--bind-mount', action='store_true',
-                        help="Treat working directory as a bind mount."
-                        " Needed when running from within a container")
+    parser.add_argument('-b', '--bind-mount', metavar='BIND_DIR',
+                        help="Absolute path to bind mount target. Needed"
+                        " when running from within a container.")
     parser.add_argument('-r', '--redo', action='store_true',
                         help="Repopulate the cache for found layers")
     # sys.version gives more information than we care to print
