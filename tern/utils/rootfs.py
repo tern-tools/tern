@@ -32,7 +32,6 @@ unmount = ['umount']
 
 mount_dir = None
 
-
 # enable host DNS settings
 host_dns = ['cp', constants.resolv_path]
 
