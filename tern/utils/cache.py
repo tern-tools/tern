@@ -21,7 +21,6 @@ import yaml
 from tern.utils.constants import cache_file
 from tern.utils import rootfs
 
-
 # known base image database
 cache = {}
 
