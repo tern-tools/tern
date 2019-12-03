@@ -12,7 +12,7 @@ RUN tdnf remove -y toybox && tdnf install -y tar findutils attr util-linux pytho
 RUN pip3 install --upgrade pip && pip3 install tern
 
 # make a mounting directory
-RUN mkdir temp
+RUN mkdir hostmount
 
-ENTRYPOINT ["tern", "-b"]
+ENTRYPOINT ["tern", "-b", "/hostmount"]
 CMD ["-h"]
