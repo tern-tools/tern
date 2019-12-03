@@ -77,7 +77,7 @@ def clean_image_tars(image_obj):
             rootfs.root_command(rootfs.remove, fspath)
 
 
-def clean_working_dir(bind_mount):
+def clean_working_dir():
     '''Clean up the working directory
     If bind_mount is true then leave the upper level directory'''
     path = rootfs.get_working_dir()
