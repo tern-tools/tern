@@ -6,7 +6,7 @@
 # transitive dependencies listed make it more difficult to figure out
 # what should be updated.
 
-PyYAML>=5.1
+PyYAML>=5.2
 docker~=4.1
 requests~=2.22
 stevedore>=1.31
