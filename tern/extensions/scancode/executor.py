@@ -30,11 +30,9 @@ class Scancode(Executor):
     '''Execute scancode'''
     def execute(self, image_obj):
         '''Execution should be:
-            ./scancode -lpcu --quiet --json - /path/to/directory
-        scancode-toolkit will be released as a pip package supporting python3
-        soon.
+            scancode -lpcu --quiet --json - /path/to/directory
         '''
-        command = './scancode -lpcu --quiet --json -'
+        command = 'scancode -lpcu --quiet --json -'
         # run the command against the image filesystems
         if not passthrough.run_on_image(image_obj, command):
             logger.error("scancode error")
