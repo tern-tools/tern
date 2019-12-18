@@ -214,7 +214,19 @@ $ tern -l report -f spdxtagvalue -i golang:1.12-alpine -o spdx.txt
 Tern does not have its own file level license scanner. In order to fill in the gap, Tern allows you to extend container image analysis with an external file analysis CLI tool or Python3 module.
 
 ## Scancode<a name="scancode">
-[scancode-toolkit](https://github.com/nexB/scancode-toolkit) is a license analysis tool that "detects licenses, copyrights, package manifests and direct dependencies and more both in source code and binary files". To use it to analyze container images, run:
+[scancode-toolkit](https://github.com/nexB/scancode-toolkit) is a license analysis tool that "detects licenses, copyrights, package manifests and direct dependencies and more both in source code and binary files".
+
+1. Setup a python virtual environment
+```
+$ python3 -m venv scanenv
+$ cd scanenv
+$ source bin/activate
+```
+2. Install tern and scancode
+```
+$ pip install tern scancode
+```
+3. Run tern
 ```
 $ tern -l report -x scancode -i golang:1.12-alpine
 ```
