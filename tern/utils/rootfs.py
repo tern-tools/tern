@@ -78,11 +78,15 @@ def root_command(command, *extra):
     return result
 
 
-def shell_command(command, *extra):
-    '''Invoke a shell command as a regular user.
+def shell_command(is_sudo, command, *extra):
+    '''Invoke a shell command as a regular user unless explicitly stated.
     This is used to check the result and error message of the command'''
     full_cmd = []
-    full_cmd.extend(command)  # we do this because command may be used again
+    if not isinstance(is_sudo, bool):
+        raise TypeError("First argument should be of type bool")
+    if not general.check_root() and is_sudo:
+        full_cmd.append('sudo')
+    full_cmd.extend(command)
     for arg in extra:
         full_cmd.append(arg)
     # invoke
