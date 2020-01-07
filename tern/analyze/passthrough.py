@@ -33,12 +33,12 @@ def get_filesystem_command(layer_obj, command):
     return cmd_list
 
 
-def execute_external_command(layer_obj, command):
+def execute_external_command(layer_obj, command, is_sudo=False):
     '''Given an Imagelayer object and a command in the form of a list, execute
     the command and store the results in the ImageLayer object either as
     results or as a Notice object'''
     origin_layer = 'Layer: ' + layer_obj.fs_hash[:10]
-    result, error = rootfs.shell_command(command)
+    result, error = rootfs.shell_command(is_sudo, command)
     if error:
         logger.error("Error in executing external command: %s", str(error))
         layer_obj.origins.add_notice_to_origins(origin_layer, Notice(
@@ -48,7 +48,7 @@ def execute_external_command(layer_obj, command):
     return True
 
 
-def run_on_image(image_obj, command):
+def run_on_image(image_obj, command, is_sudo=False):
     '''Given an Image object, for each layer, run the given command on the
     layer filesystem.
     The layer tarballs should already be extracted (taken care of when
@@ -65,7 +65,7 @@ def run_on_image(image_obj, command):
         layer.files_analyzed = True
         # get the actual command
         full_cmd = get_filesystem_command(layer, command)
-        if not execute_external_command(layer, full_cmd):
+        if not execute_external_command(layer, full_cmd, is_sudo):
             logger.error(
                 "Error in executing given external command: %s", command)
             return False
