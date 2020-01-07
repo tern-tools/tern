@@ -29,7 +29,7 @@ class CveBinTool(Executor):
         '''
         command = 'cve-bin-tool -u now'
         # run the command against the image filesystems
-        if not passthrough.run_on_image(image_obj, command):
+        if not passthrough.run_on_image(image_obj, command, True):
             logger.error("cve-bin-tool error")
             sys.exit(1)
         # for now we just print the results for each layer

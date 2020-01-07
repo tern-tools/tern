@@ -34,7 +34,7 @@ class Scancode(Executor):
         '''
         command = 'scancode -lpcu --quiet --json -'
         # run the command against the image filesystems
-        if not passthrough.run_on_image(image_obj, command):
+        if not passthrough.run_on_image(image_obj, command, True):
             logger.error("scancode error")
             sys.exit(1)
         # for now we just print the file path and licenses found if there are
