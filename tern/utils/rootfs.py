@@ -60,10 +60,8 @@ def root_command(command, *extra):
     '''Invoke a shell command as root or using sudo. The command is a
     list of shell command words'''
     full_cmd = []
-    sudo = True
-    if os.getuid() == 0:
-        sudo = False
-    if sudo:
+    # add sudo before a command if the user is not root
+    if not general.check_root():
         full_cmd.append('sudo')
     full_cmd.extend(command)
     for arg in extra:
