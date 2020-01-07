@@ -99,7 +99,8 @@ def shell_command(is_sudo, command, *extra):
 def check_tar_permissions(tar_file, directory_path):
     '''Invoke a shell command as the current user. If the error contains
     'Operation not permitted' then return False. Else return True'''
-    _, error = shell_command(extract_tar, tar_file, '-C', directory_path)
+    _, error = shell_command(
+        False, extract_tar, tar_file, '-C', directory_path)
     if "Operation not permitted" in error.decode():
         return False
     return True
@@ -108,7 +109,7 @@ def check_tar_permissions(tar_file, directory_path):
 def check_tar_members(tar_file):
     '''Given the path to the tar file, check to see if there is an error with
     the members of the tarfile or if it is empty'''
-    result, error = shell_command(check_tar, tar_file)
+    result, error = shell_command(False, check_tar, tar_file)
     if error:
         logger.error("Malformed tar: %s", error.decode())
         raise EOFError("Malformed tarball: {}".format(tar_file))
