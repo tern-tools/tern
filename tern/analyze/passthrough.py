@@ -9,6 +9,7 @@ Use an external tool to analyze a container image
 
 
 import logging
+import shutil
 from stevedore import driver
 from stevedore.exception import NoMatches
 
@@ -26,6 +27,12 @@ def get_filesystem_command(layer_obj, command):
     This assumes that the layer tarball is untarred, which should have happened
     during the loading of the Image object'''
     cmd_list = command.split(' ')
+    # we first find if the command exists on the system
+    run_bin = cmd_list.pop(0)
+    bin_path = shutil.which(run_bin)
+    if not bin_path:
+        raise OSError("Command {} not found".format(run_bin))
+    cmd_list.insert(0, bin_path)
     # in most cases, the external tool has a CLI where the target directory
     # is the last token in the command. So the most straightforward way
     # to perform this operation is to append the target directory
