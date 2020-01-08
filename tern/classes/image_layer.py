@@ -73,7 +73,7 @@ class ImageLayer:
     @property
     def created_by(self):
         return self.__created_by
-        
+
     @created_by.setter
     def created_by(self, create_string):
         self.__created_by = create_string
@@ -120,11 +120,11 @@ class ImageLayer:
             self.__analyzed_output = analyzed_output
         else:
             raise ValueError('analyzed_output should be a string')
-    
+
     @property
     def files_analyzed(self):
         return self.__files_analyzed
-        
+
     @files_analyzed.setter
     def files_analyzed(self, x):
         if isinstance(x, bool):
@@ -138,7 +138,7 @@ class ImageLayer:
                 self.__packages.append(package)
         else:
             raise TypeError('Object type is {0}, should be Package'.format(
-                       type(package)))
+                            type(package)))
 
     def remove_package(self, package_name):
         rem_index = 0
