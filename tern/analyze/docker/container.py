@@ -16,7 +16,6 @@ import requests
 import sys
 import time
 
-from tern.analyze import common
 from tern.utils.constants import container
 from tern.utils.constants import logger_name
 from tern.utils.constants import temp_tarfile
@@ -148,7 +147,7 @@ def extract_image_metadata(image_tag_string):
     temp_path = rootfs.get_working_dir()
     placeholder = os.path.join(general.get_top_dir(), temp_tarfile)
     try:
-        if common.check_tar(image_tag_string) is True:
+        if general.check_tar(image_tag_string) is True:
             # image_tag_string is the path to the tar file for raw images
             rootfs.extract_tarfile(image_tag_string, temp_path)
         else:
