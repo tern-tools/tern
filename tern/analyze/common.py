@@ -9,7 +9,6 @@ Common functions
 
 import logging
 import os
-import tarfile
 
 from tern.classes.package import Package
 from tern.classes.notice import Notice
@@ -453,11 +452,3 @@ def get_os_style(image_layer, binary):
                     package_manager=binary,
                     package_format=image_layer.pkg_format,
                     os_list=image_layer.os_guess), 'info'))
-
-
-def check_tar(tar_file):
-    '''Check if provided file is a valid tar archive file'''
-    if os.path.exists(tar_file):
-        if tarfile.is_tarfile(tar_file):
-            return True
-    return False

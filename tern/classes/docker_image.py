@@ -99,7 +99,7 @@ class DockerImage(Image):
         '''Given the manifest, return the list of image tag strings'''
         return manifest[0].get('RepoTags')
 
-    def get_layer_sha(layer_path):
+    def get_layer_sha(self, layer_path):
         '''Docker's layers are file paths starting with the ID.
         Get just the sha'''
         return os.path.dirname(layer_path)

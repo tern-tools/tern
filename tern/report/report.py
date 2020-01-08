@@ -19,7 +19,6 @@ from stevedore.exception import NoMatches
 from tern.report import errors
 from tern.report import formats
 from tern.analyze.docker import container
-from tern.analyze import common
 from tern.utils import constants
 from tern.utils import cache
 from tern.utils import general
@@ -52,7 +51,7 @@ def setup(dockerfile=None, image_tag_string=None):
     if dockerfile:
         dhelper.load_docker_commands(dockerfile)
     # check if the docker image is present
-    if image_tag_string and common.check_tar(image_tag_string) is False:
+    if image_tag_string and general.check_tar(image_tag_string) is False:
         if not container.check_image(image_tag_string):
             # if no docker image is present, try to pull it
             if not container.pull_image(image_tag_string):

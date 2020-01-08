@@ -88,7 +88,7 @@ class Package:
 
     @checksum.setter
     def checksum(self, checksum):
-        self.__checksum = checksum;
+        self.__checksum = checksum
 
     def to_dict(self, template=None):
         '''Return a dictionary version of the Package object

@@ -6,6 +6,7 @@
 import os
 import random
 import re
+import tarfile
 import subprocess  # nosec
 from contextlib import contextmanager
 from pathlib import Path
@@ -123,3 +124,11 @@ def prop_names(obj):
         prop_name = re.sub(priv_name, '', key)
         prop_name = re.sub(prop_decorators, '', prop_name, 1)
         yield key, prop_name
+
+
+def check_tar(tar_file):
+    '''Check if provided file is a valid tar archive file'''
+    if os.path.exists(tar_file):
+        if tarfile.is_tarfile(tar_file):
+            return True
+    return False

@@ -256,7 +256,7 @@ class SpdxTagValue(generator.Generate):
                 if ('PackageLicenseDeclared' in package_dict.keys() and
                         package_obj.pkg_license):
                     package_dict['PackageLicenseDeclared'] = \
-                       get_license_ref(package_obj.pkg_license)
+                        get_license_ref(package_obj.pkg_license)
                 if ('PackageCopyrightText' in package_dict.keys() and
                         package_obj.copyright):
                     package_dict['PackageCopyrightText'] = \
