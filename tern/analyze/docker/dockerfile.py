@@ -47,9 +47,7 @@ def get_command_list(dockerfile_name):
         # check if this line is a continuation of the previous line
         # it should not be a comment
         if command_cont:
-            if comments.match(line):
-                continue
-            else:
+            if comments.match(line) is not None:
                 command = command + line
         # check if this line has an indentation
         # comments don't count
