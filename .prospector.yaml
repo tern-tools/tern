@@ -1,0 +1,12 @@
+# -*- coding: utf-8 -*-
+# Copyright © 2020, VMware, Inc.  All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+
+strictness: medium
+test-warnings: false
+
+pep8:
+  full: true
+
+pep257:
+  run: false
