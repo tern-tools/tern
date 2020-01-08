@@ -108,7 +108,6 @@ class Image:
         '''Load image metadata
         Currently there is no standard way to do this. For a specific tool,
         Inherit from this class and override this method'''
-        pass
 
     def to_dict(self, template=None):
         '''Return a dictionary representation of the image'''
@@ -150,4 +149,3 @@ class Image:
     def get_download_location(self):
         '''Return the registry information from where the image came from.
         Currently, the image's metadata doesn't have this information'''
-        pass
