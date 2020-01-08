@@ -8,7 +8,6 @@ from tern.utils.general import prop_names
 
 class NoticeException(Exception):
     '''Base notice exception'''
-    pass
 
 
 class LevelException(NoticeException):
