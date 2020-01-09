@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 import os
@@ -131,4 +131,12 @@ def check_tar(tar_file):
     if os.path.exists(tar_file):
         if tarfile.is_tarfile(tar_file):
             return True
+    return False
+
+
+def check_root():
+    '''Check to see if the current user is root or not. Return True if root
+    and False if not'''
+    if os.getuid() == 0:
+        return True
     return False

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -60,10 +60,8 @@ def root_command(command, *extra):
     '''Invoke a shell command as root or using sudo. The command is a
     list of shell command words'''
     full_cmd = []
-    sudo = True
-    if os.getuid() == 0:
-        sudo = False
-    if sudo:
+    # add sudo before a command if the user is not root
+    if not general.check_root():
         full_cmd.append('sudo')
     full_cmd.extend(command)
     for arg in extra:
@@ -80,11 +78,15 @@ def root_command(command, *extra):
     return result
 
 
-def shell_command(command, *extra):
-    '''Invoke a shell command as a regular user.
+def shell_command(is_sudo, command, *extra):
+    '''Invoke a shell command as a regular user unless explicitly stated.
     This is used to check the result and error message of the command'''
     full_cmd = []
-    full_cmd.extend(command)  # we do this because command may be used again
+    if not isinstance(is_sudo, bool):
+        raise TypeError("First argument should be of type bool")
+    if not general.check_root() and is_sudo:
+        full_cmd.append('sudo')
+    full_cmd.extend(command)
     for arg in extra:
         full_cmd.append(arg)
     # invoke
@@ -97,7 +99,8 @@ def shell_command(command, *extra):
 def check_tar_permissions(tar_file, directory_path):
     '''Invoke a shell command as the current user. If the error contains
     'Operation not permitted' then return False. Else return True'''
-    _, error = shell_command(extract_tar, tar_file, '-C', directory_path)
+    _, error = shell_command(
+        False, extract_tar, tar_file, '-C', directory_path)
     if "Operation not permitted" in error.decode():
         return False
     return True
@@ -106,7 +109,7 @@ def check_tar_permissions(tar_file, directory_path):
 def check_tar_members(tar_file):
     '''Given the path to the tar file, check to see if there is an error with
     the members of the tarfile or if it is empty'''
-    result, error = shell_command(check_tar, tar_file)
+    result, error = shell_command(False, check_tar, tar_file)
     if error:
         logger.error("Malformed tar: %s", error.decode())
         raise EOFError("Malformed tarball: {}".format(tar_file))
