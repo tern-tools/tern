@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -29,7 +29,7 @@ class CveBinTool(Executor):
         '''
         command = 'cve-bin-tool -u now'
         # run the command against the image filesystems
-        if not passthrough.run_on_image(image_obj, command):
+        if not passthrough.run_on_image(image_obj, command, True):
             logger.error("cve-bin-tool error")
             sys.exit(1)
         # for now we just print the results for each layer
