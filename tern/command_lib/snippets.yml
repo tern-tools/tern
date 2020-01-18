@@ -13,6 +13,13 @@ apt-get:
     - 'update' 
   packages: 'dpkg' # refer to base.yml's method of collection
 
+apt:
+  install: 'install' # subcommand to install
+  remove: 'purge' # subcommand to remove a package
+  ignore: # list of subcommands that don't add or remove packages
+    - 'update' 
+  packages: 'dpkg' # refer to base.yml's method of collection
+
 tyum:
   install: 'install'
   remove: 'remove'
