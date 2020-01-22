@@ -7,6 +7,8 @@ test-warnings: false
 
 pep8:
   full: true
+  disable:
+    - N802 # pep8-naming: function name should be lower case
 
 pep257:
   run: false
