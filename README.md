@@ -44,7 +44,7 @@ Tern is an inspection tool to find the metadata of the packages installed in a c
 1. It uses overlayfs to mount the first filesystem layer (also known as the BaseOS) used to build the container image
 2. It then executes scripts from the "command library" in a chroot environment to collect information about packages installed in that layer
 3. With that information as a starting point, it continues to iterate over steps 1 and 2 for the rest of the layers in the container image
-4. Once done, it generates a report in different formats. The default report is a verbose explanation of what layers brought in what software components. If a Dockerfile is provided then it will also provide what lines in the Dockerfile was used to create the layers.
+4. Once done, it generates a report, various format options are available. The report, in its default format, provides a verbose, layer by layer, explanation of the various software components imported. If a Dockerfile is provided, the report indicates the Dockerfile lines corresponding to each of the file system layers.
 
 Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies. It's also a good tool if you are curious about the contents of the container images you have built.
 
@@ -54,6 +54,8 @@ Tern gives you a deeper understanding of your container's bill of materials so y
 # Getting Started<a name="getting-started"/>
 
 ## Getting Started with Docker<a name="getting-started-with-docker">
+Note MAC users: currently running Tern natively as a docker container is unsupported. An option is to launch a linux virtual machine (VM) on your MAC and from within follow the steps below.
+
 Docker is the most widely used tool to build and run containers. If you already have Docker installed, you can run Tern by building a container with the Dockerfile provided and the `docker_run.sh` script:
 
 Clone this repository:
@@ -61,12 +63,12 @@ Clone this repository:
 $ git clone https://github.com/vmware/tern.git
 ```
 
-Build the Docker image (called `ternd` here):
+Build the Docker image (called `ternd` here). You may need to use sudo:
 ```
 $ docker build -t ternd .
 ```
 
-Run the script `docker_run.sh`
+Run the script `docker_run.sh`. You may need to use sudo. In the below command `debian` is the docker hub container image name  and `buster` is the tag that identifies the version we are interested in analyzing.
 
 ```
 $ ./docker_run.sh workdir ternd "report -i debian:buster" > output.txt
