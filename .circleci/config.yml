@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 version: 2.1
+
 # set up executor
 executors:
   ubuntu1604:
@@ -63,6 +64,15 @@ jobs:
       - setup
       - run: pip install .
       - run: tern -l report -i photon:3.0
+  test_coverage:
+    executor: ubuntu1604
+    steps:
+      - setup
+      - run: pip install coverage
+      - run: pip install .
+      - run: coverage run -m unittest discover -s tests
+      - run: coverage report
+
 
 workflows:
   version: 2
@@ -72,3 +82,5 @@ workflows:
       - commit_check
       - security
       - test_changes
+      - test_coverage
+
