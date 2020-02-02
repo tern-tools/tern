@@ -5,10 +5,15 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 from setuptools import setup
+import unittest
+
+
+def get_test_suite():
+    return unittest.TestLoader().discover('tests', 'test_*.py')
 
 
 setup(
     setup_requires=['pbr'],
     pbr=True,
-    test_suite="tests.runtests",
+    test_suite="setup.get_test_suite",
 )
