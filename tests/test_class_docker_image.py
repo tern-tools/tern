@@ -22,12 +22,15 @@ class TestClassDockerImage(unittest.TestCase):
         set_mount_dir()
         create_top_dir()
         check_docker_setup()
-        if not check_image('prajwalm2212/testimage:08022020'):
+        if not check_image('vmware/tern@sha256:20b32a9a20752aa1ad'
+                           '7582c667704fda9f004cc4bfd8601fac7f2656c7567bb4'):
             try:
-                container.pull_image('prajwalm2212/testimage:08022020')
+                container.pull_image('vmware/tern@sha256:20b32a9a20'
+                                     '752aa1ad7582c667704fda9f004cc4bfd8601fac7f2656c7567bb4')
             except subprocess.CalledProcessError as error:
                 print(error.output)
-        self.image = DockerImage('prajwalm2212/testimage:08022020')
+        self.image = DockerImage('vmware/tern@sha256:20b32'
+                                 'a9a20752aa1ad7582c667704fda9f004cc4bfd8601fac7f2656c7567bb4')
         # constants for this image
         self.image_id = 'acb194ad84d0f9734e794fbbdbb65fb7db6eda83f33e9e817bcc75b1bdd99f5e'
         self.layer = 'c1c3a87012e7ff5791b31e94515b661cdf06f6d5dc2f9a6245eda8774d257a13'
@@ -40,9 +43,10 @@ class TestClassDockerImage(unittest.TestCase):
         del self.image
 
     def testInstance(self):
-        self.assertEqual(self.image.repotag, 'prajwalm2212/testimage:08022020')
-        self.assertEqual(self.image.name, 'prajwalm2212/testimage')
-        self.assertEqual(self.image.tag, '08022020')
+        self.assertEqual(self.image.repotag, 'vmware/tern@sha256:20b32a9a2'
+                                             '0752aa1ad7582c667704fda9f004cc4bfd8601fac7f2656c7567bb4')
+        self.assertEqual(self.image.name, 'vmware/tern@sha256')
+        self.assertEqual(self.image.tag, '20b32a9a20752aa1ad7582c667704fda9f004cc4bfd8601fac7f2656c7567bb4')
         self.assertFalse(self.image.image_id)
         self.assertFalse(self.image.manifest)
         self.assertFalse(self.image.repotags)
