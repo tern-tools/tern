@@ -140,3 +140,11 @@ def check_root():
     if os.getuid() == 0:
         return True
     return False
+
+
+def check_image_string(image_str: str):
+    tag_format = r'.+:.+'
+    digest_format = r'.+@.+:.+'
+    if re.match(tag_format, image_str) or re.match(digest_format, image_str):
+        return True
+    return False
