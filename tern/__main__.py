@@ -23,6 +23,8 @@ from tern.report import errors
 
 
 # global logger
+from tern.utils.general import check_image_string
+
 logger = logging.getLogger(constants.logger_name)
 logger.setLevel(logging.DEBUG)
 
@@ -86,6 +88,14 @@ def do_main(args):
         if args.dockerfile:
             run.execute_dockerfile(args)
         if args.docker_image:
+            # Check if the image is of image:tag
+            # or image@digest_type:digest format
+            if not check_image_string(args.docker_image):
+                sys.stderr.write('Error running Tern\n'
+                                 'Please provide docker image '
+                                 'string in image:tag or '
+                                 'image@digest_type:digest format\n')
+                sys.exit(1)
             if general.check_tar(args.docker_image):
                 logger.error("%s", errors.incorrect_raw_option)
             else:
