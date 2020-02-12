@@ -1,5 +1,5 @@
 import unittest
-from tern.utils.general import check_image_string
+from tern.utils import general
 
 
 class TestUtilGeneral(unittest.TestCase):
@@ -10,7 +10,8 @@ class TestUtilGeneral(unittest.TestCase):
             'image:tag',
             'debian:buster',
             'golang:1.12-alpine',
-            'p12/test@sha256:737aaa0caf3b8f64baa41ebf78c6cd0c43f34fadccc1275a32b8ab5d5b75c344'
+            ('p12/test@sha256:737aaa0caf3b8f64baa41ebf78c6cd0c43f34fadccc1275'
+             'a32b8ab5d5b75c344')
         ]
 
         incorrect_strings = [
@@ -21,7 +22,45 @@ class TestUtilGeneral(unittest.TestCase):
         ]
 
         for image_str in correct_strings:
-            self.assertTrue(check_image_string(image_str))
+            self.assertTrue(general.check_image_string(image_str))
 
         for image_str in incorrect_strings:
-            self.assertFalse(check_image_string(image_str))
+            self.assertFalse(general.check_image_string(image_str))
+
+    def testParseImageString(self):
+        hello = 'hello-world'
+        debian = 'debian:9.8-slim'
+        distroless = 'gcr.io/distroless/static'
+        resizer = 'gcr.io/google-containers/addon-resizer:2.3'
+        etcd = ('bitnami/etcd@sha256:35862e29b27efd97cdf4a1fc79abc1341feac556'
+                '32e4256b02e6cfee9a4b6455')
+        self.assertEqual(general.parse_image_string(hello),
+                         {'name': 'hello-world',
+                          'tag': '',
+                          'digest_type': '',
+                          'digest': ''})
+        self.assertEqual(general.parse_image_string(debian),
+                         {'name': 'debian',
+                          'tag': '9.8-slim',
+                          'digest_type': '',
+                          'digest': ''})
+        self.assertEqual(general.parse_image_string(distroless),
+                         {'name': 'gcr.io/distroless/static',
+                          'tag': '',
+                          'digest_type': '',
+                          'digest': ''})
+        self.assertEqual(general.parse_image_string(resizer),
+                         {'name': 'gcr.io/google-containers/addon-resizer',
+                          'tag': '2.3',
+                          'digest_type': '',
+                          'digest': ''})
+        self.assertEqual(general.parse_image_string(etcd),
+                         {'name': 'bitnami/etcd',
+                          'tag': '',
+                          'digest_type': 'sha256',
+                          'digest': ('35862e29b27efd97cdf4a1fc79abc1341fe'
+                                     'ac55632e4256b02e6cfee9a4b6455')})
+
+
+if __name__ == '__main__':
+    unittest.main()
