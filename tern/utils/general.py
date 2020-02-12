@@ -148,3 +148,33 @@ def check_image_string(image_str: str):
     if re.match(tag_format, image_str) or re.match(digest_format, image_str):
         return True
     return False
+
+
+def parse_image_string(image_string):
+    '''From the image string used to reference an image, return a dictionary
+    of the form:
+        {'name': <image name used (either from dockerhub or full name)>,
+         'tag': <image tag>,
+         'digest_type': <the hashing algorithm used>,
+         'digest': <image digest>}
+    per Docker's convention, an image can be referenced either as
+    image OR image:tag OR image@hash:digest
+    we choose ':' and '@' as separators
+    Currently OCI also uses this convention'''
+    tokens = re.split(r'[@:]', image_string)
+    if len(tokens) == 1:
+        return {'name': tokens[0],
+                'tag': '',
+                'digest_type': '',
+                'digest': ''}
+    if len(tokens) == 2:
+        return {'name': tokens[0],
+                'tag': tokens[1],
+                'digest_type': '',
+                'digest': ''}
+    if len(tokens) == 3:
+        return {'name': tokens[0],
+                'tag': '',
+                'digest_type': tokens[1],
+                'digest': tokens[2]}
+    return None

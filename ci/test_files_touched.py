@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 from git import Repo
@@ -72,6 +72,7 @@ test_suite = {
         'tern -l report -i centos:7'],
     # tern/analyze/docker
     re.compile('tern/analyze/docker'): [
+        'python tests/test_analyze_docker_dockerfile.py',
         'tern -l report -i golang:alpine',
         'tern -l report -d samples/alpine_python/Dockerfile'],
     # tern/report
@@ -86,6 +87,7 @@ test_suite = {
     ['tern -l report -i golang:alpine'],
     # tern/utils
     re.compile('tern/utils'): [
+        'python tests/test_util_general.py',
         'tern -l report -i golang:alpine',
         'tern -l report -d samples/alpine_python/Dockerfile'],
     # tests
@@ -106,8 +108,7 @@ test_suite = {
     re.compile('tests/test_class_package.py'):
         ['python tests/test_class_package.py'],
     re.compile('tests/test_class_template.py'):
-        ['python tests/test_class_template.py']
-        }
+        ['python tests/test_class_template.py']}
 
 alltests = []
 for change in changes:

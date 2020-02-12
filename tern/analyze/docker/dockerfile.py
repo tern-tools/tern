@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
-Dockerfile parser and information retrieval
+Dockerfile information retrieval and modification
 """
 
+from dockerfile_parse import DockerfileParser
 import re
 
-from tern.utils.general import clean_command
+from tern.utils import general
 
 directives = ['FROM',
               'ARG',
@@ -33,6 +34,88 @@ bash_var = R'[\$\{\}]'
 
 # strings
 tag_separator = ':'
+
+
+class Dockerfile():
+    ''' This class is used as a wrapper to store dockerfile information
+    retrieved from the parser.'''
+    def __init__(self):
+        self.structure = None
+        self.envs = None
+        self.prev_env = None
+        self.filepath = ""
+        self.parent_images = []
+
+    def is_none(self):
+        """Check if the object is empty."""
+        is_none = True
+        if (self.structure or
+                self.envs or
+                self.prev_env or
+                self.filepath):
+            is_none = False
+        return is_none
+
+
+def get_dockerfile_obj(dockerfile_name, prev_env=None):
+    '''Given a Dockerfile, create a Dockerfile parser object to be used later.
+    dockerfile_name: This is the path to the Dockerfile including the
+                            file name
+    prev_env: These are environment variables that may have been used in
+    previous stages in a multistage docker build. Should be a python dictionary
+    of the form {'ENV': 'value',...}'''
+    dfobj = Dockerfile()
+    with open(dockerfile_name) as f:
+        parser = DockerfileParser(parent_env=prev_env, fileobj=f)
+        dfobj.filepath = dockerfile_name
+        dfobj.structure = parser.structure
+        dfobj.envs = parser.envs
+        dfobj.prev_env = prev_env
+        dfobj.parent_images = parser.parent_images
+    return dfobj
+
+
+def replace_env(key_value_dict, df_structure_dict):
+    '''Replace the environment variables in the key_value_dict dictionary
+    with its corresponding value in the df_line_dict dictionary
+    key_value_dict: a dictionary of key-value pairs like envs in the dockerfile
+                    object
+    df_structure_dict: a dictionary from the dockerfile object's structure'''
+    for key, val in key_value_dict.items():
+        envvar1 = '$' + key
+        envvar2 = '${' + key + '}'
+        df_structure_dict['content'] = df_structure_dict['content'].replace(
+            envvar1, val)
+        df_structure_dict['content'] = df_structure_dict['content'].replace(
+            envvar2, val)
+        df_structure_dict['value'] = df_structure_dict['value'].replace(
+            envvar1, val)
+        df_structure_dict['value'] = df_structure_dict['value'].replace(
+            envvar2, val)
+
+
+def expand_vars(dfobj):
+    '''Replace the environment variables with their values if known
+    dfobj: the Dockerfile object created using get_dockerfile_obj'''
+    if dfobj.envs:
+        for obj in dfobj.structure:
+            replace_env(dfobj.envs, obj)
+    if dfobj.prev_env:
+        for obj in dfobj.structure:
+            replace_env(dfobj.prev_env, obj)
+
+
+def parse_from_image(dfobj):
+    '''Get a list of dictionaries from the FROM instruction. The dictionary
+    should be of the form:
+        [{'name': <image name used (either from dockerhub or full name)>,
+          'tag': <image tag>,
+          'digest_type': <the hashing algorithm used>
+          'digest': <image digest>}..]'''
+    image_list = []
+    for image_string in dfobj.parent_images:
+        image_list.append(general.parse_image_string(image_string))
+    return image_list
 
 
 def get_command_list(dockerfile_name):
@@ -80,7 +163,7 @@ def get_directive_list(command_list):
     i.e. FROM, ADD, COPY etc and the object to be acted upon'''
     directive_list = []
     for command in command_list:
-        directive_list.append(get_directive(clean_command(command)))
+        directive_list.append(get_directive(general.clean_command(command)))
     return directive_list
 
 
