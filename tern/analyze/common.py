@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 '''
 Common functions
 '''
@@ -19,6 +19,8 @@ from tern.report import errors
 from tern.report import content
 from tern.utils import cache
 from tern.utils import constants
+from tern.utils import general
+from tern.utils import rootfs
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -26,10 +28,10 @@ logger = logging.getLogger(constants.logger_name)
 
 def get_shell_commands(shell_command_line):
     '''Given a shell command line, get a list of Command objects'''
-    comm_list = shell_command_line.split('&&')
+    comm_list = general.split_command(shell_command_line)
     cleaned_list = []
     for comm in comm_list:
-        cleaned_list.append(Command(comm.strip()))
+        cleaned_list.append(Command(general.clean_command(comm)))
     return cleaned_list
 
 
@@ -39,24 +41,30 @@ def load_from_cache(layer, redo=False):
     If it doesn't exist return false. Default operation is to not redo the
     cache. Add notices to the layer's origins matching the origin_str'''
     loaded = False
-    origin_layer = 'Layer: ' + layer.fs_hash[:10]
     if not layer.packages and not redo:
         # there are no packages in this layer and we are not repopulating the
         # cache, try to get it from the cache
         raw_pkg_list = cache.get_packages(layer.fs_hash)
         if raw_pkg_list:
             logger.debug('Loaded from cache: layer \"%s\"', layer.fs_hash[:10])
-            message = formats.loading_from_cache.format(
-                layer_id=layer.fs_hash[:10])
-            # add notice to the origin
-            layer.origins.add_notice_to_origins(origin_layer, Notice(
-                message, 'info'))
             for pkg_dict in raw_pkg_list:
                 pkg = Package(pkg_dict['name'])
                 pkg.fill(pkg_dict)
                 layer.add_package(pkg)
+            load_notices_from_cache(layer)
             loaded = True
     return loaded
+
+
+def load_notices_from_cache(layer):
+    '''Given a layer object, populate the notices from the cache'''
+    origins_list = cache.get_origins(layer.fs_hash)
+    for origin_dict in origins_list:
+        layer.origins.add_notice_origin(origin_dict['origin_str'])
+        for notice in origin_dict['notices']:
+            layer.origins.add_notice_to_origins(
+                origin_dict['origin_str'], Notice(
+                    notice['message'], notice['level']))
 
 
 def save_to_cache(image):
@@ -72,13 +80,41 @@ def get_base_bin():
     binary = ''
     # the path to where the filesystem is mounted
     # look at utils/rootfs.py mount_base_layer module
-    cwd = os.path.join(os.getcwd(), constants.temp_folder, constants.mergedir)
+    cwd = os.path.join(rootfs.get_working_dir(), constants.mergedir)
     for key, value in command_lib.command_lib['base'].items():
         for path in value['path']:
             if os.path.exists(os.path.join(cwd, path)):
                 binary = key
                 break
     return binary
+
+
+def get_os_release():
+    '''Given the base layer object, determine if an os-release file exists and
+    return the PRETTY_NAME string from it. If no release file exists,
+    return an empty string. Assume that the layer filesystem is mounted'''
+    # os-release may exist under /etc/ or /usr/lib. We should first check
+    # for the preferred /etc/os-release and fall back on /usr/lib/os-release
+    # if it does not exist under /etc
+    etc_path = os.path.join(rootfs.get_working_dir(), constants.mergedir,
+                            constants.etc_release_path)
+    lib_path = os.path.join(rootfs.get_working_dir(), constants.mergedir,
+                            constants.lib_release_path)
+    if not os.path.exists(etc_path):
+        if not os.path.exists(lib_path):
+            return ''
+        etc_path = lib_path
+    # file exists at this point, try to read it
+    with open(etc_path, 'r') as f:
+        lines = f.readlines()
+    pretty_name = ''
+    # iterate through os-release file to find OS
+    for l in lines:
+        key, val = l.rstrip().split('=', 1)
+        if key == "PRETTY_NAME":
+            pretty_name = val
+            break
+    return pretty_name.strip('"')
 
 
 def collate_list_metadata(shell, listing):
@@ -283,6 +319,20 @@ def remove_unrecognized_commands(command_list):
     return unrec_commands, filtered_list
 
 
+def consolidate_commands(command_list):
+    '''Given a list of Command objects, consolidate the install and remove
+    commands into one and return a list of resulting command objects'''
+    new_list = []
+    while command_list:
+        first = command_list.pop(0)
+        for _ in range(0, len(command_list)):
+            second = command_list.pop(0)
+            if not first.merge(second):
+                command_list.append(first)
+        new_list.append(first)
+    return new_list
+
+
 def filter_install_commands(shell_command_line):
     '''Given a shell command line:
         1. Create a list of Command objects
@@ -300,7 +350,8 @@ def filter_install_commands(shell_command_line):
         report = report + formats.ignored + ignore_msgs
     if unrec_msgs:
         report = report + formats.unrecognized + unrec_msgs
-    return filter2, report
+
+    return consolidate_commands(filter2), report
 
 
 def add_snippet_packages(image_layer, command, pkg_listing, shell):
@@ -364,3 +415,40 @@ def update_master_list(master_list, layer_obj):
     while unique:
         layer_obj.packages.append(unique.pop(0))
     del unique
+
+
+def get_os_style(image_layer, binary):
+    '''Given an ImageLayer object and a binary package manager, check for the
+    OS identifier in the os-release file first. If the os-release file
+    is not available, make an educated guess as to what kind of OS the layer
+    might be based off of given the pkg_format + package manager. If the binary
+    provided does not exist in base.yml, add a warning notice'''
+    origin_command_lib = formats.invoking_base_commands
+    origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
+    pkg_format = command_lib.check_pkg_format(binary)
+    os_guess = command_lib.check_os_guess(binary)
+    if get_os_release():
+        # We know with high degree of certainty what the OS is
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            formats.os_release.format(os_style=get_os_release()), 'info'))
+    elif binary is None:
+        # No binary and no os-release means we have no idea about base OS
+        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+            errors.no_etc_release, 'warning'))
+    else:
+        # We make a guess about the OS based on pkg_format + binary
+        # First check that binary exists in base.yml
+        if not pkg_format or not os_guess:
+            image_layer.origins.add_notice_to_origins(
+                origin_command_lib, Notice(
+                    errors.no_listing_for_base_key.format(listing_key=binary),
+                    'warning'))
+        else:
+            # Assign image layer attributes and guess OS
+            image_layer.pkg_format = pkg_format
+            image_layer.os_guess = os_guess
+            image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+                formats.os_style_guess.format(
+                    package_manager=binary,
+                    package_format=image_layer.pkg_format,
+                    os_list=image_layer.os_guess), 'info'))

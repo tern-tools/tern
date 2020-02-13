@@ -2,8 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
-import os
+
 
 from tern.classes.package import Package
 from tern.classes.origins import Origins
@@ -29,6 +28,8 @@ class ImageLayer:
         last layer of the image that was imported
         import_str: The string from a build tool (like a Dockerfile) that
         created this layer by importing it from another image
+        files_analyzed: whether the files in this layer are analyzed or not
+        analyzed_output: the result of the file analysis
     methods:
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
@@ -44,6 +45,10 @@ class ImageLayer:
         self.__origins = Origins()
         self.__import_image = None
         self.__import_str = ''
+        self.__pkg_format = ''
+        self.__os_guess = ''
+        self.__files_analyzed = False
+        self.__analyzed_output = ''
 
     @property
     def diff_id(self):
@@ -89,13 +94,51 @@ class ImageLayer:
     def import_str(self, import_str):
         self.__import_str = import_str
 
+    @property
+    def pkg_format(self):
+        return self.__pkg_format
+
+    @pkg_format.setter
+    def pkg_format(self, pkg_format):
+        self.__pkg_format = pkg_format
+
+    @property
+    def os_guess(self):
+        return self.__os_guess
+
+    @os_guess.setter
+    def os_guess(self, os_guess):
+        self.__os_guess = os_guess
+
+    @property
+    def analyzed_output(self):
+        return self.__analyzed_output
+
+    @analyzed_output.setter
+    def analyzed_output(self, analyzed_output):
+        if isinstance(analyzed_output, str):
+            self.__analyzed_output = analyzed_output
+        else:
+            raise ValueError('analyzed_output should be a string')
+
+    @property
+    def files_analyzed(self):
+        return self.__files_analyzed
+
+    @files_analyzed.setter
+    def files_analyzed(self, x):
+        if isinstance(x, bool):
+            self.__files_analyzed = x
+        else:
+            raise ValueError('files_analyzed should be boolean')
+
     def add_package(self, package):
         if isinstance(package, Package):
             if package.name not in self.get_package_names():
                 self.__packages.append(package)
         else:
             raise TypeError('Object type is {0}, should be Package'.format(
-                       type(package)))
+                            type(package)))
 
     def remove_package(self, package_name):
         rem_index = 0
@@ -152,8 +195,5 @@ class ImageLayer:
         if self.__tar_file:
             fs_dir = rootfs.get_untar_dir(self.__tar_file)
             tar_file = rootfs.get_layer_tar_path(self.__tar_file)
-            # remove the fs directory if it already exists
-            if os.path.isdir(fs_dir):
-                rootfs.root_command(rootfs.remove, fs_dir)
-            rootfs.extract_layer_tar(tar_file, fs_dir)
+            rootfs.extract_tarfile(tar_file, fs_dir)
             self.__fs_hash = rootfs.calc_fs_hash(fs_dir)

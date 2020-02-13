@@ -24,6 +24,7 @@ A clear and concise description of what you expected to happen.
 
 **Environment you are running Tern on**
 Enter all that apply
+- Output of 'tern --version'
 - Operating System (Linux Distro and version or Mac or Windows)
 - Vagrant file
 - Container OS

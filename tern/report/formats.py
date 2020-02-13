@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Report formatting for different types of reports and report content
 """
@@ -33,8 +33,9 @@ retrieve_from_cache = '''Retrieving packages from cache for layer ''' \
 # command library
 base_listing = '''Direct listing in command_lib/base.yml'''
 snippet_listing = '''Direct listing in command_lib/snippets.yml'''
-invoke_for_base = '''Using invoke listing in command_lib/base.yml'''
-invoke_for_snippets = '''Using invoke listing in command_lib/snippets.yml'''
+invoke_for_base = '''Retrieved by invoking listing in command_lib/base.yml'''
+invoke_for_snippets = '''Retrieved by invoking listing in command_lib/''' \
+    '''snippets.yml'''
 invoke_in_container = '''\tin container:\n'''
 invoke_on_host = '''\ton host:\n'''
 # package information
@@ -43,6 +44,12 @@ package_version = '''Version: {package_version}\n'''
 package_url = '''Project URL: {package_url}\n'''
 package_license = '''License: {package_license}\n'''
 package_copyright = '''Copyright Text: {package_copyright}\n'''
+layer_packages_list = '''\tPackages found in Layer:  {list}\n'''
+layer_licenses_list = '''\tLicenses found in Layer:  {list}\n'''
+full_licenses_list = '''###########################################\n'''\
+    '''# Summary of licenses found in Container: #\n'''\
+    '''###########################################\n{list}\n'''
+
 # notes
 package_notes = '''Errors: {package_info_retrieval_errors}\n''' \
     '''Improvements: {package_info_reporting_improvements}\n'''
@@ -57,6 +64,10 @@ invoking_snippet_commands = '''Invoking commands from ''' \
     '''command_lib/snippets.yml'''
 ignored = '''\nIgnored Commands:'''
 unrecognized = '''\nUnrecognized Commands:'''
+os_style_guess = '''Found {package_manager} package manager with '''\
+    '''{package_format} package format. Possible OS(es) for this layer '''\
+    '''might be: {os_list}'''
+os_release = '''Found '{os_style}' in /etc/os-release.'''
 
 # report formatting for dockerfiles
 

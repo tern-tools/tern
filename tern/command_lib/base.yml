@@ -1,9 +1,10 @@
-# Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 #
 # Known package listings for base images
 # Format to list images
 # <package manager>:
+#   pkg_format: <the package format used by the package manager>
 #   shell: <the shell executable> (needed if entering code snippets)
 #   names: <a list of package names>
 #     invoke: (if this is a script to invoke include this)
@@ -15,6 +16,9 @@
 
 # tdnf ---------------------------------------------------------------------------------------------------------------------------------
 tdnf:
+  pkg_format: 'rpm'
+  os_guess:
+    - 'Photon'
   path:
     - 'usr/bin/tdnf' # don't put forward slash here as os.path.join will think it is the root directory on the host
   shell: '/usr/bin/bash'
@@ -54,6 +58,10 @@ tdnf:
 
 # dpkg -------------------------------------------------------------------------------------------------------------------------------
 dpkg:
+  pkg_format: 'deb'
+  os_guess:
+    - 'Debian'
+    - 'Ubuntu'
   path:
     - 'usr/bin/dpkg'
   shell: '/bin/bash'
@@ -84,6 +92,9 @@ dpkg:
 
 # apk ---------------------------------------------------------------------------------------------------------
 apk:
+  pkg_format: 'apk'
+  os_guess:
+    - 'Alpine Linux'
   path:
     - 'sbin/apk'
   shell: '/bin/sh'
@@ -119,6 +130,9 @@ apk:
 
 # pacman ----------------------------------------------------------------------
 pacman:
+  pkg_format: 'pkg.tar.xz'
+  os_guess:
+    - 'Arch Linux'
   path:
     - 'usr/bin/pacman'
   shell: '/usr/bin/sh'
@@ -149,6 +163,12 @@ pacman:
 
 # rpm ----------------------------------------------------------------------
 rpm:
+  pkg_format: 'rpm'
+  os_guess:
+    - 'CentOS'
+    - 'Fedora'
+    - 'openSUSE'
+    - 'RHEL'
   path:
     - 'usr/bin/rpm'
   shell: '/usr/bin/sh'

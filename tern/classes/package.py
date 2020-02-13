@@ -2,7 +2,6 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
 
 from tern.classes.notice import Notice
 from tern.classes.origins import Origins
@@ -19,6 +18,7 @@ class Package:
         proj_url: package source url
         download_url: package download url
         origins: a list of NoticeOrigin objects
+        checksum: checksum as package property
 
     methods:
         to_dict: returns a dict representation of the instance
@@ -31,6 +31,7 @@ class Package:
         self.__copyright = ''
         self.__proj_url = ''
         self.__download_url = ''
+        self.__checksum = ''
         self.__origins = Origins()
 
     @property
@@ -80,6 +81,14 @@ class Package:
     @property
     def origins(self):
         return self.__origins
+
+    @property
+    def checksum(self):
+        return self.__checksum
+
+    @checksum.setter
+    def checksum(self, checksum):
+        self.__checksum = checksum
 
     def to_dict(self, template=None):
         '''Return a dictionary version of the Package object
@@ -146,9 +155,3 @@ class Package:
             if value != other_pkg_dict[key]:
                 return False
         return True
-
-    def get_package_id(self):
-        '''This method returns a string of the name and version for a package
-        represented as "name.version". This method might be helpful when working
-        with SPDX documents that require a unique package identifier.'''
-        return "{0}.{1}".format(self.name, self.version)

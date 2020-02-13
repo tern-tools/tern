@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017, 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Docker layer cache related modules
 The cache is currently stored in a yaml file called cache.yml
@@ -19,6 +19,7 @@ It is organized in this way:
 import os
 import yaml
 from tern.utils.constants import cache_file
+from tern.utils import rootfs
 
 # known base image database
 cache = {}
@@ -29,10 +30,10 @@ def load():
     global cache
 
     # Do not try to populate the cache if there is no cache available
-    if not os.path.exists(os.path.abspath(cache_file)):
+    if not os.path.exists(os.path.join(rootfs.mount_dir, cache_file)):
         return
 
-    with open(os.path.abspath(cache_file)) as f:
+    with open(os.path.join(rootfs.mount_dir, cache_file)) as f:
         cache = yaml.safe_load(f)
 
 
@@ -49,6 +50,13 @@ def get_layers():
     return cache.keys()
 
 
+def get_origins(layer_hash):
+    '''Return the origins dictionary'''
+    if 'origins' in cache[layer_hash].keys():
+        return cache[layer_hash]['origins']
+    return []
+
+
 def add_layer(layer_obj):
     '''Given a layer object, add it to the cache
     We use the layer's to_dict object and make a dictionary such that
@@ -61,7 +69,7 @@ def add_layer(layer_obj):
 
 def save():
     '''Save the cache to the cache file'''
-    with open(os.path.abspath(cache_file), 'w') as f:
+    with open(os.path.join(rootfs.mount_dir, cache_file), 'w') as f:
         yaml.dump(cache, f, default_flow_style=False)
 
 
@@ -78,5 +86,5 @@ def clear():
     '''Empty the cache - don't use unless you really have to'''
     global cache
     cache = {}
-    with open(os.path.abspath(cache_file), 'w') as f:
+    with open(os.path.join(rootfs.mount_dir, cache_file), 'w') as f:
         yaml.dump(cache, f, default_flow_style=False)

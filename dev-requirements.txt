@@ -1,8 +1,0 @@
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
-# SPDX-License-Identifier: BSD-2-Clause
-
-# Pull in the runtime dependencies
--r requirements.txt
-
-# For development work, pull in dev support utilities
-prospector==1.1.6.2

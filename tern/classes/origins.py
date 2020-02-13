@@ -2,7 +2,6 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
 
 from tern.classes.notice_origin import NoticeOrigin
 
@@ -47,7 +46,8 @@ class Origins:
             self.__origins.append(notice_orij)
 
     def add_notice_origin(self, orig_string):
-        self.__origins.append(NoticeOrigin(orig_string))
+        if not self.get_origin(orig_string):
+            self.__origins.append(NoticeOrigin(orig_string))
 
     def is_empty(self):
         empty = True

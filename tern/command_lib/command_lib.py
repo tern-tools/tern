@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Invoking commands in the command library
 """
@@ -13,7 +13,7 @@ import subprocess  # nosec
 import yaml
 import pkg_resources
 
-from tern.utils import container
+from tern.analyze.docker import container
 from tern.utils import constants
 from tern.utils import rootfs
 from tern.report import errors
@@ -31,7 +31,8 @@ with open(os.path.abspath(base_file)) as f:
 with open(os.path.abspath(snippet_file)) as f:
     command_lib['snippets'] = yaml.safe_load(f)
 # list of package information keys that the command library can accomodate
-base_keys = {'names', 'versions', 'licenses', 'copyrights', 'proj_urls', 'srcs'}
+base_keys = {'names', 'versions', 'licenses', 'copyrights', 'proj_urls',
+             'srcs'}
 package_keys = {'name', 'version', 'license', 'copyright', 'proj_url', 'src'}
 
 # global logger
@@ -266,3 +267,26 @@ def check_sourcable(command, package_name):
                         'src' in package.keys():
                     sourcable = True
     return sourcable
+
+
+def check_pkg_format(binary):
+    '''Given a binary package manager, return the associated pkg_format from
+    base.yml. If the binary is not valid in base.yml, return an empty
+    string.'''
+    try:
+        return command_lib['base'][binary]['pkg_format']
+    except KeyError:
+        return ''
+
+
+def check_os_guess(binary):
+    '''Given a binary package manager, return the associated os_guess from
+    base.yml. If the binary is not valid in base.yml, return an empty
+    string.'''
+    os_list = []
+    try:
+        for o in command_lib['base'][binary]['os_guess']:
+            os_list.append(o)
+        return ', '.join(os_list)
+    except KeyError:
+        return ''

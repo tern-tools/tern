@@ -2,13 +2,14 @@
 #
 # Copyright (c) 2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 SPDX document formatting
 """
 
 # basic strings
 tag_value = '{tag}: {value}'
+block_text = '<text>{message}</text>'
 
 # document level strings
 spdx_version = 'SPDXVersion: SPDX-2.1'
@@ -25,6 +26,7 @@ created = 'Created: {timestamp}'
 
 # Package level strings
 package_comment = 'PackageComment: <text>{comment}</text>'
+package_id = '{name}-{ver}'
 
 # Relationship strings
 contains = 'Relationship: {outer} CONTAINS {inner}'

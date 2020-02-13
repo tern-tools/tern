@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Error messages
 """
@@ -12,15 +12,18 @@ unrecognized_base = '''Unable to determine the base OS of the image ''' \
 no_packages = '''Unable to recover packages for layer {layer_id}. ''' \
     '''Consider either entering them manually or create a bash script to ''' \
     '''retrieve the package in the command library.\n'''
+no_package_manager = '''Unable to find a known package manager. Cannot ''' \
+    '''list packages.\n'''
+no_etc_release = '''Unknown base OS. Unable to find an os-release file.'''
 no_version = '''No version for package {package_name}. Consider either ''' \
     '''entering the version manually or creating a script to retrieve ''' \
     '''it in the command library\n'''
 no_license = '''No license for package {package_name}. Consider either ''' \
     '''entering the license manually or creating a script to retrieve it ''' \
     '''in the command library\n'''
-no_proj_url = '''No project url for package {package_name}. Consider either ''' \
-    '''entering the source url manually or creating a script to retrieve ''' \
-    '''it in the command library\n'''
+no_proj_url = '''No project url for package {package_name}. Consider ''' \
+    '''either entering the source url manually or creating a script to ''' \
+    '''retrieve it in the command library\n'''
 env_dep_dockerfile = '''Docker build failed: {build_fail_msg} \n Since ''' \
     '''the Docker image cannot be built, Tern will try to retrieve ''' \
     '''package information from the Dockerfile itself.\n'''
@@ -49,6 +52,11 @@ no_shell_listing = '''There is no listing for 'shell' under the base ''' \
     '''{default_shell}\n'''
 unknown_content = '''Unknown content included in layer {files}. Please ''' \
     '''analyze these files separately\n'''
+keyboard_interrupt = '''Keyboard Interrupt! Aborting analysis...'''
+invalid_raw_image = '''Invalid raw image provided: '{image}' - Check ''' \
+    '''that path to raw image is correct and in tar archive format.'''
+incorrect_raw_option = '''Expected docker image but detected file in ''' \
+    '''tar archive format.'''
 
 # Dockerfile specific errors
 dockerfile_no_tag = '''The Dockerfile provided has no tag in the line ''' \

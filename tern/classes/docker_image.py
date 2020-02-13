@@ -2,17 +2,16 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
 
 import json
 import os
 import subprocess  # nosec
 
+from tern.utils import rootfs
 from tern.utils.general import pushd
-from tern.utils.constants import temp_folder
 from tern.utils.constants import manifest_file
-from tern.utils.container import extract_image_metadata
-from tern.utils.dockerfile import tag_separator
+from tern.analyze.docker.container import extract_image_metadata
+from tern.analyze.docker.dockerfile import tag_separator
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
@@ -73,7 +72,7 @@ class DockerImage(Image):
     def get_image_manifest(self):
         '''Assuming that there is a temp folder with a manifest.json of
         an image inside, get a dict of the manifest.json file'''
-        temp_path = os.path.abspath(temp_folder)
+        temp_path = rootfs.get_working_dir()
         with pushd(temp_path):
             with open(manifest_file) as f:
                 json_obj = json.loads(f.read())
@@ -100,7 +99,7 @@ class DockerImage(Image):
         '''Given the manifest, return the list of image tag strings'''
         return manifest[0].get('RepoTags')
 
-    def get_layer_sha(layer_path):
+    def get_layer_sha(self, layer_path):
         '''Docker's layers are file paths starting with the ID.
         Get just the sha'''
         return os.path.dirname(layer_path)
@@ -111,7 +110,7 @@ class DockerImage(Image):
         config_file = self.get_image_config_file(manifest)
         # assuming that the config file path is in the same root path as the
         # manifest file
-        temp_path = os.path.abspath(temp_folder)
+        temp_path = rootfs.get_working_dir()
         with pushd(temp_path):
             with open(config_file) as f:
                 json_obj = json.loads(f.read())
@@ -168,8 +167,3 @@ class DockerImage(Image):
             raise
         except IOError:  # pylint: disable=try-except-raise
             raise
-
-    def get_download_location(self):
-        '''A docker image's download location is in the repotags. We will
-        return a string of repotags joined by a hyphen -'''
-        return '-'.join(self.repotags)

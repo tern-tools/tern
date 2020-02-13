@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Test script for running commands in a chroot environment to check if the
 results produced are expected
@@ -54,9 +54,9 @@ if __name__ == '__main__':
         if len(image_obj.layers) == 1:
             # mount only one layer
             target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
-            rootfs.prep_rootfs(target)
         else:
             report.mount_overlay_fs(image_obj, len(image_obj.layers) - 1)
+        rootfs.prep_rootfs(target)
         # invoke commands in chroot
         # if we're looking up the snippets library
         # we should see 'snippets' in the keys

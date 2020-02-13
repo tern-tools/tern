@@ -2,7 +2,6 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
 
 import unittest
 
@@ -20,6 +19,7 @@ class TestClassPackage(unittest.TestCase):
         self.p1.copyright = 'All Rights Reserved'
         self.p1.proj_url = 'github.com'
         self.p1.download_url = 'https://github.com'
+        self.p1.checksum = '123abc456'
 
         self.p2 = Package('p2')
 
@@ -34,6 +34,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertFalse(self.p2.pkg_license)
         self.assertFalse(self.p2.copyright)
         self.assertFalse(self.p2.download_url)
+        self.assertFalse(self.p2.checksum)
 
     def testSetters(self):
         self.assertRaises(AttributeError, setattr, self.p2, 'name', 'y')
@@ -47,6 +48,8 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p2.proj_url, 'github.com')
         self.p2.download_url = 'https://github.com'
         self.assertEqual(self.p2.download_url, 'https://github.com')
+        self.p2.checksum = '123abc456'
+        self.assertEqual(self.p2.checksum, '123abc456')
 
     def testGetters(self):
         self.assertEqual(self.p1.name, 'p1')
@@ -55,6 +58,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p1.copyright, 'All Rights Reserved')
         self.assertEqual(self.p1.proj_url, 'github.com')
         self.assertEqual(self.p1.download_url, 'https://github.com')
+        self.assertEqual(self.p1.checksum, '123abc456')
 
     def testToDict(self):
         a_dict = self.p1.to_dict()
@@ -65,6 +69,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(a_dict['proj_url'], 'github.com')
         self.assertEqual(a_dict['download_url'], 'https://github.com')
         self.assertFalse(a_dict['origins'])
+        self.assertEqual(a_dict['checksum'], '123abc456')
 
     def testToDictTemplate(self):
         template1 = TestTemplate1()
@@ -83,9 +88,11 @@ class TestClassPackage(unittest.TestCase):
         p.pkg_license = 'Testpkg_license'
         p.version = '1.0'
         p.proj_url = 'TestUrl'
+        p.checksum = 'abcdef'
         self.p2.pkg_license = 'Testpkg_license'
         self.p2.version = '2.0'
         self.p2.proj_url = 'TestUrl'
+        self.p2.checksum = 'abcdef'
         self.assertFalse(self.p2.is_equal(p))
         p.version = '2.0'
         self.assertTrue(self.p2.is_equal(p))
@@ -93,12 +100,14 @@ class TestClassPackage(unittest.TestCase):
     def testFill(self):
         p_dict = {'name': 'p1',
                   'version': '1.0',
-                  'pkg_license': 'Apache 2.0'}
+                  'pkg_license': 'Apache 2.0',
+                  'checksum': 'abcxyz'}
         p = Package('p1')
         p.fill(p_dict)
         self.assertEqual(p.name, 'p1')
         self.assertEqual(p.version, '1.0')
         self.assertEqual(p.pkg_license, 'Apache 2.0')
+        self.assertEqual(p.checksum, 'abcxyz')
         self.assertFalse(p.copyright)
         self.assertFalse(p.proj_url)
         self.assertEqual(len(p.origins.origins), 1)
@@ -111,9 +120,6 @@ class TestClassPackage(unittest.TestCase):
                          "No metadata for key: proj_url")
         self.assertEqual(p.origins.origins[0].notices[2].message,
                          "No metadata for key: download_url")
-
-    def testGetPackageId(self):
-        self.assertEqual(self.p1.get_package_id(), 'p1.1.0')
 
 
 if __name__ == '__main__':

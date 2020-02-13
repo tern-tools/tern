@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 import os
 import random
 import re
+import tarfile
 import subprocess  # nosec
 from contextlib import contextmanager
+from pathlib import Path
+from pbr.version import VersionInfo
 
-from tern import Version
 from tern.utils import constants
+
+
+# regex strings
+cleaning = '[\t\\\\]'
+concat = '&&|;'
 
 
 # from https://stackoverflow.com/questions/6194499/pushd-through-os-system
@@ -22,11 +29,28 @@ def pushd(path):
     os.chdir(curr_path)
 
 
+def get_top_dir():
+    '''Get the hidden working directory'''
+    return os.path.join(str(Path.home()), constants.dot_folder)
+
+
 def initialize_names():
     randint = random.randint(10000, 99999)  # nosec
     constants.image = constants.image + "_" + str(randint)
     constants.tag = constants.tag + "_" + str(randint)
     constants.container = constants.container + "_" + str(randint)
+
+
+def clean_command(command):
+    '''Given a command string, clean out all whitespaces, tabs and line
+    indentations
+    Leave && alone'''
+    return re.sub(cleaning, '', command).strip()
+
+
+def split_command(command):
+    '''Given a string of concatenated commands, return a list of commands'''
+    return re.split(concat, command)
 
 
 def parse_command(command):
@@ -74,18 +98,19 @@ def parse_command(command):
 
 
 def get_git_rev_or_version():
-    '''Assuming we are operating within a git repository, get the SHA
-    of the current commit'''
+    '''Either get the current git commit or the PyPI distribution
+    Use pbr to get the package version'''
     command = ['git', 'rev-parse', 'HEAD']
     try:
-        output = subprocess.check_output(command)  # nosec
+        output = subprocess.check_output(  # nosec
+            command, stderr=subprocess.DEVNULL)
         if isinstance(output, bytes):
             output = output.decode('utf-8')
         ver_type = 'commit'
 
     except subprocess.CalledProcessError:
         ver_type = 'package'
-        output = Version
+        output = VersionInfo('tern').version_string()
     return ver_type, output.split('\n').pop(0)
 
 
@@ -99,3 +124,57 @@ def prop_names(obj):
         prop_name = re.sub(priv_name, '', key)
         prop_name = re.sub(prop_decorators, '', prop_name, 1)
         yield key, prop_name
+
+
+def check_tar(tar_file):
+    '''Check if provided file is a valid tar archive file'''
+    if os.path.exists(tar_file):
+        if tarfile.is_tarfile(tar_file):
+            return True
+    return False
+
+
+def check_root():
+    '''Check to see if the current user is root or not. Return True if root
+    and False if not'''
+    if os.getuid() == 0:
+        return True
+    return False
+
+
+def check_image_string(image_str: str):
+    tag_format = r'.+:.+'
+    digest_format = r'.+@.+:.+'
+    if re.match(tag_format, image_str) or re.match(digest_format, image_str):
+        return True
+    return False
+
+
+def parse_image_string(image_string):
+    '''From the image string used to reference an image, return a dictionary
+    of the form:
+        {'name': <image name used (either from dockerhub or full name)>,
+         'tag': <image tag>,
+         'digest_type': <the hashing algorithm used>,
+         'digest': <image digest>}
+    per Docker's convention, an image can be referenced either as
+    image OR image:tag OR image@hash:digest
+    we choose ':' and '@' as separators
+    Currently OCI also uses this convention'''
+    tokens = re.split(r'[@:]', image_string)
+    if len(tokens) == 1:
+        return {'name': tokens[0],
+                'tag': '',
+                'digest_type': '',
+                'digest': ''}
+    if len(tokens) == 2:
+        return {'name': tokens[0],
+                'tag': tokens[1],
+                'digest_type': '',
+                'digest': ''}
+    if len(tokens) == 3:
+        return {'name': tokens[0],
+                'tag': '',
+                'digest_type': tokens[1],
+                'digest': tokens[2]}
+    return None

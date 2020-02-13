@@ -2,24 +2,24 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Docker specific functions - used when trying to retrieve packages when
 given a Dockerfile
 """
+import docker
 import logging
 import os
 import re
-import subprocess  # nosec
 
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
-from tern.utils import dockerfile
-from tern.utils import container
+from tern.analyze.docker import dockerfile
+from tern.analyze.docker import container
 from tern.utils import constants
 from tern.report import errors
 from tern.report import formats
-from tern import common
+from tern.analyze import common
 
 # dockerfile
 dockerfile_global = ''
@@ -109,12 +109,10 @@ def is_build():
     msg = ''
     try:
         container.build_container(dockerfile_global, image_tag_string)
-    except subprocess.CalledProcessError as error:
-        print(errors.docker_build_failed.format(
-            dockerfile=dockerfile_global, error_msg=error.output))
+    except (docker.errors.APIError, docker.errors.BuildError) as error:
         success = False
-        logger.error('Error building image: %s', error.output)
-        msg = error.output
+        logger.error('Error building image: %s', str(error))
+        msg = str(error)
     else:
         logger.debug('Successfully built image')
         success = True

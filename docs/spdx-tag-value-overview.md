@@ -98,3 +98,5 @@ SPDXID: SPDXRef-DOCUMENT
 ```
 
 Packages also must define a unique SPDX identifier, which must start with `SPDXRef-` followed by any unique combination of alphanumeric characters, `.` or `-`. An identifier might incorporate a human-relevant name for the package (e.g. `SPDXRef-requests`), or alternatively Package identifiers might just be sequential numbers (e.g. `SPDXRef-1`, `SPDXRef-2`, ...).
+
+[Back to the README](../README.md)

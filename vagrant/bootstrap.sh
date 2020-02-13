@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-
+#
+# Copyright (c) 2018-2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
 
 # Update the Ubuntu repositories
 sudo apt-get update
@@ -21,6 +23,5 @@ sudo apt-get install -y docker.io
 
 sudo usermod -a -G docker vagrant
 
-# Install dependencies
-cd /tern
-pip3 install -r requirements.txt
+# Install tern
+pip3 install tern

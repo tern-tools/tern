@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
+
 """
 Docker container operations
 """
@@ -12,15 +12,15 @@ import grp
 import logging
 import os
 import pwd
-import tarfile
+import requests
+import sys
 import time
-from requests.exceptions import HTTPError
-
 
 from tern.utils.constants import container
 from tern.utils.constants import logger_name
-from tern.utils.constants import temp_folder
 from tern.utils.constants import temp_tarfile
+from tern.utils import rootfs
+from tern.utils import general
 
 
 # timestamp tag
@@ -31,14 +31,24 @@ logger = logging.getLogger(logger_name)
 
 # global docker client
 client = None
-try:
-    client = docker.from_env()
-except IOError:
-    logger.critical("Docker daemon not running")
-    raise Exception("Critical Error using Docker API. See logs for details")
-except OSError:  # pylint: disable=duplicate-except
-    logger.critical("User has no access to docker unix socket")
-    raise Exception("Critical Error using Docker API. See logs for details")
+
+
+def check_docker_setup():
+    '''Check if the docker daemon is running and if the user has the
+    appropriate privileges'''
+    global client
+    try:
+        client = docker.from_env()
+        client.ping()
+    except requests.exceptions.ConnectionError as e:
+        logger.critical('Critical Docker error: %s', str(e))
+        if 'FileNotFoundError' in str(e):
+            logger.critical('Docker is not installed or the daemon is not '
+                            'running.')
+        if 'PermissionError' in str(e):
+            logger.critical('The user id is not in the docker group.')
+        logger.critical('Aborting...')
+        sys.exit(1)
 
 
 def is_sudo():
@@ -64,8 +74,8 @@ def check_container():
 
 def check_image(image_tag_string):
     '''Check if image exists'''
-    logger.debug("Checking if image \"%s\" is available on disk...",
-        image_tag_string)
+    logger.debug(
+        "Checking if image \"%s\" is available on disk...", image_tag_string)
     try:
         client.images.get(image_tag_string)
         logger.debug("Image \"%s\" found", image_tag_string)
@@ -91,23 +101,21 @@ def build_container(dockerfile, image_tag_string):
     It is assumed that docker is installed and the docker daemon is running'''
     path = os.path.dirname(dockerfile)
     if not check_image(image_tag_string):
-        try:
-            client.images.build(path=path, tag=image_tag_string, nocache=True)
-        except (TypeError, docker.errors.APIError, docker.errors.BuildError):  # pylint: disable=try-except-raise
-            raise
+        # let docker handle the errors
+        client.images.build(path=path, tag=image_tag_string, nocache=True)
 
 
 def start_container(image_tag_string):
     '''Start the test container in detach state'''
     try:
         client.containers.run(image_tag_string, name=container, detach=True)
-    except HTTPError:
+    except requests.exceptions.HTTPError:
         # container may already be running
         pass
     try:
         remove_container()
         client.containers.run(image_tag_string, name=container, detach=True)
-    except HTTPError:
+    except requests.exceptions.HTTPError:
         # not sure what the error is now
         raise Exception("Cannot remove running container")
 
@@ -136,20 +144,24 @@ def get_image_id(image_tag_string):
 
 def extract_image_metadata(image_tag_string):
     '''Run docker save and extract the files in a temporary directory'''
-    temp_path = os.path.abspath(temp_folder)
+    temp_path = rootfs.get_working_dir()
+    placeholder = os.path.join(general.get_top_dir(), temp_tarfile)
     try:
-        image = client.images.get(image_tag_string)
-        result = image.save(chunk_size=2097152, named=True)
-        # write all of the tar byte stream into temporary tar file
-        with open(temp_tarfile, 'wb') as f:
-            for chunk in result:
-                f.write(chunk)
-        # extract tarfile into folder
-        with tarfile.open(temp_tarfile) as tar:
-            tar.extractall(temp_path)
-        # remove temporary tar file
-        os.remove(temp_tarfile)
-        if not os.path.exists(temp_path):
+        if general.check_tar(image_tag_string) is True:
+            # image_tag_string is the path to the tar file for raw images
+            rootfs.extract_tarfile(image_tag_string, temp_path)
+        else:
+            image = client.images.get(image_tag_string)
+            result = image.save(chunk_size=2097152, named=True)
+            # write all of the tar byte stream into temporary tar file
+            with open(placeholder, 'wb') as f:
+                for chunk in result:
+                    f.write(chunk)
+            # extract tarfile into folder
+            rootfs.extract_tarfile(placeholder, temp_path)
+            # remove temporary tar file
+            os.remove(placeholder)
+        if not os.listdir(temp_path):
             raise IOError('Unable to untar Docker image')
     except docker.errors.APIError:  # pylint: disable=try-except-raise
         raise

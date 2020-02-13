@@ -1,3 +1,6 @@
+# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+
 deb http://deb.debian.org/debian jessie main
 deb http://deb.debian.org/debian jessie-updates main
 deb http://security.debian.org jessie/updates main

@@ -2,7 +2,6 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
 
 import unittest
 
@@ -31,6 +30,20 @@ class TestClassImageLayer(unittest.TestCase):
                           'some/other/path')
         self.layer.created_by = 'some string'
         self.assertEqual(self.layer.created_by, 'some string')
+        self.layer.pkg_format = 'rpm'
+        self.assertEqual(self.layer.pkg_format, 'rpm')
+        self.layer.os_guess = 'operating system'
+        self.assertEqual(self.layer.os_guess, 'operating system')
+        self.assertFalse(self.layer.files_analyzed)
+        self.layer.files_analyzed = True
+        self.assertTrue(self.layer.files_analyzed)
+        self.assertRaises(ValueError, setattr, self.layer,
+                          'files_analyzed', 'some string')
+        self.assertEqual("", self.layer.analyzed_output)
+        self.layer.analyzed_output = 'some string'
+        self.assertEqual(self.layer.analyzed_output, 'some string')
+        self.assertRaises(ValueError, setattr, self.layer,
+                          'analyzed_output', 123)
 
     def testAddPackage(self):
         err = "Object type String, should be Package"

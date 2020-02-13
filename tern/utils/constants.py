@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017, 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
 
 '''
 Constants
 '''
 
-# temporary folder for extracting container image
-# this is relative to where the tern executable is
+# paths for working on container images
+# this is relative to the user's home directory
+
+# hidden folder
+dot_folder = '.tern'
+# working folder
 temp_folder = 'temp'
 # temporary tar file
 temp_tarfile = 'temp.tar'
@@ -31,6 +34,9 @@ cache_file = 'cache.yml'
 shell = '/bin/sh'
 # path where resolv.conf lives
 resolv_path = '/etc/resolv.conf'
+# paths where os-release could be
+etc_release_path = 'etc/os-release'
+lib_release_path = 'usr/lib/os-release'
 # directory where layer.tar can be extracted to
 untar_dir = 'contents'
 # rootfs working directory
@@ -41,5 +47,3 @@ workdir = 'workdir'
 mergedir = 'mergedir'
 # report file
 report_file = 'report.txt'
-yaml_file = 'report.yml'
-json_file = 'report.json'

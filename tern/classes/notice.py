@@ -2,14 +2,12 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-#
 
 from tern.utils.general import prop_names
 
 
 class NoticeException(Exception):
     '''Base notice exception'''
-    pass
 
 
 class LevelException(NoticeException):
