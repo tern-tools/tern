@@ -17,12 +17,15 @@ jobs:
           pip install GitPython~=2.1
           pip install .
       - name: Prospector Linting
+        if: always()
         run: |
           pip install prospector>=1.1
           c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi
       - name: Commit Message Linting
+        if: always()
         run: python ci/test_commit_message.py    
       - name: Security Linting
+        if: always()
         run: |
           pip install bandit~=1.6
           c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
