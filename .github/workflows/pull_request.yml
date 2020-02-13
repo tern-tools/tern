@@ -1,0 +1,40 @@
+name: CI for Pull Requests
+on: pull_request
+
+jobs:
+  PRs:
+    name: Pull Request Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1 #equivlent to running git fetch and git checkout latest
+      - uses: actions/setup-python@v1 # setup python3 environment
+        with:
+          python-version: '3.6.10'
+      - name: Install Deps
+        run: |
+          sudo apt-get install -y attr
+          pip install --upgrade pip
+          pip install GitPython~=2.1
+          pip install .
+      - name: Prospector Linting
+        run: |
+          pip install prospector>=1.1
+          c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi
+      - name: Commit Message Linting
+        if: always() # run even if prospector linting fails
+        run: python ci/test_commit_message.py    
+      - name: Security Linting
+        if: always() # run even if commit message linting fails
+        run: |
+          pip install bandit~=1.6
+          c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
+      - name: Test Changes
+        if: always() # run even security linting fails
+        run: python ci/test_files_touched.py
+      - name: Test Coverage
+        if: always() # run even if testing changes fails
+        run: |
+          pip install coverage
+          pip install .
+          coverage run -m unittest discover -s tests
+          coverage report --fail-under 85
