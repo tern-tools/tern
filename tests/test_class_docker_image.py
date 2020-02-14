@@ -6,10 +6,11 @@
 import unittest
 import subprocess  # nosec
 
-from classes.docker_image import DockerImage
-from utils.container import docker_command
-from utils.container import pull
-from utils.container import check_image
+from tern.__main__ import create_top_dir
+from tern.analyze.docker import container
+from tern.analyze.docker.container import check_image, check_docker_setup
+from tern.classes.docker_image import DockerImage
+from tern.utils.rootfs import set_mount_dir
 
 
 class TestClassDockerImage(unittest.TestCase):
@@ -18,30 +19,41 @@ class TestClassDockerImage(unittest.TestCase):
         '''Using a specific image here. If this test fails due to the image
         not being found anymore, pick a different image to test against
         For now use Docker to pull the image from Dockerhub'''
-        if not check_image('debian:jessie'):
+        set_mount_dir()
+        create_top_dir()
+        check_docker_setup()
+        if not check_image('vmware/tern@sha256:20b32a9a20752aa1ad'
+                           '7582c667704fda9f004cc4bfd8601fac7f2656c7567bb4'):
             try:
-                docker_command(pull, 'debian:jessie')
+                container.pull_image('vmware/tern@sha256:20b32a9a20'
+                                     '752aa1ad7582c667704fda9f004cc4'
+                                     'bfd8601fac7f2656c7567bb4')
             except subprocess.CalledProcessError as error:
                 print(error.output)
-        self.image = DockerImage('debian:jessie')
+        self.image = DockerImage('vmware/tern@sha256:20b32'
+                                 'a9a20752aa1ad7582c667704fda9f00'
+                                 '4cc4bfd8601fac7f2656c7567bb4')
         # constants for this image
-        self.image_id = ('2fe79f06fa6d3fa9e877b4415fb189f89ca8a4ff4a954a3d84b2c84129'
-                   '9cd127')
-        self.layer = ('4bcdffd70da292293d059d2435c7056711fab2655f8b74f48ad0abe'
-                      '042b63687')
+        self.image_id = ('acb194ad84d0f9734e794fbbdbb65fb'
+                         '7db6eda83f33e9e817bcc75b1bdd99f5e')
+        self.layer = ('c1c3a87012e7ff5791b31e94515b661'
+                      'cdf06f6d5dc2f9a6245eda8774d257a13')
         self.no_layers = 1
-        self.created_by = ('/bin/sh -c #(nop) ADD file:1dd78a123212328bdc72ef7'
-                           '888024ea27fe141a72e24e0ea7c3c92b63b73d8d1 in / ')
-        self.instruction = ('ADD file:1dd78a123212328bdc72ef7888024ea27fe141a7'
-                            '2e24e0ea7c3c92b63b73d8d1 in /')
+        self.created_by = ('/bin/sh -c #(nop) ADD '
+                           'file:92137e724f46c720d8083a11290c67'
+                           'd9daa387e523336b1757a0e3c4f5867cd5 '
+                           'in / ')
 
     def tearDown(self):
         del self.image
 
     def testInstance(self):
-        self.assertEqual(self.image.repotag, 'debian:jessie')
-        self.assertEqual(self.image.name, 'debian')
-        self.assertEqual(self.image.tag, 'jessie')
+        self.assertEqual(self.image.repotag, 'vmware/tern@sha256:20b32a9a2'
+                                             '0752aa1ad7582c667704fda9f004cc4'
+                                             'bfd8601fac7f2656c7567bb4')
+        self.assertEqual(self.image.name, 'vmware/tern@sha256')
+        self.assertEqual(self.image.tag, '20b32a9a20752aa1ad7582c667704fda9f004c'
+                                         'c4bfd8601fac7f2656c7567bb4')
         self.assertFalse(self.image.image_id)
         self.assertFalse(self.image.manifest)
         self.assertFalse(self.image.repotags)
@@ -63,11 +75,6 @@ class TestClassDockerImage(unittest.TestCase):
         self.image.load_image()
         self.assertEqual(len(self.image.get_layer_diff_ids()), self.no_layers)
         self.assertEqual(self.image.get_layer_diff_ids()[0], self.layer)
-
-    def testCreatedToInstruction(self):
-        self.image.load_image()
-        instruction = self.image.created_to_instruction(self.created_by)
-        self.assertEqual(instruction, self.instruction)
 
 
 if __name__ == '__main__':
