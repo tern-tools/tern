@@ -36,4 +36,4 @@ jobs:
           pip install coverage
           pip install .
           coverage run -m unittest discover -s tests
-          coverage report --fail-under 85
+          coverage report
