@@ -120,6 +120,9 @@ This will install tern in development mode on windows and mac.
 4. Fix any issues bandit brings up.
 5. Test your changes.
 
+### Testing you changes
+After you make the changes just run `tox`. This will run a set tests and inform you if anything is wrong.
+
 ## Coding Style
 
 Tern follows general [PEP8](https://www.python.org/dev/peps/pep-0008/) style guidelines. Apart from that, these specific rules apply:
