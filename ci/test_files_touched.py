@@ -49,6 +49,8 @@ test_suite = {
     ['python tests/test_class_command.py'],
     re.compile('tern/classes/docker_image.py'):
     ['tern -l report -i photon:3.0'],
+    re.compile('tern/classes/file_data.py'):
+    ['python tests/test_class_file_data.py'],
     re.compile('tern/classes/image.py'):
     ['python tests/test_class_image.py'],
     re.compile('tern/classes/image_layer.py'):
@@ -95,6 +97,8 @@ test_suite = {
         ['python tests/test_class_command.py'],
     re.compile('tests/test_class_docker_image.py'):
         ['python tests/test_class_docker_image.py'],
+    re.compile('tests/test_class_file_data.py'):
+        ['python tests/test_class_file_data.py'],
     re.compile('tests/test_class_image.py'):
         ['python tests/test_class_image.py'],
     re.compile('tests/test_class_image_layer.py'):
