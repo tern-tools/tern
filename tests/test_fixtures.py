@@ -14,8 +14,8 @@ from tern.classes.template import Template
 
 
 class TestImage(Image):
-    def __init__(self, id):
-        super().__init__(id)
+    def __init__(self, image_id):
+        super().__init__(image_id)
 
     def load_image(self):
         l1 = ImageLayer('123abc', 'path/to/tar')
