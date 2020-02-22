@@ -176,15 +176,21 @@ def extract_tarfile(tar_path, directory_path):
 def prep_rootfs(rootfs_dir):
     '''Mount required filesystems in the rootfs directory'''
     rootfs_path = os.path.abspath(rootfs_dir)
-    try:
-        root_command(mount_proc, os.path.join(rootfs_path, 'proc'))
-        root_command(mount_sys, os.path.join(rootfs_path, 'sys'))
-        root_command(mount_dev, os.path.join(rootfs_path, 'dev'))
-        root_command(host_dns, os.path.join(
-            rootfs_path, constants.resolv_path[1:]))
-    except subprocess.CalledProcessError as error:
-        logger.error("%s", error.output)
-        raise
+    if (
+        os.path.exists(os.path.join(rootfs_path, "proc"))
+        and os.path.exists(os.path.join(rootfs_path, "sys"))
+        and os.path.exists(os.path.join(rootfs_path, "dev"))
+    ):
+        try:
+            root_command(mount_proc, os.path.join(rootfs_path, "proc"))
+            root_command(mount_sys, os.path.join(rootfs_path, "sys"))
+            root_command(mount_dev, os.path.join(rootfs_path, "dev"))
+            root_command(host_dns, os.path.join(rootfs_path, constants.resolv_path[1:]))
+        except subprocess.CalledProcessError as error:
+            logger.error("%s", error.output)
+            raise
+    else:
+        logger.debug("The image does not have  a /dev, /sys, or /proc mountpoint")
 
 
 def mount_base_layer(base_layer_tar):
