@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -14,8 +14,8 @@ from tern.classes.template import Template
 
 
 class TestImage(Image):
-    def __init__(self, id):
-        super().__init__(id)
+    def __init__(self, image_id):
+        super().__init__(image_id)
 
     def load_image(self):
         l1 = ImageLayer('123abc', 'path/to/tar')
@@ -28,6 +28,11 @@ class TestImage(Image):
 
 class TestTemplate1(Template):
     '''Template with no origins mapping'''
+    def file_data(self):
+        return {'name': 'file.name',
+                'path': 'file.path',
+                'licenses': 'file.licenses'}
+
     def package(self):
         return {'name': 'package.name',
                 'version': 'package.version',
@@ -45,6 +50,14 @@ class TestTemplate1(Template):
 
 class TestTemplate2(Template):
     '''Template with origins mapping'''
+    def file_data(self):
+        mapping = {'name': 'file.name',
+                   'path': 'file.path',
+                   'licenses': 'file.licenses'}
+        # we update the mapping with another defined mapping
+        mapping.update(self.origins())
+        return mapping
+
     def package(self):
         mapping = {'name': 'package.name',
                    'version': 'package.version',
