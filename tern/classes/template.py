@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 from abc import ABCMeta
@@ -19,6 +19,10 @@ class Template(metaclass=ABCMeta):
             notice: mappings for the properties under 'Notice'
             notice_origin: mappings for the properties under 'NoticeOrigin'
             origins: mappings for the properties under 'Origins' '''
+
+    @abstractmethod
+    def file_data(self):
+        '''Must implement a mapping for 'FileData' class properties'''
 
     @abstractmethod
     def package(self):
