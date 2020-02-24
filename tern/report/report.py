@@ -52,9 +52,9 @@ def setup(dockerfile=None, image_tag_string=None):
         dhelper.load_docker_commands(dockerfile)
     # check if the docker image is present
     if image_tag_string and general.check_tar(image_tag_string) is False:
-        if not container.check_image(image_tag_string):
+        if container.check_image(image_tag_string) is None:
             # if no docker image is present, try to pull it
-            if not container.pull_image(image_tag_string):
+            if container.pull_image(image_tag_string) is None:
                 logger.fatal("%s", errors.cannot_find_image.format(
                     imagetag=image_tag_string))
                 sys.exit()
@@ -90,9 +90,9 @@ def load_base_image():
     '''Create base image from dockerfile instructions and return the image'''
     base_image, dockerfile_lines = dhelper.get_dockerfile_base()
     # try to get image metadata
-    if not container.check_image(base_image.repotag):
+    if container.check_image(base_image.repotag) is None:
         # if no base image is found, give a warning and continue
-        if not container.pull_image(base_image.repotag):
+        if container.pull_image(base_image.repotag) is None:
             logger.warning("%s", errors.cannot_find_image.format(
                 imagetag=base_image.repotag))
     try:
