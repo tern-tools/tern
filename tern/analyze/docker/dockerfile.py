@@ -9,8 +9,15 @@ Dockerfile information retrieval and modification
 
 from dockerfile_parse import DockerfileParser
 import re
+import logging
 
 from tern.utils import general
+from tern.utils import constants
+from tern.analyze.docker import container
+
+# global logger
+logger = logging.getLogger(constants.logger_name)
+
 
 directives = ['FROM',
               'ARG',
@@ -116,6 +123,35 @@ def parse_from_image(dfobj):
     for image_string in dfobj.parent_images:
         image_list.append(general.parse_image_string(image_string))
     return image_list
+
+
+def expand_from_images(dfobj):
+    '''Replace all parent_image values with their full image@digest_type:digest
+    value. Update the structure dictionary with the same information.
+    dfobj: the Dockerfile object created using get_dockerfile_obj'''
+    # update parent_images
+    images = parse_from_image(dfobj)
+    for i, img in enumerate(images):
+        # don't re-pull digest if already available
+        if not img['digest_type'] and not img['digest']:
+            if not img['tag']:
+                img['tag'] = 'latest'
+            image = container.get_image(img['name'] + tag_separator +
+                                        img['tag'])
+            if image is not None:
+                dfobj.parent_images[i] = container.get_image_digest(image)
+            else:
+                logger.error("Error pinning digest to '%s'. Image not found.",
+                             dfobj.parent_images[i])
+    # update structure
+    counter = 0
+    for i, command_dict in enumerate(dfobj.structure):
+        if command_dict['instruction'] == 'FROM':
+            # Pull digest in order of parent_images
+            dfobj.structure[i]['content'] = command_dict['instruction'] + \
+                ' ' + dfobj.parent_images[counter] + '\n'
+            dfobj.structure[i]['value'] = dfobj.parent_images[counter]
+            counter = counter + 1
 
 
 def get_command_list(dockerfile_name):
