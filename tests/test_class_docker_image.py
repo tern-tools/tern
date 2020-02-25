@@ -45,6 +45,7 @@ class TestClassDockerImage(unittest.TestCase):
                            'in / ')
 
     def tearDown(self):
+        container.close_client()
         del self.image
 
     def testInstance(self):
@@ -52,8 +53,8 @@ class TestClassDockerImage(unittest.TestCase):
                                              '0752aa1ad7582c667704fda9f004cc4'
                                              'bfd8601fac7f2656c7567bb4')
         self.assertEqual(self.image.name, 'vmware/tern@sha256')
-        self.assertEqual(self.image.tag, '20b32a9a20752aa1ad7582c667704fda9f004c'
-                                         'c4bfd8601fac7f2656c7567bb4')
+        self.assertEqual(self.image.tag, '20b32a9a20752aa1ad7582c667704fda9f00'
+                                         '4cc4bfd8601fac7f2656c7567bb4')
         self.assertFalse(self.image.image_id)
         self.assertFalse(self.image.manifest)
         self.assertFalse(self.image.repotags)
