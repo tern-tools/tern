@@ -62,6 +62,8 @@ def setup(dockerfile=None, image_tag_string=None):
 
 def teardown():
     '''Tear down tern setup'''
+    # close docker client if any
+    container.close_client()
     # save the cache
     cache.save()
     # remove folders for rootfs operations
