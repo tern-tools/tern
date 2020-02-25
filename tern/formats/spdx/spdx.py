@@ -10,6 +10,10 @@ class SPDX(Template):
     '''This is the SPDX Template class
     It provides mappings for the SPDX tag-value document format'''
 
+    def file_data(self):
+        return {'name': 'FileName',
+                'file_type': 'FileType'}
+
     def package(self):
         return {'name': 'PackageName',
                 'version': 'PackageVersion',
