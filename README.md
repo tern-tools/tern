@@ -16,15 +16,14 @@ Tern is a software package inspection tool for containers. It's written in Pytho
   - [Navigating the Code](/docs/navigating-the-code.md)
   - [Data Model](/docs/data-model.md)
 - [Getting Started](#getting-started)
+  - [Getting Started on Linux](#getting-started-on-linux)
   - [Getting Started with Docker](#getting-started-with-docker)
   - [Getting Started with Vagrant](#getting-started-with-vagrant)
-  - [Getting Started on Linux](#getting-started-on-linux)
 - [Using Tern](#using-tern)
   - [Generating a BoM report for a Docker image](#bom-for-docker-image)
   - [Generating a BoM report from a Dockerfile](#bom-for-dockerfile)
 - [Report Formats](#report-formats)
   - [Human Readable Format](#report-human-readable)
-  - [Summary Format](#report-summary)
   - [JSON Format](#report-json)
   - [YAML Format](#report-yaml)
   - [SPDX tag-value Format](#report-spdxtagvalue)
@@ -53,8 +52,47 @@ Tern gives you a deeper understanding of your container's bill of materials so y
 
 # Getting Started<a name="getting-started"/>
 
+## Getting Started on Linux<a name="getting-started-on-linux">
+If you have a Linux OS you will need a distro with a kernel version >= 4.0 (Ubuntu 16.04 or newer or Fedora 25 or newer are good selections) and will need to install the following requirements:
+
+- Git (Installation instructions can be found here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- attr (sudo apt-get install attr or sudo dnf install attr)
+- Python 3.6 or newer (sudo apt-get install python3.6(3.7) or sudo dnf install python36(37))
+- Pip (sudo apt-get install python3-pip).
+
+Some distro versions have all of these except `attr` preinstalled but `attr` is a common utility and is available via the package manager.
+
+For Docker containers
+- Docker CE (Installation instructions can be found here: https://docs.docker.com/engine/installation/#server)
+
+Make sure the docker daemon is running.
+
+Create a python3 virtual environment:
+```
+$ python3 -m venv ternenv
+$ cd ternenv
+```
+
+*NOTE:* Your OS might distribute each Python version separately. For example, on Ubuntu LTS, Python 2.7 is linked to `python2` and Python 3.6 is linked to `python3`. I develop with Python 3.7 which is installed separately with no symlinks. In this case, I use the binary. The binaries are usually installed in `/usr/bin/python`.
+
+Activate the virtual environment:
+```
+$ source bin/activate
+```
+NOTE: This specific activate script only works for Bash shells. If you need to activate a Fish Shell or C Shell you should use `source bin/activate.fish` or `source bin/activate.csh`, respectively.
+
+Install tern:
+```
+$ pip install tern
+```
+
+Run Tern:
+```
+$ tern -l report -o output.txt -i debian:buster
+```
+
 ## Getting Started with Docker<a name="getting-started-with-docker">
-Note MAC users: currently running Tern natively as a docker container is unsupported. An option is to launch a linux virtual machine (VM) on your MAC and from within follow the steps below.
+Note Mac users: running Tern natively as a docker container is currently unsupported. Another option is to use Vagrant in your Mac environment and then follow the steps below. For Vagrant setup, see [Getting Started with Vagrant](#getting-started-with-vagrant).
 
 Docker is the most widely used tool to build and run containers. If you already have Docker installed, you can run Tern by building a container with the Dockerfile provided and the `docker_run.sh` script:
 
@@ -117,45 +155,6 @@ Run:
 $ tern -l report -i debian:buster -o output.txt
 ```
 
-## Getting Started on Linux<a name="getting-started-on-linux">
-If you have a Linux OS you will need a distro with a kernel version >= 4.0 (Ubuntu 16.04 or newer or Fedora 25 or newer are good selections) and will need to install the following requirements:
-
-- Git (Installation instructions can be found here: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-- attr (sudo apt-get install attr or sudo dnf install attr)
-- Python 3.6 or newer (sudo apt-get install python3.6(3.7) or sudo dnf install python36(37))
-- Pip (sudo apt-get install python3-pip).
-
-Some distro versions have all of these except `attr` preinstalled but `attr` is a common utility and is available via the package manager.
-
-For Docker containers
-- Docker CE (Installation instructions can be found here: https://docs.docker.com/engine/installation/#server)
-
-Make sure the docker daemon is running.
-
-Create a python3 virtual environment:
-```
-$ python3 -m venv ternenv
-$ cd ternenv
-```
-
-*NOTE:* Your OS might distribute each Python version separately. For example, on Ubuntu LTS, Python 2.7 is linked to `python2` and Python 3.6 is linked to `python3`. I develop with Python 3.7 which is installed separately with no symlinks. In this case, I use the binary. The binaries are usually installed in `/usr/bin/python`.
-
-Activate the virtual environment:
-```
-$ source bin/activate
-```
-NOTE: This specific activate script only works for Bash shells. If you need to activate a Fish Shell or C Shell you should use `source/bin/activate.fish` or `source/bin/activate.csh`, respectively.
-
-Install tern:
-```
-$ pip install tern
-```
-
-Run Tern:
-```
-$ tern -l report -o output.txt -i debian:buster
-```
-
 # Using Tern<a name="using-tern">
 
 *WARNING*: The CLI has changed since the last release. Visit [Tern's PyPI project page](https://pypi.org/project/tern/) to find the correct CLI options or just run `tern -h`.
@@ -185,14 +184,6 @@ The default report Tern produces is a human readable report. The object of this 
 ```
 $ tern -l report -i golang:1.12-alpine -o output.txt
 ```
-
-## Summary Format<a name="report-summary">
-To get just a list of packages, you can use the `-s` option to get a summary report. This is useful to provide to a legal or OSS compliance team.
-```
-$ tern -l report -s -i golang:1.12 -f output.txt
-```
-WARNING: Tern is meant to give guidance on what may be installed in a container image. We recommend that you use the default report format for the purpose of investigation.
-
 
 ## JSON Format<a name="report-json">
 You can get the results in a JSON file to pass around in a network.
