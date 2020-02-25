@@ -64,7 +64,8 @@ test_suite = {
     re.compile('tern/classes/package.py'):
     ['python tests/test_class_package.py'],
     re.compile('tern/classes/template.py'):
-    ['python tests/test_class_template.py'],
+    ['python tests/test_class_template.py',
+     'tern -l report -f spdxtagvalue -i photon:3.0'],
     # tern/command_lib
     re.compile('tern/command_lib'): [
         'tern -l report -i photon:3.0',
@@ -84,6 +85,9 @@ test_suite = {
         'tern -l report -f json -i photon:3.0',
         'tern -l report -f spdxtagvalue -i photon:3.0',
         'tern -l report -d samples/alpine_python/Dockerfile'],
+    # tern/formats/spdx
+    re.compile('tern/formats/spdx'): [
+        'tern -l report -f spdxtagvalue -i photon:3.0'],
     # tern/tools
     re.compile('tern/tools'):
     ['tern -l report -i golang:alpine'],
