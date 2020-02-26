@@ -204,28 +204,46 @@ $ tern -l report -f spdxtagvalue -i golang:1.12-alpine -o spdx.txt
 ```
 
 # Extensions<a name="extensions">
-Tern does not have its own file level license scanner. In order to fill in the gap, Tern allows you to extend container image analysis with an external file analysis CLI tool or Python3 module.
+Tern does not have its own file level license scanner. In order to fill in the gap, Tern allows you to extend container image analysis with an external file analysis CLI tool or Python3 module. In order to take advantage of the extensions, both the extention tool and Tern need to be installed.
+
+NOTE: Neither the Docker container nor the Vagrant image has any of the extensions installed. You are welcomed to modify `Dockerfile` and `vagrant/bootstrap.sh` to install the extensions if you wish to use them. Please see the instructions below on how to enable the extension of your choice.
 
 ## Scancode<a name="scancode">
 [scancode-toolkit](https://github.com/nexB/scancode-toolkit) is a license analysis tool that "detects licenses, copyrights, package manifests and direct dependencies and more both in source code and binary files".
 
-1. Setup a python virtual environment
+1. Install system dependencies for scancode (refer to the [Scancode GitHub repo](https://github.com/nexB/scancode-toolkit) for instructions)
+
+2. Setup a python virtual environment
 ```
 $ python3 -m venv scanenv
 $ cd scanenv
 $ source bin/activate
 ```
-2. Install tern and scancode
+3. Install tern and scancode
 ```
-$ pip install tern scancode
+$ pip install tern scancode-toolkit
 ```
-3. Run tern
+4. Run tern with scancode
 ```
 $ tern -l report -x scancode -i golang:1.12-alpine
 ```
 
 ## cve-bin-tool<a name="cve-bin-tool">
-[cve-bin-tool](https://github.com/intel/cve-bin-tool) is a command line tool which "scans for a number of common, vulnerable components (openssl, libpng, libxml2, expat and a few others) to let you know if your system includes common libraries with known vulnerabilities". Vulnerability scanning tools can also be extended to work on containers using Tern, although support for certain metadata pertaining to CVEs may not be available yet. As a result, you will not see any of the results in the generated reports. To try it out, run:
+[cve-bin-tool](https://github.com/intel/cve-bin-tool) is a command line tool which "scans for a number of common, vulnerable components (openssl, libpng, libxml2, expat and a few others) to let you know if your system includes common libraries with known vulnerabilities". Vulnerability scanning tools can also be extended to work on containers using Tern, although support for certain metadata pertaining to CVEs may not be available yet. As a result, you will not see any of the results in the generated reports.
+
+1. Install system dependencies for cve-bin-tool (refer to the [cve-bin-tool GitHub repo](https://github.com/intel/cve-bin-tool) for instructions)
+
+2. Setup a python virtual environment
+```
+$ python3 -m venv scanenv
+$ cd scanenv
+$ source bin/activate
+```
+3. Install tern and cve-bin-tool
+```
+$ pip install tern cve-bin-tool
+```
+4. Run tern with cve-bin-tool
 ```
 $ tern -l report -x cve_bin_tool -i golang:1.12-alpine
 ```
