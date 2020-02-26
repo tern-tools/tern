@@ -12,4 +12,4 @@
 # Example: ./docker_run.sh workdir ternd "report -i golang:alpine"
 
 mkdir -p $1
-docker run --privileged -v /var/run/docker.sock:/var/run/docker.sock --mount type=bind,source=$PWD/$1,target=/hostmount $2 $3
+docker run --privileged -v /var/run/docker.sock:/var/run/docker.sock --mount type=bind,source=$PWD/$1,target=/hostmount --rm $2 $3
