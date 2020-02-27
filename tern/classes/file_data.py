@@ -52,6 +52,7 @@ class FileData:
         self.__checksum = ''
         self.__version_control = ''
         self.__version = ''
+        self.__extattrs = ''
         self.licenses = []
         self.license_expressions = []
         self.copyrights = []
@@ -71,6 +72,14 @@ class FileData:
     @property
     def date(self):
         return self.__date
+
+    @property
+    def extattrs(self):
+        return self.__extattrs
+
+    @extattrs.setter
+    def extattrs(self, extattrs):
+        self.__extattrs = extattrs
 
     @date.setter
     def date(self, date):

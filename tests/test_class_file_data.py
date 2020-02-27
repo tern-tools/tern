@@ -65,6 +65,11 @@ class TestClassFileData(unittest.TestCase):
         self.assertEqual(self.afile.checksum_type, 'sha256')
         self.assertEqual(self.afile.checksum, '12345abcde')
 
+    def testExtAttrs(self):
+        file = FileData('test.txt', 'usr/abc/test.txt')
+        file.extattrs = '-rw-r--r--|1000|1000|19|1'
+        self.assertEqual(file.extattrs, '-rw-r--r--|1000|1000|19|1')
+
     def testSetVersion(self):
         self.afile.set_version('git', '12345abcde')
         self.assertEqual(self.afile.version_control, 'git')

@@ -43,6 +43,24 @@ class TestClassDockerImage(unittest.TestCase):
                            'file:92137e724f46c720d8083a11290c67'
                            'd9daa387e523336b1757a0e3c4f5867cd5 '
                            'in / ')
+        self.file_info = [
+            ('file2.txt', 'documents/test/file2.txt',
+             '9710f003d924890c7677b4dd91fd753f6ed71cc57d4f'
+             '9482261b6786d81957fa',
+             'sha256'),
+            ('file2.txt', 'documents/test/test2/file2.txt',
+             '885000512dee8ac814641bbf6a7c887012ec23a2fb3e'
+             '3b2cff583c45a611317d',
+             'sha256'),
+            ('file1.txt', 'documents/test/test2/file1.txt',
+             '885000512dee8ac814641bbf6a7c887012ec'
+             '23a2fb3e3b2cff583c45a611317d',
+             'sha256'),
+            ('file1.txt', 'documents/test/file1.txt',
+             'a3cccbc52486d50a86ff0bc1e6ea0e0b701ac'
+             '4bb139f8713fa136ef9ec68e97e',
+             'sha256')
+        ]
 
     def tearDown(self):
         container.close_client()
@@ -76,6 +94,15 @@ class TestClassDockerImage(unittest.TestCase):
         self.image.load_image()
         self.assertEqual(len(self.image.get_layer_diff_ids()), self.no_layers)
         self.assertEqual(self.image.get_layer_diff_ids()[0], self.layer)
+
+    def testLayerFiles(self):
+        self.image.load_image()
+        for file in self.image.layers[0].files:
+            self.assertTrue(
+                (file.name, file.path, file.checksum,
+                 file.checksum_type) in
+                self.file_info
+            )
 
 
 if __name__ == '__main__':

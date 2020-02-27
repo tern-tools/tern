@@ -159,6 +159,7 @@ class DockerImage(Image):
             while layer_diffs and layer_paths:
                 layer = ImageLayer(layer_diffs.pop(0), layer_paths.pop(0))
                 layer.gen_fs_hash()
+                layer.add_files()
                 self._layers.append(layer)
             self.set_layer_created_by()
         except NameError:  # pylint: disable=try-except-raise

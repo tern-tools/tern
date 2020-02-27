@@ -50,7 +50,7 @@ class TestClassImage(unittest.TestCase):
     def testGetLayerObject(self):
         self.image2.load_image()
         self.assertEqual(
-             self.image2.get_layer_object('123abc'), self.image2.layers[0])
+            self.image2.get_layer_object('123abc'), self.image2.layers[0])
 
     def testToDict(self):
         self.image2.load_image()
