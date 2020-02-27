@@ -41,7 +41,8 @@ class TestTemplate1(Template):
     def image_layer(self):
         return {'diff_id': 'layer.diff',
                 'tar_file': 'layer.tarfile',
-                'packages': 'layer.packages'}
+                'packages': 'layer.packages',
+                'files': 'layer.files'}
 
     def image(self):
         return {'image_id': 'image.id',
@@ -70,7 +71,8 @@ class TestTemplate2(Template):
     def image_layer(self):
         mapping = {'diff_id': 'layer.diff',
                    'tar_file': 'layer.tarfile',
-                   'packages': 'layer.packages'}
+                   'packages': 'layer.packages',
+                   'files': 'layer.files'}
         # we update the mapping with another defined mapping
         mapping.update(self.origins())
         return mapping

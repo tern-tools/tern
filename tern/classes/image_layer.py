@@ -3,7 +3,7 @@
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
-
+from tern.classes.file_data import FileData
 from tern.classes.package import Package
 from tern.classes.origins import Origins
 from tern.utils import rootfs
@@ -42,6 +42,7 @@ class ImageLayer:
         self.__tar_file = tar_file
         self.__created_by = created_by
         self.__packages = []
+        self.__files = []
         self.__origins = Origins()
         self.__import_image = None
         self.__import_str = ''
@@ -57,6 +58,10 @@ class ImageLayer:
     @property
     def packages(self):
         return self.__packages
+
+    @property
+    def files(self):
+        return self.__files
 
     @property
     def fs_hash(self):
@@ -157,6 +162,7 @@ class ImageLayer:
         layer_dict = {}
         # for packages call each package object's to_dict method
         pkg_list = [pkg.to_dict(template) for pkg in self.packages]
+        file_list = [file.to_dict(template) for file in self.files]
         if template:
             # use the template mapping for key names
             for key, prop in prop_names(self):
@@ -172,6 +178,11 @@ class ImageLayer:
             if 'packages' in template.image_layer().keys():
                 layer_dict.update(
                     {template.image_layer()['packages']: pkg_list})
+            # update the 'files' if it exists in the mapping
+            if 'files' in template.image_layer().keys():
+                layer_dict.update(
+                    {template.image_layer()['files']: file_list}
+                )
         else:
             # directly use property names
             for key, prop in prop_names(self):
@@ -180,6 +191,9 @@ class ImageLayer:
             layer_dict.update({'packages': pkg_list})
             # take care of the 'origins' property
             layer_dict.update({'origins': self.origins.to_dict()})
+            # take care of the 'files' property
+            layer_dict.update({'files': file_list})
+
         return layer_dict
 
     def get_package_names(self):
@@ -188,6 +202,26 @@ class ImageLayer:
         for pkg in self.packages:
             pkg_list.append(pkg.name)
         return pkg_list
+
+    def add_file(self, file):
+        if isinstance(file, FileData):
+            if (file.name, file.path) not in self.get_file_names_and_paths():
+                self.__files.append(file)
+        else:
+            raise TypeError('Object type is {0}, should be FileData'.format(
+                type(file)))
+
+    def remove_file(self, file_name, path):
+        updated_list = list(filter(lambda file: (file.name, file.path) != (file_name, path),
+                                   self.__files))
+        if len(updated_list) < len(self.__files):
+            self.__files = updated_list
+            return True
+
+        return False
+
+    def get_file_names_and_paths(self):
+        return list(map(lambda file: (file.name, file.path), self.files))
 
     def gen_fs_hash(self):
         '''Get the filesystem hash if the image class was created with a

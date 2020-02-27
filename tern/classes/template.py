@@ -15,6 +15,7 @@ class Template(metaclass=ABCMeta):
             package: mappings for the properties under 'Package'
             layer: mappings for the properties under 'Layer'
             image: mappings for the properties under 'Image'
+            file_data: mappings for the properties under 'FileData'
         should implement:
             notice: mappings for the properties under 'Notice'
             notice_origin: mappings for the properties under 'NoticeOrigin'

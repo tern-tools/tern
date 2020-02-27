@@ -5,6 +5,7 @@
 
 import unittest
 
+from tern.classes.file_data import FileData
 from tern.classes.image_layer import ImageLayer
 from tern.classes.package import Package
 from test_fixtures import TestTemplate1
@@ -52,6 +53,10 @@ class TestClassImageLayer(unittest.TestCase):
         self.assertEqual(len(self.layer.packages), 1)
         with self.assertRaises(TypeError, msg=err):
             self.layer.add_package("not_a_package")
+        # Check that existing package is not added again
+        p2 = Package('x')
+        self.layer.add_package(p2)
+        self.assertEqual(len(self.layer.packages), 1)
 
     def testRemovePackage(self):
         p1 = Package('x')
@@ -61,13 +66,40 @@ class TestClassImageLayer(unittest.TestCase):
         self.assertTrue(self.layer.remove_package('y'))
         self.assertFalse(self.layer.remove_package('y'))
 
+    def testAddFile(self):
+        err = "Object type String, should be FileData"
+        f1 = FileData('file1.c', '/abc/pqr')
+        f2 = FileData('file2.c', '/abc/pqr/lmn')
+        self.layer.add_file(f1)
+        self.layer.add_file(f2)
+        self.assertEqual(len(self.layer.files), 2)
+        with self.assertRaises(TypeError, msg=err):
+            self.layer.add_file('pqr')
+        # Check that existing file is not added again
+        f3 = FileData('file1.c', '/abc/pqr')
+        self.layer.add_file(f3)
+        self.assertEqual(len(self.layer.files), 2)
+
+    def testRemoveFile(self):
+        f1 = FileData('file1.c', '/abc/pqr')
+        f2 = FileData('file1.c', '/abc/pqr/lmn')
+        self.layer.add_file(f1)
+        self.layer.add_file(f2)
+        self.assertTrue(self.layer.remove_file('file1.c', '/abc/pqr'))
+        self.assertFalse(self.layer.remove_file('file2.c', '/abc/pqr/lmn'))
+
     def testToDict(self):
         p1 = Package('x')
         self.layer.add_package(p1)
+        f1 = FileData('abc', 'abc/pqr')
+        self.layer.add_file(f1)
         a_dict = self.layer.to_dict()
         self.assertEqual(a_dict['diff_id'], '123abc')
         self.assertEqual(len(a_dict['packages']), 1)
+        self.assertEqual(len(a_dict['files']), 1)
         self.assertEqual(a_dict['packages'][0]['name'], 'x')
+        self.assertEqual(a_dict['files'][0]['name'], 'abc')
+        self.assertEqual(a_dict['files'][0]['path'], 'abc/pqr')
         self.assertEqual(a_dict['tar_file'], 'path/to/tar')
 
     def testToDictTemplate(self):
@@ -75,13 +107,16 @@ class TestClassImageLayer(unittest.TestCase):
         template2 = TestTemplate2()
         p1 = Package('x')
         self.layer.add_package(p1)
+        f1 = FileData('abc', 'abc/pqr')
+        self.layer.add_file(f1)
         dict1 = self.layer.to_dict(template1)
         dict2 = self.layer.to_dict(template2)
-        self.assertEqual(len(dict1.keys()), 3)
+        self.assertEqual(len(dict1.keys()), 4)
         self.assertEqual(dict1['layer.diff'], '123abc')
         self.assertEqual(dict1['layer.tarfile'], 'path/to/tar')
         self.assertEqual(len(dict1['layer.packages']), 1)
-        self.assertEqual(len(dict2.keys()), 4)
+        self.assertEqual(len(dict1['layer.files']), 1)
+        self.assertEqual(len(dict2.keys()), 5)
         self.assertFalse(dict2['notes'])
         self.assertFalse(dict2['layer.packages'][0]['notes'])
 
@@ -90,6 +125,15 @@ class TestClassImageLayer(unittest.TestCase):
         self.layer.add_package(p1)
         pkgs = self.layer.get_package_names()
         self.assertEqual(pkgs[0], 'x')
+
+    def testGetFileNamesAndPaths(self):
+        f1 = FileData('file1.java', 'abc/pqr')
+        f2 = FileData('sum.cpp', 'abc/pqr')
+        self.layer.add_file(f1)
+        self.layer.add_file(f2)
+        files = self.layer.get_file_names_and_paths()
+        self.assertEqual(files, [('file1.java', 'abc/pqr'),
+                                 ('sum.cpp', 'abc/pqr')])
 
 
 if __name__ == '__main__':
