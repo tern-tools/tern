@@ -2,7 +2,8 @@
 #
 # Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-
+import os
+import re
 
 from tern.classes.package import Package
 from tern.classes.file_data import FileData
@@ -42,6 +43,7 @@ class ImageLayer:
         remove_file: given the file path, remove a file object from the
         list of files in this layer
         get_file_paths: Get a list of file paths in the image layer'''
+
     def __init__(self, diff_id, tar_file=None, created_by=None):
         self.__diff_id = diff_id
         self.__fs_hash = ''
@@ -149,7 +151,7 @@ class ImageLayer:
                 self.__packages.append(package)
         else:
             raise TypeError('Object type is {0}, should be Package'.format(
-                            type(package)))
+                type(package)))
 
     def remove_package(self, package_name):
         rem_index = 0
@@ -245,3 +247,25 @@ class ImageLayer:
             tar_file = rootfs.get_layer_tar_path(self.__tar_file)
             rootfs.extract_tarfile(tar_file, fs_dir)
             self.__fs_hash = rootfs.calc_fs_hash(fs_dir)
+
+    def add_files(self):
+        '''Get all the files present in a layer and store
+        them as a list of FileData objects'''
+        fs_path = rootfs.get_untar_dir(self.__tar_file)
+        hash_file = os.path.join(os.path.dirname(fs_path),
+                                 self.__fs_hash) + '.txt'
+        pattern = re.compile(r'([\w\-|]+)\s+(.+)')
+        with open(hash_file) as f:
+            content = f.readlines()
+        for line in content:
+            m = pattern.search(line)
+            if m:
+                # m.group(2) contains the file path
+                # m.group(1) contains the extattrs and checksum
+                file_data = FileData(os.path.basename(m.group(2)),
+                                     os.path.relpath(m.group(2), '.'))
+                # attrs_tuple contains (extattrs, '|', checksum)
+                attrs_tuple = m.group(1).rpartition('|')
+                file_data.set_checksum('sha256', attrs_tuple[2])
+                file_data.extattrs = attrs_tuple[0]
+                self.add_file(file_data)
