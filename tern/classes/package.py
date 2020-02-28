@@ -2,7 +2,7 @@
 #
 # Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
-
+from tern.classes.file_data import FileData
 from tern.classes.notice import Notice
 from tern.classes.origins import Origins
 from tern.utils.general import prop_names
@@ -19,11 +19,16 @@ class Package:
         download_url: package download url
         origins: a list of NoticeOrigin objects
         checksum: checksum as package property
+        files: list of files in a package
 
     methods:
         to_dict: returns a dict representation of the instance
         fill: instantiates a package object given a dict representation.
-        is_equal: compares two package objects.'''
+        is_equal: compares two package objects.
+        get_file_paths: Returns a list of file paths
+        add_file: Add a file to list of files
+        remove_file: Removes a file from a list of files
+        '''
     def __init__(self, name):
         self.__name = name
         self.__version = ''
@@ -33,10 +38,15 @@ class Package:
         self.__download_url = ''
         self.__checksum = ''
         self.__origins = Origins()
+        self.__files = []
 
     @property
     def name(self):
         return self.__name
+
+    @property
+    def files(self):
+        return self.__files
 
     @property
     def version(self):
@@ -90,11 +100,33 @@ class Package:
     def checksum(self, checksum):
         self.__checksum = checksum
 
+    def get_file_paths(self):
+        """Return a list of paths of all the files in a package"""
+        return [f.path for f in self.__files]
+
+    def add_file(self, file):
+        """Add a file to the list of files present in a package"""
+        if isinstance(file, FileData):
+            if file.path not in self.get_file_paths():
+                self.files.append(file)
+        else:
+            raise TypeError('Object type is {0}, should be FileData'.format(
+                type(file)))
+
+    def remove_file(self, file_path):
+        """Remove a file from the list of files present in a package"""
+        for file in self.__files:
+            if file.path == file_path:
+                self.__files.remove(file)
+                return True
+        return False
+
     def to_dict(self, template=None):
         '''Return a dictionary version of the Package object
         If given an object which is a subclass of Template then map
         the keys to the Package class properties'''
         pkg_dict = {}
+        file_list = [f.to_dict(template) for f in self.__files]
         if template:
             # loop through object properties
             for key, prop in prop_names(self):
@@ -106,11 +138,16 @@ class Package:
             if 'origins' in template.package().keys():
                 pkg_dict.update(
                     {template.package()['origins']: self.origins.to_dict()})
+            # update the 'files' part if it exists in the mapping
+            if 'files' in template.package().keys():
+                pkg_dict.update(
+                    {template.package()['files']: file_list})
         else:
             # don't map, just use the property name as the key
             for key, prop in prop_names(self):
                 pkg_dict.update({prop: self.__dict__[key]})
             pkg_dict.update({'origins': self.origins.to_dict()})
+            pkg_dict.update({'files': file_list})
         return pkg_dict
 
     def __fill_properties(self, package_dict):
