@@ -18,10 +18,12 @@ class TestClassImage(unittest.TestCase):
         '''Test a generic Image class'''
         self.image1 = Image('1234abcd')
         self.image2 = TestImage('5678efgh')
+        self.image3 = TestImage('f380a61e')
 
     def tearDown(self):
         del self.image1
         del self.image2
+        del self.image3
 
     def testInstance(self):
         self.assertEqual(self.image1.image_id, '1234abcd')
@@ -50,7 +52,7 @@ class TestClassImage(unittest.TestCase):
     def testGetLayerObject(self):
         self.image2.load_image()
         self.assertEqual(
-             self.image2.get_layer_object('123abc'), self.image2.layers[0])
+            self.image2.get_layer_object('123abc'), self.image2.layers[0])
 
     def testToDict(self):
         self.image2.load_image()
@@ -78,6 +80,27 @@ class TestClassImage(unittest.TestCase):
         self.image2.load_image()
         self.assertEqual(
             self.image2.get_human_readable_id(), '5678efgh-testimage-testtag')
+
+    def testSetImageImport(self):
+        self.image1.load_image()
+        self.image2.load_image()
+        self.image3.load_image()
+        self.assertTrue(self.image3.set_image_import(self.image2))
+        self.assertFalse(self.image3.set_image_import(self.image1))
+
+    def testLastImportLayer(self):
+        self.image1.load_image()
+        self.image2.load_image()
+        self.image3.load_image()
+        self.image3.set_image_import(self.image1)
+        self.assertTrue(self.image3.get_last_import_layer() is None)
+        self.image3.set_image_import(self.image2)
+        self.assertTrue(self.image3.get_last_import_layer() is not None)
+
+    def testGetLastImportLayer(self):
+        self.image2.load_image()
+        self.assertTrue(self.image2.get_layer_object("123abc") is not None)
+        self.assertTrue(self.image2.get_layer_object("1234abcd") is None)
 
 
 if __name__ == '__main__':
