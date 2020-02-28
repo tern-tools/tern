@@ -29,8 +29,10 @@ def pushd(path):
     os.chdir(curr_path)
 
 
-def get_top_dir():
+def get_top_dir(working_dir=None):
     '''Get the hidden working directory'''
+    if working_dir:
+        return os.path.join(working_dir, constants.dot_folder)
     return os.path.join(str(Path.home()), constants.dot_folder)
 
 
