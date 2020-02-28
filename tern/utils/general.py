@@ -143,6 +143,8 @@ def check_root():
 
 
 def check_image_string(image_str: str):
+    '''Check if the image string is in the format image:tag or
+    image@digest_type:digest format. If not, return False.'''
     tag_format = r'.+:.+'
     digest_format = r'.+@.+:.+'
     if re.match(tag_format, image_str) or re.match(digest_format, image_str):

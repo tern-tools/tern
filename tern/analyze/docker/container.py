@@ -77,23 +77,39 @@ def check_image(image_tag_string):
     logger.debug(
         "Checking if image \"%s\" is available on disk...", image_tag_string)
     try:
-        client.images.get(image_tag_string)
+        image = client.images.get(image_tag_string)
         logger.debug("Image \"%s\" found", image_tag_string)
-        return True
+        return image
     except docker.errors.ImageNotFound:
-        return False
+        return None
 
 
 def pull_image(image_tag_string):
     '''Try to pull an image from Dockerhub'''
     logger.debug("Attempting to pull image \"%s\"", image_tag_string)
     try:
-        client.images.pull(image_tag_string)
+        image = client.images.pull(image_tag_string)
         logger.debug("Image \"%s\" downloaded", image_tag_string)
-        return True
+        return image
     except docker.errors.ImageNotFound:
         logger.warning("No such image: \"%s\"", image_tag_string)
-        return False
+        return None
+
+
+def get_image(image_tag_string):
+    '''Try to get an image from Dockerhub.
+    image_tag_string: can be in image:tag or image@digest_type:digest format'''
+    check_docker_setup()
+    image = check_image(image_tag_string)
+    if image is None:
+        return pull_image(image_tag_string)
+    return image
+
+
+def get_image_digest(docker_image):
+    '''Given a docker image object return the digest information of the
+    unique image in 'image@sha_type:digest' format.'''
+    return docker_image.attrs['RepoDigests'][0]
 
 
 def build_container(dockerfile, image_tag_string):
@@ -165,3 +181,14 @@ def extract_image_metadata(image_tag_string):
             raise IOError('Unable to untar Docker image')
     except docker.errors.APIError:  # pylint: disable=try-except-raise
         raise
+
+
+def close_client():
+    '''End docker interactions by closing the client. This is meant to be
+    used after analysis is done'''
+    try:
+        client.close()
+    except requests.exceptions.ConnectionError:
+        # it should either already be closed or docker is not setup
+        # either way, the socket is closed
+        pass
