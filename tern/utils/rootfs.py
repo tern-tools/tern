@@ -45,7 +45,7 @@ union_mount = ['mount', '-t', 'overlay', 'overlay', '-o']
 logger = logging.getLogger(constants.logger_name)
 
 
-def set_mount_dir(bind=None):
+def set_mount_dir(bind=None, working_dir=None):
     '''Set mount directory according to --bind-mount CLI option (or lack
     thereof). The mount_dir value is used to set the working directory
     properly in get_working_dir().'''
@@ -53,7 +53,7 @@ def set_mount_dir(bind=None):
     if bind:
         mount_dir = bind
     else:
-        mount_dir = general.get_top_dir()
+        mount_dir = general.get_top_dir(working_dir)
 
 
 def root_command(command, *extra):

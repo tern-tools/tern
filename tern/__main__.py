@@ -62,19 +62,19 @@ def get_version():
     return message
 
 
-def create_top_dir():
+def create_top_dir(working_dir=None):
     '''Create the top level working directory'''
-    top_dir = general.get_top_dir()
+    top_dir = general.get_top_dir(working_dir)
     if not os.path.isdir(top_dir):
-        os.mkdir(top_dir)
+        os.makedirs(top_dir)
 
 
 def do_main(args):
     '''Execute according to subcommands'''
     # set bind mount location if working in a container
-    rootfs.set_mount_dir(args.bind_mount)
+    rootfs.set_mount_dir(args.bind_mount, args.working_dir)
     # create working directory
-    create_top_dir()
+    create_top_dir(args.working_dir)
     if args.log_stream:
         # set up console logs
         global logger
@@ -132,6 +132,9 @@ def main():
                         " when running from within a container.")
     parser.add_argument('-r', '--redo', action='store_true',
                         help="Repopulate the cache for found layers")
+    parser.add_argument('-wd', '--working-dir', metavar='PATH',
+                        help="Change default working directory to specified"
+                        "absolute path.")
     # sys.version gives more information than we care to print
     py_ver = sys.version.replace('\n', '').split('[')[0]
     parser.add_argument('-v', '--version', action='version',
