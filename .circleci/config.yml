@@ -77,7 +77,7 @@ jobs:
     steps:
       - setup
       - run: pip install .
-      - run: tern -l report -i photon:3.0
+      - run: tern report -i photon:3.0
   # Deploy to PyPi
   pypi_deploy:
    executor: ubuntu1604
