@@ -60,7 +60,7 @@ def get_version():
 
 def do_main(args):
     '''Execute according to subcommands'''
-    if args.log_stream:
+    if not args.quiet:
         # set up console logs
         global logger
         global console
@@ -86,9 +86,9 @@ def main():
            Tern is a container image component curation tool. Tern retrieves
     information about packages that are installed in a container image.
     Learn more at https://github.com/vmware/tern''')
-    parser.add_argument('-l', '--log-stream', action='store_true',
-                        help="Stream logs to the console;"
-                        "Useful when running in a shell")
+    parser.add_argument('-q', '--quiet', action='store_true',
+                        help="Silences the output to the terminal;"
+                        "Useful when logging behaviour unnecessary")
     parser.add_argument('-c', '--clear-cache', action='store_true',
                         help="Clear the cache before running")
     parser.add_argument('-k', '--keep-working-dir', action='store_true',
