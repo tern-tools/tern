@@ -104,7 +104,7 @@ SSH into the created VM:
 
 Run the program:
 ```
-$ python3 -m tern -l report -i debian:buster -f output.txt
+$ python3 -m tern report -i debian:buster -f output.txt
 ```
 
 ## Getting Started on Linux<a name="getting-started-on-linux">
@@ -148,7 +148,7 @@ $ pip install .
 
 Run Tern:
 ```
-$ tern -l report -f output.txt -i debian:buster
+$ tern report -f output.txt -i debian:buster
 ```
 
 # Using Tern<a name="using-tern">
@@ -158,14 +158,14 @@ Tern creates a report containing the Bill of Materials (BoM) of a container imag
 ## Generating a BoM report for a Docker image<a name="bom-for-docker-image">
 If you have a Docker image pulled locally and want to inspect it
 ```
-$ tern -l report -i debian:jessie
+$ tern report -i debian:jessie
 ```
 Take a look at report.txt to see what packages are installed in the Docker image and how Tern got this information. If you encounter any errors, please file an issue.
 
 ## Generating a BoM report from a Dockerfile<a name="bom-for-dockerfile">
 You can provide a Dockerfile to Tern to figure out the Bill of Materials and other information. Tern will build the image, analyze it with respect to the Dockerfile and discard the image. This is useful to engineers who are developing a Dockerfile for their app or in a container build and release pipeline.
 ```
-$ tern -l report -d samples/photon_git/Dockerfile
+$ tern report -d samples/photon_git/Dockerfile
 ```
 Take a look at report.txt to see what packages you would be shipping if you were to use the given Dockerfile. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
 
@@ -176,13 +176,13 @@ Tern creates BoM reports suitable to read over or to provide to another tool for
 ## Human Readable Format<a name="report-human-readable">
 The default report Tern produces is a human readable report. The object of this report is to give the container developer a deeper understanding of what is installed in a container image during development. This allows a developer to glean basic information about the container such as what the true base operating system is, what the app dependencies are, if the container is using an official or personal repository for sources or binaries, whether the dependencies are at the correct versions, etc.
 ```
-$ tern -l report -i golang:1.12-alpine -f output.txt
+$ tern report -i golang:1.12-alpine -f output.txt
 ```
 
 ## Summary Format<a name="report-summary">
 To get just a list of packages, you can use the `-s` option to get a summary report. This is useful to provide to a legal or OSS compliance team.
 ```
-$ tern -l report -s -i golang:1.12 -f output.txt
+$ tern report -s -i golang:1.12 -f output.txt
 ```
 WARNING: Tern is meant to give guidance on what may be installed in a container image. We recommend that you use the default report format for the purpose of investigation.
 
@@ -196,13 +196,13 @@ $ tern report -m json -i golang:1.12-alpine
 ## YAML Format<a name="report-yaml">
 You can get the results in a YAML file to be consumed by a downstream tool or script.
 ```
-$ tern -l report -y -i golang:1.12-alpine -f output.yaml
+$ tern report -y -i golang:1.12-alpine -f output.yaml
 ```
 
 ## SPDX tag-value Format<a name="report-spdxtagvalue">
 [SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. Many compliance tools are compatible with SPDX. Tern follows the [SPDX specifications](https://spdx.org/specifications) specifically the tag-value format which is the most compatible format with the toolkit the organization provides. The tag-value format is the only SPDX format Tern supports. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](./docs/spdx-tag-value-overview) and about how Tern maps its properties to the keys mandated by the spec [here](./docs/spdx-tag-value-mapping.md).
 ```
-$ tern -l report -m spdxtagvalue -i golang:1.12-alpine -f spdx.txt
+$ tern report -m spdxtagvalue -i golang:1.12-alpine -f spdx.txt
 ```
  
 # Running tests<a name="running-tests">

@@ -35,14 +35,14 @@ if not changes:
 
 test_suite = {
     # requirements.txt
-    re.compile('requirements.txt'): ['tern -l report -i photon:3.0'],
+    re.compile('requirements.txt'): ['tern report -i photon:3.0'],
     # Dockerfile
     re.compile('Dockerfile'): [
         'docker build -t ternd .',
         './docker_run.sh workdir ternd "report -i golang:alpine"'],
     # Files under tern directory
     re.compile('tern/__init__.py|tern/__main__.py'):
-    ['tern -l report -i golang:alpine'],
+    ['tern report -i golang:alpine'],
     # tern/classes
     re.compile('tern/classes/command.py'):
     ['python tests/test_class_command.py'],
@@ -64,30 +64,30 @@ test_suite = {
     ['python tests/test_class_template.py'],
     # tern/command_lib
     re.compile('tern/command_lib'): [
-        'tern -l report -i photon:3.0',
-        'tern -l report -i debian:buster',
-        'tern -l report -i alpine:3.9',
-        'tern -l report -i archlinux:latest',
-        'tern -l report -i centos:7'],
+        'tern report -i photon:3.0',
+        'tern report -i debian:buster',
+        'tern report -i alpine:3.9',
+        'tern report -i archlinux:latest',
+        'tern report -i centos:7'],
     # tern/helpers
     re.compile('tern/helpers'): [
-        'tern -l report -i golang:alpine',
-        'tern -l report -d samples/alpine_python/Dockerfile'],
+        'tern report -i golang:alpine',
+        'tern report -d samples/alpine_python/Dockerfile'],
     # tern/report
     re.compile('tern/report'): [
-        'tern -l report -i golang:alpine',
-        'tern -l report -m yaml -i photon:3.0',
-        'tern -l report -s -i photon:3.0',
-        'tern -l report -m json -i photon:3.0',
-        'tern -l report -m spdxtagvalue -i photon:3.0',
-        'tern -l report -d samples/alpine_python/Dockerfile'],
+        'tern report -i golang:alpine',
+        'tern report -m yaml -i photon:3.0',
+        'tern report -s -i photon:3.0',
+        'tern report -m json -i photon:3.0',
+        'tern report -m spdxtagvalue -i photon:3.0',
+        'tern report -d samples/alpine_python/Dockerfile'],
     # tern/tools
     re.compile('tern/tools'):
-    ['tern -l report -i golang:alpine'],
+    ['tern report -i golang:alpine'],
     # tern/utils
     re.compile('tern/utils'): [
-        'tern -l report -i golang:alpine',
-        'tern -l report -d samples/alpine_python/Dockerfile'],
+        'tern report -i golang:alpine',
+        'tern report -d samples/alpine_python/Dockerfile'],
     # tests
     re.compile('tests/test_class_command.py'):
         ['python tests/test_class_command.py'],
