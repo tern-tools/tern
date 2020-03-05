@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 #
 # Known package listings for base images
@@ -6,6 +6,8 @@
 # <package manager>:
 #   pkg_format: <the package format used by the package manager>
 #   shell: <the shell executable> (needed if entering code snippets)
+#   pkg_separators: Potential characters to separate package name from version. Some package managers will have more than one.
+#   pinning_separator: Character to denote package version in pinned Dockerfile (i.e. apk add package=version)
 #   names: <a list of package names>
 #     invoke: (if this is a script to invoke include this)
 #       1:
@@ -22,6 +24,9 @@ tdnf:
   path:
     - 'usr/bin/tdnf' # don't put forward slash here as os.path.join will think it is the root directory on the host
   shell: '/usr/bin/bash'
+  pkg_separators:
+    - '-'
+  pinning_separator: '-'
   names:
     invoke:
       1:
@@ -65,6 +70,9 @@ dpkg:
   path:
     - 'usr/bin/dpkg'
   shell: '/bin/bash'
+  pkg_separators:
+    - '='
+  pinning_separator: '='
   # either enter the package names as a list or a snippet to invoke either within or outside the container
   names:
     invoke:
@@ -98,6 +106,9 @@ apk:
   path:
     - 'sbin/apk'
   shell: '/bin/sh'
+  pkg_separators:
+    - '='
+  pinning_separator: '='
   names:
     invoke:
       1:
@@ -136,6 +147,9 @@ pacman:
   path:
     - 'usr/bin/pacman'
   shell: '/usr/bin/sh'
+  pkg_separators:
+    - '='
+  pinning_separator: '='
   names:
     invoke:
       1:
@@ -172,6 +186,9 @@ rpm:
   path:
     - 'usr/bin/rpm'
   shell: '/usr/bin/sh'
+  pkg_separators:
+    - '-'
+  pinning_separator: '-'
   names:
     invoke:
       1:

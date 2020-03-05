@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
+import re
 from tern.utils.general import parse_command
 
 
@@ -140,3 +141,13 @@ class Command:
             return False
         raise TypeError('Object type is {0}, should be Command'.format(
             type(other)))
+
+    def get_pkg_name(self, word, separators):
+        '''Given a package word and package manager separator character list,
+        parse the package name from the version and return the name.'''
+        if separators[0] == '-':
+            for i, char in enumerate(word):
+                if i < len(word):
+                    if char == separators[0] and word[i+1].isdigit():
+                        return word[:i]
+        return re.match(r'^[a-z-_A-Z\d]*', word).group()
