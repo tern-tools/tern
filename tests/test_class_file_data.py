@@ -41,6 +41,8 @@ class TestClassFileData(unittest.TestCase):
             file2 = FileData('file2',
                              'path/to/file2',
                              '12355')
+        file1.file_type = 'ELF'
+        self.assertEqual(file1.file_type, 'ELF')
         file2 = FileData('file2',
                          'path/to/file2',
                          '2020-01-01',
