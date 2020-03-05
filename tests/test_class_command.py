@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 import unittest
 
 from tern.classes.command import Command
+from tern.analyze.common import get_installed_package_names
 
 
 class TestClassCommand(unittest.TestCase):
@@ -16,6 +17,9 @@ class TestClassCommand(unittest.TestCase):
         self.download = Command('wget url')
         self.remove = Command('apt-get purge git')
         self.install2 = Command('apt-get install -y ca-certificates')
+        self.pinned1 = Command('apt-get install python3 zlib1g-dev=4.52.1')
+        self.pinned2 = Command('apt-get install ca-certificates:ppc64=2018i')
+        self.pinned3 = Command('yum install libncurses5-dev syslog-ng-1-2.3')
 
     def tearDown(self):
         del self.install
@@ -23,6 +27,9 @@ class TestClassCommand(unittest.TestCase):
         del self.download
         del self.remove
         del self.install2
+        del self.pinned1
+        del self.pinned2
+        del self.pinned3
 
     def testInstance(self):
         self.assertEqual(self.install.shell_command, 'apt-get install -y git')
@@ -121,6 +128,16 @@ class TestClassCommand(unittest.TestCase):
         # try to merge some other object
         with self.assertRaises(TypeError):
             self.install.merge('test')
+
+    def getPackageName(self):
+        list1 = get_installed_package_names(self.pinned1)
+        list2 = get_installed_package_names(self.pinned2)
+        list3 = get_installed_package_names(self.pinned3)
+        self.assertTrue(self.get_pkg_name(list1[0], '='), 'python3')
+        self.assertTrue(self.get_pkg_name(list1[1], '='), 'zlib1g-dev')
+        self.assertTrue(self.get_pkg_name(list2[0], '='), 'ca-certificates')
+        self.assertTrue(self.get_pkg_name(list3[0], '-'), 'libncurses5-dev')
+        self.assertTrue(self.get_pkg_name(list3[1], '-'), 'syslog-ng')
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 #
 # general commands to be invoked when retrieving package information
@@ -54,4 +54,7 @@ dnf:
     - 'check-update'
     - 'clean'
   packages: 'rpm'
-
+rpm:
+   install: '-i'
+   remove: '-e'
+   packages: 'rpm'
