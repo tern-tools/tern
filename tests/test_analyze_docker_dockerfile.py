@@ -15,11 +15,14 @@ class TestAnalyzeDockerDockerfile(unittest.TestCase):
         self.buildpackpinned = 'tests/dockerfiles/buildpack_deps_jessie_pinned'
         self.golang = 'tests/dockerfiles/golang_1.13_stretch'
         self.buildpackarg = 'tests/dockerfiles/buildpack_deps_jessie_arg'
+        self.pin_add = ('tests/dockerfiles/pin_add_command_test/'
+                        'pin_add_command_test_dockerfile')
 
     def tearDown(self):
         del self.buildpack
         del self.golang
         del self.buildpackarg
+        del self.pin_add
 
     def testDockerfileObject(self):
         dfobj = dockerfile.Dockerfile()
@@ -112,6 +115,30 @@ class TestAnalyzeDockerDockerfile(unittest.TestCase):
         struct = dfobj.structure[1]
         self.assertEqual(struct['value'], replace_value)
         self.assertEqual(struct['content'], replace_content)
+
+    # test find the git project name
+    def testFindGitInfo(self):
+        sample_line = 'ADD plain_file /tmp'
+        comment_line = dockerfile.find_git_info(sample_line, self.pin_add)
+        project_name = comment_line.split(',')[0]
+        self.assertIn(project_name, ['git project name: project',
+                                     'git project name: tern'])
+
+    # test adding the comments
+    def testExpandAddCommand(self):
+        dfobj = dockerfile.get_dockerfile_obj(self.pin_add)
+        self.assertFalse(dfobj.is_none())
+        dockerfile.expand_add_command(dfobj)
+        content = dfobj.structure[1]['content']
+        value = dfobj.structure[1]['value']
+        content_name = content.split(',')[0]
+        value_name = value.split(',')[0]
+        self.assertIn(content_name,
+                      ['ADD plain_file /tmp # git project name: project',
+                       'ADD plain_file /tmp # git project name: tern'])
+        self.assertIn(value_name,
+                      ['plain_file /tmp # git project name: project',
+                       'plain_file /tmp # git project name: tern'])
 
 
 if __name__ == '__main__':
