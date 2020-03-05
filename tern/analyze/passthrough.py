@@ -9,6 +9,7 @@ Use an external tool to analyze a container image
 
 
 import logging
+import os
 import shutil
 from stevedore import driver
 from stevedore.exception import NoMatches
@@ -21,22 +22,42 @@ from tern.utils import rootfs
 logger = logging.getLogger(constants.logger_name)
 
 
-def get_filesystem_command(layer_obj, command):
-    '''Given an ImageLayer object and a command in the form of a string,
-    return the command in list form  with the target directory of the layer.
-    This assumes that the layer tarball is untarred, which should have happened
-    during the loading of the Image object'''
-    cmd_list = command.split(' ')
+def get_exec_command(command_string):
+    '''Given a command as a string, find out if the command exists on the
+    system. If it does exist, return a subprocess invokable command list
+    where the command is the absolute path of the binary existing on the
+    system'''
+    cmd_list = command_string.split(' ')
     # we first find if the command exists on the system
     run_bin = cmd_list.pop(0)
     bin_path = shutil.which(run_bin)
     if not bin_path:
         raise OSError("Command {} not found".format(run_bin))
     cmd_list.insert(0, bin_path)
+    return cmd_list
+
+
+def get_filesystem_command(layer_obj, command):
+    '''Given an ImageLayer object and a command in the form of a string,
+    return the command in list form  with the target directory of the layer.
+    This assumes that the layer tarball is untarred, which should have happened
+    during the loading of the Image object'''
     # in most cases, the external tool has a CLI where the target directory
     # is the last token in the command. So the most straightforward way
     # to perform this operation is to append the target directory
+    cmd_list = get_exec_command(command)
     cmd_list.append(rootfs.get_untar_dir(layer_obj.tar_file))
+    return cmd_list
+
+
+def get_file_command(layer_tar_file, layer_file, command):
+    '''Given an ImageLayer object's tar_file property and a FileData object
+    from that layer, along with the command, return the command in list form
+    with the target file appended at the end'''
+    cmd_list = get_exec_command(command)
+    file_path = os.path.join(
+        rootfs.get_untar_dir(layer_tar_file), layer_file.path)
+    cmd_list.append(file_path)
     return cmd_list
 
 
