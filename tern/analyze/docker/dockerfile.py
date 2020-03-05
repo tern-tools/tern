@@ -14,10 +14,10 @@ import logging
 from tern.utils import general
 from tern.utils import constants
 from tern.analyze.docker import container
+from tern.analyze import common
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
-
 
 directives = ['FROM',
               'ARG',
@@ -46,6 +46,7 @@ tag_separator = ':'
 class Dockerfile():
     ''' This class is used as a wrapper to store dockerfile information
     retrieved from the parser.'''
+
     def __init__(self):
         self.structure = None
         self.envs = None
@@ -284,3 +285,43 @@ def get_base_image_tag(base_instructions):
     if len(image_tag_list) == 1:
         image_tag_list.append('')
     return tuple(image_tag_list)
+
+
+def find_git_info(line, dockerfile_path):
+    '''Given a line of ADD command and the path of dockerfile,
+    return the information(string format) on the git project name and sha
+    if the dockerfile is included in a git repository.
+    ADD command has a general format:
+    ADD [--chown=<user>:<group>] <src> <dst>
+    Currently we parse the <src>, but not use it.
+    '''
+    args = line.split(' ')
+    src_path = ''
+    # check if --chown exists
+    if args[1].startswith('--chown'):
+        # check if the line is valid
+        if len(args) < 4:
+            logger.error('Invalid ADD command line')
+        src_path = args[2]
+    else:
+        # the line has no --chown option
+        if len(args) < 3:
+            logger.error('Invalid ADD command line')
+        src_path = args[1]
+    # log the parsed src_path
+    logger.debug('Parsed src_path is %s', src_path)
+    # get the git project info
+    comment_line = common.check_git_src(dockerfile_path)
+    return comment_line
+
+
+def expand_add_command(dfobj):
+    dockerfile_path = dfobj.filepath
+    for i, command_dict in enumerate(dfobj.structure):
+        if command_dict['instruction'] == 'ADD':
+            comment_line = find_git_info(command_dict['content'],
+                                         dockerfile_path)
+            dfobj.structure[i]['content'] = command_dict['content'].strip('\n')\
+                + ' # ' + comment_line + '\n'
+            dfobj.structure[i]['value'] = command_dict['value']\
+                + ' # ' + comment_line

@@ -9,6 +9,7 @@ Common functions
 
 import logging
 import os
+import subprocess  # nosec
 
 from tern.classes.package import Package
 from tern.classes.file_data import FileData
@@ -502,3 +503,59 @@ def get_os_style(image_layer, binary):
                     package_manager=binary,
                     package_format=image_layer.pkg_format,
                     os_list=image_layer.os_guess), 'info'))
+
+
+def check_git_src(dockerfile_path):
+    '''Given the src_path and the dockerfile path, return the git
+    repository name and sha information in the format of string.
+    Currently we only consider the following situation:
+    - target_git_project
+        - dir1
+        - dir2/dockerfile
+    So we only use dockerfile_path to find the git repo info.'''
+    # get the path of the folder containing the dockerfile
+    dockerfile_folder_path = os.path.dirname(dockerfile_path)
+    # locate the top level directory
+    path_to_toplevel = get_git_toplevel(dockerfile_folder_path)
+    # get the path of the target folder or file
+    logger.debug('looking into path: %s for git repo.', path_to_toplevel)
+    comment_line = ''
+    if path_to_toplevel:
+        sha_info = get_git_sha(path_to_toplevel)
+        # if path_to_toplevel exists, name_info should be the folder name
+        name_info = os.path.basename(path_to_toplevel)
+        comment_line = ('git project name: ' + name_info +
+                        ', HEAD sha: ' + sha_info)
+    else:
+        comment_line = 'Not a git repository'
+    return comment_line
+
+
+def get_git_sha(path_to_toplevel):
+    '''Given a absolute path to a git repository, return the HEAD sha.'''
+    command = ['git', 'rev-parse', 'HEAD']
+    sha_info = '(not found)'
+    try:
+        output = subprocess.check_output(  # nosec
+            command, stderr=subprocess.DEVNULL, cwd=path_to_toplevel)
+        if isinstance(output, bytes):
+            sha_info = output.decode('utf-8').split('\n').pop(0)
+    except subprocess.CalledProcessError:
+        logger.debug("Cannot find git repo sha, toplevel path is %s",
+                     path_to_toplevel)
+    return sha_info
+
+
+def get_git_toplevel(path):
+    '''Give a path, return the absolute path to the top level directory if it
+    is in a git repository. Empty string will be returned if not.'''
+    command = ['git', 'rev-parse', '--show-toplevel']
+    path_to_toplevel = ''
+    try:
+        output = subprocess.check_output(  # nosec
+            command, stderr=subprocess.DEVNULL, cwd=path)
+        if isinstance(output, bytes):
+            path_to_toplevel = output.decode('utf-8').split('\n').pop(0)
+    except subprocess.CalledProcessError:
+        logger.debug("Cannot find git repo toplevel, path is %s", path)
+    return path_to_toplevel
