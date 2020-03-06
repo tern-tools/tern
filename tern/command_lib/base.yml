@@ -52,6 +52,7 @@ tdnf:
           - 'pkgs=`tdnf list installed | cut -f1 -d"."`'
           - 'for p in $pkgs; do tdnf info $p | head -10 | tail -1 | cut -f2 -d":" | xargs; done'
     delimiter: "\n"
+  files: {}
   proj_urls:
     invoke:
       1:
@@ -95,6 +96,13 @@ dpkg:
           - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
           - "for p in $pkgs; do /bin/cat /usr/share/doc/$p/copyright; echo LICF; done"
     delimiter: 'LICF'
+  files:
+    invoke:
+      1:
+        container:
+        - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+        - 'for p in $pkgs; do files=`dpkg-query -L $p`; for file in $files; do if [[ -f $file ]]; then echo $file; fi; done; echo LICF; done'
+    delimiter: 'LICF'
   proj_urls: {}
 
 # apk ---------------------------------------------------------------------------------------------------------
@@ -129,6 +137,13 @@ apk:
           - 'pkgs=`apk info 2>/dev/null`'
           - 'for p in $pkgs; do apk -a info $p 2>/dev/null | tail -2 | head -1; done'
     delimiter: "\n"
+  files:
+    invoke:
+      1:
+        container:
+        - 'pkgs=`apk info 2>/dev/null`'
+        - 'for p in $pkgs; do files=`apk -L info $p 2>/dev/null`; for file in $files; do if [[ -f $file ]]; then echo $file; fi; done; echo LICF; done'
+    delimiter: 'LICF'
   proj_urls:
     invoke:
       1:
@@ -165,6 +180,13 @@ pacman:
         container:
           - 'pacman -Qi 2>/dev/null | sed -n "/Licenses/p" | cut -d ":" -f 2'
     delimiter: "\n"
+  files:
+    invoke:
+      1:
+        container:
+        - 'pkgs=`pacman -Qq 2>/dev/null`'
+        - 'for p in $pkgs; do files=`pacman -Ql $p 2>/dev/null`; for file in $files; do if [[ -f $file ]]; then echo $file; fi; done; echo LICF; done'
+    delimiter: 'LICF'
   proj_urls:
     invoke:
       1:
@@ -203,6 +225,13 @@ rpm:
         container:
           - 'rpm --query --all --queryformat "%{license}\n" 2>/dev/null'
     delimiter: "\n"
+  files:
+    invoke:
+      1:
+        container:
+        - 'pkgs=`rpm --query --all --queryformat "%{name}\n" 2>/dev/null`'
+        - 'for p in $pkgs; do files=`rpm -ql $p  2>/dev/null`; for file in $files; do if [[ -f $file ]]; then echo $file; fi; done; echo LICF; done'
+    delimiter: 'LICF'
   proj_urls:
     invoke:
       1:

@@ -55,6 +55,12 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p2.checksum, '123abc456')
         self.p2.pkg_licenses = ['license1', 'license2']
         self.assertEqual(self.p2.pkg_licenses, ['license1', 'license2'])
+        self.p2.files = [FileData('a', '/usr/abc/a'),
+                         FileData('b', '/usr/abc/b')]
+        self.assertEqual((self.p2.files[0].name, self.p2.files[0].path),
+                         ('a', '/usr/abc/a'))
+        self.assertEqual((self.p2.files[1].name, self.p2.files[1].path),
+                         ('b', '/usr/abc/b'))
 
     def testGetters(self):
         self.assertEqual(self.p1.name, 'p1')

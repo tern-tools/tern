@@ -50,6 +50,10 @@ class Package:
     def files(self):
         return self.__files
 
+    @files.setter
+    def files(self, files):
+        self.__files = files
+
     @property
     def version(self):
         return self.__version
@@ -180,6 +184,7 @@ class Package:
             pkg_license: <package license string>
             copyright: <package copyright text>
             proj_url: <project url>
+            files: <package files>
         the way to use this method is to instantiate the class with the
         name and then give it a package dictionary to fill in the rest
         return true if package name is the same as the one used to instantiate
