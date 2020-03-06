@@ -111,6 +111,10 @@ class FileData:
     def file_type(self):
         return self.__file_type
 
+    @file_type.setter
+    def file_type(self, file_type):
+        self.__file_type = file_type
+
     @property
     def origins(self):
         return self.__origins
