@@ -64,6 +64,14 @@ def load_packages_from_cache(layer):
         logger.debug(
             'Loading packages from cache: layer \"%s\"', layer.fs_hash[:10])
         for pkg_dict in raw_pkg_list:
+            raw_file_list = pkg_dict.get('files', False)
+            if raw_file_list:
+                file_list = []
+                for file_dict in raw_file_list:
+                    fd = FileData(file_dict['name'], file_dict['path'])
+                    fd.fill(file_dict)
+                    file_list.append(fd)
+                pkg_dict['files'] = file_list
             pkg = Package(pkg_dict['name'])
             pkg.fill(pkg_dict)
             # collect package origins
@@ -202,7 +210,8 @@ def convert_to_pkg_dicts(pkg_dict):
                'version': 'versions',
                'pkg_license': 'licenses',
                'copyright': 'copyrights',
-               'proj_url': 'proj_urls'}
+               'proj_url': 'proj_urls',
+               'files': 'files'}
     pkg_list = []
     len_names = len(pkg_dict['names'])
     # make a list of keys that correspond with package property names
@@ -240,8 +249,8 @@ def add_base_packages(image_layer, binary, shell):
     listing = command_lib.get_base_listing(binary)
     if listing:
         # put info notice about what is going to be invoked
-        snippet_msg = formats.invoke_for_base + '\n' + \
-            content.print_base_invoke(binary)
+        snippet_msg = (formats.invoke_for_base + '\n' +
+                       content.print_base_invoke(binary))
         image_layer.origins.add_notice_to_origins(
             origin_layer, Notice(snippet_msg, 'info'))
         shell, _ = command_lib.get_image_shell(listing)
@@ -255,7 +264,9 @@ def add_base_packages(image_layer, binary, shell):
         if warnings:
             image_layer.origins.add_notice_to_origins(
                 origin_command_lib, Notice(warnings, 'warning'))
+        layer_file_list = image_layer.files
         if 'names' in pkg_dict and len(pkg_dict['names']) > 1:
+            get_package_files(layer_file_list, pkg_dict)
             pkg_list = convert_to_pkg_dicts(pkg_dict)
             for pkg_dict in pkg_list:
                 pkg = Package(pkg_dict['name'])
@@ -266,6 +277,25 @@ def add_base_packages(image_layer, binary, shell):
         image_layer.origins.add_notice_to_origins(
             origin_command_lib, Notice(errors.no_listing_for_base_key.format(
                 listing_key=binary), 'error'))
+
+
+def get_package_files(layer_file_list, pkg_dict):
+    '''For each file in a package fetch its details from the
+    layer file list'''
+
+    files = pkg_dict['files']
+    new_layer_file_list = []
+
+    for f in files:
+        file_list = f.split('\n')
+        new_fd_list = []
+        for file in file_list:
+            for fd in layer_file_list:
+                if file == '/'+fd.path:
+                    new_fd_list.append(fd)
+        new_layer_file_list.append(new_fd_list)
+
+    pkg_dict['files'] = new_layer_file_list
 
 
 def fill_package_metadata(pkg_obj, pkg_listing, shell):
@@ -432,8 +462,8 @@ def add_snippet_packages(image_layer, command, pkg_listing, shell):
     # set up a notice origin for the layer
     origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
     # find packages for the command
-    cmd_msg = formats.invoke_for_snippets + '\n' + \
-        content.print_package_invoke(command.name)
+    cmd_msg = (formats.invoke_for_snippets + '\n' +
+               content.print_package_invoke(command.name))
     image_layer.origins.add_notice_to_origins(origin_layer, Notice(
         cmd_msg, 'info'))
     pkg_list = get_installed_package_names(command)
