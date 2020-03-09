@@ -5,6 +5,7 @@
 
 import datetime
 
+from tern.classes.notice import Notice
 from tern.classes.origins import Origins
 from tern.utils.general import prop_names
 
@@ -153,3 +154,43 @@ class FileData:
                 file_dict.update({prop: self.__dict__[key]})
             file_dict.update({'origins': self.origins.to_dict()})
         return file_dict
+
+    def __fill_properties(self, file_dict):
+        '''Check to see if the dictionary keys have all the properties
+        listed. If not then put a Notice object in the list of Origins'''
+        for key, prop in prop_names(self):
+            if prop not in ('name', 'origins', 'path'):
+                if prop not in file_dict.keys():
+                    self.origins.add_notice_to_origins(
+                        self.name, Notice(
+                            "No metadata for key: {}".format(prop), 'warning'))
+                else:
+                    self.__dict__[key] = file_dict[prop]
+
+    def fill(self, file_dict):
+        '''The file dict looks like this:
+            name: <name>
+            path: <path to file>
+            date: <date>
+            file_type: <file_type>
+            checksum: <checksum>
+            checksum_type: <checksum_type>
+            version_control: <version_control>
+            version: <version>
+            extattrs: <extattrs>
+            licenses: <licenses>
+            license_expressions: <license_expressions>
+            copyrights: <copyrights>
+            authors: <authors>
+            packages: <packages>
+            urls: <urls>
+        the way to use this method is to instantiate the class with the
+        name and path and then give it a file_data dictionary to fill
+        in the rest return true if package name is the same as the one
+        used to instantiate the object, false if not'''
+        success = True
+        if self.name == file_dict['name'] and self.path == file_dict['path']:
+            self.__fill_properties(file_dict)
+        else:
+            success = False
+        return success
