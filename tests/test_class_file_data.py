@@ -94,6 +94,33 @@ class TestClassFileData(unittest.TestCase):
         self.assertEqual(dict1['file.licenses'], ['MIT', 'GPL'])
         self.assertFalse(dict2['notes'])
 
+    def testFill(self):
+        file_dict = {
+            'name': 'zconf.h',
+            'path': '/usr/include/zconf.h',
+            'checksum_type': 'sha256',
+            'checksum': '77304005ceb5f0d03ad4c37eb8386a10866e'
+                        '4ceeb204f7c3b6599834c7319541',
+            'extattrs': '-rw-r--r-- 1 1000 1000 16262 Nov 13 17:57'
+                        ' /usr/include/zconf.h'
+        }
+        f = FileData('zconf.h', '/usr/include/zconf.h')
+        f.fill(file_dict)
+        self.assertEqual(f.name, 'zconf.h')
+        self.assertEqual(f.path, '/usr/include/zconf.h')
+        self.assertEqual(f.checksum_type, 'sha256')
+        self.assertEqual(f.checksum, '77304005ceb5f0d03ad4c37eb838'
+                                     '6a10866e4ceeb204f7c3b6599834c7319541')
+        self.assertEqual(f.extattrs, '-rw-r--r-- 1 1000 1000 '
+                                     '16262 Nov 13 17:57 /usr/include/zconf.h')
+        self.assertEqual(f.origins.origins[0].notices[1].message,
+                         'No metadata for key: file_type')
+        self.assertEqual(f.origins.origins[0].notices[1].level, 'warning')
+        self.assertEqual(f.origins.origins[0].notices[0].message,
+                         'No metadata for key: date')
+        self.assertEqual(f.origins.origins[0].notices[2].message,
+                         'No metadata for key: version_control')
+
 
 if __name__ == '__main__':
     unittest.main()

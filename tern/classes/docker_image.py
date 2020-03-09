@@ -7,7 +7,9 @@ import json
 import os
 import subprocess  # nosec
 
+from tern.classes.file_data import FileData
 from tern.utils import rootfs
+from tern.utils.cache import get_files
 from tern.utils.general import pushd
 from tern.utils.constants import manifest_file
 from tern.analyze.docker.container import extract_image_metadata
@@ -159,7 +161,16 @@ class DockerImage(Image):
             while layer_diffs and layer_paths:
                 layer = ImageLayer(layer_diffs.pop(0), layer_paths.pop(0))
                 layer.gen_fs_hash()
-                layer.add_files()
+                raw_file_list = get_files(layer.fs_hash)
+                # Fetch file info from cache if exists
+                # else extract and store file info
+                if raw_file_list:
+                    for file_dict in raw_file_list:
+                        file = FileData(file_dict['name'], file_dict['path'])
+                        file.fill(file_dict)
+                        layer.add_file(file)
+                else:
+                    layer.add_files()
                 self._layers.append(layer)
             self.set_layer_created_by()
         except NameError:  # pylint: disable=try-except-raise
