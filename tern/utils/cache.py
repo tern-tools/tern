@@ -45,6 +45,14 @@ def get_packages(layer_hash):
     return []
 
 
+def get_files(layer_hash):
+    '''Given the layer hash, retrieve file layers cache record.
+    If none return an empty list'''
+    if layer_hash in cache.keys():
+        return cache[layer_hash]['files']
+    return []
+
+
 def get_layers():
     '''Return a list of layer shas'''
     return cache.keys()
