@@ -39,7 +39,8 @@ class FileData:
         to_dict: returns a dictionary representation of the instance
         set_version: set the version of the file given the version control
         system used
-        set_checksum: set the checksum of the file given the checksum type'''
+        set_checksum: set the checksum of the file given the checksum type
+        fill: fill data into the object instance from a dictionary'''
     def __init__(self,
                  name,
                  path,
@@ -194,3 +195,23 @@ class FileData:
         else:
             success = False
         return success
+
+    def merge(self, other):
+        '''Compare another FileData object to this instance. If the checksum
+        (contents) and the file path (location) are the same, we fill in the
+        rest of the data'''
+        if not isinstance(other, FileData):
+            return False
+        if (self.path == other.path and
+                self.checksum_type == other.checksum_type and
+                self.checksum == other.checksum):
+            self.date = other.date
+            self.file_type = other.file_type
+            self.licenses = other.licenses
+            self.license_expressions = other.license_expressions
+            self.copyrights = other.copyrights
+            self.authors = other.authors
+            self.packages = other.packages
+            self.urls = other.urls
+            return True
+        return False

@@ -121,6 +121,37 @@ class TestClassFileData(unittest.TestCase):
         self.assertEqual(f.origins.origins[0].notices[2].message,
                          'No metadata for key: version_control')
 
+    def testMerge(self):
+        file1 = FileData('switch_root', 'sbin/switch_root')
+        file1.set_checksum('sha256', '123abc456def')
+        file1.extattrs = '-rwxr-xr-x|1000|1000|14408|1'
+        file2 = FileData('switch_root', 'sbin/switch_root')
+        file2.set_checksum('sha256', '123abc456def')
+        file2.extattrs = '-rwxr-xr-x|1000|1000|14408|1'
+        file2.date = '2012-02-02'
+        file2.file_type = 'binary'
+        file2.licenses = ['MIT', 'GPL']
+        file2.license_expressions = ['MIT or GPL']
+        file2.copyrights = ['copyrights']
+        file2.authors = ['author1', 'author2']
+        file2.packages = ['package1', 'package2']
+        file2.urls = ['url1', 'url2']
+        file3 = FileData('switch_root', 'sbin/switch_root')
+        file3.set_checksum('sha256', '456def123abc')
+        file4 = FileData('e2image', 'sbin/e2image')
+        self.assertFalse(file1.merge(file4))
+        self.assertFalse(file1.merge(file3))
+        self.assertFalse(file1.merge('astring'))
+        self.assertTrue(file1.merge(file2))
+        self.assertEqual(file1.date, '2012-02-02')
+        self.assertEqual(file1.file_type, 'binary')
+        self.assertEqual(file1.licenses, ['MIT', 'GPL'])
+        self.assertEqual(file1.license_expressions, ['MIT or GPL'])
+        self.assertEqual(file1.copyrights, ['copyrights'])
+        self.assertEqual(file1.authors, ['author1', 'author2'])
+        self.assertEqual(file1.packages, ['package1', 'package2'])
+        self.assertEqual(file1.urls, ['url1', 'url2'])
+
 
 if __name__ == '__main__':
     unittest.main()
