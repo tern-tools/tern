@@ -14,10 +14,12 @@ class TestAnalyzeDockerDockerfile(unittest.TestCase):
         self.buildpack = 'tests/dockerfiles/buildpack_deps_jessie_curl'
         self.buildpackpinned = 'tests/dockerfiles/buildpack_deps_jessie_pinned'
         self.golang = 'tests/dockerfiles/golang_1.13_stretch'
+        self.buildpackarg = 'tests/dockerfiles/buildpack_deps_jessie_arg'
 
     def tearDown(self):
         del self.buildpack
         del self.golang
+        del self.buildpackarg
 
     def testDockerfileObject(self):
         dfobj = dockerfile.Dockerfile()
@@ -101,6 +103,15 @@ class TestAnalyzeDockerDockerfile(unittest.TestCase):
                                        'tag': '',
                                        'digest_type': 'sha256',
                                        'digest': debian_digest}])
+
+    def testExpandArg(self):
+        dfobj = dockerfile.get_dockerfile_obj(self.buildpackarg)
+        dockerfile.expand_arg(dfobj)
+        replace_content = 'FROM debian:jessie\n'
+        replace_value = 'debian:jessie'
+        struct = dfobj.structure[1]
+        self.assertEqual(struct['value'], replace_value)
+        self.assertEqual(struct['content'], replace_content)
 
 
 if __name__ == '__main__':
