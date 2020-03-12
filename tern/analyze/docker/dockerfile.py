@@ -112,6 +112,25 @@ def expand_vars(dfobj):
             replace_env(dfobj.prev_env, obj)
 
 
+def expand_arg(dfobj):
+    '''Replace the ARG variables with their values if known
+    dfobj: the Dockerfile object created using get_dockerfile_obj'''
+    # get arg dictionary
+    arg_dict = {}
+    for instruction_desc in dfobj.structure:
+        if instruction_desc['instruction'] == 'ARG':
+            instruction_value_split = instruction_desc['value'].split('=')
+            # contains '='
+            if len(instruction_value_split) == 2:
+                key = instruction_value_split[0].strip(' ')
+                value = instruction_value_split[1].strip(' ')
+                arg_dict[key] = value
+    # expand arg variables
+    if arg_dict:
+        for obj in dfobj.structure:
+            replace_env(arg_dict, obj)
+
+
 def parse_from_image(dfobj):
     '''Get a list of dictionaries from the FROM instruction. The dictionary
     should be of the form:
