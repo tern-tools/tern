@@ -75,7 +75,7 @@ def analyze_file(layer_obj):
     # run scancode against each file
     command = 'scancode -ilpcu --quiet --json -'
     for fd in layer_obj.files:
-        full_cmd = get_file_command(layer_obj.tar_file, fd.path, command)
+        full_cmd = get_file_command(layer_obj.tar_file, fd, command)
         origin_file = 'File: ' + fd.path
         result, error = rootfs.shell_command(True, full_cmd)
         if not result:
