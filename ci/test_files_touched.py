@@ -76,6 +76,7 @@ test_suite = {
     # tern/analyze/docker
     re.compile('tern/analyze/docker'): [
         'python tests/test_analyze_docker_dockerfile.py',
+        'python tests/test_analyze_common.py',
         'tern -l report -i golang:alpine',
         'tern -l report -d samples/alpine_python/Dockerfile'],
     # tern/report
@@ -97,6 +98,8 @@ test_suite = {
         'tern -l report -i golang:alpine',
         'tern -l report -d samples/alpine_python/Dockerfile'],
     # tests
+    re.compile('tests/test_analyze_common.py'):
+        ['python tests/test_analyze_common.py'],
     re.compile('tests/test_class_command.py'):
         ['python tests/test_class_command.py'],
     re.compile('tests/test_class_docker_image.py'):
