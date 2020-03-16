@@ -11,6 +11,7 @@ import logging
 import os
 
 from tern.classes.package import Package
+from tern.classes.file_data import FileData
 from tern.classes.notice import Notice
 from tern.classes.command import Command
 from tern.command_lib import command_lib
@@ -37,22 +38,71 @@ def get_shell_commands(shell_command_line):
 
 def load_from_cache(layer, redo=False):
     '''Given a layer object, check against cache to see if that layer id exists
-    if yes then get the package list and load it in the layer and return true.
-    If it doesn't exist return false. Default operation is to not redo the
-    cache. Add notices to the layer's origins matching the origin_str'''
+    if yes then load any relevant layer level information. The default
+    operation is to not redo the cache. Add notices to the layer's origins
+    matching the origin_str'''
     loaded = False
-    if not layer.packages and not redo:
-        # there are no packages in this layer and we are not repopulating the
-        # cache, try to get it from the cache
-        raw_pkg_list = cache.get_packages(layer.fs_hash)
-        if raw_pkg_list:
-            logger.debug('Loaded from cache: layer \"%s\"', layer.fs_hash[:10])
-            for pkg_dict in raw_pkg_list:
-                pkg = Package(pkg_dict['name'])
-                pkg.fill(pkg_dict)
-                layer.add_package(pkg)
-            load_notices_from_cache(layer)
+    if not redo:
+        # check if packages are available in the cache
+        if load_packages_from_cache(layer):
             loaded = True
+        # check if files are available in the cache
+        if load_files_from_cache(layer):
+            loaded = True
+        # load some extra properties into the layer if available
+        if layer.fs_hash in cache.get_layers():
+            layer.files_analyzed = cache.cache[layer.fs_hash]['files_analyzed']
+            # load any origin data
+            load_notices_from_cache(layer)
+    return loaded
+
+
+def load_packages_from_cache(layer):
+    '''Given a layer object, populate package level information'''
+    loaded = False
+    raw_pkg_list = cache.get_packages(layer.fs_hash)
+    if raw_pkg_list:
+        logger.debug(
+            'Loading packages from cache: layer \"%s\"', layer.fs_hash[:10])
+        for pkg_dict in raw_pkg_list:
+            pkg = Package(pkg_dict['name'])
+            pkg.fill(pkg_dict)
+            # collect package origins
+            if 'origins' in pkg_dict.keys():
+                for origin_dict in pkg_dict['origins']:
+                    for notice in origin_dict['notices']:
+                        pkg.origins.add_notice_to_origins(
+                            origin_dict['origin_str'], Notice(
+                                notice['message'], notice['level']))
+            layer.add_package(pkg)
+        loaded = True
+    return loaded
+
+
+def load_files_from_cache(layer):
+    '''Given a layer object, populate file level information'''
+    loaded = False
+    raw_file_list = cache.get_files(layer.fs_hash)
+    if raw_file_list:
+        logger.debug(
+            'Loading files from cache: layer \"%s\"', layer.fs_hash[:10])
+        for file_dict in raw_file_list:
+            f = FileData(file_dict['name'], file_dict['path'])
+            f.fill(file_dict)
+            # collect file origins
+            if 'origins' in file_dict.keys():
+                for origin_dict in file_dict['origins']:
+                    for notice in origin_dict['notices']:
+                        f.origins.add_notice_to_origins(
+                            origin_dict['origin_str'], Notice(
+                                notice['message'], notice['level']))
+            layer.add_file(f)
+            loaded = True
+    else:
+        # if there are no files, generate them from the pre-calculated
+        # hash file
+        logger.debug('Reading files in filesystem...')
+        layer.add_files()
     return loaded
 
 
@@ -70,7 +120,7 @@ def load_notices_from_cache(layer):
 def save_to_cache(image):
     '''Given an image object, save all layers to the cache'''
     for layer in image.layers:
-        if layer.packages:
+        if layer.packages or layer.files_analyzed:
             cache.add_layer(layer)
 
 
