@@ -100,14 +100,10 @@ def get_os_release():
                             constants.etc_release_path)
     lib_path = os.path.join(rootfs.get_working_dir(), constants.mergedir,
                             constants.lib_release_path)
-    tern_path = command_lib.base_file
     if not os.path.exists(etc_path):
         if not os.path.exists(lib_path):
-            if not tern_path:
-                return ''
-            etc_path = tern_path
-        else:
-            etc_path = lib_path
+            return ''
+        etc_path = lib_path
     # file exists at this point, try to read it
     with open(etc_path, 'r') as f:
         lines = f.readlines()
