@@ -16,9 +16,10 @@ The expected environment is as follows:
 
 import json
 import logging
+import os
 
 from tern.analyze.passthrough import get_filesystem_command
-from tern.analyze.passthrough import get_file_command
+from tern.analyze import common
 from tern.classes.notice import Notice
 from tern.classes.file_data import FileData
 from tern.extensions.executor import Executor
@@ -29,10 +30,12 @@ from tern.utils import rootfs
 logger = logging.getLogger(constants.logger_name)
 
 
-def analyze_layer(layer_obj):
-    '''Use scancode to analyze the layer's contents. Create file objects
-    and add them to the layer object. Add any Notices to the FileData objects
+def collect_layer_data(layer_obj):
+    '''Use scancode to collect data from a layer filesystem. This function will
+    create a FileData object for every file found. After scanning, it will
+    return a list of FileData objects.
     '''
+    files = []
     # run scancode against a directory
     command = 'scancode -ilpcu --quiet --json -'
     full_cmd = get_filesystem_command(layer_obj, command)
@@ -48,8 +51,12 @@ def analyze_layer(layer_obj):
         data = json.loads(result)
         for f in data['files']:
             if f['type'] == 'file':
-                fd = FileData(f['name'], f['path'], f['date'], f['file_type'])
-                fd.set_checksum('sha1', f['sha1'])
+                # scancode records paths from the target directory onwards
+                # which in tern's case is tern.utils.constants.untar_dir
+                # removing that portion of the file path
+                fspath = f['path'].replace(
+                    constants.untar_dir + os.path.sep, '')
+                fd = FileData(f['name'], fspath, f['date'], f['file_type'])
                 if f['licenses']:
                     fd.licenses = [l['short_name'] for l in f['licenses']]
                 fd.license_expressions = f['license_expressions']
@@ -58,52 +65,27 @@ def analyze_layer(layer_obj):
                 if f['urls']:
                     fd.urls = [u['url'] for u in f['urls']]
                 fd.packages = f['packages']
-                fd.authors = f['authors']
+                fd.authors = [a['value'] for a in f['authors']]
                 if f['scan_errors']:
                     # for each scan error make a notice
                     for err in f['scan_errors']:
                         fd.origins.add_notice_to_origins(
                             'File: ' + fd.path, Notice(err, 'error'))
-                # add filedata object to layer
-                layer_obj.add_file(fd)
+                files.append(fd)
+    return files
 
 
-def analyze_file(layer_obj):
-    '''Use scancode to analyze files Tern has already found in an image layer.
-    For each file in the layer, run scancode on the file. We assume that we
-    already have the files names, paths and checksums filled out'''
-    # run scancode against each file
-    command = 'scancode -ilpcu --quiet --json -'
-    for fd in layer_obj.files:
-        full_cmd = get_file_command(layer_obj.tar_file, fd, command)
-        origin_file = 'File: ' + fd.path
-        result, error = rootfs.shell_command(True, full_cmd)
-        if not result:
-            logger.error(
-                "No scancode results for this file: %s", str(error))
-            fd.origins.add_notice_to_origins(
-                origin_file, Notice(str(error), 'error'))
-        else:
-            # Fill the results into the FileData object
-            data = json.loads(result)['files'][0]
-            fd.date = data['date']
-            fd.file_type = data['file_type']
-            if data['licenses']:
-                fd.licenses = [l['short_name'] for l in data['licenses']]
-            fd.license_expressions = data['license_expressions']
-            if data['copyrights']:
-                fd.copyrights = [c['value'] for c in data['copyrights']]
-            if data['urls']:
-                fd.urls = [u['url'] for u in data['urls']]
-            fd.packages = data['packages']
-            fd.authors = data['authors']
-            if data['scan_errors']:
-                # for each scan error make a notice
-                for err in data['scan_errors']:
-                    fd.origins.add_notice_to_origins(
-                        origin_file, Notice(err, 'error'))
-            # add filedata object to layer
-            layer_obj.add_file(fd)
+def add_file_data(layer_obj, collected_files):
+    '''Use the file data collected with scancode to fill in the file level
+    data for an ImageLayer object'''
+    # we'll assume that we are merging the collected_files data with
+    # the file level data already in the layer object
+    logger.debug("Collecting file data...")
+    while collected_files:
+        checkfile = collected_files.pop()
+        for f in layer_obj.files:
+            if f.merge(checkfile):
+                break
 
 
 class Scancode(Executor):
@@ -113,12 +95,13 @@ class Scancode(Executor):
             scancode -ilpcu --quiet --json - /path/to/directory
         '''
         for layer in image_obj.layers:
-            layer.files_analyzed = True
-            if layer.files:
-                # If the layer already has files processed, then run
-                # scancode per file
-                analyze_file(layer)
-            else:
-                # If there was no file processing done, scancode will process
-                # them for you
-                analyze_layer(layer)
+            # load the layers from cache
+            common.load_from_cache(layer)
+            if not layer.files_analyzed:
+                # the layer doesn't have analyzed files, so run analysis
+                file_list = collect_layer_data(layer)
+                if file_list:
+                    add_file_data(layer, file_list)
+                    layer.files_analyzed = True
+        # save data to the cache
+        common.save_to_cache(image_obj)

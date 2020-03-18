@@ -97,6 +97,8 @@ class TestClassDockerImage(unittest.TestCase):
 
     def testLayerFiles(self):
         self.image.load_image()
+        self.assertFalse(self.image.layers[0].files)
+        self.image.layers[0].add_files()
         for file in self.image.layers[0].files:
             self.assertTrue(
                 (file.name, file.path, file.checksum,
