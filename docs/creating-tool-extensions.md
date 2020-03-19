@@ -30,13 +30,13 @@ To test out your plugin run:
 
 ```
 $ pip install -e.[dev]
-$ tern -l report -x custom -i <image:tag>
+$ tern report -x custom -i <image:tag>
 ```
 
 To test out the different formats for your plugin run:
 
 ```
-$ tern -l report -x custom -f <format> -i <image:tag>
+$ tern report -x custom -f <format> -i <image:tag>
 ```
 
 where <format> is one of Tern's supported formats. To see what formats are supported, run `tern report --help`.

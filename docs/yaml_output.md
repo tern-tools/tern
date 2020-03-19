@@ -2,7 +2,7 @@
 
 You can get the results in a YAML file to be consumed by a downstream tool or script.
 
-`$ tern -l report -f yaml -i golang:1.12-alpine -o output.yaml`
+`$ tern report -f yaml -i golang:1.12-alpine -o output.yaml`
 
 A YAML format output file starts with line comments indicating the version of Tern. It has a `image` key(image.py) corresponding to the analyzed image. Here are the subkeys and their description:
 
