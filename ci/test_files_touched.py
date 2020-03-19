@@ -35,7 +35,7 @@ if not changes:
 
 test_suite = {
     # requirements.txt
-    re.compile('requirements.txt'): ['tern -l report -i photon:3.0'],
+    re.compile('requirements.txt'): ['tern report -i photon:3.0'],
     # Dockerfile
     re.compile('Dockerfile'): [
         'python3 setup.py sdist && '
@@ -43,12 +43,12 @@ test_suite = {
         './docker_run.sh workdir ternd "report -i golang:alpine"'],
     # Files under tern directory
     re.compile('tern/__init__.py|tern/__main__.py'):
-    ['tern -l report -i golang:alpine'],
+    ['tern  report -i golang:alpine'],
     # tern/classes
     re.compile('tern/classes/command.py'):
     ['python tests/test_class_command.py'],
     re.compile('tern/classes/docker_image.py'):
-    ['tern -l report -i photon:3.0'],
+    ['tern report -i photon:3.0'],
     re.compile('tern/classes/file_data.py'):
     ['python tests/test_class_file_data.py'],
     re.compile('tern/classes/image.py'):
@@ -65,38 +65,38 @@ test_suite = {
     ['python tests/test_class_package.py'],
     re.compile('tern/classes/template.py'):
     ['python tests/test_class_template.py',
-     'tern -l report -f spdxtagvalue -i photon:3.0'],
+     'tern report -f spdxtagvalue -i photon:3.0'],
     # tern/command_lib
     re.compile('tern/command_lib'): [
-        'tern -l report -i photon:3.0',
-        'tern -l report -i debian:buster',
-        'tern -l report -i alpine:3.9',
-        'tern -l report -i archlinux:latest',
-        'tern -l report -i centos:7'],
+        'tern report -i photon:3.0',
+        'tern report -i debian:buster',
+        'tern report -i alpine:3.9',
+        'tern report -i archlinux:latest',
+        'tern report -i centos:7'],
     # tern/analyze/docker
     re.compile('tern/analyze/docker'): [
         'python tests/test_analyze_docker_dockerfile.py',
         'python tests/test_analyze_common.py',
-        'tern -l report -i golang:alpine',
-        'tern -l report -d samples/alpine_python/Dockerfile'],
+        'tern report -i golang:alpine',
+        'tern report -d samples/alpine_python/Dockerfile'],
     # tern/report
     re.compile('tern/report'): [
-        'tern -l report -i golang:alpine',
-        'tern -l report -f yaml -i photon:3.0',
-        'tern -l report -f json -i photon:3.0',
-        'tern -l report -f spdxtagvalue -i photon:3.0',
-        'tern -l report -d samples/alpine_python/Dockerfile'],
+        'tern report -i golang:alpine',
+        'tern report -f yaml -i photon:3.0',
+        'tern report -f json -i photon:3.0',
+        'tern report -f spdxtagvalue -i photon:3.0',
+        'tern report -d samples/alpine_python/Dockerfile'],
     # tern/formats/spdx
     re.compile('tern/formats/spdx'): [
-        'tern -l report -f spdxtagvalue -i photon:3.0'],
+        'tern report -f spdxtagvalue -i photon:3.0'],
     # tern/tools
     re.compile('tern/tools'):
-    ['tern -l report -i golang:alpine'],
+    ['tern report -i golang:alpine'],
     # tern/utils
     re.compile('tern/utils'): [
         'python tests/test_util_general.py',
-        'tern -l report -i golang:alpine',
-        'tern -l report -d samples/alpine_python/Dockerfile'],
+        'tern report -i golang:alpine',
+        'tern report -d samples/alpine_python/Dockerfile'],
     # tests
     re.compile('tests/test_analyze_common.py'):
         ['python tests/test_analyze_common.py'],
