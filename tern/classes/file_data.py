@@ -34,6 +34,7 @@ class FileData:
         authors: a list of authors if known
         packages: a list of packages where this file could come from
         urls: a list of urls from where this file could come from
+        checksums: a list of tuples of the form (checksum_type, checksum)
 
     methods:
         to_dict: returns a dictionary representation of the instance
@@ -61,6 +62,7 @@ class FileData:
         self.authors = []
         self.packages = []
         self.urls = []
+        self.__checksums = []
         self.__origins = Origins()
 
     @property
@@ -118,6 +120,14 @@ class FileData:
         self.__file_type = file_type
 
     @property
+    def checksums(self):
+        return self.__checksums
+
+    @checksums.setter
+    def checksums(self, checksums):
+        self.__checksums = checksums
+
+    @property
     def origins(self):
         return self.__origins
 
@@ -132,6 +142,11 @@ class FileData:
         # TODO: find the version given the version control system
         self.__version_control = version_control
         self.__version = version
+
+    def add_checksums(self, checksums):
+        '''Add checksum tuples to checksums property'''
+        for checksum in checksums:
+            self.__checksums.append(checksum)
 
     def to_dict(self, template=None):
         '''Return a dictionary version of the FileData object
@@ -185,6 +200,7 @@ class FileData:
             authors: <authors>
             packages: <packages>
             urls: <urls>
+            checksums: <checksums>
         the way to use this method is to instantiate the class with the
         name and path and then give it a file_data dictionary to fill
         in the rest return true if package name is the same as the one
@@ -213,6 +229,7 @@ class FileData:
             self.authors = other.authors
             self.packages = other.packages
             self.urls = other.urls
+            self.checksums = other.checksums
             # collect notices
             for o in other.origins.origins:
                 for n in o.notices:
