@@ -26,6 +26,9 @@ class FileData:
         version: the version of the file under version control. If it came
         with a package the version would be the same as the package version.
         file_type: this is a string describing what type of file this is
+        short_file_type: this is a short string describing what type of file
+        this is. This should be one of the following:
+            SOURCE, BINARY, ARCHIVE, TEXT, OTHER
         licenses: A list of licenses that may be detected or is known
         license_expressions: This is a SPDX term used to describe how one or
         more licenses together should be understood. This list may be left
@@ -51,6 +54,7 @@ class FileData:
         self.__path = path
         self.date = date
         self.__file_type = file_type
+        self.__short_file_type = ''
         self.__checksum_type = ''
         self.__checksum = ''
         self.__version_control = ''
@@ -128,6 +132,21 @@ class FileData:
         self.__checksums = checksums
 
     @property
+    def short_file_type(self):
+        return self.__short_file_type
+
+    @short_file_type.setter
+    def short_file_type(self, short_file_type):
+        '''short_file_type should be one of these:
+            SOURCE, BINARY, ARCHIVE, TEXT, OTHER'''
+        allowed_file_types = ('SOURCE', 'BINARY', 'ARCHIVE', 'TEXT', 'OTHER')
+        if short_file_type not in allowed_file_types:
+            raise ValueError(
+                "Incorrect short file type name, should be "
+                "SOURCE, BINARY, ARCHIVE, TEXT or OTHER")
+        self.__short_file_type = short_file_type
+
+    @property
     def origins(self):
         return self.__origins
 
@@ -189,6 +208,7 @@ class FileData:
             path: <path to file>
             date: <date>
             file_type: <file_type>
+            short_file_type: <short_file_type>
             checksum: <checksum>
             checksum_type: <checksum_type>
             version_control: <version_control>
@@ -223,6 +243,8 @@ class FileData:
         if (self.path == other.path):
             self.date = other.date
             self.file_type = other.file_type
+            if other.short_file_type:
+                self.short_file_type = other.short_file_type
             self.licenses = other.licenses
             self.license_expressions = other.license_expressions
             self.copyrights = other.copyrights

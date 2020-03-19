@@ -31,6 +31,7 @@ class TestClassFileData(unittest.TestCase):
         self.assertFalse(file1.version_control)
         self.assertFalse(file1.version)
         self.assertFalse(file1.file_type)
+        self.assertFalse(file1.short_file_type)
         self.assertFalse(file1.licenses)
         self.assertFalse(file1.license_expressions)
         self.assertFalse(file1.copyrights)
@@ -44,6 +45,10 @@ class TestClassFileData(unittest.TestCase):
                              '12355')
         file1.file_type = 'ELF'
         self.assertEqual(file1.file_type, 'ELF')
+        with self.assertRaises(ValueError):
+            file1.short_file_type = 'SOMETHING'
+        file1.short_file_type = 'BINARY'
+        self.assertEqual(file1.short_file_type, 'BINARY')
         file2 = FileData('file2',
                          'path/to/file2',
                          '2020-01-01',
@@ -128,13 +133,13 @@ class TestClassFileData(unittest.TestCase):
                          [('SHA1', '12345abcde'),
                           ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')]
                          )
+        self.assertEqual(f.origins.origins[0].notices[0].message,
+                         'No metadata for key: date')
         self.assertEqual(f.origins.origins[0].notices[1].message,
                          'No metadata for key: file_type')
         self.assertEqual(f.origins.origins[0].notices[1].level, 'warning')
-        self.assertEqual(f.origins.origins[0].notices[0].message,
-                         'No metadata for key: date')
         self.assertEqual(f.origins.origins[0].notices[2].message,
-                         'No metadata for key: version_control')
+                         'No metadata for key: short_file_type')
 
     def testMerge(self):
         file1 = FileData('switch_root', 'sbin/switch_root')
@@ -147,6 +152,7 @@ class TestClassFileData(unittest.TestCase):
         file2.extattrs = '-rwxr-xr-x|1000|1000|14408|1'
         file2.date = '2012-02-02'
         file2.file_type = 'binary'
+        file2.short_file_type = 'BINARY'
         file2.licenses = ['MIT', 'GPL']
         file2.license_expressions = ['MIT or GPL']
         file2.copyrights = ['copyrights']
@@ -169,6 +175,7 @@ class TestClassFileData(unittest.TestCase):
                           ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
         self.assertEqual(file1.date, '2012-02-02')
         self.assertEqual(file1.file_type, 'binary')
+        self.assertEqual(file1.short_file_type, 'BINARY')
         self.assertEqual(file1.licenses, ['MIT', 'GPL'])
         self.assertEqual(file1.license_expressions, ['MIT or GPL'])
         self.assertEqual(file1.copyrights, ['copyrights'])
