@@ -14,5 +14,5 @@ RUN pip3 install --upgrade pip && pip3 install tern
 # make a mounting directory
 RUN mkdir hostmount
 
-ENTRYPOINT ["tern", "-b", "/hostmount"]
+ENTRYPOINT ["tern", "-q", "-b", "/hostmount"]
 CMD ["-h"]

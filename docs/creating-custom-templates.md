@@ -100,7 +100,7 @@ tern.formats =
 
 In order to register your plugin you need to add it to the list of format entry points. The value to the left of the `=` is the value you would use to run Tern from the command line. The value to the right of the `=` is where Stevedore tries to find the plugin at runtime. Let's take the spdxtagvalue report plugin as an example. If a user invokes Tern using the spdxtagvalue reporting style, Stevedore will look at the `tern/formats/spdx/spdxtagvalue/generator.py` file. Inside the `generator.py` file, Stevedore will look for the `generate()` function inside the `SpdxTagValue` subclass. There may also be other functions present in the `generator.py` file (which can be included or not included in the `SpdxTagValue` class) but the `generate()` function is what tells Tern how to get information and structure it in the output report. It is also important to note that the SpdxTagValue class inside `generator.py` must be derived from the Generate base class in `tern/formats/generator.py`.
 
-Continuing with the example from step #2, if you wanted to enable your `custom` plugin you would make the following change to `setup.cfg` and then invoke Tern using `tern -l report -f custom -i <image> -o <output_file>`
+Continuing with the example from step #2, if you wanted to enable your `custom` plugin you would make the following change to `setup.cfg` and then invoke Tern using `tern report -f custom -i <image> -o <output_file>`
 
 ```
  tern.formats =

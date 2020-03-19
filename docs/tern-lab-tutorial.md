@@ -43,7 +43,7 @@ Tern is now ready to be used to inspect Docker container images.
 ### Option 1: Generate the default report for a container image
 
 ```
-$ tern -l report -o output.txt -i photon:3.0
+$ tern report -o output.txt -i photon:3.0
 ```
 
 Look at the report generated in `output.txt`.
@@ -64,7 +64,7 @@ Repeat as desired for any Docker container image of your choosing.
 ### Option 2:  Generate a YAML report for the container image
 
 ```
-$ tern -l report -i photon:3.0 -f yaml -o yaml.txt
+$ tern report -i photon:3.0 -f yaml -o yaml.txt
 ```
 
 Look at the report generated in `yaml.txt`. Specifically, notice:  
@@ -76,7 +76,7 @@ Repeat as desired for any Docker container image of your choosing.
 ### Option 3: Generate a JSON report for the container image
 
 ```
-$ tern -l report -i photon:3.0 -f json -o json.txt
+$ tern report -i photon:3.0 -f json -o json.txt
 ```
 
 Repeat as desired for any Docker container image of your choosing.
@@ -88,7 +88,7 @@ Repeat as desired for any Docker container image of your choosing.
 #### Step 1: Generate the SPDX tag-value report
 
 ```
-$ tern -l report -i photon:3.0 -f spdxtagvalue -o spdx.txt
+$ tern report -i photon:3.0 -f spdxtagvalue -o spdx.txt
 ```
 
 #### Step 2: Check if your SPDX report validates
@@ -122,7 +122,7 @@ $ vi demo/Dockerfile
 Run Tern using the newly-created Dockerfile. You should see a similar list of packages in the output report as you did in the first `output.txt` file you created.
 
 ```
-$ tern -l report -d demo/Dockerfile -o dockerfile.txt
+$ tern report -d demo/Dockerfile -o dockerfile.txt
 ```
 	
 ## Get Involved with Tern

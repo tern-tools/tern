@@ -18,5 +18,5 @@ RUN pip install tern-*.tar.gz
 # make a mounting directory
 RUN mkdir hostmount
 
-ENTRYPOINT ["tern", "-b", "/hostmount"]
+ENTRYPOINT ["tern", "-q", "-b", "/hostmount"]
 CMD ["-h"]
