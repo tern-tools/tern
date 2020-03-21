@@ -21,6 +21,7 @@ from tern.classes.image import Image
 from tern.classes.package import Package
 from tern.analyze.docker.analyze import analyze_docker_image
 from tern.analyze.passthrough import run_extension
+from tern.analyze.docker import dockerfile
 
 
 # global logger
@@ -58,13 +59,16 @@ def get_dockerfile_packages():
     return stub_image
 
 
-def analyze(image_obj, args, is_dockerfile=False):
+def analyze(image_obj, args, is_dockerfile=False, dfobj=None):
     '''Analyze the image object either using the default method or the extended
     method'''
-    if args.extend:
-        run_extension(image_obj, args.extend)
+    if args.name == 'report':
+        if args.extend:
+            run_extension(image_obj, args.extend)
+        else:
+            analyze_docker_image(image_obj, args.redo, is_dockerfile)
     else:
-        analyze_docker_image(image_obj, args.redo, is_dockerfile)
+        analyze_docker_image(image_obj, args.redo, is_dockerfile, dfobj)
 
 
 def execute_docker_image(args):
@@ -103,7 +107,14 @@ def execute_dockerfile(args):
     '''Execution path if given a dockerfile'''
     container.check_docker_setup()
     logger.debug('Setting up...')
-    report.setup(dockerfile=args.dockerfile)
+    dfile = ''
+    dfobj = None
+    if args.name == 'report':
+        dfile = args.dockerfile
+    else:
+        dfile = args.lock
+        dfobj = dockerfile.get_dockerfile_obj(args.lock)
+    report.setup(dockerfile=dfile)
     # attempt to build the image
     logger.debug('Building Docker image...')
     # placeholder to check if we can analyze the full image
@@ -117,9 +128,9 @@ def execute_dockerfile(args):
             # image loading was successful
             # Add an image origin here
             full_image.origins.add_notice_origin(
-                formats.dockerfile_image.format(dockerfile=args.dockerfile))
+                formats.dockerfile_image.format(dockerfile=dfile))
             # analyze image
-            analyze(full_image, args, True)
+            analyze(full_image, args, True, dfobj)
         else:
             # we cannot load the full image
             logger.warning('Cannot retrieve full image metadata')
@@ -141,24 +152,34 @@ def execute_dockerfile(args):
             # image loading was successful
             # add a notice stating failure to build image
             base_image.origins.add_notice_to_origins(
-                args.dockerfile, Notice(
+                dfile, Notice(
                     formats.image_build_failure, 'warning'))
-            # analyze image
-            analyze(base_image, args)
+            if dfobj is not None:
+                # analyze for dockerfile lock
+                analyze(base_image, args, True, dfobj)
+            else:
+                # analyze image
+                analyze(base_image, args)
         else:
             # we cannot load the base image
             logger.warning('Cannot retrieve base image metadata')
-        # run through commands in the Dockerfile
-        logger.debug('Parsing Dockerfile to generate report...')
         stub_image = get_dockerfile_packages()
-        if not args.keep_wd:
-            report.clean_image_tars(base_image)
+        if args.name == 'report':
+            if not args.keep_wd:
+                report.clean_image_tars(base_image)
     # generate report based on what images were created
     if completed:
-        report.report_out(args, full_image)
+        if args.name == 'report':
+            report.report_out(args, full_image)
     else:
-        report.report_out(args, base_image, stub_image)
+        if args.name == 'report':
+            report.report_out(args, base_image, stub_image)
+    if args.name == 'lock':
+        logger.debug('Parsing Dockerfile to generate report...')
+        output = dockerfile.create_locked_dockerfile(dfobj)
+        dockerfile.write_locked_dockerfile(output, args.output_file)
     logger.debug('Teardown...')
     report.teardown()
-    if not args.keep_wd:
-        report.clean_working_dir()
+    if args.name == 'report':
+        if not args.keep_wd:
+            report.clean_working_dir()
