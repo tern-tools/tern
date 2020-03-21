@@ -103,7 +103,7 @@ def execute_docker_image(args):
         report.clean_working_dir()
 
 
-def execute_dockerfile(args):
+def execute_dockerfile(args):  # noqa C901,R0912
     '''Execution path if given a dockerfile'''
     container.check_docker_setup()
     logger.debug('Setting up...')
