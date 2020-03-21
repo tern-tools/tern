@@ -372,15 +372,24 @@ def remove_unrecognized_commands(command_list):
 
 def consolidate_commands(command_list):
     '''Given a list of Command objects, consolidate the install and remove
-    commands into one and return a list of resulting command objects'''
+    commands into one install command and return a list of resulting
+    command objects'''
     new_list = []
+
+    if len(command_list) == 1:
+        new_list.append(command_list.pop(0))
+
     while command_list:
         first = command_list.pop(0)
         for _ in range(0, len(command_list)):
             second = command_list.pop(0)
-            if not first.merge(second):
-                command_list.append(first)
-        new_list.append(first)
+            if first.is_remove() and second.is_install():
+                # if remove then install, ignore the remove command
+                new_list.append(second)
+            else:
+                if not first.merge(second):
+                    command_list.append(first)
+                new_list.append(first)
     return new_list
 
 
