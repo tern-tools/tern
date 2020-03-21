@@ -290,3 +290,13 @@ def check_os_guess(binary):
         return ', '.join(os_list)
     except KeyError:
         return ''
+
+
+def check_pinning_separator(binary):
+    '''Given a binary package manager, return the associated pinning_separator
+    from base.yml. If the binary is not valid in base.yml, return an empty
+    string.'''
+    try:
+        return command_lib['base'][binary]['pinning_separator']
+    except KeyError:
+        return ''
