@@ -46,6 +46,7 @@ package_license = '''License: {package_license}\n'''
 package_copyright = '''Copyright Text: {package_copyright}\n'''
 layer_packages_list = '''\tPackages found in Layer:  {list}\n'''
 layer_licenses_list = '''\tLicenses found in Layer:  {list}\n'''
+layer_file_licenses_list = '''\tFile licenses found in Layer:  {list}\n'''
 full_licenses_list = '''###########################################\n'''\
     '''# Summary of licenses found in Container: #\n'''\
     '''###########################################\n{list}\n'''

@@ -29,11 +29,24 @@ def print_full_report(image):
         if layer.import_image:
             notes = notes + print_full_report(layer.import_image)
         else:
-            for layer_origin in layer.origins.origins:
-                notes = notes + content.print_notices(layer_origin,
-                                                      '\t', '\t\t')
+            if len(layer.origins.origins) == 0:
+                notes += '\tLayer: {0}:\n'.format(layer.fs_hash[:10])
+            else:
+                for layer_origin in layer.origins.origins:
+                    notes = notes + content.print_notices(layer_origin,
+                                                          '\t', '\t\t')
             layer_pkg_list = []
             layer_license_list = []
+            layer_file_licenses_list = []
+            file_level_licenses = None
+
+            for f in layer.files:
+                layer_file_licenses_list.extend(f.license_expressions)
+
+            layer_file_licenses_list = list(set(layer_file_licenses_list))
+            if layer_file_licenses_list:
+                file_level_licenses = ", ".join(layer_file_licenses_list)
+
             for package in layer.packages:
                 pkg = package.name + "-" + package.version
                 if pkg not in layer_pkg_list and pkg:
@@ -41,10 +54,13 @@ def print_full_report(image):
                 if package.pkg_license not in layer_license_list and \
                         package.pkg_license:
                     layer_license_list.append(package.pkg_license)
-            # Collect packages + licenses in the layer
-            notes = notes + formats.layer_packages_list.format(
+
+            # Collect files + packages + licenses in the layer
+            notes += formats.layer_file_licenses_list.format(
+                list=file_level_licenses)
+            notes += formats.layer_packages_list.format(
                 list=", ".join(layer_pkg_list) if layer_pkg_list else 'None')
-            notes = notes + formats.layer_licenses_list.format(list=", ".join(
+            notes += formats.layer_licenses_list.format(list=", ".join(
                 layer_license_list) if layer_license_list else 'None')
             notes = notes + formats.package_demarkation
     return notes
@@ -59,6 +75,12 @@ def print_licenses_only(image_obj_list):
                 if (package.pkg_license and
                         package.pkg_license not in full_license_list):
                     full_license_list.append(package.pkg_license)
+
+            for f in layer.files:
+                for license_expression in f.license_expressions:
+                    if license_expression not in full_license_list:
+                        full_license_list.append(license_expression)
+
     # Collect the full list of licenses from all the layers
     licenses = formats.full_licenses_list.format(list=", ".join(
         full_license_list) if full_license_list else 'None')
