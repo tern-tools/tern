@@ -84,10 +84,13 @@ def do_main(args):
     if args.clear_cache:
         logger.debug('Clearing cache...')
         cache.clear()
-    if hasattr(args, 'name') and args.name == 'report':
-        if args.dockerfile:
+    if hasattr(args, 'name') and (args.name == 'report' or
+                                  args.name == 'lock'):
+        if args.name == 'lock':
             run.execute_dockerfile(args)
-        if args.docker_image:
+        elif args.dockerfile:
+            run.execute_dockerfile(args)
+        elif args.docker_image:
             # Check if the image is of image:tag
             # or image@digest_type:digest format
             if not check_image_string(args.docker_image):
@@ -101,13 +104,14 @@ def do_main(args):
             else:
                 run.execute_docker_image(args)
                 logger.debug('Report completed.')
-        if args.raw_image:
-            if not general.check_tar(args.raw_image):
-                logger.error("%s", errors.invalid_raw_image.format(
-                    image=args.raw_image))
-            else:
-                run.execute_docker_image(args)
-                logger.debug('Report completed.')
+        if args.name == 'report':
+            if args.raw_image:
+                if not general.check_tar(args.raw_image):
+                    logger.error("%s", errors.invalid_raw_image.format(
+                        image=args.raw_image))
+                else:
+                    run.execute_docker_image(args)
+                    logger.debug('Report completed.')
     logger.debug('Finished')
 
 
@@ -172,6 +176,21 @@ def main():
                                "If no file is given the default file in "
                                "utils/constants.py will be used")
     parser_report.set_defaults(name='report')
+    # subparser for dockerfile lock
+    parser_lock = subparsers.add_parser('lock',
+                                        help="Create an annotated Dockerfile"
+                                        " that will pin the information "
+                                        "it finds. Use this option to help "
+                                        "achieve a more repeatable "
+                                        "container image build.")
+    parser_lock.add_argument('lock', metavar='DOCKERFILE',
+                             help="Dockerfile that you want to lock.")
+    parser_lock.add_argument('-o', '--output-file', default=None,
+                             metavar='FILE', help="Write the "
+                             "annotated Dockerfile to a file. If no report "
+                             "is given, a new file, Dockerfile.new, will "
+                             "be created in the current directory.")
+    parser_lock.set_defaults(name='lock')
     args = parser.parse_args()
 
     # execute
