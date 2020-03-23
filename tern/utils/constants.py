@@ -47,3 +47,5 @@ workdir = 'workdir'
 mergedir = 'mergedir'
 # report file
 report_file = 'report.txt'
+# locked dockerfile
+locked_dockerfile = 'Dockerfile.lock'

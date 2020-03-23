@@ -174,6 +174,36 @@ def expand_from_images(dfobj):
             counter = counter + 1
 
 
+def expand_package(command_dict, package, version, pinning_separator):
+    '''Update the given dockerfile object with the pinned package
+    and version information. '''
+    command_dict['value'] = command_dict['value'].replace(package, package +
+                                                          pinning_separator +
+                                                          version, 1)
+    # Update 'content' to match 'value' in dfobj
+    command_dict['content'] = command_dict['instruction'] + ' ' + \
+        command_dict['value'] + '\n'
+
+
+def get_run_layers(dfobj):
+    '''Given a dockerfile object, collect a list of RUN command dictionaries'''
+    run_list = []
+    for command_dict in dfobj.structure:
+        if command_dict['instruction'] == 'RUN':
+            run_list.append(command_dict)
+    return run_list
+
+
+def package_in_dockerfile(command_dict, pkg_name):
+    '''Return True if pkg_name is a package specified in the command_dict
+    RUN line provided, otherwise return False.'''
+    command_words, _ = common.filter_install_commands(command_dict['value'])
+    for command in command_words:
+        if pkg_name in command.words:
+            return True
+    return False
+
+
 def get_command_list(dockerfile_name):
     '''Given a Dockerfile, return a list of Docker commands'''
     with open(dockerfile_name) as f:
@@ -321,7 +351,33 @@ def expand_add_command(dfobj):
         if command_dict['instruction'] == 'ADD':
             comment_line = find_git_info(command_dict['content'],
                                          dockerfile_path)
-            dfobj.structure[i]['content'] = command_dict['content'].strip('\n')\
-                + ' # ' + comment_line + '\n'
+            dfobj.structure[i]['content'] = \
+                command_dict['content'].strip('\n') + \
+                ' # ' + comment_line + '\n'
             dfobj.structure[i]['value'] = command_dict['value']\
                 + ' # ' + comment_line
+
+
+def create_locked_dockerfile(dfobj):
+    '''Given a dockerfile object, the information in a new Dockerfile object
+    Copy the dfobj info to the destination output Dockerfile location'''
+    expand_from_images(dfobj)
+    # packages in run lines are already expanded
+    expand_vars(dfobj)
+    expand_arg(dfobj)
+    expand_add_command(dfobj)
+    # create the output file
+    dfile = ''
+    for command_dict in dfobj.structure:
+        dfile = dfile + command_dict['content']
+    return dfile
+
+
+def write_locked_dockerfile(dfile, destination=None):
+    '''Write the pinned Dockerfile to a file'''
+    if destination is not None:
+        file_name = destination
+    else:
+        file_name = constants.locked_dockerfile
+    with open(file_name, 'w') as f:
+        f.write(dfile)

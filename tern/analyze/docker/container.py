@@ -115,7 +115,7 @@ def get_image_digest(docker_image):
 def build_container(dockerfile, image_tag_string):
     '''Invoke docker command to build a docker image from the dockerfile
     It is assumed that docker is installed and the docker daemon is running'''
-    path = os.path.dirname(dockerfile)
+    path = os.path.dirname(os.path.abspath(dockerfile))
     if not check_image(image_tag_string):
         # let docker handle the errors
         client.images.build(path=path, tag=image_tag_string, nocache=True)
