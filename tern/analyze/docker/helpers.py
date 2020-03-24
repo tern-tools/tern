@@ -64,7 +64,7 @@ def get_dockerfile_base():
         # check for scratch
         if base_image_tag[0] == 'scratch':
             # there is no base image - return no image object
-            return None
+            return None, None
         # there should be some image object here
         repotag = base_image_tag[0] + dockerfile.tag_separator + \
             base_image_tag[1]
@@ -91,7 +91,7 @@ def get_dockerfile_base():
     except ValueError as e:
         logger.warning("%s", errors.cannot_parse_base_image.format(
             dockerfile=dockerfile_global, error_msg=e))
-        return None
+        return None, None
 
 
 def get_dockerfile_image_tag():
