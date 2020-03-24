@@ -123,6 +123,28 @@ This will install tern in development mode on windows and mac.
 ### Testing you changes
 After you make the changes just run `tox`. This will run a set tests and inform you if anything is wrong.
 
+### Setting up a development environment for use with extensions
+To learn more about how Tern can be used with external tools as extensions, see [these instructions](https://github.com/vmware/tern#extensions).
+
+Tern will be able to find the absolute path of the command line tool which will be used as an extension if it is available on the system. For instance, to make Tern work with Scancode, you can install Scancode in your development environment such that it is available when you run `which scancode`.
+
+Note that you do not need to do this if you are using a Python library as an extension.
+
+#### Development with Tern and Scancode
+If you are developing on Tern and Scancode together, you will need to install both packages in your python virtual environment before running Tern. Eg:
+```
+$ python3 -m venv devenv
+$ cd devenv
+$ git clone git@github.com:vmware/tern.git
+$ git clone git@github.com:nexB/scancode-toolkit.git
+$ cd tern
+$ pip install -e.[dev] .
+$ cd ../scancode-toolkit
+$ pip install .
+$ cd ..
+$ tern report -x scancode -i debian:buster
+```
+
 ## Coding Style
 
 Tern follows general [PEP8](https://www.python.org/dev/peps/pep-0008/) style guidelines. Apart from that, these specific rules apply:
