@@ -94,12 +94,17 @@ def analyze_first_layer(image_obj, master_list, redo):
         target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
         binary = common.get_base_bin()
         shell = get_shell(image_obj, binary)
+        image_obj.layers[0].os_guess = common.get_os_release()
         # set up a notice origin for the first layer
         origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
         # only extract packages if there is a known binary
         if binary:
             # Determine package/os style from binary in the image layer
             common.get_os_style(image_obj.layers[0], binary)
+            # Update os_guess to default if /etc/os-release not available
+            if not image_obj.layers[0].os_guess:
+                image_obj.layers[0].os_guess = \
+                    command_lib.check_os_guess(binary)
             # get the packages of the first layer
             try:
                 rootfs.prep_rootfs(target)
