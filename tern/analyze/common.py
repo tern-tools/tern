@@ -563,9 +563,54 @@ def get_git_sha(path_to_toplevel):
     return sha_info
 
 
+def get_git_url(dockerfile_path):
+    '''Given a dockerfile_path, return url of git project which contains
+    the dockerfile in a form of list.'''
+    # get the path of the folder containing the dockerfile
+    dockerfile_folder_path = os.path.dirname(dockerfile_path)
+    command = ['git', 'remote', '-v']
+    try:
+        output = subprocess.check_output(  # nosec
+            command, stderr=subprocess.DEVNULL, cwd=dockerfile_folder_path)
+        if isinstance(output, bytes):
+            lines = output.decode('utf-8').split('\n')
+            # pop the last line which is an empty line
+            lines.pop()
+            url_list = set()
+            for line in lines:
+                extract_url = extract_git_url_from_line(line)
+                if extract_url:
+                    url_list.add(extract_url)
+    except subprocess.CalledProcessError:
+        logger.debug("Cannot find git repo url, path is %s",
+                     dockerfile_folder_path)
+    return url_list
+
+
+def extract_git_url_from_line(line):
+    '''Given a line of git remote -v output, parse the url
+    line structure is '<label>\t<url> (fetch)'''
+    split_line = line.split(' ')
+    extract_url = ''
+    # use fetch url
+    if split_line[1] == '(fetch)':
+        split_line = split_line[0].split('\t')
+        # use https or git@ type
+        full_url = split_line[1]
+        if full_url.startswith('https://'):
+            extract_url = full_url.lstrip('https://')
+        elif full_url.startswith('http://'):
+            extract_url = full_url.lstrip('http://')
+        elif full_url.startswith('git'):
+            extract_url = full_url.replace('git@github.com:', 'github.com/', 1)
+        extract_url = extract_url.rstrip('.git')
+    return extract_url
+
+
 def get_git_toplevel(path):
-    '''Give a path, return the absolute path to the top level directory if it
-    is in a git repository. Empty string will be returned if not.'''
+    '''Given a path, return the absolute path to the top level directory if it
+    is in a git repository. Empty string will be returned if not.
+    Path should be a path to a directory not to a file.'''
     command = ['git', 'rev-parse', '--show-toplevel']
     path_to_toplevel = ''
     try:

@@ -254,6 +254,11 @@ def find_git_info(line, dockerfile_path):
     logger.debug('Parsed src_path is %s', src_path)
     # get the git project info
     comment_line = common.check_git_src(dockerfile_path)
+    # get the git project link
+    url_list = common.get_git_url(dockerfile_path)
+    if url_list:
+        comment_url = ', '.join(url_list)
+        comment_line += ', project url(s): ' + comment_url
     return comment_line
 
 
