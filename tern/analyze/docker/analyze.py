@@ -84,21 +84,17 @@ def abort_analysis():
 
 
 def analyze_first_layer(image_obj, master_list, redo):
-    # set shell to empty string in case one is found
-    shell = ''
-    # try to load from cache
-    loaded = common.load_from_cache(image_obj.layers[0], redo)
-    # if there is no cache, find the binary and shell by mounting the
-    # base layer
-    if not loaded:
-        target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
-        binary = common.get_base_bin()
-        shell = get_shell(image_obj, binary)
-        image_obj.layers[0].os_guess = common.get_os_release()
-        # set up a notice origin for the first layer
-        origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
-        # only extract packages if there is a known binary
-        if binary:
+    # find the binary and shell by mounting the base layer
+    target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
+    binary = common.get_base_bin()
+    shell = get_shell(image_obj, binary)
+    image_obj.layers[0].os_guess = common.get_os_release()
+    # set up a notice origin for the first layer
+    origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
+    # only extract packages if there is a known binary and the layer is not
+    # cached
+    if binary:
+        if not common.load_from_cache(image_obj.layers[0], redo):
             # Determine package/os style from binary in the image layer
             common.get_os_style(image_obj.layers[0], binary)
             # Update os_guess to default if /etc/os-release not available
@@ -114,18 +110,17 @@ def analyze_first_layer(image_obj, master_list, redo):
                 abort_analysis()
             # unmount proc, sys and dev
             rootfs.undo_mount()
-        else:
-            logger.warning(errors.no_package_manager)
-            # /etc/os-release may still be present even if binary is not
-            common.get_os_style(image_obj.layers[0], None)
-            image_obj.layers[0].origins.add_notice_to_origins(
-                origin_first_layer, Notice(
-                    errors.no_package_manager, 'warning'))
-            # no binary means there is no shell so set to default shell
-            logger.warning('Unknown filesystem. Using default shell')
-            shell = constants.shell
-        # unmount the first layer
-        rootfs.unmount_rootfs()
+    else:
+        logger.warning(errors.no_package_manager)
+        # /etc/os-release may still be present even if binary is not
+        common.get_os_style(image_obj.layers[0], None)
+        image_obj.layers[0].origins.add_notice_to_origins(
+            origin_first_layer, Notice(errors.no_package_manager, 'warning'))
+        # no binary means there is no shell so set to default shell
+        logger.warning('Unknown filesystem. Using default shell')
+        shell = constants.shell
+    # unmount the first layer
+    rootfs.unmount_rootfs()
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)
@@ -136,8 +131,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None): 
     # get packages for subsequent layers
     curr_layer = 1
     while curr_layer < len(image_obj.layers):  # pylint:disable=too-many-nested-blocks
-        if (not common.load_from_cache(image_obj.layers[curr_layer], redo) and
-                shell):
+        if not common.load_from_cache(image_obj.layers[curr_layer], redo):
             # get commands that created the layer
             # for docker images this is retrieved from the image history
             command_list = dhelper.get_commands_from_history(
