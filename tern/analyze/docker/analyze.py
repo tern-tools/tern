@@ -84,9 +84,7 @@ def abort_analysis():
 
 
 def analyze_first_layer(image_obj, master_list, redo):
-    # find the binary and shell by mounting the base layer
-    target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
-    binary = common.get_base_bin()
+    binary = common.get_base_bin(image_obj.layers[0])
     shell = get_shell(image_obj, binary)
     image_obj.layers[0].os_guess = common.get_os_release()
     # set up a notice origin for the first layer
@@ -103,13 +101,15 @@ def analyze_first_layer(image_obj, master_list, redo):
                     command_lib.check_os_guess(binary)
             # get the packages of the first layer
             try:
+                target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
                 rootfs.prep_rootfs(target)
                 common.add_base_packages(image_obj.layers[0], binary, shell)
+                # unmount proc, sys and dev
+                rootfs.undo_mount()
+                rootfs.unmount_rootfs()
             except KeyboardInterrupt:
                 logger.critical(errors.keyboard_interrupt)
                 abort_analysis()
-            # unmount proc, sys and dev
-            rootfs.undo_mount()
     else:
         logger.warning(errors.no_package_manager)
         # /etc/os-release may still be present even if binary is not
@@ -119,8 +119,6 @@ def analyze_first_layer(image_obj, master_list, redo):
         # no binary means there is no shell so set to default shell
         logger.warning('Unknown filesystem. Using default shell')
         shell = constants.shell
-    # unmount the first layer
-    rootfs.unmount_rootfs()
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)
