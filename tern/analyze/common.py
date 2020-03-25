@@ -47,14 +47,12 @@ def load_from_cache(layer, redo=False):
         # check if packages are available in the cache
         if load_packages_from_cache(layer):
             loaded = True
-        # check if files are available in the cache
-        if load_files_from_cache(layer):
-            loaded = True
         # load some extra properties into the layer if available
         if layer.fs_hash in cache.get_layers():
             layer.files_analyzed = cache.cache[layer.fs_hash]['files_analyzed']
             # load any origin data
             load_notices_from_cache(layer)
+        load_files_from_cache(layer)
     return loaded
 
 
@@ -82,7 +80,6 @@ def load_packages_from_cache(layer):
 
 def load_files_from_cache(layer):
     '''Given a layer object, populate file level information'''
-    loaded = False
     raw_file_list = cache.get_files(layer.fs_hash)
     if raw_file_list:
         logger.debug(
@@ -98,13 +95,11 @@ def load_files_from_cache(layer):
                             origin_dict['origin_str'], Notice(
                                 notice['message'], notice['level']))
             layer.add_file(f)
-            loaded = True
     else:
         # if there are no files, generate them from the pre-calculated
         # hash file
         logger.debug('Reading files in filesystem...')
         layer.add_files()
-    return loaded
 
 
 def load_notices_from_cache(layer):
