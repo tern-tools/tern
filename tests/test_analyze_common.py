@@ -5,6 +5,7 @@
 
 import unittest
 from unittest.mock import Mock
+import re
 
 from tern.analyze import common
 from test_fixtures import TestImage
@@ -21,12 +22,14 @@ class TestAnalyzeCommon(unittest.TestCase):
         self.image = TestImage('5678efgh')
         self.file = FileData('README.txt', '/home/test')
         cache.cache = {}
+        self.test_dockerfile = 'tests/dockerfiles/buildpack_deps_jessie_curl'
 
     def tearDown(self):
         del self.image
         del self.command1
         del self.command2
         cache.cache = {}
+        del self.test_dockerfile
 
     def testGetShellCommands(self):
         command = common.get_shell_commands("yum install nfs-utils")
@@ -247,6 +250,19 @@ class TestAnalyzeCommon(unittest.TestCase):
         self.command2.set_remove()
         self.assertEqual(
             len(common.get_installed_package_names(self.command2)), 0)
+
+    def testGetGitURL(self):
+        ''' we check the url to be the following form:
+        github.com/<username>/tern'''
+        url_list = common.get_git_url(self.test_dockerfile)
+        check_num = len(url_list)
+        pass_num = 0
+        git_username_reg = r'([a-zA-Z\d_-]{0,38})'
+        pattern = re.compile(r'github.com/'+git_username_reg+r'/tern')
+        for url in url_list:
+            if pattern.match(url):
+                pass_num += 1
+        self.assertEqual(pass_num, check_num)
 
 
 if __name__ == '__main__':
