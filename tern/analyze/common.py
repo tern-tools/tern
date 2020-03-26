@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 '''
@@ -50,8 +50,6 @@ def load_from_cache(layer, redo=False):
         # load some extra properties into the layer if available
         if layer.fs_hash in cache.get_layers():
             layer.files_analyzed = cache.cache[layer.fs_hash]['files_analyzed']
-            # load any origin data
-            load_notices_from_cache(layer)
         load_files_from_cache(layer)
     return loaded
 
@@ -113,10 +111,22 @@ def load_notices_from_cache(layer):
                     notice['message'], notice['level']))
 
 
+def get_total_notices(layer):
+    '''Find the total number of notices in a layer'''
+    count = 0
+    for origin in layer.origins.origins:
+        count += len(origin.notices)
+    return count
+
+
 def save_to_cache(image):
     '''Given an image object, save all layers to the cache'''
     for layer in image.layers:
         if layer.packages or layer.files_analyzed:
+            if get_total_notices(layer) == 0:
+                # if there are no new notices, we have probably pulled the
+                # data from the cache. So load those notices here.
+                load_notices_from_cache(layer)
             cache.add_layer(layer)
 
 
