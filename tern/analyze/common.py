@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 '''
@@ -47,14 +47,12 @@ def load_from_cache(layer, redo=False):
         # check if packages are available in the cache
         if load_packages_from_cache(layer):
             loaded = True
-        # check if files are available in the cache
-        if load_files_from_cache(layer):
-            loaded = True
         # load some extra properties into the layer if available
         if layer.fs_hash in cache.get_layers():
             layer.files_analyzed = cache.cache[layer.fs_hash]['files_analyzed']
-            # load any origin data
-            load_notices_from_cache(layer)
+            layer.os_guess = cache.cache[layer.fs_hash]['os_guess']
+            layer.pkg_format = cache.cache[layer.fs_hash]['pkg_format']
+        load_files_from_cache(layer)
     return loaded
 
 
@@ -82,7 +80,6 @@ def load_packages_from_cache(layer):
 
 def load_files_from_cache(layer):
     '''Given a layer object, populate file level information'''
-    loaded = False
     raw_file_list = cache.get_files(layer.fs_hash)
     if raw_file_list:
         logger.debug(
@@ -98,13 +95,11 @@ def load_files_from_cache(layer):
                             origin_dict['origin_str'], Notice(
                                 notice['message'], notice['level']))
             layer.add_file(f)
-            loaded = True
     else:
         # if there are no files, generate them from the pre-calculated
         # hash file
         logger.debug('Reading files in filesystem...')
         layer.add_files()
-    return loaded
 
 
 def load_notices_from_cache(layer):
@@ -118,20 +113,32 @@ def load_notices_from_cache(layer):
                     notice['message'], notice['level']))
 
 
+def get_total_notices(layer):
+    '''Find the total number of notices in a layer'''
+    count = 0
+    for origin in layer.origins.origins:
+        count += len(origin.notices)
+    return count
+
+
 def save_to_cache(image):
     '''Given an image object, save all layers to the cache'''
     for layer in image.layers:
         if layer.packages or layer.files_analyzed:
+            if get_total_notices(layer) == 0:
+                # if there are no new notices, we have probably pulled the
+                # data from the cache. So load those notices here.
+                load_notices_from_cache(layer)
             cache.add_layer(layer)
 
 
-def get_base_bin():
-    '''Given the base layer object, find the binary used to identify the
-    base OS layer. Assume that the layer filesystem is mounted'''
+def get_base_bin(first_layer):
+    '''Find the binary used to identify the base OS for the container image.
+    We do this by providing the path to the first layer of the container
+    image and looking for known binaries there. Assume that the layer has
+    already been unpacked with the filesystem'''
     binary = ''
-    # the path to where the filesystem is mounted
-    # look at utils/rootfs.py mount_base_layer module
-    cwd = os.path.join(rootfs.get_working_dir(), constants.mergedir)
+    cwd = rootfs.get_untar_dir(first_layer.tar_file)
     for key, value in command_lib.command_lib['base'].items():
         for path in value['path']:
             if os.path.exists(os.path.join(cwd, path)):
@@ -140,17 +147,17 @@ def get_base_bin():
     return binary
 
 
-def get_os_release():
+def get_os_release(base_layer):
     '''Given the base layer object, determine if an os-release file exists and
     return the PRETTY_NAME string from it. If no release file exists,
     return an empty string. Assume that the layer filesystem is mounted'''
     # os-release may exist under /etc/ or /usr/lib. We should first check
     # for the preferred /etc/os-release and fall back on /usr/lib/os-release
     # if it does not exist under /etc
-    etc_path = os.path.join(rootfs.get_working_dir(), constants.mergedir,
-                            constants.etc_release_path)
-    lib_path = os.path.join(rootfs.get_working_dir(), constants.mergedir,
-                            constants.lib_release_path)
+    etc_path = os.path.join(
+        rootfs.get_untar_dir(base_layer.tar_file), constants.etc_release_path)
+    lib_path = os.path.join(
+        rootfs.get_untar_dir(base_layer.tar_file), constants.lib_release_path)
     if not os.path.exists(etc_path):
         if not os.path.exists(lib_path):
             return ''
@@ -487,11 +494,12 @@ def get_os_style(image_layer, binary):
     origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
     pkg_format = command_lib.check_pkg_format(binary)
     os_guess = command_lib.check_os_guess(binary)
-    if get_os_release():
+    os_release = get_os_release(image_layer)
+    if os_release:
         # We know with high degree of certainty what the OS is
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
-            formats.os_release.format(os_style=get_os_release()), 'info'))
-    elif binary is None:
+            formats.os_release.format(os_style=os_release), 'info'))
+    elif not binary:
         # No binary and no os-release means we have no idea about base OS
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             errors.no_etc_release, 'warning'))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -60,8 +60,9 @@ def get_layers():
 
 def get_origins(layer_hash):
     '''Return the origins dictionary'''
-    if 'origins' in cache[layer_hash].keys():
-        return cache[layer_hash]['origins']
+    if layer_hash in get_layers():
+        if 'origins' in cache[layer_hash].keys():
+            return cache[layer_hash]['origins']
     return []
 
 
