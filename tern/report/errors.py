@@ -65,7 +65,7 @@ dockerfile_no_tag = '''The Dockerfile provided has no tag in the line ''' \
 dockerfile_using_latest = '''The Dockerfile is using the tag 'latest' ''' \
     '''in line {dockerfile_line}. Consider using a specific immutable tag'''
 cannot_parse_base_image = '''Unable to parse base image in the Dockerfile ''' \
-    '''{dockerfile}. Error: {error_msg}\n'''
+    ''''{dockerfile}'. Error: {error_msg}\n'''
 base_image_not_found = '''Failed to pull the base image. Perhaps it was ''' \
     '''removed from Dockerhub\n'''
 cannot_extract_base_image = '''Failed to extact base image {image}:{tag}.'''

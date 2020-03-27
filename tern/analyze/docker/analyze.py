@@ -25,7 +25,7 @@ from tern.analyze.docker import dockerfile as d_file
 logger = logging.getLogger(constants.logger_name)
 
 
-def analyze_docker_image(image_obj, redo=False, dockerfile=False, dfobj=None):
+def analyze_docker_image(image_obj, redo=False, dfile_lock=False, dfobj=None):
     '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
@@ -35,11 +35,12 @@ def analyze_docker_image(image_obj, redo=False, dockerfile=False, dfobj=None):
 
     # set up empty master list of packages
     master_list = []
-    prepare_for_analysis(image_obj, dockerfile)
+    prepare_for_analysis(image_obj, dfobj)
     # Analyze the first layer and get the shell
     shell = analyze_first_layer(image_obj, master_list, redo)
     # Analyze the remaining layers
-    analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj)
+    analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj,
+                              dfile_lock)
     common.save_to_cache(image_obj)
 
 
@@ -67,9 +68,9 @@ def get_shell(image_obj, binary):
     return shell
 
 
-def prepare_for_analysis(image_obj, dockerfile):
+def prepare_for_analysis(image_obj, dfobj):
     # find the layers that are imported
-    if dockerfile:
+    if dfobj:
         dhelper.set_imported_layers(image_obj)
     # add notices for each layer if it is imported
     image_setup(image_obj)
@@ -127,7 +128,8 @@ def analyze_first_layer(image_obj, master_list, redo):
     return shell
 
 
-def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None):  # pylint:disable=too-many-branches
+def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  # noqa: R0912,R0913
+                              dfile_lock=False):
     # get packages for subsequent layers
     curr_layer = 1
     while curr_layer < len(image_obj.layers):  # pylint:disable=too-many-nested-blocks
@@ -160,7 +162,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None): 
                         logger.critical(errors.keyboard_interrupt)
                         abort_analysis()
                 # pin any installed packages to a locked dockerfile.
-                if dfobj is not None:
+                if dfile_lock:
                     # collect list of RUN commands that could install pkgs
                     run_dict = d_file.get_run_layers(dfobj)
                     for package in image_obj.layers[curr_layer].packages:
