@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -41,15 +41,15 @@ def write_report(report, args):
         f.write(report)
 
 
-def setup(dockerfile=None, image_tag_string=None):
+def setup(dfobj=None, image_tag_string=None):
     '''Any initial setup'''
     # generate random names for image, container, and tag
     general.initialize_names()
     # load the cache
     cache.load()
     # load dockerfile if present
-    if dockerfile:
-        dhelper.load_docker_commands(dockerfile)
+    if dfobj is not None:
+        dhelper.load_docker_commands(dfobj)
     # check if the docker image is present
     if image_tag_string and general.check_tar(image_tag_string) is False:
         if container.check_image(image_tag_string) is None:
