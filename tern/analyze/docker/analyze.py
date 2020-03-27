@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -88,21 +88,14 @@ def analyze_first_layer(image_obj, master_list, redo):
     # see if there is an associated shell
     # if there is no binary, this will be set to the default shell
     shell = get_shell(image_obj, binary)
-    # set a possible OS
-    image_obj.layers[0].os_guess = common.get_os_release()
-    # set up a notice origin for the first layer
-    origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
     # try to load packages from cache
-    loaded = common.load_from_cache(image_obj.layers[0], redo)
-    # if there is a binary, we can set other things
-    if binary:
-        # Determine package/os style from binary in the image layer
+    if not common.load_from_cache(image_obj.layers[0], redo):
+        # set a possible OS
         common.get_os_style(image_obj.layers[0], binary)
-        # Update os_guess to default if /etc/os-release not available
-        if not image_obj.layers[0].os_guess:
-            image_obj.layers[0].os_guess = command_lib.check_os_guess(binary)
-        # if no packages are loaded from the cache, we can try to extract it
-        if not loaded:
+        # set up a notice origin for the first layer
+        origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
+        # if there is a binary, extract packages
+        if binary:
             try:
                 target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
                 rootfs.prep_rootfs(target)
@@ -113,12 +106,11 @@ def analyze_first_layer(image_obj, master_list, redo):
             except KeyboardInterrupt:
                 logger.critical(errors.keyboard_interrupt)
                 abort_analysis()
-    else:
-        logger.warning(errors.no_package_manager)
-        # /etc/os-release may still be present even if binary is not
-        common.get_os_style(image_obj.layers[0], None)
-        image_obj.layers[0].origins.add_notice_to_origins(
-            origin_first_layer, Notice(errors.no_package_manager, 'warning'))
+        else:
+            logger.warning(errors.no_package_manager)
+            image_obj.layers[0].origins.add_notice_to_origins(
+                origin_first_layer, Notice(
+                    errors.no_package_manager, 'warning'))
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)
