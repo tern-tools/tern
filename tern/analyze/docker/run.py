@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -39,14 +39,15 @@ def get_dockerfile_packages():
         4. Return stub image'''
     stub_image = Image('easteregg:cookie')
     layer_count = 0
-    for inst in dhelper.docker_commands:
-        if inst[0] == 'RUN':
+    for cmd in dhelper.docker_commands:
+        if cmd['instruction'] == 'RUN':
             layer_count = layer_count + 1
             layer = ImageLayer(layer_count)
-            install_commands, msg = common.filter_install_commands(inst[1])
+            install_commands, msg = \
+                common.filter_install_commands(cmd['value'])
             if msg:
                 layer.origins.add_notice_to_origins(
-                    inst[1], Notice(msg, 'info'))
+                    cmd['value'], Notice(msg, 'info'))
             pkg_names = []
             for command in install_commands:
                 pkg_names.append(common.get_installed_package_names(command))
@@ -59,16 +60,13 @@ def get_dockerfile_packages():
     return stub_image
 
 
-def analyze(image_obj, args, is_dockerfile=False, dfobj=None):
+def analyze(image_obj, args, dfile_lock=False, dfobj=None):
     '''Analyze the image object either using the default method or the extended
     method'''
-    if args.name == 'report':
-        if args.extend:
-            run_extension(image_obj, args.extend)
-        else:
-            analyze_docker_image(image_obj, args.redo, is_dockerfile)
+    if not dfile_lock and args.extend:
+        run_extension(image_obj, args.extend)
     else:
-        analyze_docker_image(image_obj, args.redo, is_dockerfile, dfobj)
+        analyze_docker_image(image_obj, args.redo, dfile_lock, dfobj)
 
 
 def execute_docker_image(args):
@@ -108,13 +106,17 @@ def execute_dockerfile(args):  # noqa C901,R0912
     container.check_docker_setup()
     logger.debug('Setting up...')
     dfile = ''
-    dfobj = None
+    dfile_lock = False
     if args.name == 'report':
         dfile = args.dockerfile
     else:
         dfile = args.lock
-        dfobj = dockerfile.get_dockerfile_obj(args.lock)
-    report.setup(dockerfile=dfile)
+        dfile_lock = True
+    dfobj = dockerfile.get_dockerfile_obj(dfile)
+    # expand potential ARG values so base image tag is correct
+    dockerfile.expand_arg(dfobj)
+    dockerfile.expand_vars(dfobj)
+    report.setup(dfobj=dfobj)
     # attempt to build the image
     logger.debug('Building Docker image...')
     # placeholder to check if we can analyze the full image
@@ -130,7 +132,7 @@ def execute_dockerfile(args):  # noqa C901,R0912
             full_image.origins.add_notice_origin(
                 formats.dockerfile_image.format(dockerfile=dfile))
             # analyze image
-            analyze(full_image, args, True, dfobj)
+            analyze(full_image, args, dfile_lock, dfobj)
         else:
             # we cannot load the full image
             logger.warning('Cannot retrieve full image metadata')
@@ -154,12 +156,8 @@ def execute_dockerfile(args):  # noqa C901,R0912
             base_image.origins.add_notice_to_origins(
                 dfile, Notice(
                     formats.image_build_failure, 'warning'))
-            if dfobj is not None:
-                # analyze for dockerfile lock
-                analyze(base_image, args, True, dfobj)
-            else:
-                # analyze image
-                analyze(base_image, args)
+            # analyze image
+            analyze(base_image, args, dfile_lock, dfobj)
         else:
             # we cannot load the base image
             logger.warning('Cannot retrieve base image metadata')
@@ -168,13 +166,12 @@ def execute_dockerfile(args):  # noqa C901,R0912
             if not args.keep_wd:
                 report.clean_image_tars(base_image)
     # generate report based on what images were created
-    if completed:
-        if args.name == 'report':
+    if not dfile_lock:
+        if completed:
             report.report_out(args, full_image)
-    else:
-        if args.name == 'report':
+        else:
             report.report_out(args, base_image, stub_image)
-    if args.name == 'lock':
+    else:
         logger.debug('Parsing Dockerfile to generate report...')
         output = dockerfile.create_locked_dockerfile(dfobj)
         dockerfile.write_locked_dockerfile(output, args.output_file)
