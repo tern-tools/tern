@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -64,7 +64,6 @@ def get_shell(image_obj, binary):
         image_obj.layers[0].origins.add_notice_to_origins(
             origin_command_lib, Notice(add_shell_message, 'hint'))
         shell = constants.shell
-
     return shell
 
 
@@ -85,43 +84,34 @@ def abort_analysis():
 
 
 def analyze_first_layer(image_obj, master_list, redo):
-    # find the binary and shell by mounting the base layer
-    target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
-    binary = common.get_base_bin()
+    # find the binary of the first layer
+    binary = common.get_base_bin(image_obj.layers[0])
+    # see if there is an associated shell
+    # if there is no binary, this will be set to the default shell
     shell = get_shell(image_obj, binary)
-    image_obj.layers[0].os_guess = common.get_os_release()
-    # set up a notice origin for the first layer
-    origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
-    # only extract packages if there is a known binary and the layer is not
-    # cached
-    if binary:
-        if not common.load_from_cache(image_obj.layers[0], redo):
-            # Determine package/os style from binary in the image layer
-            common.get_os_style(image_obj.layers[0], binary)
-            # Update os_guess to default if /etc/os-release not available
-            if not image_obj.layers[0].os_guess:
-                image_obj.layers[0].os_guess = \
-                    command_lib.check_os_guess(binary)
-            # get the packages of the first layer
+    # try to load packages from cache
+    if not common.load_from_cache(image_obj.layers[0], redo):
+        # set a possible OS
+        common.get_os_style(image_obj.layers[0], binary)
+        # set up a notice origin for the first layer
+        origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
+        # if there is a binary, extract packages
+        if binary:
             try:
+                target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
                 rootfs.prep_rootfs(target)
                 common.add_base_packages(image_obj.layers[0], binary, shell)
+                # unmount proc, sys and dev
+                rootfs.undo_mount()
+                rootfs.unmount_rootfs()
             except KeyboardInterrupt:
                 logger.critical(errors.keyboard_interrupt)
                 abort_analysis()
-            # unmount proc, sys and dev
-            rootfs.undo_mount()
-    else:
-        logger.warning(errors.no_package_manager)
-        # /etc/os-release may still be present even if binary is not
-        common.get_os_style(image_obj.layers[0], None)
-        image_obj.layers[0].origins.add_notice_to_origins(
-            origin_first_layer, Notice(errors.no_package_manager, 'warning'))
-        # no binary means there is no shell so set to default shell
-        logger.warning('Unknown filesystem. Using default shell')
-        shell = constants.shell
-    # unmount the first layer
-    rootfs.unmount_rootfs()
+        else:
+            logger.warning(errors.no_package_manager)
+            image_obj.layers[0].origins.add_notice_to_origins(
+                origin_first_layer, Notice(
+                    errors.no_package_manager, 'warning'))
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)
