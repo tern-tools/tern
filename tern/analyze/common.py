@@ -50,6 +50,8 @@ def load_from_cache(layer, redo=False):
         # load some extra properties into the layer if available
         if layer.fs_hash in cache.get_layers():
             layer.files_analyzed = cache.cache[layer.fs_hash]['files_analyzed']
+            layer.os_guess = cache.cache[layer.fs_hash]['os_guess']
+            layer.pkg_format = cache.cache[layer.fs_hash]['pkg_format']
         load_files_from_cache(layer)
     return loaded
 
@@ -145,17 +147,17 @@ def get_base_bin(first_layer):
     return binary
 
 
-def get_os_release():
+def get_os_release(base_layer):
     '''Given the base layer object, determine if an os-release file exists and
     return the PRETTY_NAME string from it. If no release file exists,
     return an empty string. Assume that the layer filesystem is mounted'''
     # os-release may exist under /etc/ or /usr/lib. We should first check
     # for the preferred /etc/os-release and fall back on /usr/lib/os-release
     # if it does not exist under /etc
-    etc_path = os.path.join(rootfs.get_working_dir(), constants.mergedir,
-                            constants.etc_release_path)
-    lib_path = os.path.join(rootfs.get_working_dir(), constants.mergedir,
-                            constants.lib_release_path)
+    etc_path = os.path.join(
+        rootfs.get_untar_dir(base_layer.tar_file), constants.etc_release_path)
+    lib_path = os.path.join(
+        rootfs.get_untar_dir(base_layer.tar_file), constants.lib_release_path)
     if not os.path.exists(etc_path):
         if not os.path.exists(lib_path):
             return ''
@@ -492,11 +494,12 @@ def get_os_style(image_layer, binary):
     origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
     pkg_format = command_lib.check_pkg_format(binary)
     os_guess = command_lib.check_os_guess(binary)
-    if get_os_release():
+    os_release = get_os_release(image_layer)
+    if os_release:
         # We know with high degree of certainty what the OS is
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
-            formats.os_release.format(os_style=get_os_release()), 'info'))
-    elif binary is None:
+            formats.os_release.format(os_style=os_release), 'info'))
+    elif not binary:
         # No binary and no os-release means we have no idea about base OS
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             errors.no_etc_release, 'warning'))
