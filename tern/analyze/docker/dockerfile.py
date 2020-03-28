@@ -276,10 +276,20 @@ def create_locked_dockerfile(dfobj):
     # packages in RUN lines, ENV, and ARG values are already expanded
     expand_from_images(dfobj)
     expand_add_command(dfobj)
+
     # create the output file
     dfile = ''
+    prev_endline = 0
+
     for command_dict in dfobj.structure:
-        dfile = dfile + command_dict['content']
+        endline = command_dict["endline"]
+        diff = endline - prev_endline
+        # calculate number of new line characters to
+        # add before each line of content
+        delimeter = "\n" * (diff - 1) if diff > 1 else ""
+        dfile = dfile + delimeter + command_dict['content']
+        prev_endline = endline
+
     return dfile
 
 
