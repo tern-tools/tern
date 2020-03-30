@@ -16,9 +16,14 @@ class Image:
         manifest: the json object representing the image manifest
         config: the image config metadata
         layers: list of layer objects in the image
+        checksum_type: the digest algorithm used to create the image checksum
+        checksum: the checksum
+        checksums: a list of tuples of the form (checksum_type, checksum)
     methods:
         load_image: this method is to be implemented in the derived classes
         get_layer_diff_ids: returns a list of layer diff ids only
+        set_checksum: set the checksum of the image given the checksum type
+        add_checksums: add new checksums in the existing list of the checksums
         to_dict: return a python dictionary representation of the image
     '''
     def __init__(self, image_id=None):
@@ -29,6 +34,9 @@ class Image:
         self._manifest = {}
         self._config = {}
         self._layers = []
+        self.__checksum_type = ''
+        self.__checksum = ''
+        self.__checksums = []
         self._origins = Origins()
 
     @property
@@ -55,6 +63,22 @@ class Image:
     def name(self):
         return self._name
 
+    @property
+    def checksum_type(self):
+        return self.__checksum_type
+
+    @property
+    def checksum(self):
+        return self.__checksum
+
+    @property
+    def checksums(self):
+        return self.__checksums
+
+    @checksums.setter
+    def checksums(self, checksums):
+        self.__checksums = checksums
+
     @name.setter
     def name(self, name):
         self._name = name
@@ -66,6 +90,17 @@ class Image:
     @tag.setter
     def tag(self, tag):
         self._tag = tag
+
+    def set_checksum(self, checksum_type='', checksum=''):
+        '''Set the checksum type and checksum of the image'''
+        # TODO: calculate the checksum if not given
+        self.__checksum_type = checksum_type
+        self.__checksum = checksum
+
+    def add_checksums(self, checksums):
+        '''Add checksum tuples to checksums property'''
+        for checksum in checksums:
+            self.__checksums.append(checksum)
 
     def get_layer_diff_ids(self):
         '''Get a list of layer diff ids'''

@@ -33,6 +33,10 @@ class ImageLayer:
         files_analyzed: whether the files in this layer are analyzed or not
         analyzed_output: the result of the file analysis
         files: a list of files included in the image layer
+        checksum_type: the digest algorithm used to create the image layer
+        checksum
+        checksum: the checksum
+        checksums: a list of tuples of the form (checksum_type, checksum)
     methods:
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
@@ -42,7 +46,11 @@ class ImageLayer:
         add_file: adds a file to the layer
         remove_file: given the file path, remove a file object from the
         list of files in this layer
-        get_file_paths: Get a list of file paths in the image layer'''
+        get_file_paths: Get a list of file paths in the image layer
+        set_checksum: set the checksum of the image layer given the checksum
+        type
+        add_checksums: add new checksums in the existing list of the checksums
+        '''
 
     def __init__(self, diff_id, tar_file=None, created_by=None):
         self.__diff_id = diff_id
@@ -58,6 +66,9 @@ class ImageLayer:
         self.__os_guess = ''
         self.__files_analyzed = False
         self.__analyzed_output = ''
+        self.__checksum_type = ''
+        self.__checksum = ''
+        self.__checksums = []
 
     @property
     def diff_id(self):
@@ -86,6 +97,22 @@ class ImageLayer:
     @property
     def created_by(self):
         return self.__created_by
+
+    @property
+    def checksum_type(self):
+        return self.__checksum_type
+
+    @property
+    def checksum(self):
+        return self.__checksum
+
+    @property
+    def checksums(self):
+        return self.__checksums
+
+    @checksums.setter
+    def checksums(self, checksums):
+        self.__checksums = checksums
 
     @created_by.setter
     def created_by(self, create_string):
@@ -144,6 +171,17 @@ class ImageLayer:
             self.__files_analyzed = x
         else:
             raise ValueError('files_analyzed should be boolean')
+
+    def set_checksum(self, checksum_type='', checksum=''):
+        '''Set the checksum type and checksum of the image layer'''
+        # TODO: calculate the checksum if not given
+        self.__checksum_type = checksum_type
+        self.__checksum = checksum
+
+    def add_checksums(self, checksums):
+        '''Add checksum tuples to checksums property'''
+        for checksum in checksums:
+            self.__checksums.append(checksum)
 
     def add_package(self, package):
         if isinstance(package, Package):
