@@ -33,7 +33,7 @@ This is a checklist for cutting a release
       - Changelog     
         * "Note: This changelog will not include these release notes"
         * "Changelog produced by command: `git log --pretty=format:"%h %s" v<tag>..master`"
-      - Contributors (look at Authors in the changelog `git log --pretty=format:"%an %ae" v<tag>..master | uniq`)
+      - Contributors (look at Authors in the changelog `git log --pretty=format:"%an %ae" v<tag>..master | sort | uniq`). Remove the maintainers name from the contributor list.
       - Contact the Maintainers
 
 - [ ] Commit release notes and create patch for your changes
@@ -43,7 +43,8 @@ This is a checklist for cutting a release
     * Create a new branch. You will use this branch to submit a PR for the release changes.
     * Copy the patch file you just created into your new forked repo environment.
     * Run `git am 0001-<commit_message_title>.patch`.
-    * After running the `git am` command above, the changes in the patch will be available in your forked repo. You can verify this by running `git log` and looking at the top commit from the output.
+    * Run `git push origin <branch-you-created>` to push the changes to your forked repo.
+    * The changes are now available in your forked repo. You can verify this by running `git log` and looking at the top commit from the output.
     * Open a pull request in the Tern project repository for your release changes.
     * Request a review from another maintainer. Update PR as needed based on feedback. Merge the PR. This commit is where the release will be tagged.
 
