@@ -102,6 +102,19 @@ class TestClassImage(unittest.TestCase):
         self.assertTrue(self.image2.get_layer_object("123abc") is not None)
         self.assertTrue(self.image2.get_layer_object("1234abcd") is None)
 
+    def testSetChecksum(self):
+        self.image1.set_checksum('sha256', '12345abcde')
+        self.assertEqual(self.image1.checksum_type, 'sha256')
+        self.assertEqual(self.image1.checksum, '12345abcde')
+
+    def testAddChecksums(self):
+        self.image1.add_checksums([
+            ('SHA1', '12345abcde'),
+            ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+        self.assertEqual(self.image1.checksums,
+                         [('SHA1', '12345abcde'),
+                          ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+
 
 if __name__ == '__main__':
     unittest.main()

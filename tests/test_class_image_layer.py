@@ -124,6 +124,18 @@ class TestClassImageLayer(unittest.TestCase):
         file_paths = self.layer.get_file_paths()
         self.assertEqual(file_paths, ['path/to/file1', 'path/to/file2'])
 
+    def testSetChecksum(self):
+        self.layer.set_checksum('sha256', '12345abcde')
+        self.assertEqual(self.layer.checksum_type, 'sha256')
+        self.assertEqual(self.layer.checksum, '12345abcde')
+
+    def testAddChecksums(self):
+        self.layer.add_checksums([('SHA1', '12345abcde'),
+                                  ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+        self.assertEqual(self.layer.checksums,
+                         [('SHA1', '12345abcde'),
+                          ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+
 
 if __name__ == '__main__':
     unittest.main()
