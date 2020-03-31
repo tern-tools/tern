@@ -8,6 +8,7 @@ from git import GitCommandError
 import os
 import re
 import sys
+import subprocess  # nosec
 
 # This script is written to be used with CI Integration
 
@@ -60,6 +61,8 @@ if __name__ == '__main__':
     # inputting each one into the linting function
 
     # We are in the 'tern' directory
+    output = subprocess.check_output(['git', 'remote', '-v'])  # nosec
+    print(output.decode('utf-8'))
     repo = Repo(os.getcwd())
     try:
         repo.git.remote(
