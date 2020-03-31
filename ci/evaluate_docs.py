@@ -7,12 +7,16 @@ from git import Repo
 from git import GitCommandError
 import os
 import sys
+import subprocess
 
 # This is meant to run within CI Integration
 # Print out only .py files that have changed
 # Pipe to any linting tools
 # Note that some linting tools will lint everything if the output
 # of this script is nothing
+
+output = subprocess.check_output(['git', 'remote', '-v'])
+print(output.decode('utf-8'))
 
 repo = Repo(os.getcwd())
 try:
