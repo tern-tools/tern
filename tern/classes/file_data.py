@@ -44,6 +44,8 @@ class FileData:
         set_version: set the version of the file given the version control
         system used
         set_checksum: set the checksum of the file given the checksum type
+        get_checksum: get the checksum that matches the checksum type from
+        the property 'checksums'
         fill: fill data into the object instance from a dictionary'''
     def __init__(self,
                  name,
@@ -166,6 +168,14 @@ class FileData:
         '''Add checksum tuples to checksums property'''
         for checksum in checksums:
             self.__checksums.append(checksum)
+
+    def get_checksum(self, hash_type):
+        '''Given a hash type, return the checksum. If the hash type is not
+        available, return None'''
+        for tup in self.__checksums:
+            if tup[0].lower() == hash_type.lower():
+                return tup[1]
+        return None
 
     def to_dict(self, template=None):
         '''Return a dictionary version of the FileData object
