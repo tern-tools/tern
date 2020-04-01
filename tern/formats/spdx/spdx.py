@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 from tern.classes.template import Template
@@ -11,8 +11,8 @@ class SPDX(Template):
     It provides mappings for the SPDX tag-value document format'''
 
     def file_data(self):
-        return {'name': 'FileName',
-                'file_type': 'FileType'}
+        return {'path': 'FileName',
+                'short_file_type': 'FileType'}
 
     def package(self):
         return {'name': 'PackageName',
