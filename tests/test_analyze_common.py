@@ -11,6 +11,8 @@ from test_fixtures import TestImage
 from tern.classes.command import Command
 from tern.classes.file_data import FileData
 from tern.utils import cache
+from tern.classes.image_layer import ImageLayer
+from tern.classes.package import Package
 
 
 class TestAnalyzeCommon(unittest.TestCase):
@@ -160,33 +162,21 @@ class TestAnalyzeCommon(unittest.TestCase):
         common.save_to_cache(self.image)
         cache.add_layer.assert_called_once_with(layer)
 
-    def testUpdateMasterListWithoutPackages(self):
+    def testUpdateLayerPackages(self):
+        '''Given image object and layer index updates the current layer packages removes
+        redundant packages'''
         self.image.load_image()
-        layer = self.image.layers[0]
-        master_list = list()
-        common.update_master_list(master_list, layer)
-        self.assertEqual(len(master_list), len(layer.packages))
-
-    def testUpdateMasterListWithPackages(self):
-        self.image.load_image()
-        layer = self.image.layers[0]
-        master_list = list()
-        older_master_list = list()
-        for pkg in layer.packages:
-            master_list.append(pkg)
-            older_master_list.append(pkg)
-
-        common.update_master_list(master_list, layer)
-        self.assertEqual(len(master_list), len(older_master_list))
-        self.assertEqual(len(layer.packages), 0)
-
-        for old_pkg in older_master_list:
-            exists = False
-            for pkg in master_list:
-                if old_pkg.is_equal(pkg):
-                    exists = True
-                    break
-            self.assertTrue(exists)
+        packages = self.image.layers[0].packages
+        common.update_layer_package_list(self.image, 0)
+        self.assertAlmostEqual(len(packages), len(self.image.layers[0].packages))
+        l2 = ImageLayer('123cdef', 'path/to/tar')
+        l2.add_package(packages[0])
+        l2.add_package(packages[1])
+        l2.add_package(Package('p3'))
+        self.image.layers.append(l2)
+        common.update_layer_package_list(self.image, 1)
+        packages_2 = self.image.layers[1].packages
+        self.assertEqual(len(packages_2), 1)
 
     def testFilterInstallCommands(self):
         commands, _ = common.filter_install_commands("yum install")

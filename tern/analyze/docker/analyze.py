@@ -33,13 +33,11 @@ def analyze_docker_image(image_obj, redo=False, dfile_lock=False, dfobj=None):
     If there's a dockerfile object available, extract any package
     information from the layers.'''
 
-    # set up empty master list of packages
-    master_list = []
     prepare_for_analysis(image_obj, dfobj)
     # Analyze the first layer and get the shell
-    shell = analyze_first_layer(image_obj, master_list, redo)
+    shell = analyze_first_layer(image_obj, redo)
     # Analyze the remaining layers
-    analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj,
+    analyze_subsequent_layers(image_obj, shell, redo, dfobj,
                               dfile_lock)
     common.save_to_cache(image_obj)
 
@@ -83,7 +81,7 @@ def abort_analysis():
     sys.exit(1)
 
 
-def analyze_first_layer(image_obj, master_list, redo):
+def analyze_first_layer(image_obj, redo):
     # find the binary of the first layer
     binary = common.get_base_bin(image_obj.layers[0])
     # see if there is an associated shell
@@ -112,13 +110,10 @@ def analyze_first_layer(image_obj, master_list, redo):
             image_obj.layers[0].origins.add_notice_to_origins(
                 origin_first_layer, Notice(
                     errors.no_package_manager, 'warning'))
-    # populate the master list with all packages found in the first layer
-    for p in image_obj.layers[0].packages:
-        master_list.append(p)
     return shell
 
 
-def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  # noqa: R0912,R0913
+def analyze_subsequent_layers(image_obj, shell, redo, dfobj=None,  # noqa: R0912,R0913
                               dfile_lock=False):
     # get packages for subsequent layers
     curr_layer = 1
@@ -167,8 +162,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
             if command_list:
                 rootfs.undo_mount()
                 rootfs.unmount_rootfs()
-        # update the master list
-        common.update_master_list(master_list, image_obj.layers[curr_layer])
+        common.update_layer_package_list(image_obj, curr_layer)
         curr_layer = curr_layer + 1
 
 

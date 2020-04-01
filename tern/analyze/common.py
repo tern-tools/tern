@@ -6,7 +6,7 @@
 '''
 Common functions
 '''
-
+import itertools
 import logging
 import os
 import subprocess  # nosec
@@ -458,30 +458,23 @@ def add_snippet_packages(image_layer, command, pkg_listing, shell):
         image_layer.add_package(pkg)
 
 
-def update_master_list(master_list, layer_obj):
-    '''Given a master list of package objects and a layer object containing a
-    list of package objects, append to the master list all the package objects
-    that are not in the master list and remove the duplicate packages from the
-    layer object'''
-    # temporary placement of package objects
-    unique = []
-    for _ in range(len(layer_obj.packages)):
-        item = layer_obj.packages.pop(0)
-        # check for whether the package exists on the master list
-        exists = False
-        for pkg in master_list:
-            if item.is_equal(pkg):
-                exists = True
-                break
-        if not exists:
-            unique.append(item)
-    # add all the unique packages to the master list
-    for u in unique:
-        master_list.append(u)
-    # empty the unique packages back into the layer object
-    while unique:
-        layer_obj.packages.append(unique.pop(0))
-    del unique
+def update_layer_package_list(img_obj, layer_index):
+    '''Given an Image and layer index it will update the packages found in that
+    particular layer by removing the packages which are already found in previous
+    layers.
+    '''
+    layer_obj = img_obj.layers[layer_index]
+    package_list = list(itertools.chain.from_iterable(layer.packages for layer in img_obj.layers[:layer_index]))
+    updated_package_list = []
+    for item in layer_obj.packages:
+        if item in package_list:
+            pass
+        else:
+            updated_package_list.append(item)
+    while(len(layer_obj.packages) > 0):
+        layer_obj.packages.pop(0)
+    for item in updated_package_list:
+        layer_obj.packages.append(item)
 
 
 def get_os_style(image_layer, binary):
