@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -9,12 +9,18 @@ SPDX document generator
 
 import datetime
 import hashlib
+import logging
 
 from tern.formats.spdx.spdx import SPDX
 from tern.utils.general import get_git_rev_or_version
+from tern.utils import constants
 from tern.report import content
 from tern.formats.spdx import formats as spdx_formats
 from tern.formats import generator
+
+
+# global logger
+logger = logging.getLogger(constants.logger_name)
 
 
 def get_document_namespace(image_obj):
@@ -136,6 +142,27 @@ def get_license_block(license_list):
         block = block + spdx_formats.extracted_text.format(
             orig_license=l if l else 'NOASSERTION') + '\n\n'
     return block
+
+
+def get_layer_verification_code(layer_obj):
+    '''Calculate the verification code from the files in an image layer. This
+    assumes that layer_obj.files_analyzed is True. The implementation follows
+    the algorithm in the SPDX spec v 2.1 which requires SHA1 to be used to
+    calculate the checksums of the file and the final verification code'''
+    sha1_list = []
+    for filedata in layer_obj.files:
+        filesha = filedata.get_checksum('sha1')
+        if not filesha:
+            # we cannot create a verification code, hence file generation
+            # is aborted
+            logger.critical(
+                'File %s does not have a sha1 checksum. Failed to generate '
+                'a SPDX tag-value report', filedata.path)
+            return None
+        sha1_list.append(filesha)
+    sha1_list.sort()
+    sha1s = ''.join(sha1_list)
+    return hashlib.sha1(sha1s.encode('utf-8')).hexdigest()
 
 
 class SpdxTagValue(generator.Generate):

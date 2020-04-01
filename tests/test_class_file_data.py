@@ -81,6 +81,14 @@ class TestClassFileData(unittest.TestCase):
                          [('SHA1', '12345abcde'),
                           ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
 
+    def testGetChecksum(self):
+        self.afile.add_checksums([('SHA1', '12345abcde'),
+                                  ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+        self.assertEqual(self.afile.get_checksum('sha1'), '12345abcde')
+        self.assertEqual(self.afile.get_checksum('MD5'),
+                         '1ff38cc592c4c5d0c8e3ca38be8f1eb1')
+        self.assertIsNone(self.afile.get_checksum('sha256'))
+
     def testExtAttrs(self):
         file = FileData('test.txt', 'usr/abc/test.txt')
         file.extattrs = '-rw-r--r--|1000|1000|19|1'
