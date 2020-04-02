@@ -22,6 +22,7 @@ Tern is a software package inspection tool for containers. It's written in Pytho
 - [Using Tern](#using-tern)
   - [Generating a BoM report for a Docker image](#bom-for-docker-image)
   - [Generating a BoM report from a Dockerfile](#bom-for-dockerfile)
+  - [Generating a locked Dockerfile](#dockerfile-lock)
 - [Report Formats](#report-formats)
   - [Human Readable Format](#report-human-readable)
   - [JSON Format](#report-json)
@@ -175,6 +176,16 @@ $ tern report -d samples/photon_git/Dockerfile
 ```
 Take a look at report.txt to see what packages you would be shipping if you were to use the given Dockerfile. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
 
+## Generating a locked Dockerfile<a name="dockerfile-lock">
+Because of the way Docker builds containers, Dockerfiles are generally not declarative or reflective of what ultimately gets included in the container image that gets produced. Pinning information in your Dockerfile (base OS, packages, etc.) can help create more reproducible container images should your Dockerfile be distributed to other parties. If you have a Dockerfile that you would like to lock to a more reproducible version, Tern can help.
+```
+$ tern lock Dockerfile
+```
+The locked Dockerfile will be created in `Dockerfile.lock` unless an output file is otherwise specified. To specify an output file
+```
+$ tern lock Dockerfile -o output.txt
+```
+If the packages are not pinned in the resulting `Dockerfile.lock` or output file that gets produced, it is because 1) Tern does not know the version of the packages to pin (i.e. unable to get this information from the package manager) or 2) your Dockerfile failed to build. In the case of a failed Dockerfile build, Tern only builds the base image and tries to pin what it can. If you encounter any errors, please file an issue.
 
 # Report Formats<a name="report-formats">
 Tern creates BoM reports suitable to read over or to provide to another tool for consumption.
