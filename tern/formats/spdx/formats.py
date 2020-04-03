@@ -9,7 +9,7 @@ SPDX document formatting
 
 # basic strings
 tag_value = '{tag}: {value}'
-block_text = '<text>{message}</text>'
+block_text = '<text>\n{message}\n</text>'
 
 # document level strings
 spdx_version = 'SPDXVersion: SPDX-2.1'
