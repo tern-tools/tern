@@ -22,10 +22,7 @@ class SPDX(Template):
                 'download_url': 'PackageDownloadLocation'}
 
     def image_layer(self):
-        # TODO: hash_type should be added in the class property
-        # not hardcoded here
-        return {'diff_id': 'PackageName',
-                'fs_hash': 'PackageChecksum: SHA256'}
+        return {'tar_file': 'PackageFileName'}
 
     def image(self):
         return {'name': 'PackageName',
