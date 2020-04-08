@@ -78,7 +78,7 @@ OS container, we can run:
 $ dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'
 ```
 which is what we would normally do on a regular Debian OS (granted there is some
-fenagling of the output to just print out the names but hey, who hasn't done fancy
+finagling of the output to just print out the names but hey, who hasn't done fancy
 shell-fu to get a desired output? No joke - I found this on stackoverflow).
 
 You can try this yourself on a debian:jessie container:
