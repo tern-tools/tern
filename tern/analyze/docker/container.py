@@ -38,7 +38,7 @@ def check_docker_setup():
     appropriate privileges'''
     global client
     try:
-        client = docker.from_env()
+        client = docker.from_env(timeout=120)
         client.ping()
     except requests.exceptions.ConnectionError as e:
         logger.critical('Critical Docker error: %s', str(e))
