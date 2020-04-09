@@ -75,15 +75,15 @@ class TestClassFileData(unittest.TestCase):
 
     def testAddChecksums(self):
         file1 = FileData('file1', 'path/to/file1')
-        file1.add_checksums([('SHA1', '12345abcde'),
-                             ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+        file1.add_checksums({'SHA1': '12345abcde',
+                             'MD5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'})
         self.assertEqual(file1.checksums,
-                         [('SHA1', '12345abcde'),
-                          ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+                         {'sha1': '12345abcde',
+                          'md5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'})
 
     def testGetChecksum(self):
-        self.afile.add_checksums([('SHA1', '12345abcde'),
-                                  ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+        self.afile.add_checksums({'SHA1': '12345abcde',
+                                  'MD5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'})
         self.assertEqual(self.afile.get_checksum('sha1'), '12345abcde')
         self.assertEqual(self.afile.get_checksum('MD5'),
                          '1ff38cc592c4c5d0c8e3ca38be8f1eb1')
@@ -125,8 +125,8 @@ class TestClassFileData(unittest.TestCase):
                         '4ceeb204f7c3b6599834c7319541',
             'extattrs': '-rw-r--r-- 1 1000 1000 16262 Nov 13 17:57'
                         ' /usr/include/zconf.h',
-            'checksums': [('SHA1', '12345abcde'),
-                          ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')]
+            'checksums': {'sha1': '12345abcde',
+                          'md5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'}
         }
         f = FileData('zconf.h', '/usr/include/zconf.h')
         f.fill(file_dict)
@@ -138,9 +138,8 @@ class TestClassFileData(unittest.TestCase):
         self.assertEqual(f.extattrs, '-rw-r--r-- 1 1000 1000 '
                                      '16262 Nov 13 17:57 /usr/include/zconf.h')
         self.assertEqual(f.checksums,
-                         [('SHA1', '12345abcde'),
-                          ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')]
-                         )
+                         {'sha1': '12345abcde',
+                          'md5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'})
         self.assertEqual(f.origins.origins[0].notices[0].message,
                          'No metadata for key: date')
         self.assertEqual(f.origins.origins[0].notices[1].message,
@@ -154,8 +153,8 @@ class TestClassFileData(unittest.TestCase):
         file1.set_checksum('sha256', '123abc456def')
         file1.extattrs = '-rwxr-xr-x|1000|1000|14408|1'
         file2 = FileData('switch_root', 'sbin/switch_root')
-        file2.checksums = [('SHA1', '12345abcde'),
-                           ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')]
+        file2.add_checksums({'SHA1': '12345abcde',
+                             'MD5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'})
         file2.set_checksum('sha256', '123abc456def')
         file2.extattrs = '-rwxr-xr-x|1000|1000|14408|1'
         file2.date = '2012-02-02'
@@ -179,8 +178,8 @@ class TestClassFileData(unittest.TestCase):
         self.assertFalse(file1.merge('astring'))
         self.assertTrue(file1.merge(file2))
         self.assertEqual(file1.checksums,
-                         [('SHA1', '12345abcde'),
-                          ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+                         {'sha1': '12345abcde',
+                          'md5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'})
         self.assertEqual(file1.date, '2012-02-02')
         self.assertEqual(file1.file_type, 'binary')
         self.assertEqual(file1.short_file_type, 'BINARY')

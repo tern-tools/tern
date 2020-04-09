@@ -37,7 +37,8 @@ class FileData:
         authors: a list of authors if known
         packages: a list of packages where this file could come from
         urls: a list of urls from where this file could come from
-        checksums: a list of tuples of the form (checksum_type, checksum)
+        checksums: a dictionary of the form {<checksum_type>: <checksum>,...}
+        checksum types and checksums are stored in lower case
 
     methods:
         to_dict: returns a dictionary representation of the instance
@@ -68,7 +69,7 @@ class FileData:
         self.authors = []
         self.packages = []
         self.urls = []
-        self.__checksums = []
+        self.__checksums = {}
         self.__origins = Origins()
 
     @property
@@ -129,10 +130,6 @@ class FileData:
     def checksums(self):
         return self.__checksums
 
-    @checksums.setter
-    def checksums(self, checksums):
-        self.__checksums = checksums
-
     @property
     def short_file_type(self):
         return self.__short_file_type
@@ -165,17 +162,14 @@ class FileData:
         self.__version = version
 
     def add_checksums(self, checksums):
-        '''Add checksum tuples to checksums property'''
-        for checksum in checksums:
-            self.__checksums.append(checksum)
+        '''Add a checksum dictionary to checksums property'''
+        for key, value in checksums.items():
+            self.__checksums[key.lower()] = value.lower()
 
     def get_checksum(self, hash_type):
         '''Given a hash type, return the checksum. If the hash type is not
         available, return None'''
-        for tup in self.__checksums:
-            if tup[0].lower() == hash_type.lower():
-                return tup[1]
-        return None
+        return self.__checksums.get(hash_type.lower(), None)
 
     def to_dict(self, template=None):
         '''Return a dictionary version of the FileData object
@@ -261,7 +255,7 @@ class FileData:
             self.authors = other.authors
             self.packages = other.packages
             self.urls = other.urls
-            self.checksums = other.checksums
+            self.add_checksums(other.checksums)
             # collect notices
             for o in other.origins.origins:
                 for n in o.notices:
