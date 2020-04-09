@@ -103,22 +103,27 @@ You may have already cloned the project and started working on it. If you're rea
 7. Highly recommended: If you want to set up your project for long-term open source contribution, I highly suggest following [this setup](https://github.com/nishakm/puns).
 
 ### Setting up a development environment on Mac and Windows
-1. [Install](https://github.com/vmware/tern#install) VirtualBox and Vagrant for mac or windows
-2. Run `git clone https://github.com/vmware/tern.git`
+1. [Install](https://github.com/tern-tools/tern#install) VirtualBox and Vagrant for Mac or Windows
+2. Run `git clone https://github.com/tern-tools/tern.git`
 3. Run `cd tern/vagrant`
 4. Run `vagrant up`
 5. Run `vagrant ssh`
-6. Run `pip3 install wheel`
-7. Run `cd /tern`
-8. Run `pip3 install -e.[dev]`
-This will install tern in development mode on windows and mac.
+6. Run `python3 -m venv ternenv`
+7. Run `cd ternenv`
+8. Run `source bin/activate`
+9. Run `cp -r /tern .`
+10. Run `cd tern`
+11. Run `pip3 install wheel`
+12. Run `pip3 install -e.[dev]`
+This will install tern at the tip of master on Windows and Mac.
 
 ### After making changes
-1. Run prospector from the project's root directory `prospector .`
-2. Fix any issues prospector brings up.
-3. Run bandit from the project's root directory `bandit -r .`
-4. Fix any issues bandit brings up.
-5. Test your changes.
+1. Install your changes in the development virtual environment `pip3 install -e.[dev]`
+2. Run prospector from the project's root directory `prospector .`
+3. Fix any issues prospector brings up.
+4. Run bandit from the project's root directory `bandit -r .`
+5. Fix any issues bandit brings up.
+6. Test your changes.
 
 ### Testing you changes
 After you make the changes just run `tox`. This will run a set tests and inform you if anything is wrong.
