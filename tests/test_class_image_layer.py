@@ -130,11 +130,11 @@ class TestClassImageLayer(unittest.TestCase):
         self.assertEqual(self.layer.checksum, '12345abcde')
 
     def testAddChecksums(self):
-        self.layer.add_checksums([('SHA1', '12345abcde'),
-                                  ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+        self.layer.add_checksums({'SHA1': '12345abcde',
+                                  'MD5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'})
         self.assertEqual(self.layer.checksums,
-                         [('SHA1', '12345abcde'),
-                          ('MD5', '1ff38cc592c4c5d0c8e3ca38be8f1eb1')])
+                         {'sha1': '12345abcde',
+                          'md5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'})
 
 
 if __name__ == '__main__':

@@ -36,7 +36,7 @@ class ImageLayer:
         checksum_type: the digest algorithm used to create the image layer
         checksum
         checksum: the checksum
-        checksums: a list of tuples of the form (checksum_type, checksum)
+        checksums: a dictionary of the form {<checksum_type>: <checksum>}
     methods:
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
@@ -68,7 +68,7 @@ class ImageLayer:
         self.__analyzed_output = ''
         self.__checksum_type = ''
         self.__checksum = ''
-        self.__checksums = []
+        self.__checksums = {}
 
     @property
     def diff_id(self):
@@ -109,10 +109,6 @@ class ImageLayer:
     @property
     def checksums(self):
         return self.__checksums
-
-    @checksums.setter
-    def checksums(self, checksums):
-        self.__checksums = checksums
 
     @created_by.setter
     def created_by(self, create_string):
@@ -179,9 +175,9 @@ class ImageLayer:
         self.__checksum = checksum
 
     def add_checksums(self, checksums):
-        '''Add checksum tuples to checksums property'''
-        for checksum in checksums:
-            self.__checksums.append(checksum)
+        '''Add a checksum dictionary to checksums property'''
+        for key, value in checksums.items():
+            self.__checksums[key.lower()] = value.lower()
 
     def add_package(self, package):
         if isinstance(package, Package):
