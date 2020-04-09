@@ -133,11 +133,13 @@ Follow the instructions on the [VirtualBox](https://www.virtualbox.org/wiki/Down
 Follow the instructions on the website to install [Vagrant](https://www.vagrantup.com/downloads.html) for your OS. 
 
 ### Create a Vagrant environment
-In your terminal app, run the following commands.
+**NOTE**: The following steps will install the latest [PyPI release](https://pypi.org/project/tern/#history) version of Tern. If you want to install Tern from the tip of master, please instead follow "Setting up a development environment on Mac and Windows" in the [contributing guide](/CONTRIBUTING.md).
+
+In your terminal app, run the following commands. 
 
 Clone this repository:
 ```
-$ git clone https://github.com/vmware/tern.git
+$ git clone https://github.com/tern-tools/tern.git
 ```
 
 Bring up the Vagrant box: 
