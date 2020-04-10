@@ -11,7 +11,7 @@ class SPDX(Template):
     It provides mappings for the SPDX tag-value document format'''
 
     def file_data(self):
-        return {'path': 'FileName',
+        return {'name': 'FileName',
                 'short_file_type': 'FileType'}
 
     def package(self):
