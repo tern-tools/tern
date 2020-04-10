@@ -141,7 +141,14 @@ def get_layer_block(layer_obj, template, image_loc=''):
     if layer_obj.files_analyzed:
         # blank new line
         block += '\n'
+        # some files are located in different places in the filesystem
+        # they would occur as duplicates in this block
+        # keep a list of previously printed file spdx-refs
+        file_refs = set()
         # file data
         for filedata in layer_obj.files:
-            block += fhelpers.get_file_block(filedata, template) + '\n'
+            file_ref = fhelpers.get_file_spdxref(filedata)
+            if file_ref not in file_refs:
+                block += fhelpers.get_file_block(filedata, template) + '\n'
+                file_refs.add(file_ref)
     return block
