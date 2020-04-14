@@ -40,32 +40,6 @@ def get_package_license_ref(package_license):
         'utf-8')).hexdigest()[-7:]
 
 
-def get_unique_license_list(pkg_obj_list):
-    '''Given a list of package objects, return a list of unique license
-    texts. Don't include empty licenses'''
-    licenses = set()
-    for pkg in pkg_obj_list:
-        if pkg.pkg_license:
-            licenses.add(pkg.license)
-    return list(licenses)
-
-
-def get_package_license_block(pkg_obj_list):
-    '''Given a list of package objects, return a LicenseRef block of text
-    this is of the format:
-        ## License Information
-        LicenseID: LicenseRef-MIT
-        ExtractedText: <text> </text>'''
-    block = ''
-    license_list = get_unique_license_list(pkg_obj_list)
-    for l in license_list:
-        block = block + spdx_formats.license_id.format(
-            license_ref=get_package_license_ref(l)) + '\n'
-        block = block + spdx_formats.extracted_text.format(
-            orig_license=l) + '\n\n'
-    return block
-
-
 def get_package_block(package_obj, template):
     '''Given a package object and its SPDX template mapping, return a SPDX
     document block for the package. The mapping should have keys:
@@ -102,7 +76,7 @@ def get_package_block(package_obj, template):
     # Package Copyright Text
     if mapping['PackageCopyrightText']:
         block += 'PackageCopyrightText:' + spdx_formats.block_text.format(
-            mapping['PackageCopyrightText']) + '\n'
+            message=mapping['PackageCopyrightText']) + '\n'
     else:
         block += 'PackageCopyrightText: NONE\n'
     # Package Comments

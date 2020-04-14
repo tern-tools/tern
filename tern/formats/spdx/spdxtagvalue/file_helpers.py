@@ -6,14 +6,18 @@
 """
 File level helpers for SPDX tag-value document generator
 """
+import hashlib
 
 
 # basic functions
-def get_file_spdxref(filedata):
+def get_file_spdxref(filedata, layer_id):
     '''Given a FileData object, return a unique identifier for the SPDX
     document. According to the spec, this should be of the form: SPDXRef-<id>
-    We will return a combination of the file name and checksum'''
-    return 'SPDXRef-{}'.format(filedata.name + filedata.checksum[:7])
+    We will use a combination of the file name, checksum and layer_id and
+    calculate a hash of this string'''
+    file_string = filedata.path + filedata.checksum[:7] + layer_id
+    fileid = hashlib.sha256(file_string.encode('utf-8')).hexdigest()[-7:]
+    return 'SPDXRef-{}'.format(fileid)
 
 
 def get_file_checksum(filedata):
@@ -38,8 +42,8 @@ def get_file_notice(filedata):
     '''Return a formatted string with all copyrights found in a file. Return
     an empty string if there are no copyrights'''
     notice = ''
-    for copyright in filedata.copyrights:
-        notice = notice + copyright + '\n'
+    for cp in filedata.copyrights:
+        notice = notice + cp + '\n'
     return notice
 
 
@@ -68,16 +72,18 @@ def get_file_contributor_block(filedata):
 
 
 # full file block
-def get_file_block(filedata, template):
+def get_file_block(filedata, template, layer_id):
     '''Given a FileData object, and the SPDX template mapping, return a SPDX
     document block for the file. The mapping should have only FileName and
-    FileType keys'''
+    FileType keys. A layer id is used to distinguish copies of the
+    same file occuring in different places in the image'''
     block = ''
     mapping = filedata.to_dict(template)
     # File Name
     block = block + 'FileName: {}'.format(mapping['FileName']) + '\n'
     # SPDX ID
-    block = block + 'SPDXID: {}'.format(get_file_spdxref(filedata)) + '\n'
+    block = block + 'SPDXID: {}'.format(
+        get_file_spdxref(filedata, layer_id)) + '\n'
     # File Type
     block = block + 'FileType: {}'.format(mapping['FileType']) + '\n'
     # File checksum
