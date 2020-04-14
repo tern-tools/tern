@@ -101,6 +101,7 @@ def get_layer_block(layer_obj, template, image_loc=''):
     would be downloaded along with the image.'''
     block = ''
     mapping = layer_obj.to_dict(template)
+    layer_checksum = get_layer_checksum(layer_obj)
     # Package Name
     block += 'PackageName: {}\n'.format(os.path.basename(layer_obj.tar_file))
     # Package SPDXID
@@ -122,7 +123,7 @@ def get_layer_block(layer_obj, template, image_loc=''):
     else:
         block += 'FilesAnalyzed: false\n'
     # Package Checksum
-    block += 'PackageChecksum: {}\n'.format(get_layer_checksum(layer_obj))
+    block += 'PackageChecksum: {}\n'.format(layer_checksum)
     # Package License Concluded (always NOASSERTION)
     block += 'PackageLicenseConcluded: NOASSERTION\n'
     # All licenses info from files
@@ -147,8 +148,10 @@ def get_layer_block(layer_obj, template, image_loc=''):
         file_refs = set()
         # file data
         for filedata in layer_obj.files:
-            file_ref = fhelpers.get_file_spdxref(filedata)
+            # we use the layer checksum as the layer id
+            file_ref = fhelpers.get_file_spdxref(filedata, layer_checksum)
             if file_ref not in file_refs:
-                block += fhelpers.get_file_block(filedata, template) + '\n'
+                block += fhelpers.get_file_block(
+                    filedata, template, layer_checksum) + '\n'
                 file_refs.add(file_ref)
     return block
