@@ -20,5 +20,5 @@ command -v getfattr || { echo "'getfattr' not found on system." >&2 ; exit 1; }
 
 cwd=`pwd`
 cd $1
-find -type f -printf "%M|%U|%G|%s|%n|" -exec sha256sum {} \; -exec getfattr -d -m - {} \;
+find -type f ! -size 0 -printf "%M|%U|%G|%s|%n|" -exec sha256sum {} \; -exec getfattr -d -m - {} \;
 cd $cwd
