@@ -129,6 +129,11 @@ class DockerImage(Image):
             diff_ids.append(item.split(':').pop())
         return diff_ids
 
+    def get_diff_checksum_type(self, config):
+        '''Get the checksum type that was used to calculate the diff_id
+        of the image'''
+        return config['rootfs']['diff_ids'][0].split(':')[0]
+
     def set_layer_created_by(self):
         '''Docker image history configuration consists of a list of commands
         and indication of whether the command created a filesystem or not.
@@ -156,8 +161,10 @@ class DockerImage(Image):
             self.__history = self.get_image_history(self._config)
             layer_paths = self.get_image_layers(self._manifest)
             layer_diffs = self.get_diff_ids(self._config)
+            checksum_type = self.get_diff_checksum_type(self._config)
             while layer_diffs and layer_paths:
                 layer = ImageLayer(layer_diffs.pop(0), layer_paths.pop(0))
+                layer.set_checksum(checksum_type, layer.diff_id)
                 layer.gen_fs_hash()
                 self._layers.append(layer)
             self.set_layer_created_by()

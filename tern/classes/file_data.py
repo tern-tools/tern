@@ -26,6 +26,9 @@ class FileData:
         version: the version of the file under version control. If it came
         with a package the version would be the same as the package version.
         file_type: this is a string describing what type of file this is
+        short_file_type: this is a short string describing what type of file
+        this is. This should be one of the following:
+            SOURCE, BINARY, ARCHIVE, TEXT, OTHER
         licenses: A list of licenses that may be detected or is known
         license_expressions: This is a SPDX term used to describe how one or
         more licenses together should be understood. This list may be left
@@ -34,13 +37,16 @@ class FileData:
         authors: a list of authors if known
         packages: a list of packages where this file could come from
         urls: a list of urls from where this file could come from
-        checksums: a list of tuples of the form (checksum_type, checksum)
+        checksums: a dictionary of the form {<checksum_type>: <checksum>,...}
+        checksum types and checksums are stored in lower case
 
     methods:
         to_dict: returns a dictionary representation of the instance
         set_version: set the version of the file given the version control
         system used
         set_checksum: set the checksum of the file given the checksum type
+        get_checksum: get the checksum that matches the checksum type from
+        the property 'checksums'
         fill: fill data into the object instance from a dictionary'''
     def __init__(self,
                  name,
@@ -51,6 +57,7 @@ class FileData:
         self.__path = path
         self.date = date
         self.__file_type = file_type
+        self.__short_file_type = ''
         self.__checksum_type = ''
         self.__checksum = ''
         self.__version_control = ''
@@ -62,7 +69,7 @@ class FileData:
         self.authors = []
         self.packages = []
         self.urls = []
-        self.__checksums = []
+        self.__checksums = {}
         self.__origins = Origins()
 
     @property
@@ -123,9 +130,20 @@ class FileData:
     def checksums(self):
         return self.__checksums
 
-    @checksums.setter
-    def checksums(self, checksums):
-        self.__checksums = checksums
+    @property
+    def short_file_type(self):
+        return self.__short_file_type
+
+    @short_file_type.setter
+    def short_file_type(self, short_file_type):
+        '''short_file_type should be one of these:
+            SOURCE, BINARY, ARCHIVE, TEXT, OTHER'''
+        allowed_file_types = ('SOURCE', 'BINARY', 'ARCHIVE', 'TEXT', 'OTHER')
+        if short_file_type not in allowed_file_types:
+            raise ValueError(
+                "Incorrect short file type name, should be "
+                "SOURCE, BINARY, ARCHIVE, TEXT or OTHER")
+        self.__short_file_type = short_file_type
 
     @property
     def origins(self):
@@ -144,9 +162,14 @@ class FileData:
         self.__version = version
 
     def add_checksums(self, checksums):
-        '''Add checksum tuples to checksums property'''
-        for checksum in checksums:
-            self.__checksums.append(checksum)
+        '''Add a checksum dictionary to checksums property'''
+        for key, value in checksums.items():
+            self.__checksums[key.lower()] = value.lower()
+
+    def get_checksum(self, hash_type):
+        '''Given a hash type, return the checksum. If the hash type is not
+        available, return None'''
+        return self.__checksums.get(hash_type.lower(), None)
 
     def to_dict(self, template=None):
         '''Return a dictionary version of the FileData object
@@ -189,6 +212,7 @@ class FileData:
             path: <path to file>
             date: <date>
             file_type: <file_type>
+            short_file_type: <short_file_type>
             checksum: <checksum>
             checksum_type: <checksum_type>
             version_control: <version_control>
@@ -223,13 +247,15 @@ class FileData:
         if (self.path == other.path):
             self.date = other.date
             self.file_type = other.file_type
+            if other.short_file_type:
+                self.short_file_type = other.short_file_type
             self.licenses = other.licenses
             self.license_expressions = other.license_expressions
             self.copyrights = other.copyrights
             self.authors = other.authors
             self.packages = other.packages
             self.urls = other.urls
-            self.checksums = other.checksums
+            self.add_checksums(other.checksums)
             # collect notices
             for o in other.origins.origins:
                 for n in o.notices:

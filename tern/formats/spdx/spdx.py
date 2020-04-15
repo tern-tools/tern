@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 from tern.classes.template import Template
@@ -12,7 +12,7 @@ class SPDX(Template):
 
     def file_data(self):
         return {'name': 'FileName',
-                'file_type': 'FileType'}
+                'short_file_type': 'FileType'}
 
     def package(self):
         return {'name': 'PackageName',
@@ -22,10 +22,7 @@ class SPDX(Template):
                 'download_url': 'PackageDownloadLocation'}
 
     def image_layer(self):
-        # TODO: hash_type should be added in the class property
-        # not hardcoded here
-        return {'diff_id': 'PackageName',
-                'fs_hash': 'PackageChecksum: SHA256'}
+        return {'tar_file': 'PackageFileName'}
 
     def image(self):
         return {'name': 'PackageName',

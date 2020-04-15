@@ -30,6 +30,21 @@ from tern.utils import rootfs
 logger = logging.getLogger(constants.logger_name)
 
 
+def get_file_type(scancode_file_dict):
+    '''Scancode's file dictionary has a set of keys:
+        is_binary, is_text, is_archive, is_media, is_source, is_script
+    using this set, return a filetype recognized by SPDX'''
+    if scancode_file_dict['is_binary'] == 'true':
+        return 'BINARY'
+    if scancode_file_dict['is_source'] == 'true':
+        return 'SOURCE'
+    if scancode_file_dict['is_text'] == 'true':
+        return 'TEXT'
+    if scancode_file_dict['is_archive'] == 'true':
+        return 'ARCHIVE'
+    return 'OTHER'
+
+
 def collect_layer_data(layer_obj):
     '''Use scancode to collect data from a layer filesystem. This function will
     create a FileData object for every file found. After scanning, it will
@@ -50,13 +65,15 @@ def collect_layer_data(layer_obj):
         # make FileData objects for each result
         data = json.loads(result)
         for f in data['files']:
-            if f['type'] == 'file':
+            if f['type'] == 'file' and f['size'] != 0:
                 # scancode records paths from the target directory onwards
                 # which in tern's case is tern.utils.constants.untar_dir
                 # removing that portion of the file path
                 fspath = f['path'].replace(
                     constants.untar_dir + os.path.sep, '')
                 fd = FileData(f['name'], fspath, f['date'], f['file_type'])
+                fd.short_file_type = get_file_type(f)
+                fd.add_checksums({'sha1': f['sha1'], 'md5': f['md5']})
                 if f['licenses']:
                     fd.licenses = [l['short_name'] for l in f['licenses']]
                 fd.license_expressions = f['license_expressions']

@@ -86,6 +86,8 @@ class TestClassDockerImage(unittest.TestCase):
         self.assertEqual(self.image.layers[0].diff_id, self.layer)
         self.assertEqual(len(self.image.layers), self.no_layers)
         self.assertEqual(self.image.layers[0].created_by, self.created_by)
+        self.assertEqual(self.image.layers[0].checksum_type, 'sha256')
+        self.assertEqual(self.image.layers[0].checksum, self.layer)
 
     def testGetImageOption(self):
         self.assertEqual(self.image.get_image_option(), self.image.repotag)
