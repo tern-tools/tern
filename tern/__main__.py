@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -122,7 +122,7 @@ def main():
         description='''
     Tern is a container image component curation tool. Tern retrieves
     information about packages that are installed in a container image.
-    Learn more at https://github.com/vmware/tern''')
+    Learn more at https://github.com/tern-tools/tern''')
     parser.add_argument('-q', '--quiet', action='store_true',
                         help="Silences the output to the terminal;"
                         "Useful when logging behaviour unnecessary")

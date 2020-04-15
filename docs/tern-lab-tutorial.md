@@ -83,7 +83,7 @@ Repeat as desired for any Docker container image of your choosing.
 
 ### Option 4: Generate a SPDX tag-value report for the container image
 
-[SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. Many compliance tools are compatible with SPDX. Tern follows the SPDX [specifications](https://spdx.org/specifications) specifically the tag-value format which is the most compatible format with the toolkit the organization provides. The tag-value format is the only SPDX format Tern supports. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](https://github.com/vmware/tern/blob/master/docs/spdx-tag-value-overview.md) and about how Tern maps its properties to the keys mandated by the spec [here](https://github.com/vmware/tern/blob/master/docs/spdx-tag-value-mapping.md).
+[SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. Many compliance tools are compatible with SPDX. Tern follows the SPDX [specifications](https://spdx.org/specifications) specifically the tag-value format which is the most compatible format with the toolkit the organization provides. The tag-value format is the only SPDX format Tern supports. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](https://github.com/tern-tools/tern/blob/master/docs/spdx-tag-value-overview.md) and about how Tern maps its properties to the keys mandated by the spec [here](https://github.com/tern-tools/tern/blob/master/docs/spdx-tag-value-mapping.md).
 
 #### Step 1: Generate the SPDX tag-value report
 
@@ -129,7 +129,7 @@ $ tern report -d demo/Dockerfile -o dockerfile.txt
 
 Do you have questions about Tern? Do you think it can do better? Would you like to make it better? You can get involved by giving your feedback and contributing to the code, documentation and conversation!
 
-Please read our [code of conduct](https://github.com/vmware/tern/blob/master/CODE_OF_CONDUCT.md) and see our [CONTRIBUTING.md](https://github.com/vmware/tern/blob/master/CONTRIBUTING.md) for details on the project and the process for submitting pull requests.
+Please read our [code of conduct](https://github.com/tern-tools/tern/blob/master/CODE_OF_CONDUCT.md) and see our [CONTRIBUTING.md](https://github.com/tern-tools/tern/blob/master/CONTRIBUTING.md) for details on the project and the process for submitting pull requests.
 
 ## Authors
 
@@ -138,4 +138,4 @@ Please read our [code of conduct](https://github.com/vmware/tern/blob/master/COD
 
 ## License
 
-Tern is licensed under the The BSD-2 license - see [LICENSE.txt](https://github.com/vmware/tern/blob/master/LICENSE.txt) for more information.
+Tern is licensed under the The BSD-2 license - see [LICENSE.txt](https://github.com/tern-tools/tern/blob/master/LICENSE.txt) for more information.
