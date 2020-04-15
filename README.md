@@ -270,13 +270,12 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Release 1.0.0 was released at the beginning of November. A follow-up release, v1.0.1, was made available at the beginning of December to address a regression found when running Tern in a Docker container.
+Release 2.0.0 is out! See the [release notes](docs/releases/v2_0_0.md) for more information.
 
-See the [release notes](docs/releases/v1_0_0.md) for more information. See the [update notes](docs/releases/v1_0_1.md) for patches on top of this release.
-
-We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 1.1.0.
+We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 2.1.0.
 
 ## Releases
+* [v2.0.0](docs/releases/v2_0_0.md)
 * [v1.0.1](docs/releases/v1_0_1.md)
 * [v0.5.4](docs/releases/v0_5_4.md)
 * [v0.4.0](docs/releases/v0_4_0.md)

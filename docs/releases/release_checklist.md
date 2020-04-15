@@ -36,6 +36,8 @@ This is a checklist for cutting a release
       - Contributors (look at Authors in the changelog `git log --pretty=format:"%an %ae" v<tag>..master | sort | uniq`). Remove the maintainers name from the contributor list.
       - Contact the Maintainers
 
+    * Update the Project Status part of the README.md to reflect this release and add it to the list of releases.
+
 - [ ] Commit release notes and create patch for your changes
     * `git add` and `git commit` any changes. This will likely include`v<release>-requirements.txt`, any changes to `requirements.txt` and `v<release>.md`. **Do not push these changes to master!**
     * Run `git format-patch -n1`. This will create a patch file of the release changes you just committed called `0001-<commit_title>.patch`.
