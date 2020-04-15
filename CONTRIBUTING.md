@@ -15,7 +15,7 @@ You can contribute in the following ways:
 - Contribute changes to documentation by [submitting pull requests](#submit-pr) to it.
 
 **Contribute Code**
-- [Resolve Issues](https://github.com/vmware/tern/issues)
+- [Resolve Issues](https://github.com/tern-tools/tern/issues)
 - Improve the robustness of the project by:
   - [Adding to the Command Library](docs/adding-to-command-library.md)
   - [Adding a Custom Report Format](docs/creating-custom-templates.md)
@@ -129,7 +129,7 @@ This will install tern at the tip of master on Windows and Mac.
 After you make the changes just run `tox`. This will run a set tests and inform you if anything is wrong.
 
 ### Setting up a development environment for use with extensions
-To learn more about how Tern can be used with external tools as extensions, see [these instructions](https://github.com/vmware/tern#extensions).
+To learn more about how Tern can be used with external tools as extensions, see [these instructions](https://github.com/tern-tools/tern#extensions).
 
 Tern will be able to find the absolute path of the command line tool which will be used as an extension if it is available on the system. For instance, to make Tern work with Scancode, you can install Scancode in your development environment such that it is available when you run `which scancode`.
 
@@ -140,7 +140,7 @@ If you are developing on Tern and Scancode together, you will need to install bo
 ```
 $ python3 -m venv devenv
 $ cd devenv
-$ git clone git@github.com:vmware/tern.git
+$ git clone git@github.com:tern-tools/tern.git
 $ git clone git@github.com:nexB/scancode-toolkit.git
 $ cd tern
 $ pip install -e.[dev] .

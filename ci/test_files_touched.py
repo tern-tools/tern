@@ -15,7 +15,8 @@ import subprocess  # nosec
 
 repo = Repo(os.getcwd())
 try:
-    repo.git.remote('add', 'upstream', 'https://github.com/vmware/tern.git')
+    repo.git.remote('add', 'upstream',
+                    'https://github.com/tern-tools/tern.git')
 except GitCommandError:
     pass
 repo.git.fetch('upstream')
