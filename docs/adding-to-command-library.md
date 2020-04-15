@@ -215,7 +215,7 @@ environment:
 ```
 $ python3 -m venv ternenv
 $ cd ternenv
-$ git clone https://github.com/vmware/tern.git
+$ git clone https://github.com/tern-tools/tern.git
 $ source bin/activate
 $ cd tern
 $ pip install -r requirements.txt

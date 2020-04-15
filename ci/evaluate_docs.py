@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 from git import Repo
@@ -16,7 +16,8 @@ import sys
 
 repo = Repo(os.getcwd())
 try:
-    repo.git.remote('add', 'upstream', 'https://github.com/vmware/tern.git')
+    repo.git.remote('add', 'upstream',
+                    'https://github.com/tern-tools/tern.git')
 except GitCommandError:
     pass
 repo.git.fetch('upstream')
