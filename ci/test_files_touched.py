@@ -79,7 +79,8 @@ test_suite = {
         'python tests/test_analyze_docker_dockerfile.py',
         'python tests/test_analyze_common.py',
         'tern report -i golang:alpine',
-        'tern report -d samples/alpine_python/Dockerfile'],
+        'tern report -d samples/alpine_python/Dockerfile',
+        'tern lock Dockerfile'],
     # tern/report
     re.compile('tern/report'): [
         'tern report -i golang:alpine',
