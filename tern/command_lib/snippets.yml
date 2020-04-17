@@ -58,3 +58,79 @@ rpm:
    install: '-i'
    remove: '-e'
    packages: 'rpm'
+
+pip3:
+  install: 'install'
+  remove: 'uninstall'
+  ignore:
+    - 'freeze'
+    - 'list'
+    - 'download'
+    - 'show'
+    - 'check'
+    - 'config'
+    - 'debug'
+    - 'hash'
+    - 'wheel'
+    - 'search'
+  packages:
+    - name: default
+      version:
+        invoke:
+          1:
+            container:
+              - "pip3 show {package} 2> /dev/null | sed -n '2 p' | awk '{print $2}'"
+      proj_url:
+        invoke:
+          1:
+            container:
+              - "pip3 show {package} 2> /dev/null | sed -n '4 p' | awk '{print $2}'"
+      license:
+        invoke:
+          1:
+            container:
+              - "pip3 show {package} 2> /dev/null | sed -n '7 p' | awk '{print $2}'"
+      deps:
+        invoke:
+          1:
+            container:
+              - "pip3 show {package} 2> /dev/null | sed -n '9 p' |  awk -F':' '{ print $2}' | tr ',' '\n' |tr -d '^ ' "
+        delimiter: "\n"
+
+pip:
+  install: 'install'
+  remove: 'uninstall'
+  ignore:
+    - 'freeze'
+    - 'list'
+    - 'download'
+    - 'show'
+    - 'check'
+    - 'config'
+    - 'debug'
+    - 'hash'
+    - 'wheel'
+    - 'search'
+  packages:
+    - name: default
+      version:
+        invoke:
+          1:
+            container:
+              - "pip show {package} 2> /dev/null | sed -n '2 p' | awk '{print $2}'"
+      proj_url:
+        invoke:
+          1:
+            container:
+              - "pip show {package} 2> /dev/null | sed -n '4 p' | awk '{print $2}'"
+      license:
+        invoke:
+          1:
+            container:
+              - "pip show {package} 2> /dev/null | sed -n '7 p' | awk '{print $2}'"
+      deps:
+        invoke:
+          1:
+            container:
+              - "pip show {package} 2> /dev/null | sed -n '9 p' |  awk -F':' '{ print $2}' | tr ',' '\n' |tr -d '^ ' "
+        delimiter: "\n"
