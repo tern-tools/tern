@@ -35,26 +35,8 @@ def print_full_report(image):
                 for layer_origin in layer.origins.origins:
                     notes = notes + content.print_notices(layer_origin,
                                                           '\t', '\t\t')
-            layer_pkg_list = []
-            layer_license_list = []
-            layer_file_licenses_list = []
-            file_level_licenses = None
-
-            for f in layer.files:
-                layer_file_licenses_list.extend(f.license_expressions)
-
-            layer_file_licenses_list = list(set(layer_file_licenses_list))
-            if layer_file_licenses_list:
-                file_level_licenses = ", ".join(layer_file_licenses_list)
-
-            for package in layer.packages:
-                pkg = package.name + "-" + package.version
-                if pkg not in layer_pkg_list and pkg:
-                    layer_pkg_list.append(pkg)
-                if package.pkg_license not in layer_license_list and \
-                        package.pkg_license:
-                    layer_license_list.append(package.pkg_license)
-
+            (layer_pkg_list, layer_license_list,
+             file_level_licenses) = get_layer_info_list(layer)
             # Collect files + packages + licenses in the layer
             notes += formats.layer_file_licenses_list.format(
                 list=file_level_licenses)
@@ -64,6 +46,31 @@ def print_full_report(image):
                 layer_license_list) if layer_license_list else 'None')
             notes = notes + formats.package_demarkation
     return notes
+
+
+def get_layer_info_list(layer):
+    '''Given a layer, collect files + packages + licenses in the layer,
+    return them as lists.'''
+    layer_pkg_list = []
+    layer_license_list = []
+    layer_file_licenses_list = []
+    file_level_licenses = None
+
+    for f in layer.files:
+        layer_file_licenses_list.extend(f.license_expressions)
+
+    layer_file_licenses_list = list(set(layer_file_licenses_list))
+    if layer_file_licenses_list:
+        file_level_licenses = ", ".join(layer_file_licenses_list)
+
+    for package in layer.packages:
+        pkg = package.name + "-" + package.version
+        if pkg not in layer_pkg_list and pkg:
+            layer_pkg_list.append(pkg)
+        if package.pkg_license not in layer_license_list and \
+                package.pkg_license:
+            layer_license_list.append(package.pkg_license)
+    return layer_pkg_list, layer_license_list, file_level_licenses
 
 
 def print_licenses_only(image_obj_list):
