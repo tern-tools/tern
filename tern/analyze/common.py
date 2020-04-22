@@ -531,7 +531,7 @@ def check_git_src(dockerfile_path):
         - dir2/dockerfile
     So we only use dockerfile_path to find the git repo info.'''
     # get the path of the folder containing the dockerfile
-    dockerfile_folder_path = os.path.dirname(dockerfile_path)
+    dockerfile_folder_path = os.path.dirname(os.path.abspath(dockerfile_path))
     # locate the top level directory
     path_to_toplevel = get_git_toplevel(dockerfile_folder_path)
     # get the path of the target folder or file
@@ -567,7 +567,7 @@ def get_git_url(dockerfile_path):
     '''Given a dockerfile_path, return url of git project which contains
     the dockerfile in a form of list.'''
     # get the path of the folder containing the dockerfile
-    dockerfile_folder_path = os.path.dirname(dockerfile_path)
+    dockerfile_folder_path = os.path.dirname(os.path.abspath(dockerfile_path))
     command = ['git', 'remote', '-v']
     try:
         output = subprocess.check_output(  # nosec
@@ -581,7 +581,7 @@ def get_git_url(dockerfile_path):
                 extract_url = extract_git_url_from_line(line)
                 if extract_url:
                     url_list.add(extract_url)
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         logger.debug("Cannot find git repo url, path is %s",
                      dockerfile_folder_path)
     return url_list
@@ -618,6 +618,6 @@ def get_git_toplevel(path):
             command, stderr=subprocess.DEVNULL, cwd=path)
         if isinstance(output, bytes):
             path_to_toplevel = output.decode('utf-8').split('\n').pop(0)
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         logger.debug("Cannot find git repo toplevel, path is %s", path)
     return path_to_toplevel
