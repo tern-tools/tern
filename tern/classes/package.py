@@ -39,6 +39,7 @@ class Package:
         self.__checksum = ''
         self.__origins = Origins()
         self.__files = []
+        self.__pkg_licenses = []
 
     @property
     def name(self):
@@ -60,9 +61,17 @@ class Package:
     def pkg_license(self):
         return self.__pkg_license
 
+    @property
+    def pkg_licenses(self):
+        return self.__pkg_licenses
+
     @pkg_license.setter
     def pkg_license(self, pkg_license):
         self.__pkg_license = pkg_license
+
+    @pkg_licenses.setter
+    def pkg_licenses(self, pkg_licenses):
+        self.__pkg_licenses = pkg_licenses
 
     @property
     def copyright(self):

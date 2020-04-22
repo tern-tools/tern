@@ -23,6 +23,8 @@ from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
 from tern.utils import rootfs
+from debut import debcon
+from debut import copyright as debut_copyright
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -217,7 +219,8 @@ def convert_to_pkg_dicts(pkg_dict):
                'version': 'versions',
                'pkg_license': 'licenses',
                'copyright': 'copyrights',
-               'proj_url': 'proj_urls'}
+               'proj_url': 'proj_urls',
+               'pkg_licenses': 'pkg_licenses'}
     pkg_list = []
     len_names = len(pkg_dict['names'])
     # make a list of keys that correspond with package property names
@@ -235,6 +238,62 @@ def convert_to_pkg_dicts(pkg_dict):
             a_pkg.update({key: value[index]})
         pkg_list.append(a_pkg)
     return pkg_list
+
+
+def get_licenses_from_deb_copyright(deb_copyright):
+    '''
+    Given the debian copyright texts,
+    1. parse each copyright text
+    2. filter out all the available licenses
+    3. returns a list of unique licenses found inside
+    the copyright text
+    '''
+    collected_paragraphs = list()
+    pkg_licenses = set()
+    for paragraph in iter(debcon.get_paragraphs_data(deb_copyright)):
+        if 'license' in paragraph:
+            cp = debut_copyright.CopyrightLicenseParagraph.from_dict(paragraph)
+            collected_paragraphs.append(cp)
+
+    deb_pkg_data = debut_copyright.DebianCopyright(
+        collected_paragraphs).to_dict()
+    for paragraph in deb_pkg_data.get("paragraphs"):
+        pkg_license = paragraph.get("license")
+        if not pkg_license.startswith("*"):
+            pkg_license = pkg_license.split("\n")[0]
+            if pkg_license:
+                pkg_licenses.add(pkg_license)
+
+    return list(pkg_licenses)
+
+
+def get_deb_package_licenses(deb_copyrights):
+    '''
+    Given the all debian copyrights,
+    returns a list of unique licenses in
+    each copyright
+    '''
+    deb_licenses, deb_licenses_dict = list(), dict()
+    for deb_copyright in deb_copyrights:
+        pkg_licenses = get_licenses_from_deb_copyright(deb_copyright)
+        n = len(pkg_licenses)
+        # using an extra dict to validate if we have
+        # seen the license before. If `yes` then discard it
+        # else keep it. This would help us to get all
+        # unique licenses across all the packages
+        for index in range(n):
+            pkg_license = pkg_licenses[index]
+            if deb_licenses_dict.get(pkg_license, None):
+                pkg_licenses[index] = None
+            else:
+                deb_licenses_dict[pkg_license] = 1
+        pkg_licenses = list(
+            filter(lambda pkg_license: pkg_license is not None, pkg_licenses))
+        deb_licenses.append(pkg_licenses)
+    # clear the dict content
+    deb_licenses_dict.clear()
+
+    return deb_licenses
 
 
 def add_base_packages(image_layer, binary, shell):
@@ -261,6 +320,11 @@ def add_base_packages(image_layer, binary, shell):
             origin_layer, Notice(snippet_msg, 'info'))
         # get all the packages in the base layer
         pkg_dict, invoke_msg, warnings = collate_list_metadata(shell, listing)
+
+        if listing.get("pkg_format") == "deb":
+            pkg_dict["pkg_licenses"] = get_deb_package_licenses(
+                pkg_dict["copyrights"])
+
         if invoke_msg:
             image_layer.origins.add_notice_to_origins(
                 origin_layer, Notice(invoke_msg, 'error'))

@@ -145,7 +145,8 @@ class TestClassPackage(unittest.TestCase):
         p_dict = {'name': 'p1',
                   'version': '1.0',
                   'pkg_license': 'Apache 2.0',
-                  'checksum': 'abcxyz'}
+                  'checksum': 'abcxyz',
+                  'pkg_licenses': []}
         p = Package('p1')
         p.fill(p_dict)
         self.assertEqual(p.name, 'p1')
