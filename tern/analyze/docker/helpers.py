@@ -56,23 +56,9 @@ def get_dockerfile_base():
     exception indicating that since the build arguments are determined by
     the user we will not be able to determine what the user wanted'''
     try:
-        dockerfile_lines = docker_commands
-        base_image_string = ''
-        from_line = ''
         # Get the base image tag.
         # NOTE: ARG values have already been expanded.
-        for i, cmd_dict in enumerate(dockerfile_lines):
-            if cmd_dict['instruction'] == 'FROM':
-                # Account for "as" keyword in FROM line
-                base_image_string = re.split(" as", cmd_dict['value'],
-                                             flags=re.IGNORECASE)[0]
-                from_line = 'FROM' + base_image_string
-                # Check that potential ARG values has default
-                if i != 0 and dockerfile_lines[i-1]['instruction'] == 'ARG':
-                    if len(dockerfile_lines[i-1]['value'].split('=')) == 1:
-                        raise ValueError('No ARG default value to pass to '
-                                         'FROM command in Dockerfile.')
-                break
+        base_image_string, from_line = get_base_image_tag(docker_commands)
         # check for scratch
         if base_image_string == 'scratch':
             # there is no base image to pull
@@ -86,7 +72,7 @@ def get_dockerfile_base():
             message_string = errors.dockerfile_no_tag.format(
                 dockerfile_line=from_line)
             base_image.origins.add_notice_to_origins(
-                dockerfile_lines, Notice(message_string, 'warning'))
+                docker_commands, Notice(message_string, 'warning'))
             base_image.tag = 'latest'
         else:
             base_image.tag = base_image_string.split(':')[1]
@@ -95,12 +81,32 @@ def get_dockerfile_base():
             message_string = errors.dockerfile_using_latest.format(
                 dockerfile_line=from_line)
             base_image.origins.add_notice_to_origins(
-                dockerfile_lines, Notice(message_string, 'warning'))
+                docker_commands, Notice(message_string, 'warning'))
         return base_image, from_line
     except ValueError as e:
         logger.fatal("%s", errors.cannot_parse_base_image.format(
             dockerfile=dockerfile_global, error_msg=e))
         sys.exit(1)
+
+
+def get_base_image_tag(dockerfile_lines):
+    '''Get the instructions around FROM, return the base image string
+    and the line containing FROM command'''
+    base_image_string = ''
+    from_line = ''
+    for i, cmd_dict in enumerate(dockerfile_lines):
+        if cmd_dict['instruction'] == 'FROM':
+            # Account for "as" keyword in FROM line
+            base_image_string = re.split(" as", cmd_dict['value'],
+                                         flags=re.IGNORECASE)[0]
+            from_line = 'FROM' + base_image_string
+            # Check that potential ARG values has default
+            if i != 0 and dockerfile_lines[i-1]['instruction'] == 'ARG':
+                if len(dockerfile_lines[i-1]['value'].split('=')) == 1:
+                    raise ValueError('No ARG default value to pass to '
+                                     'FROM command in Dockerfile.')
+            break
+    return base_image_string, from_line
 
 
 def get_dockerfile_image_tag():
