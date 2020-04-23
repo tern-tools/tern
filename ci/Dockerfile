@@ -6,10 +6,7 @@ FROM photon:3.0
 # install system dependencies
 # photon:3.0 comes with toybox which conflicts with some dependencies needed for tern to work, so uninstalling
 # toybox first
-RUN tdnf remove -y toybox && tdnf install -y tar findutils attr util-linux python3 python3-pip python3-setuptools git
-
-# install pip
-RUN pip3 install --upgrade pip
+RUN tdnf remove -y toybox && tdnf install -y tar findutils attr util-linux python3 python3-pip python3-setuptools git && pip3 install --upgrade pip
 
 # install tern with latest changes
 COPY dist/tern-*.tar.gz .
