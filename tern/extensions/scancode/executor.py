@@ -45,6 +45,35 @@ def get_file_type(scancode_file_dict):
     return 'OTHER'
 
 
+def get_scancode_file(file_dict):
+    '''Given a file dictionary from the scancode results, return a FileData
+    object with the results'''
+    # scancode records paths from the target directory onwards
+    # which in tern's case is tern.utils.constants.untar_dir
+    # removing that portion of the file path
+    fspath = file_dict['path'].replace(
+        constants.untar_dir + os.path.sep, '')
+    fd = FileData(
+        file_dict['name'], fspath, file_dict['date'], file_dict['file_type'])
+    fd.short_file_type = get_file_type(file_dict)
+    fd.add_checksums({'sha1': file_dict['sha1'], 'md5': file_dict['md5']})
+    if file_dict['licenses']:
+        fd.licenses = [l['short_name'] for l in file_dict['licenses']]
+    fd.license_expressions = file_dict['license_expressions']
+    if file_dict['copyrights']:
+        fd.copyrights = [c['value'] for c in file_dict['copyrights']]
+    if file_dict['urls']:
+        fd.urls = [u['url'] for u in file_dict['urls']]
+    fd.packages = file_dict['packages']
+    fd.authors = [a['value'] for a in file_dict['authors']]
+    if file_dict['scan_errors']:
+        # for each scan error make a notice
+        for err in file_dict['scan_errors']:
+            fd.origins.add_notice_to_origins(
+                'File: ' + fd.path, Notice(err, 'error'))
+    return fd
+
+
 def collect_layer_data(layer_obj):
     '''Use scancode to collect data from a layer filesystem. This function will
     create a FileData object for every file found. After scanning, it will
@@ -66,29 +95,7 @@ def collect_layer_data(layer_obj):
         data = json.loads(result)
         for f in data['files']:
             if f['type'] == 'file' and f['size'] != 0:
-                # scancode records paths from the target directory onwards
-                # which in tern's case is tern.utils.constants.untar_dir
-                # removing that portion of the file path
-                fspath = f['path'].replace(
-                    constants.untar_dir + os.path.sep, '')
-                fd = FileData(f['name'], fspath, f['date'], f['file_type'])
-                fd.short_file_type = get_file_type(f)
-                fd.add_checksums({'sha1': f['sha1'], 'md5': f['md5']})
-                if f['licenses']:
-                    fd.licenses = [l['short_name'] for l in f['licenses']]
-                fd.license_expressions = f['license_expressions']
-                if f['copyrights']:
-                    fd.copyrights = [c['value'] for c in f['copyrights']]
-                if f['urls']:
-                    fd.urls = [u['url'] for u in f['urls']]
-                fd.packages = f['packages']
-                fd.authors = [a['value'] for a in f['authors']]
-                if f['scan_errors']:
-                    # for each scan error make a notice
-                    for err in f['scan_errors']:
-                        fd.origins.add_notice_to_origins(
-                            'File: ' + fd.path, Notice(err, 'error'))
-                files.append(fd)
+                files.append(get_scancode_file(f))
     return files
 
 
