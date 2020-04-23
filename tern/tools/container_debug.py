@@ -90,6 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('--clean', action='store_true',
                         help='Clean up the mounts')
     args = parser.parse_args()
+    rootfs.set_mount_dir()
 
     # check if we need to clean
     if args.clean:
@@ -121,8 +122,6 @@ if __name__ == '__main__':
                 if not 0 <= top_layer < len(image_obj.layers):
                     print("Not a valid layer number")
                     continue
-                else:
-                    break
             drop_into_layer(image_obj, top_layer)
         except KeyboardInterrupt:
             print("Exiting...")
