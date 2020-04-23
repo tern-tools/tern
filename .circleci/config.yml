@@ -31,7 +31,7 @@ jobs:
       - setup
       - run: pip install prospector>=1.2 GitPython~=2.1
       - run: pip install .
-      - run: c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi
+      - run: prospector 
   # security linting using Bandit
   security:
     executor: ubuntu1604
