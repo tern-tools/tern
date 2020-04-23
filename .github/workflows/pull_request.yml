@@ -18,7 +18,7 @@ jobs:
       - name: Prospector Linting
         run: |
           pip install prospector>=1.1
-          c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs prospector; fi
+          prospector
       - name: Commit Message Linting
         if: always() # run even if above step fails
         run: python ci/test_commit_message.py
