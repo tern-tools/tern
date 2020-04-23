@@ -88,6 +88,45 @@ def get_file_license_expressions(layer_obj):
     return list(license_expressions)
 
 
+def get_package_license_info_block(layer_obj):
+    '''Given a layer object, return the SPDX document block with licenses
+    from the files in the layer. Return an empty string if the files are
+    not analyzed'''
+    block = ''
+    if layer_obj.files_analyzed:
+        license_expressions = get_file_license_expressions(layer_obj)
+        if license_expressions:
+            for le in license_expressions:
+                block += 'PackageLicenseInfoFromFiles: {}\n'.format(le)
+        else:
+            block = 'PackageLicenseInfoFromFiles: NONE\n'
+    return block
+
+
+def get_layer_file_data_block(layer_obj, template):
+    '''Given a layer object and the template object, return the SPDX document
+    block with file data. Return an empty string if the files are not
+    analyzed'''
+    block = ''
+    if layer_obj.files_analyzed:
+        layer_checksum = get_layer_checksum(layer_obj)
+        # insert a blank line in the beginning
+        block += '\n'
+        # some files are located in different places in the filesystem
+        # they would occur as duplicates in this block
+        # keep a list of previously printed file spdx-refs
+        file_refs = set()
+        # file data
+        for filedata in layer_obj.files:
+            # we use the layer checksum as the layer id
+            file_ref = fhelpers.get_file_spdxref(filedata, layer_checksum)
+            if file_ref not in file_refs:
+                block += fhelpers.get_file_block(
+                    filedata, template, layer_checksum) + '\n'
+                file_refs.add(file_ref)
+    return block
+
+
 def get_layer_block(layer_obj, template, image_loc=''):
     '''Given a layer object and its SPDX template mapping, return a SPDX
     document block for the layer. An image layer in SPDX behaves like a
@@ -101,7 +140,6 @@ def get_layer_block(layer_obj, template, image_loc=''):
     would be downloaded along with the image.'''
     block = ''
     mapping = layer_obj.to_dict(template)
-    layer_checksum = get_layer_checksum(layer_obj)
     # Package Name
     block += 'PackageName: {}\n'.format(os.path.basename(layer_obj.tar_file))
     # Package SPDXID
@@ -123,35 +161,15 @@ def get_layer_block(layer_obj, template, image_loc=''):
     else:
         block += 'FilesAnalyzed: false\n'
     # Package Checksum
-    block += 'PackageChecksum: {}\n'.format(layer_checksum)
+    block += 'PackageChecksum: {}\n'.format(get_layer_checksum(layer_obj))
     # Package License Concluded (always NOASSERTION)
     block += 'PackageLicenseConcluded: NOASSERTION\n'
-    # All licenses info from files
-    if layer_obj.files_analyzed:
-        license_expressions = get_file_license_expressions(layer_obj)
-        if license_expressions:
-            for le in license_expressions:
-                block += 'PackageLicenseInfoFromFiles: {}\n'.format(le)
-        else:
-            block += 'PackageLicenseInfoFromFiles: NONE\n'
+    # All licenses info from files if files_analyzed is true
+    block += get_package_license_info_block(layer_obj)
     # Package License Declared (always NOASSERTION)
     block += 'PackageLicenseDeclared: NOASSERTION\n'
     # Package Copyright (always NOASSERTION)
     block += 'PackageCopyrightText: NOASSERTION\n'
     # put the file data here if files_analyzed is true
-    if layer_obj.files_analyzed:
-        # blank new line
-        block += '\n'
-        # some files are located in different places in the filesystem
-        # they would occur as duplicates in this block
-        # keep a list of previously printed file spdx-refs
-        file_refs = set()
-        # file data
-        for filedata in layer_obj.files:
-            # we use the layer checksum as the layer id
-            file_ref = fhelpers.get_file_spdxref(filedata, layer_checksum)
-            if file_ref not in file_refs:
-                block += fhelpers.get_file_block(
-                    filedata, template, layer_checksum) + '\n'
-                file_refs.add(file_ref)
+    block += get_layer_file_data_block(layer_obj, template)
     return block
