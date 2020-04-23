@@ -14,6 +14,8 @@ import subprocess  # nosec
 from tern.command_lib import command_lib
 from tern.utils import rootfs
 from tern.report import report
+from tern.analyze.docker import container
+from tern.analyze.docker import analyze
 
 
 def look_up_lib(keys):
@@ -45,17 +47,22 @@ if __name__ == '__main__':
                         'snippet library')
     args = parser.parse_args()
 
-    # first, mount all the layers in the image
-    report.setup(image_tag_string=args.image)
+    # do initial setup to analyze docker image
+    container.check_docker_setup()
+    # set some global variables
+    rootfs.set_mount_dir()
+    # try to load the image
     image_obj = report.load_full_image(args.image)
     if image_obj.origins.is_empty():
         # image loading was successful
         # proceed mounting diff filesystems
+        rootfs.set_up()
         if len(image_obj.layers) == 1:
             # mount only one layer
             target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
         else:
-            report.mount_overlay_fs(image_obj, len(image_obj.layers) - 1)
+            target = analyze.mount_overlay_fs(
+                image_obj, len(image_obj.layers) - 1)
         rootfs.prep_rootfs(target)
         # invoke commands in chroot
         # if we're looking up the snippets library
@@ -85,4 +92,4 @@ if __name__ == '__main__':
         print("Something when wrong in loading the image")
     report.teardown()
     report.clean_image_tars(image_obj)
-    report.clean_working_dir(False)
+    report.clean_working_dir()
