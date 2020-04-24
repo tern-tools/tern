@@ -84,3 +84,15 @@ pip3:
      - 'hash'
      - 'wheel'
    packages: 'pip3'
+gem:
+  install: 'install'
+  remove: 'uninstall'
+  ignore:
+      - 'fetch'
+      - 'build'
+      - 'lock'
+      - 'unpack'
+      - 'cleanup'
+      - 'check'
+      - 'mirror'
+  packages: 'gem'
