@@ -213,3 +213,46 @@ rpm:
         container:
           - 'rpm --query --all --queryformat "%{url}\n" 2>/dev/null'
     delimiter: "\n"
+
+gem:
+  pkg_format: ''
+  os_guess:
+    - 'None'
+  path:
+    - 'usr/local/bin/gem'
+    - 'user/bin/gem'
+  shell: '/bin/bash' # could also be 'usr/bin/sh'
+  pkg_separators:
+    - '=='
+    - '<='
+    - '>='
+    - '<'
+    - '>'
+    - '~='
+  pinning_separator: '=='
+  names:
+    invoke:
+      1:
+        container:
+          - "gem list 2> /dev/null | awk '{print $1}'"
+    delimiter: "\n"
+  versions:
+    invoke:
+      1:
+        container:
+          - "gem list 2> /dev/null | awk '{print $2}' | awk -F'[()]' '{print $2}'"
+    delimiter: "\n"
+  licenses:
+    invoke:
+      1:
+        container:
+          - "pkgs=`gem list 2> /dev/null | awk '{print $1}'`"
+          - "for pkg in $pkgs;do gem info $pkg 2>/dev/null |grep -n 'License:'| awk '{print $3}'; done"
+    delimiter: "\n"
+  proj_urls:
+    invoke:
+      1:
+        container:
+          - "pkgs=`gem list 2> /dev/null | awk '{print $1}'`"
+          - "for pkg in $pkgs;do gem info $pkg 2>/dev/null |grep -n 'Homepage:'| awk '{print $3}'; done" 
+    delimiter: "\n"

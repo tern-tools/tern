@@ -58,3 +58,14 @@ rpm:
    install: '-i'
    remove: '-e'
    packages: 'rpm'
+
+
+
+gem:
+  install: 'install'
+  remove: 'uninstall'
+  ignore:
+      - 'ls'
+      - 'list'
+      - 'restart'
+  packages: 'gem'
