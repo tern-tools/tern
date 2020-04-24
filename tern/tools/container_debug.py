@@ -122,7 +122,7 @@ if __name__ == '__main__':
                 if not 0 <= top_layer < len(image_obj.layers):
                     print("Not a valid layer number")
                     continue
-            drop_into_layer(image_obj, top_layer)
+                drop_into_layer(image_obj, top_layer)
         except KeyboardInterrupt:
             print("Exiting...")
             cleanup()
