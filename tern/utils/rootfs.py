@@ -21,7 +21,7 @@ remove = ['rm', '-rf']
 
 # tar commands
 check_tar = ['tar', '-tf']
-extract_tar = ['tar', '-xf']
+extract_tar = ['tar', '-x', '--exclude=.wh.*', '-f']
 
 # mount commands
 mount = ['mount', '-o', 'bind']
