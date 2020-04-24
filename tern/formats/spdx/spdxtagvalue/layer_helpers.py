@@ -15,6 +15,7 @@ from tern.formats.spdx import formats as spdx_formats
 from tern.utils import constants
 from tern.formats.spdx.spdxtagvalue import file_helpers as fhelpers
 from tern.formats.spdx.spdxtagvalue import package_helpers as phelpers
+from tern.report import content
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -24,6 +25,18 @@ def get_layer_spdxref(layer_obj):
     '''Given the layer object, return an SPDX reference ID'''
     # here we return the shortened diff_id of the layer
     return 'SPDXRef-{}'.format(layer_obj.diff_id[:10])
+
+
+def get_layer_comment(layer_obj):
+    '''Return a PackageComment tag-value text block for a list of NoticeOrigin
+    objects for the given layer object'''
+    comment = ''
+    if not layer_obj.origins.is_empty():
+        for notice_origin in layer_obj.origins.origins:
+            comment = comment + content.print_notices(
+                notice_origin, '', '\t')
+        return spdx_formats.package_comment.format(comment=comment)
+    return comment
 
 
 def get_layer_package_relationships(layer_obj):
@@ -170,6 +183,8 @@ def get_layer_block(layer_obj, template, image_loc=''):
     block += 'PackageLicenseDeclared: NOASSERTION\n'
     # Package Copyright (always NOASSERTION)
     block += 'PackageCopyrightText: NOASSERTION\n'
+    # Package comments if any
+    block += get_layer_comment(layer_obj) + '\n'
     # put the file data here if files_analyzed is true
     block += get_layer_file_data_block(layer_obj, template)
     return block

@@ -25,7 +25,7 @@ creator = 'Creator: Tool: tern-{version}'
 created = 'Created: {timestamp}'
 
 # Package level strings
-package_comment = 'PackageComment: <text>{comment}</text>'
+package_comment = 'PackageComment: <text>\n{comment}\n</text>'
 package_id = '{name}-{ver}'
 
 # Relationship strings
