@@ -113,15 +113,6 @@ def check_library_key(listing, key):
         return {}, errors.unsupported_listing_for_key.format(listing_key=e)
 
 
-def get_image_shell(base_image_listing):
-    '''Given the base image listing return the image shell. If there is no
-    shell listing, return an empty string'''
-    shell, msg = check_library_key(base_image_listing, 'shell')
-    if not shell:
-        shell = ''
-    return shell, msg
-
-
 def get_package_listing(command_name):
     '''Given a command name, return the package listing from the snippet
     library.'''
