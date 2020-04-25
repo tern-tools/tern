@@ -94,7 +94,7 @@ dpkg:
       1:
         container:
           - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-          - "for p in $pkgs; do cat /usr/share/doc/$p/copyright; echo LICF; done"
+          - "for p in $pkgs; do echo /usr/share/doc/$p/copyright; echo LICF; done"
     delimiter: 'LICF'
   proj_urls: {}
 
