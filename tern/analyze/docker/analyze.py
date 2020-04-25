@@ -11,7 +11,6 @@ import logging
 import sys
 
 from tern.report import errors
-from tern.report import formats
 from tern.utils import constants
 from tern.utils import rootfs
 from tern.classes.notice import Notice
@@ -44,29 +43,6 @@ def analyze_docker_image(image_obj, redo=False, dfile_lock=False, dfobj=None):
     common.save_to_cache(image_obj)
 
 
-def get_shell(image_obj, binary):
-    # set up a notice origin referring to the base command library listing
-    origin_command_lib = formats.invoking_base_commands
-    # find the shell to invoke commands in
-    shell, _ = command_lib.get_image_shell(
-        command_lib.get_base_listing(binary))
-    if not shell:
-        # add a warning notice for no shell in the command library
-        logger.warning('No shell listing in command library. '
-                       'Using default shell')
-        no_shell_message = errors.no_shell_listing.format(
-            binary=binary, default_shell=constants.shell)
-        image_obj.layers[0].origins.add_notice_to_origins(
-            origin_command_lib, Notice(no_shell_message, 'warning'))
-        # add a hint notice to add the shell to the command library
-        add_shell_message = errors.no_listing_for_base_key.format(
-            listing_key='shell')
-        image_obj.layers[0].origins.add_notice_to_origins(
-            origin_command_lib, Notice(add_shell_message, 'hint'))
-        shell = constants.shell
-    return shell
-
-
 def prepare_for_analysis(image_obj, dfobj):
     # find the layers that are imported
     if dfobj:
@@ -84,19 +60,26 @@ def abort_analysis():
 
 
 def analyze_first_layer(image_obj, master_list, redo):
-    # find the binary of the first layer
+    # set up a notice origin for the first layer
+    origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
+    # find the shell from the first layer
+    shell = common.get_shell(image_obj.layers[0])
+    if not shell:
+        logger.warning(errors.no_shell)
+        image_obj.layers[0].origins.add_notice_to_origins(
+            origin_first_layer, Notice(errors.no_shell, 'warning'))
+    # find the binary from the first layer
     binary = common.get_base_bin(image_obj.layers[0])
-    # see if there is an associated shell
-    # if there is no binary, this will be set to the default shell
-    shell = get_shell(image_obj, binary)
+    if not binary:
+        logger.warning(errors.no_package_manager)
+        image_obj.layers[0].origins.add_notice_to_origins(
+            origin_first_layer, Notice(errors.no_package_manager, 'warning'))
     # try to load packages from cache
     if not common.load_from_cache(image_obj.layers[0], redo):
         # set a possible OS
         common.get_os_style(image_obj.layers[0], binary)
-        # set up a notice origin for the first layer
-        origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
         # if there is a binary, extract packages
-        if binary:
+        if shell and binary:
             try:
                 target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
                 rootfs.prep_rootfs(target)
@@ -108,11 +91,6 @@ def analyze_first_layer(image_obj, master_list, redo):
                 # unmount proc, sys and dev
                 rootfs.undo_mount()
                 rootfs.unmount_rootfs()
-        else:
-            logger.warning(errors.no_package_manager)
-            image_obj.layers[0].origins.add_notice_to_origins(
-                origin_first_layer, Notice(
-                    errors.no_package_manager, 'warning'))
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)
@@ -124,6 +102,9 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
     # get packages for subsequent layers
     curr_layer = 1
     while curr_layer < len(image_obj.layers):  # pylint:disable=too-many-nested-blocks
+        # if there is no shell, try to see if it exists in the current layer
+        if not shell:
+            shell = common.get_shell(image_obj.layers[curr_layer])
         if not common.load_from_cache(image_obj.layers[curr_layer], redo):
             # get commands that created the layer
             # for docker images this is retrieved from the image history
