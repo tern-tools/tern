@@ -101,12 +101,13 @@ def analyze_first_layer(image_obj, master_list, redo):
                 target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
                 rootfs.prep_rootfs(target)
                 common.add_base_packages(image_obj.layers[0], binary, shell)
-                # unmount proc, sys and dev
-                rootfs.undo_mount()
-                rootfs.unmount_rootfs()
             except KeyboardInterrupt:
                 logger.critical(errors.keyboard_interrupt)
                 abort_analysis()
+            finally:
+                # unmount proc, sys and dev
+                rootfs.undo_mount()
+                rootfs.unmount_rootfs()
         else:
             logger.warning(errors.no_package_manager)
             image_obj.layers[0].origins.add_notice_to_origins(
