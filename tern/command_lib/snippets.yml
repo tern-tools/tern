@@ -96,3 +96,21 @@ gem:
       - 'check'
       - 'mirror'
   packages: 'gem'
+
+npm:
+  install: 
+    - 'install'
+    - 'i'
+  remove: 'uninstall'
+  ignore:
+    - 'ping'
+  packages: 'npm'
+
+yarn:
+  install: 'install'
+  remove: 'uninstall'
+  ignore:
+    - 'publish'
+    - 'add'
+    - 'remove'
+  packages: 'npm'
