@@ -96,3 +96,14 @@ gem:
       - 'check'
       - 'mirror'
   packages: 'gem'
+bundle:
+  install: 'install'
+  remove: 'remove'
+  ignore:
+      - 'update'
+      - 'config'
+      - 'add'
+      - 'init'
+      - 'package'
+      - 'exec'
+  packages: 'gem'
