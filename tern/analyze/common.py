@@ -147,6 +147,18 @@ def get_base_bin(first_layer):
     return binary
 
 
+def get_shell(layer):
+    '''Find the shell if any on the layer filesystem. Assume that the layer
+    has already been unpacked. If there is no shell, return an empty string'''
+    shell = ''
+    cwd = rootfs.get_untar_dir(layer.tar_file)
+    for sh in command_lib.command_lib['common']['shells']:
+        # remove leading forwardslash before joining paths
+        if os.path.exists(os.path.join(cwd, sh[1:])):
+            return sh
+    return shell
+
+
 def get_os_release(base_layer):
     '''Given the base layer object, determine if an os-release file exists and
     return the PRETTY_NAME string from it. If no release file exists,
@@ -181,6 +193,9 @@ def collate_list_metadata(shell, listing):
     pkg_dict = {}
     msgs = ''
     warnings = ''
+    if not shell:
+        msgs = "Cannot invoke commands without a shell\n"
+        return pkg_dict, msgs, warnings
     for item in command_lib.base_keys:
         if item in listing.keys():
             items, msg = command_lib.get_pkg_attr_list(shell, listing[item])
@@ -244,9 +259,6 @@ def add_base_packages(image_layer, binary, shell):
             content.print_base_invoke(binary)
         image_layer.origins.add_notice_to_origins(
             origin_layer, Notice(snippet_msg, 'info'))
-        shell, _ = command_lib.get_image_shell(listing)
-        if not shell:
-            shell = constants.shell
         # get all the packages in the base layer
         pkg_dict, invoke_msg, warnings = collate_list_metadata(shell, listing)
         if invoke_msg:

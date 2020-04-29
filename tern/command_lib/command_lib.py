@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -24,8 +24,13 @@ base_file = pkg_resources.resource_filename('tern', 'command_lib/base.yml')
 # general snippets in command library
 snippet_file = pkg_resources.resource_filename('tern',
                                                'command_lib/snippets.yml')
+# common information
+common_file = pkg_resources.resource_filename('tern', 'command_lib/common.yml')
+
 # command library
-command_lib = {'base': {}, 'snippets': {}}
+command_lib = {'common': {}, 'base': {}, 'snippets': {}}
+with open(os.path.abspath(common_file)) as f:
+    command_lib['common'] = yaml.safe_load(f)
 with open(os.path.abspath(base_file)) as f:
     command_lib['base'] = yaml.safe_load(f)
 with open(os.path.abspath(snippet_file)) as f:
@@ -106,15 +111,6 @@ def check_library_key(listing, key):
             return {}, errors.no_listing_for_package_key.format(
                 listing_key=e)
         return {}, errors.unsupported_listing_for_key.format(listing_key=e)
-
-
-def get_image_shell(base_image_listing):
-    '''Given the base image listing return the image shell. If there is no
-    shell listing, return an empty string'''
-    shell, msg = check_library_key(base_image_listing, 'shell')
-    if not shell:
-        shell = ''
-    return shell, msg
 
 
 def get_package_listing(command_name):
