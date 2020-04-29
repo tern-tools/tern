@@ -80,21 +80,26 @@ def analyze_first_layer(image_obj, master_list, redo):
         common.get_os_style(image_obj.layers[0], binary)
         # if there is a binary, extract packages
         if shell and binary:
-            try:
-                target = rootfs.mount_base_layer(image_obj.layers[0].tar_file)
-                rootfs.prep_rootfs(target)
-                common.add_base_packages(image_obj.layers[0], binary, shell)
-            except KeyboardInterrupt:
-                logger.critical(errors.keyboard_interrupt)
-                abort_analysis()
-            finally:
-                # unmount proc, sys and dev
-                rootfs.undo_mount()
-                rootfs.unmount_rootfs()
+            execute_base_layer(image_obj.layers[0], binary, shell)
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)
     return shell
+
+
+def execute_base_layer(base_layer, binary, shell):
+    '''Execute retrieving base layer packages'''
+    try:
+        target = rootfs.mount_base_layer(base_layer.tar_file)
+        rootfs.prep_rootfs(target)
+        common.add_base_packages(base_layer, binary, shell)
+    except KeyboardInterrupt:
+        logger.critical(errors.keyboard_interrupt)
+        abort_analysis()
+    finally:
+        # unmount proc, sys and dev
+        rootfs.undo_mount()
+        rootfs.unmount_rootfs()
 
 
 def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  # noqa: R0912,R0913
