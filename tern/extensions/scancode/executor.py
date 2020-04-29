@@ -114,14 +114,14 @@ def add_file_data(layer_obj, collected_files):
 
 class Scancode(Executor):
     '''Execute scancode'''
-    def execute(self, image_obj):
+    def execute(self, image_obj, redo=False):
         '''Execution should be:
             scancode -ilpcu --quiet --json - /path/to/directory
         '''
         for layer in image_obj.layers:
             # load the layers from cache
             common.load_from_cache(layer)
-            if not layer.files_analyzed:
+            if redo or not layer.files_analyzed:
                 # the layer doesn't have analyzed files, so run analysis
                 file_list = collect_layer_data(layer)
                 if file_list:

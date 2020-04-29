@@ -23,13 +23,13 @@ logger = logging.getLogger(constants.logger_name)
 
 class CveBinTool(Executor):
     '''Execute cve-bin-tool'''
-    def execute(self, image_obj):
+    def execute(self, image_obj, redo=False):
         '''Execution should be:
             cve-bin-tool -u now /path/to/directory
         '''
         command = 'cve-bin-tool -u now'
         # run the command against the image filesystems
-        if not passthrough.run_on_image(image_obj, command, True):
+        if not passthrough.run_on_image(image_obj, command, True, redo=redo):
             logger.error("cve-bin-tool error")
             sys.exit(1)
         # for now we just print the results for each layer
