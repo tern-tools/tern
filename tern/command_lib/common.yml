@@ -1,0 +1,12 @@
+# Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+#
+# Known common aspects of container image filesystems
+
+# possible base OS shells
+shells:
+  - /bin/sh
+  - /usr/bin/sh
+  - /bin/bash
+  - /usr/bin/bash
+  - /bin/dash

@@ -14,6 +14,7 @@ no_packages = '''Unable to recover packages for layer {layer_id}. ''' \
     '''retrieve the package in the command library.\n'''
 no_package_manager = '''Unable to find a known package manager. Cannot ''' \
     '''list packages.\n'''
+no_shell = '''No known shell found in image. Cannot invoke commands\n'''
 no_etc_release = '''Unknown base OS. Unable to find an os-release file.'''
 no_version = '''No version for package {package_name}. Consider either ''' \
     '''entering the version manually or creating a script to retrieve ''' \
@@ -47,9 +48,6 @@ no_command_listing = '''No listing of hardcoded or retrieval steps for ''' \
 incomplete_command_lib_listing = '''The command library has an incomplete ''' \
     '''listing for {image_name}:{image_tag}. Please complete the listing ''' \
     '''based on the examples.\n'''
-no_shell_listing = '''There is no listing for 'shell' under the base ''' \
-    '''listing for {binary}. Using default shell: ''' \
-    '''{default_shell}\n'''
 unknown_content = '''Unknown content included in layer {files}. Please ''' \
     '''analyze these files separately\n'''
 keyboard_interrupt = '''Keyboard Interrupt! Aborting analysis...'''

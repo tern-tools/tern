@@ -5,7 +5,8 @@
 # Format to list images
 # <package manager>:
 #   pkg_format: <the package format used by the package manager>
-#   shell: <the shell executable> (needed if entering code snippets)
+#   os_guess: A list of strings that might indicate what kind of OS this package manager may apply to
+#   path: A list paths that this package manager may be present
 #   pkg_separators: Potential characters to separate package name from version. Some package managers will have more than one.
 #   pinning_separator: Character to denote package version in pinned Dockerfile (i.e. apk add package=version)
 #   names: <a list of package names>
@@ -23,7 +24,6 @@ tdnf:
     - 'Photon'
   path:
     - 'usr/bin/tdnf' # don't put forward slash here as os.path.join will think it is the root directory on the host
-  shell: '/usr/bin/bash'
   pkg_separators:
     - '-'
   pinning_separator: '-'
@@ -69,7 +69,6 @@ dpkg:
     - 'Ubuntu'
   path:
     - 'usr/bin/dpkg'
-  shell: '/bin/bash'
   pkg_separators:
     - '='
   pinning_separator: '='
@@ -105,7 +104,6 @@ apk:
     - 'Alpine Linux'
   path:
     - 'sbin/apk'
-  shell: '/bin/sh'
   pkg_separators:
     - '='
   pinning_separator: '='
@@ -146,7 +144,6 @@ pacman:
     - 'Arch Linux'
   path:
     - 'usr/bin/pacman'
-  shell: '/usr/bin/sh'
   pkg_separators:
     - '='
   pinning_separator: '='
@@ -185,7 +182,6 @@ rpm:
     - 'RHEL'
   path:
     - 'usr/bin/rpm'
-  shell: '/usr/bin/sh'
   pkg_separators:
     - '-'
   pinning_separator: '-'
@@ -220,7 +216,6 @@ pip:
     - 'None'
   path:
     - 'usr/local/bin/pip'
-  shell: '/bin/bash' # could also be 'usr/bin/sh'
   pkg_separators:
     - '=='
     - '<='
@@ -264,7 +259,6 @@ pip3:
     - 'None'
   path:
     - 'usr/local/bin/pip3'
-  shell: '/bin/bash' # could also be 'usr/bin/sh'
   pkg_separators:
     - '=='
     - '<='
