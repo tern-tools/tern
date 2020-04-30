@@ -107,3 +107,17 @@ bundle:
       - 'package'
       - 'exec'
   packages: 'gem'
+npm:
+  install: 'install'
+  remove: 'uninstall'
+  ignore:
+    - 'ping'
+  packages: 'npm'
+yarn:
+  install: 'install'
+  remove: 'uninstall'
+  ignore:
+    - 'publish'
+    - 'add'
+    - 'remove'
+  packages: 'npm'
