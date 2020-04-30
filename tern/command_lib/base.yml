@@ -340,3 +340,42 @@ gem:
           - "pkgs=`gem list 2> /dev/null | awk '{print $1}'`"
           - "for p in $pkgs; do proj_url=`gem spec $p homepage | head -1 | cut -f2 -d' '`; if [ -z $proj_url ]; then echo 'Unknown'; else echo $proj_url; fi; done"
     delimiter: "\n"
+# npm----------------------------------------------------------------------
+npm:
+  pkg_format: ''
+  os_guess:
+    - 'None'
+  path:
+    - 'usr/bin/npm'
+  pkg_separators:
+    - '@'
+    - '@^'
+    - '@~'
+  pinning_separator: '@'
+  names:
+    invoke:
+      1:
+        container:
+          - "npm list -g | sed 's/\\(^[^a-z]*\\)\\([_.a-z0-9-]*\\)\\(@.*\\)/\\2/g' | grep -v '/usr*' | uniq"
+    delimiter: "\n"
+  versions:
+    invoke:
+      1:
+        container:
+          - "pkgs=`npm list -g | sed 's/\\(^[^a-z]*\\)\\([_.a-z0-9-]*\\)\\(@.*\\)/\\2/g' | grep -v '/usr*' | uniq`"
+          - "for p in $pkgs; do npm show $p version; done"
+    delimiter: "\n"
+  licenses:
+    invoke:
+      1:
+        container:
+          - "pkgs=`npm list -g | sed 's/\\(^[^a-z]*\\)\\([_.a-z0-9-]*\\)\\(@.*\\)/\\2/g' | grep -v '/usr*' | uniq`"
+          - "for p in $pkgs; do lic=`npm show $p license`; if [ -z \"$lic\" ]; then echo 'Unknown'; else echo $lic; fi; done"
+    delimiter: "\n"
+  proj_urls:
+    invoke:
+      1:
+        container:
+          - "pkgs=`npm list -g | sed 's/\\(^[^a-z]*\\)\\([_.a-z0-9-]*\\)\\(@.*\\)/\\2/g' | grep -v '/usr*' | uniq`"
+          - "for p in $pkgs; do npm view $p repository.url; done"
+    delimiter: "\n"
