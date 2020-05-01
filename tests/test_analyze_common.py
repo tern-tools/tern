@@ -51,6 +51,7 @@ class TestAnalyzeCommon(unittest.TestCase):
                 'os_guess': 'Ubuntu',
                 'pkg_format': 'tar',
                 'files': [{'name': 'README.md', 'path': '/home/test/projectsX'}],
+                'extension_info': {},
                 'packages': [{'name': 'README'}]
             }}
         self.assertTrue(common.load_from_cache(self.image.layers[0], redo=False))

@@ -93,6 +93,10 @@ def collect_layer_data(layer_obj):
     else:
         # make FileData objects for each result
         data = json.loads(result)
+        notice = data.get("headers")[0].get("notice")
+        headers = layer_obj.extension_info.get("headers", set())
+        headers.add(notice)
+        layer_obj.extension_info["headers"] = headers
         for f in data['files']:
             if f['type'] == 'file' and f['size'] != 0:
                 files.append(get_scancode_file(f))

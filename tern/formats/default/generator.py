@@ -25,16 +25,17 @@ def print_full_report(image):
     notes = ''
     for image_origin in image.origins.origins:
         notes = notes + content.print_notices(image_origin, '', '\t')
+
+    # collect extension's header per layer
+    headers = get_extension_headers(image.layers)
+    for header in headers:
+        notes = notes + header + '\n\n'
+
     for layer in image.layers:
         if layer.import_image:
             notes = notes + print_full_report(layer.import_image)
         else:
-            if len(layer.origins.origins) == 0:
-                notes += '\tLayer: {0}:\n'.format(layer.fs_hash[:10])
-            else:
-                for layer_origin in layer.origins.origins:
-                    notes = notes + content.print_notices(layer_origin,
-                                                          '\t', '\t\t')
+            notes = notes + get_layer_notices(layer)
             (layer_pkg_list, layer_license_list,
              file_level_licenses) = get_layer_info_list(layer)
             # Collect files + packages + licenses in the layer
@@ -46,6 +47,35 @@ def print_full_report(image):
                 layer_license_list) if layer_license_list else 'None')
             notes = notes + formats.package_demarkation
     return notes
+
+
+def get_layer_notices(layer):
+    '''
+    Given a image layer, collect all notices attached
+    to it.
+    '''
+    notices = ''
+    if len(layer.origins.origins) == 0:
+        notices = '\tLayer: {0}:\n'.format(layer.fs_hash[:10])
+    else:
+        for layer_origin in layer.origins.origins:
+            notices += content.print_notices(layer_origin, '\t', '\t\t')
+
+    return notices
+
+
+def get_extension_headers(layers):
+    '''
+    Given all image layers, collect header string set
+    by extension on each layer level.
+    '''
+    headers = set()
+    for layer in layers:
+        layer_headers = layer.extension_info.get("headers", set())
+        for layer_header in layer_headers:
+            headers.add(layer_header)
+
+    return headers
 
 
 def get_layer_info_list(layer):
