@@ -37,6 +37,8 @@ class ImageLayer:
         checksum
         checksum: the checksum
         checksums: a dictionary of the form {<checksum_type>: <checksum>}
+        extension_info: a dictionary contains extension info such as extension
+        header info{<headers>: <set_of_header_strings>}
     methods:
         add_package: adds a package to the layer
         remove_package: removes a package from the layer
@@ -69,6 +71,7 @@ class ImageLayer:
         self.__checksum_type = ''
         self.__checksum = ''
         self.__checksums = {}
+        self.__extension_info = {}
 
     @property
     def diff_id(self):
@@ -109,6 +112,14 @@ class ImageLayer:
     @property
     def checksums(self):
         return self.__checksums
+
+    @property
+    def extension_info(self):
+        return self.__extension_info
+
+    @extension_info.setter
+    def extension_info(self, extension_info):
+        self.__extension_info = extension_info
 
     @created_by.setter
     def created_by(self, create_string):
@@ -264,6 +275,8 @@ class ImageLayer:
             layer_dict.update({'files': file_list})
             # take care of the 'origins' property
             layer_dict.update({'origins': self.origins.to_dict()})
+            # take care of the 'extension_info' property
+            layer_dict.update({'extension_info': self.extension_info})
         return layer_dict
 
     def get_package_names(self):
