@@ -54,6 +54,7 @@ def load_from_cache(layer, redo=False):
             layer.files_analyzed = cache.cache[layer.fs_hash]['files_analyzed']
             layer.os_guess = cache.cache[layer.fs_hash]['os_guess']
             layer.pkg_format = cache.cache[layer.fs_hash]['pkg_format']
+            layer.extension_info = cache.cache[layer.fs_hash]['extension_info']
         load_files_from_cache(layer)
     return loaded
 

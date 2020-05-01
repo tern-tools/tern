@@ -136,6 +136,16 @@ class TestClassImageLayer(unittest.TestCase):
                          {'sha1': '12345abcde',
                           'md5': '1ff38cc592c4c5d0c8e3ca38be8f1eb1'})
 
+    def testSetExtensionInfo(self):
+        self.layer.extension_info = {"header": set({"Test Header"})}
+        self.assertIsInstance(self.layer.extension_info, dict)
+        self.assertIsNotNone(
+            self.layer.extension_info.get("header", None), None)
+        self.assertIsInstance(
+            self.layer.extension_info.get("header", None), set)
+        header = self.layer.extension_info.get("header").pop()
+        self.assertEqual(header, "Test Header")
+
 
 if __name__ == '__main__':
     unittest.main()
