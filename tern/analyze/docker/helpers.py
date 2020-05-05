@@ -158,10 +158,12 @@ def get_commands_from_history(image_layer):
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             formats.dockerfile_line.format(dockerfile_instruction=instruction),
             'info'))
+        command_line = instruction.split(' ', 1)[1]
     else:
+        instruction = ''
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             formats.no_created_by, 'warning'))
-    command_line = instruction.split(' ', 1)[1]
+        command_line = instruction
     # Image layers are created with the directives RUN, ADD and COPY
     # For ADD and COPY instructions, there is no information about the
     # packages added
