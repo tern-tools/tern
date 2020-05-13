@@ -111,8 +111,12 @@ def check_tar_members(tar_file):
     the members of the tarfile or if it is empty'''
     result, error = shell_command(False, check_tar, tar_file)
     if error:
-        logger.error("Malformed tar: %s", error.decode())
-        raise EOFError("Malformed tarball: {}".format(tar_file))
+        error_msg = error.decode()
+        if "Removing leading" in error_msg:
+            pass
+        else:
+            logger.error("Malformed tar: %s", error_msg)
+            raise EOFError("Malformed tarball: {}".format(tar_file))
     if not result:
         raise ValueError("Empty tarball: {}".format(tar_file))
     return result
