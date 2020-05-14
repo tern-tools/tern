@@ -8,6 +8,7 @@ import random
 import re
 import tarfile
 import subprocess  # nosec
+import shlex
 from contextlib import contextmanager
 from pathlib import Path
 from pbr.version import VersionInfo
@@ -182,3 +183,78 @@ def parse_image_string(image_string):
                 'digest_type': tokens[1],
                 'digest': tokens[2]}
     return None
+
+
+def split_shell_script(script):
+    """Given a shell script, split it into statement of
+    1. variable
+    2. command
+    3. branch: if, case
+    Use dictionary to store infomations on a statement, it has following keys:
+    - type: statement type(variable, command, if or case)
+    - content: statement sentence(eg. 'apt-get update')
+    - name: (only for variable) variable name
+    - value: (only for variable) variable value
+    (more keys will be added when we move on to parsing the branches)
+    return a list of statements
+    """
+    # add ';' in case that the script is not ended with ';'
+    script += ';'
+    lexer = shlex.split(script)
+    sentence = []
+    statements = []
+    # ':;' stands for true
+    remove_token = [':;', '{', '}']
+    keywords = {'if': 'fi', 'case': 'esac'}
+    separators = ('&&', '||', ';')
+    # priority: keywords > remove_token > separator
+    # if come across a keyword(if or case), ignore remove_token and separator
+    # until meet the ending keyword(fi or esac)
+    # we will parse the keywords sentence in other functions
+    for tk in lexer:
+        # 1. check if in a branch
+        if sentence and sentence[0] in keywords.keys():
+            sentence.append(tk)
+            if tk.startswith(keywords[sentence[0]]):
+                # Currently we will not parse the branch
+                statement = {'type': sentence[0], 'content': sentence.copy()}
+                statements.append(statement)
+                sentence.clear()
+            continue
+        # 2. ignore tokens in remove_token
+        if tk in remove_token:
+            continue
+        # 3. check separator: meet a separator, end of sentence
+        if tk in separators or tk.endswith(separators):
+            # 3. check separator: endswith a separator, we need to append first
+            if tk not in separators:
+                sentence.append(tk.rstrip(''.join(separators)))
+            # 3. check separator: make sure the sentence is not empty
+            if sentence:
+                statement = {'content': sentence.copy()}
+                # check assignment, looking for '='
+                match_res = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)',
+                                     ' '.join(sentence))
+                if match_res:
+                    statement['type'] = 'variable'
+                    statement['name'] = match_res.group(1)
+                    statement['value'] = match_res.group(2)
+                else:
+                    statement['type'] = 'command'
+                statements.append(statement)
+                sentence.clear()
+        # 3. check separator: not a separator, append to sentence
+        else:
+            sentence.append(tk)
+    return statements
+
+
+def parse_shell_script(script):
+    """Given a shell script from a dockerfile RUN command,
+    return a list of parsed commands"""
+    statements = split_shell_script(script)
+    commands = []
+    for statement in statements:
+        if statement['type'] == 'command':
+            commands.append(parse_command(' '.join(statement['content'])))
+    return commands
