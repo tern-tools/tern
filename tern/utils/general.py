@@ -185,24 +185,38 @@ def parse_image_string(image_string):
     return None
 
 
-def split_shell_script(script):
+def split_shell_script(script, skip_branch=False):
     """Given a shell script, split it into statement of
     1. variable
     2. command
     3. branch: if, case
     Use dictionary to store infomations on a statement, it has following keys:
-    - type: statement type(variable, command, if or case)
+    - variable(only for variable statement):
+        - name: variable name
+        - value: variable value
+    - variable(only for variable statement):
+        - name: command name(eg. apt-get)
+        - options: command options(eg. ["--no-install-recommends", "-y"])
+        - words: command words
+    - branch(only for variable statement):
+        - type: branch type(if or case)
+        - statements: branch variable and command statements list
     - content: statement sentence(eg. 'apt-get update')
-    - name: (only for variable) variable name
-    - value: (only for variable) variable value
-    (more keys will be added when we move on to parsing the branches)
+
+    sentence is the text we are parsing.(string)
+    statement is the parsed result for sentence.(dictionary)
     return a list of statements
     """
     # add ';' in case that the script is not ended with ';'
     script += ';'
-    lexer = shlex.split(script)
+    if skip_branch:
+        lexer = script
+    else:
+        # set posix to False to keep quotes.
+        lexer = shlex.split(script, posix=False)
     sentence = []
     statements = []
+    statement = {}
     # ':;' stands for true
     remove_token = [':;', '{', '}']
     keywords = {'if': 'fi', 'case': 'esac'}
@@ -216,10 +230,24 @@ def split_shell_script(script):
         if sentence and sentence[0] in keywords.keys():
             sentence.append(tk)
             if tk.startswith(keywords[sentence[0]]):
-                # Currently we will not parse the branch
-                statement = {'type': sentence[0], 'content': sentence.copy()}
-                statements.append(statement)
+                if skip_branch:
+                    # branch statement will not be recorded
+                    # this is used to parse the statements in branch
+                    # Currently we will ignore nested branch statements
+                    sentence.clear()
+                    statement.clear()
+                    continue
+                statement = {'content': sentence.copy()}
+                # parse if branch
+                if sentence[0] == 'if':
+                    branch_dict = parse_shell_if_branch(sentence)
+                # parse case branch
+                else:
+                    branch_dict = parse_shell_case_branch(sentence)
+                statement.update(branch_dict)
+                statements.append(statement.copy())
                 sentence.clear()
+                statement.clear()
             continue
         # 2. ignore tokens in remove_token
         if tk in remove_token:
@@ -232,29 +260,98 @@ def split_shell_script(script):
             # 3. check separator: make sure the sentence is not empty
             if sentence:
                 statement = {'content': sentence.copy()}
-                # check assignment, looking for '='
-                match_res = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)',
-                                     ' '.join(sentence))
-                if match_res:
-                    statement['type'] = 'variable'
-                    statement['name'] = match_res.group(1)
-                    statement['value'] = match_res.group(2)
-                else:
-                    statement['type'] = 'command'
-                statements.append(statement)
+                statement.update(parse_shell_variables_and_command(sentence))
+                statements.append(statement.copy())
                 sentence.clear()
+                statement.clear()
         # 3. check separator: not a separator, append to sentence
         else:
             sentence.append(tk)
     return statements
 
 
-def parse_shell_script(script):
-    """Given a shell script from a dockerfile RUN command,
-    return a list of parsed commands"""
-    statements = split_shell_script(script)
-    commands = []
-    for statement in statements:
-        if statement['type'] == 'command':
-            commands.append(parse_command(' '.join(statement['content'])))
-    return commands
+def parse_shell_variables_and_command(sentence):
+    '''given a sentence, classify the variable and command type,
+    and then parse it '''
+    # check assignment, looking for '='
+    statement = {}
+    match_res = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)',
+                         ' '.join(sentence))
+    if match_res:
+        statement['variable'] = {'name': match_res.group(1),
+                                 'value': match_res.group(2)}
+    else:
+        statement['command'] =\
+            parse_command(' '.join(sentence))
+    return statement
+
+
+def parse_shell_if_branch(if_sentence):
+    '''extract all commands in the if sentence, return a branch dictionary
+    contains:
+    - type: if
+    - statements: variable and command statements in the if sentence'''
+    branch_dict = {'type': 'if'}
+    sentence = []
+    extracted_sentences = []
+    # sentences in one branch can
+    # 1. start with 'then', end with 'elif' or 'else' or 'fi'
+    # 2. start with 'else', end with 'fi'
+    keywords = {'then': ('elif', 'else', 'fi'), 'else': 'fi'}
+    # in branch we only extract the statements between keywords
+    # we have 2 state:
+    # 1. extraction not started: waiting for start word
+    # 2. extraction started: waiting for end word
+    for tk in if_sentence:
+        # meet a start keyword('then' or 'else')
+        # and the extraction is not beginning since sentence is None
+        # IN STATE 1
+        if tk in keywords.keys() and not sentence:
+            sentence.append(tk)
+        # extraction has begun
+        # IN STATE 2
+        elif sentence:
+            # end key word, remove start keyword
+            if tk.startswith(keywords[sentence[0]]):
+                del sentence[0]
+                extracted_sentences.extend(sentence)
+                sentence.clear()
+            # not an end keyword, append
+            else:
+                sentence.append(tk)
+    branch_statements = split_shell_script(extracted_sentences,
+                                           skip_branch=True)
+    branch_dict['statements'] = branch_statements
+    return {'branch': branch_dict}
+
+
+def parse_shell_case_branch(case_sentence):
+    '''extract all commands in the case sentence, return a branch dictionary
+    contains:
+    - type: case
+    - statements: variable and command statements in the case sentence'''
+    branch_dict = {'type': 'case'}
+    sentence = []
+    extracted_sentences = []
+    for tk in case_sentence:
+        # meet a start keyword( end with(')') )
+        # and the extraction is not beginning since sentence is None
+        # IN STATE 1
+        if tk.endswith(')') and not sentence:
+            sentence.append(tk)
+        # extraction has begun
+        # IN STATE 2
+        elif sentence:
+            # end key word, remove start keyword
+            if tk == ';;':
+                del sentence[0]
+                sentence.append(';')
+                extracted_sentences.extend(sentence)
+                sentence.clear()
+            # not an end keyword, append
+            else:
+                sentence.append(tk)
+    branch_statements = split_shell_script(extracted_sentences,
+                                           skip_branch=True)
+    branch_dict['statements'] = branch_statements
+    return {'branch': branch_dict}
