@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -67,27 +67,65 @@ def get_layer_info_list(layer):
         pkg = package.name + "-" + package.version
         if pkg not in layer_pkg_list and pkg:
             layer_pkg_list.append(pkg)
-        if package.pkg_license not in layer_license_list and \
-                package.pkg_license:
-            layer_license_list.append(package.pkg_license)
+
+        package_licenses = get_package_licenses(package)
+        for package_license in package_licenses:
+            if package_license not in layer_license_list:
+                layer_license_list.append(package_license)
+
     return layer_pkg_list, layer_license_list, file_level_licenses
+
+
+def get_package_licenses(package):
+    '''Given a package collect complete list of package licenses'''
+    pkg_licenses = set()
+    if package.pkg_license:
+        pkg_licenses.add(package.pkg_license)
+
+    if package.pkg_licenses:
+        for pkg_license in package.pkg_licenses:
+            if pkg_license:
+                pkg_licenses.add(pkg_license)
+
+    return list(pkg_licenses)
+
+
+def get_layer_packages_licenses(layer):
+    '''Given a image layer collect complete list of package licenses'''
+    pkg_licenses = set()
+    for package in layer.packages:
+        package_licenses = get_package_licenses(package)
+        for package_license in package_licenses:
+            pkg_licenses.add(package_license)
+
+    return list(pkg_licenses)
+
+
+def get_layer_files_licenses(layer):
+    '''Given a image layer collect complete list of file licenses'''
+    file_level_licenses = set()
+    for f in layer.files:
+        for license_expression in f.license_expressions:
+            if license_expression:
+                file_level_licenses.add(license_expression)
+
+    return list(file_level_licenses)
 
 
 def print_licenses_only(image_obj_list):
     '''Print a complete list of licenses for all images'''
-    full_license_list = []
+    full_licenses = set()
     for image in image_obj_list:
         for layer in image.layers:
-            for package in layer.packages:
-                if (package.pkg_license and
-                        package.pkg_license not in full_license_list):
-                    full_license_list.append(package.pkg_license)
+            pkg_licenses = get_layer_packages_licenses(layer)
+            for pkg_license in pkg_licenses:
+                full_licenses.add(pkg_license)
 
-            for f in layer.files:
-                for license_expression in f.license_expressions:
-                    if license_expression not in full_license_list:
-                        full_license_list.append(license_expression)
+            file_level_licenses = get_layer_files_licenses(layer)
+            for file_level_license in file_level_licenses:
+                full_licenses.add(file_level_license)
 
+    full_license_list = list(full_licenses)
     # Collect the full list of licenses from all the layers
     licenses = formats.full_licenses_list.format(list=", ".join(
         full_license_list) if full_license_list else 'None')
