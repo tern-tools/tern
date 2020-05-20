@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 from tern.classes.file_data import FileData
 from tern.classes.notice import Notice
@@ -20,6 +20,7 @@ class Package:
         origins: a list of NoticeOrigin objects
         checksum: checksum as package property
         files: list of files in a package
+        pkg_licenses: all licenses found within a package
 
     methods:
         to_dict: returns a dict representation of the instance
@@ -39,6 +40,7 @@ class Package:
         self.__checksum = ''
         self.__origins = Origins()
         self.__files = []
+        self.__pkg_licenses = []
 
     @property
     def name(self):
@@ -60,9 +62,17 @@ class Package:
     def pkg_license(self):
         return self.__pkg_license
 
+    @property
+    def pkg_licenses(self):
+        return self.__pkg_licenses
+
     @pkg_license.setter
     def pkg_license(self, pkg_license):
         self.__pkg_license = pkg_license
+
+    @pkg_licenses.setter
+    def pkg_licenses(self, pkg_licenses):
+        self.__pkg_licenses = pkg_licenses
 
     @property
     def copyright(self):
