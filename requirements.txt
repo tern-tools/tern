@@ -12,3 +12,4 @@ dockerfile-parse~=0.0
 requests~=2.23
 stevedore>=1.32
 pbr>=5.4
+debut>=0.9
