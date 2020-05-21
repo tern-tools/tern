@@ -31,6 +31,10 @@ def get_layer_comment(layer_obj):
     '''Return a PackageComment tag-value text block for a list of NoticeOrigin
     objects for the given layer object'''
     comment = ''
+    # add any headers here
+    if "headers" in layer_obj.extension_info.keys():
+        for header in layer_obj.extension_info.get("headers"):
+            comment += header + '\n'
     if not layer_obj.origins.is_empty():
         for notice_origin in layer_obj.origins.origins:
             comment = comment + content.print_notices(
