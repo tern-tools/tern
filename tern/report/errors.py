@@ -28,10 +28,10 @@ no_proj_url = '''No project url for package {package_name}. Consider ''' \
 env_dep_dockerfile = '''Docker build failed: {build_fail_msg} \n Since ''' \
     '''the Docker image cannot be built, Tern will try to retrieve ''' \
     '''package information from the Dockerfile itself.\n'''
-no_listing_for_base_key = '''No listing for key {listing_key}. ''' \
-    '''Consider adding this listing to command_lib/base.yml.\n'''
-no_listing_for_snippet_key = '''No listing for key {listing_key}. ''' \
-    '''Consider adding this listing to command_lib/snippets.yml.\n'''
+no_listing_for_base_key = '''No listing method for '{listing_key}'. '''\
+    '''Additional analysis may be required.\n'''
+no_listing_for_snippet_key = '''No listing method for '{listing_key}'. '''\
+    '''Additional analysis may be required.\n'''
 unsupported_listing_for_key = '''Unsupported listing for key ''' \
     '''{listing_key}.\n'''
 cannot_retrieve_base_packages = '''Cannot retrieve the packages in the ''' \
