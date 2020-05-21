@@ -66,7 +66,8 @@ test_suite = {
     ['python tests/test_class_package.py'],
     re.compile('tern/classes/template.py'):
     ['python tests/test_class_template.py',
-     'tern report -f spdxtagvalue -i photon:3.0'],
+     'tern report -f spdxtagvalue -i photon:3.0',
+     'tern lock Dockerfile'],
     # tern/command_lib
     re.compile('tern/command_lib'): [
         'tern report -i photon:3.0',

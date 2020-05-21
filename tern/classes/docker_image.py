@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 import json
@@ -8,10 +8,9 @@ import os
 import subprocess  # nosec
 
 from tern.utils import rootfs
-from tern.utils.general import pushd
+from tern.utils import general
 from tern.utils.constants import manifest_file
-from tern.analyze.docker.container import extract_image_metadata
-from tern.analyze.docker.dockerfile import tag_separator
+from tern.analyze.docker import container
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
@@ -32,12 +31,24 @@ class DockerImage(Image):
         self.__repotags = []
         self.__history = None
         if self.repotag is not None:
-            repo_tag_list = self.__repotag.split(tag_separator)
-            self._name = repo_tag_list[0]
-            if len(repo_tag_list) == 2:
-                self._tag = repo_tag_list[1]
-            else:
-                self._tag = ''
+            # parse the repotag
+            repo_dict = general.parse_image_string(self.__repotag)
+            self._name = repo_dict.get('name')
+            self._tag = repo_dict.get('tag')
+            self.set_checksum(
+                repo_dict.get('digest_type'), repo_dict.get('digest'))
+            if not self.checksum:
+                # if there is no checksum, get the digest type
+                docker_image = container.check_image(self.__repotag)
+                # this object could be representing an image built from
+                # a Dockerfile, so it may not have a digest
+                # so check for that condition
+                if docker_image.attrs['RepoDigests']:
+                    image_name_digest = container.get_image_digest(
+                        docker_image)
+                    repo_dict = general.parse_image_string(image_name_digest)
+                    self.set_checksum(
+                        repo_dict.get('digest_type'), repo_dict.get('digest'))
 
     @property
     def repotag(self):
@@ -73,7 +84,7 @@ class DockerImage(Image):
         '''Assuming that there is a temp folder with a manifest.json of
         an image inside, get a dict of the manifest.json file'''
         temp_path = rootfs.get_working_dir()
-        with pushd(temp_path):
+        with general.pushd(temp_path):
             with open(manifest_file) as f:
                 json_obj = json.loads(f.read())
         return json_obj
@@ -111,7 +122,7 @@ class DockerImage(Image):
         # assuming that the config file path is in the same root path as the
         # manifest file
         temp_path = rootfs.get_working_dir()
-        with pushd(temp_path):
+        with general.pushd(temp_path):
             with open(config_file) as f:
                 json_obj = json.loads(f.read())
         return json_obj
@@ -153,7 +164,7 @@ class DockerImage(Image):
         '''Load image metadata using docker commands'''
         try:
             option = self.get_image_option()
-            extract_image_metadata(option)
+            container.extract_image_metadata(option)
             self._manifest = self.get_image_manifest()
             self._image_id = self.get_image_id(self._manifest)
             self.__repotags = self.get_image_repotags(self._manifest)

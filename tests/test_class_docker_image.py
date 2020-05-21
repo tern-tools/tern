@@ -70,15 +70,31 @@ class TestClassDockerImage(unittest.TestCase):
         self.assertEqual(self.image.repotag, 'vmware/tern@sha256:20b32a9a2'
                                              '0752aa1ad7582c667704fda9f004cc4'
                                              'bfd8601fac7f2656c7567bb4')
-        self.assertEqual(self.image.name, 'vmware/tern@sha256')
-        self.assertEqual(self.image.tag, '20b32a9a20752aa1ad7582c667704fda9f00'
-                                         '4cc4bfd8601fac7f2656c7567bb4')
+        self.assertEqual(self.image.name, 'vmware/tern')
+        self.assertEqual(self.image.tag, '')
+        self.assertTrue(self.image.checksum_type, 'sha256')
+        self.assertTrue(self.image.checksum, '20b32a9a20752aa1ad7582c66'
+                                             '7704fda9f004cc4bfd8601fac7'
+                                             'f2656c7567bb4')
         self.assertFalse(self.image.image_id)
         self.assertFalse(self.image.manifest)
         self.assertFalse(self.image.repotags)
         self.assertFalse(self.image.config)
         self.assertFalse(self.image.layers)
         self.assertFalse(self.image.history)
+        # test instantiating with a tag
+        if not check_image('vmware/tern:testimage'):
+            try:
+                container.pull_image('vmware/tern:testimage')
+            except subprocess.CalledProcessError as error:
+                print(error.output)
+
+        d = DockerImage('vmware/tern:testimage')
+        self.assertEqual(d.name, 'vmware/tern')
+        self.assertEqual(d.tag, 'testimage')
+        self.assertEqual(d.checksum_type, 'sha256')
+        self.assertEqual(d.checksum, '20b32a9a20752aa1ad7582c667704fda9f004cc4'
+                                     'bfd8601fac7f2656c7567bb4')
 
     def testLoadImage(self):
         self.image.load_image()
