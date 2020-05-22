@@ -51,10 +51,14 @@ def load_from_cache(layer, redo=False):
             loaded = True
         # load some extra properties into the layer if available
         if layer.fs_hash in cache.get_layers():
-            layer.files_analyzed = cache.cache[layer.fs_hash]['files_analyzed']
-            layer.os_guess = cache.cache[layer.fs_hash]['os_guess']
-            layer.pkg_format = cache.cache[layer.fs_hash]['pkg_format']
-            layer.extension_info = cache.cache[layer.fs_hash]['extension_info']
+            layer.files_analyzed = cache.cache.get(layer.fs_hash).get(
+                'files_analyzed', False)
+            layer.os_guess = cache.cache.get(layer.fs_hash).get(
+                'os_guess', '')
+            layer.pkg_format = cache.cache.get(layer.fs_hash).get(
+                'pkg_format', '')
+            layer.extension_info = cache.cache.get(layer.fs_hash).get(
+                'extension_info', {})
         load_files_from_cache(layer)
     return loaded
 
