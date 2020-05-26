@@ -68,12 +68,24 @@ def execute_external_command(layer_obj, command, is_sudo=False):
     origin_layer = 'Layer: ' + layer_obj.fs_hash[:10]
     result, error = rootfs.shell_command(is_sudo, command)
     if error:
-        logger.error("Error in executing external command: %s", str(error))
+        msg = error.decode('utf-8')
+        logger.error("Error in executing external command: %s", msg)
         layer_obj.origins.add_notice_to_origins(origin_layer, Notice(
-            str(error), 'error'))
+            msg, 'error'))
         return False
-    layer_obj.analyzed_output = result.decode()
+    layer_obj.analyzed_output = result.decode('utf-8')
     return True
+
+
+def execute_and_pass(layer_obj, command, is_sudo=False):
+    '''Similar to execute_external_command, but the results and the errors
+    are stored together in layer_obj's analyzed_output property to be
+    post-processed. The result and error will be separated by two new line
+    characters \n\n'''
+    full_cmd = get_filesystem_command(layer_obj, command)
+    result, error = rootfs.shell_command(is_sudo, full_cmd)
+    layer_obj.analyzed_output = error.decode(
+        'utf-8') + '\n\n' + result.decode('utf-8')
 
 
 def run_on_image(image_obj, command, is_sudo=False, redo=False):

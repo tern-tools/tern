@@ -11,7 +11,6 @@ The assumption is that cve-bin-tool is globally executable
 """
 
 import logging
-import sys
 
 from tern.analyze import passthrough
 from tern.extensions.executor import Executor
@@ -25,13 +24,12 @@ class CveBinTool(Executor):
     '''Execute cve-bin-tool'''
     def execute(self, image_obj, redo=False):
         '''Execution should be:
-            cve-bin-tool -u now /path/to/directory
+            cve-bin-tool -x -u now /path/to/directory
         '''
-        command = 'cve-bin-tool -u now'
-        # run the command against the image filesystems
-        if not passthrough.run_on_image(image_obj, command, True, redo=redo):
-            logger.error("cve-bin-tool error")
-            sys.exit(1)
-        # for now we just print the results for each layer
+        command = 'cve-bin-tool -x -u now'
         for layer in image_obj.layers:
+            # execute the command for each layer
+            logger.debug("Analyzing layer %s", layer.fs_hash[:10])
+            passthrough.execute_and_pass(layer, command, True)
+            # for now we just print the results for each layer
             print(layer.analyzed_output)
