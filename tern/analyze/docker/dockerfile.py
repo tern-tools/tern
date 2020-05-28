@@ -15,6 +15,7 @@ from tern.utils import general
 from tern.utils import constants
 from tern.analyze.docker import container
 from tern.analyze import common
+from tern.command_lib import command_lib
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -188,12 +189,37 @@ def expand_from_images(dfobj):
             counter = counter + 1
 
 
+def should_pin(run_line, package, index):
+    '''This check is necessary to make sure that commands that double as
+    packages (i.e. language package managers like pip, gem) are pinned properly
+    in a locked dockerfile. For example, in the RUN line "pip install pkg"
+    we would not pin 'pip' to its version, but if the line was
+    "apt install pip" then we would want to pin the version.
+    Return True if the package should be pinned, return False if it
+    should not.'''
+    if package not in command_lib.command_lib['snippets'].keys():
+        return True
+    if index < 1:
+        return False
+    if index < len(run_line) + 1:
+        if run_line[index + 1] == \
+                command_lib.command_lib['snippets'][package]['install']:
+            return False
+    return True
+
+
 def expand_package(command_dict, package, version, pinning_separator):
     '''Update the given dockerfile object with the pinned package
     and version information. '''
-    command_dict['value'] = command_dict['value'].replace(package, package +
-                                                          pinning_separator +
-                                                          version, 1)
+    sub_string = ''
+    for i, word in enumerate(command_dict['value'].split()):
+        # only pin if the package word is not the install directive
+        if word == package and should_pin(command_dict['value'].split(),
+                                          word, i):
+            sub_string += word + pinning_separator + version + ' '
+        else:
+            sub_string += word + ' '
+    command_dict['value'] = sub_string
     # Update 'content' to match 'value' in dfobj
     command_dict['content'] = command_dict['instruction'] + ' ' + \
         command_dict['value'] + '\n'
@@ -208,14 +234,15 @@ def get_run_layers(dfobj):
     return run_list
 
 
-def package_in_dockerfile(command_dict, pkg_name):
-    '''Return True if pkg_name is a package specified in the command_dict
-    RUN line provided, otherwise return False.'''
+def get_install_packages(command_dict):
+    '''Given a dockerfile RUN line, return a list of packages to be
+    installed from that line.'''
     command_words, _ = common.filter_install_commands(command_dict['value'])
+    install_packages = []
     for command in command_words:
-        if pkg_name in command.words:
-            return True
-    return False
+        for word in command.words:
+            install_packages.append(word)
+    return install_packages
 
 
 def get_command_list(dfobj_structure):
