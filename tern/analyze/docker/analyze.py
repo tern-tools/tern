@@ -142,15 +142,19 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
                 if dfile_lock:
                     # collect list of RUN commands that could install pkgs
                     run_dict = d_file.get_run_layers(dfobj)
-                    for package in image_obj.layers[curr_layer].packages:
-                        # check that package is in current dfobj RUN line
-                        if d_file.package_in_dockerfile(
-                                run_dict[curr_layer - 1], package.name):
-                            d_file.expand_package(
-                                run_dict[curr_layer - 1], package.name,
-                                package.version,
-                                command_lib.check_pinning_separator(
-                                    pkg_listing))
+                    # use the run_dict to get list of packages being installed
+                    install_list = d_file.get_install_packages(
+                        run_dict[curr_layer - 1])
+                    for install_pkg in install_list:
+                        for layer_pkg in image_obj.layers[curr_layer].packages:
+                            if install_pkg == layer_pkg.name:
+                                # dockerfile package in layer, let's pin it
+                                d_file.expand_package(
+                                    run_dict[curr_layer - 1],
+                                    install_pkg,
+                                    layer_pkg.version,
+                                    command_lib.check_pinning_separator(
+                                        pkg_listing))
             if command_list:
                 rootfs.undo_mount()
                 rootfs.unmount_rootfs()
