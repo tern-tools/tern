@@ -34,13 +34,13 @@ def get_file_type(scancode_file_dict):
     '''Scancode's file dictionary has a set of keys:
         is_binary, is_text, is_archive, is_media, is_source, is_script
     using this set, return a filetype recognized by SPDX'''
-    if scancode_file_dict['is_binary'] == 'true':
+    if scancode_file_dict.get('is_binary'):
         return 'BINARY'
-    if scancode_file_dict['is_source'] == 'true':
+    if scancode_file_dict.get('is_source'):
         return 'SOURCE'
-    if scancode_file_dict['is_text'] == 'true':
+    if scancode_file_dict.get('is_text'):
         return 'TEXT'
-    if scancode_file_dict['is_archive'] == 'true':
+    if scancode_file_dict.get('is_archive'):
         return 'ARCHIVE'
     return 'OTHER'
 
