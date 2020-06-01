@@ -80,6 +80,7 @@ dockerfile_instruction = ''
 dockerfile_image = '''Image built from Dockerfile {dockerfile}'''
 dockerfile_base = '''Base Image: {base_image_instructions}'''
 dockerfile_line = '''Instruction Line: {dockerfile_instruction}'''
+oci_image_line = '''Instruction Line: {oci_image_instruction}'''
 image_build_failure = '''Failed to build image from Dockerfile'''
 image_load_failure = '''Failed to load metadata for built image {testimage}'''
 layer_created_by = '''Layer created by commands: {created_by}'''
@@ -87,6 +88,8 @@ no_created_by = '''No information about filesystem creation'''
 
 # docker image report
 docker_image = '''Docker image: {imagetag}'''
+# OCI image report
+oci_image = '''OCI image: {imagetag}'''
 
 # format for notices
 notice_format = '''{origin}:\n\t{info}\n\twarnings:{warnings}''' \

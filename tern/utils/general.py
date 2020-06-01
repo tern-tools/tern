@@ -144,6 +144,15 @@ def check_root():
     return False
 
 
+def check_oci_image_string(image_str: str):
+    '''Check if the image string is in the format
+    oci://image-location:tag format. If not, return False.'''
+    tag_format = r'oci://.+:.+'
+    if re.match(tag_format, image_str):
+        return True
+    return False
+
+
 def check_image_string(image_str: str):
     '''Check if the image string is in the format image:tag or
     image@digest_type:digest format. If not, return False.'''

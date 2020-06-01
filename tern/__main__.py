@@ -13,8 +13,8 @@ import argparse
 import logging
 import os
 import sys
-
-from tern.analyze.docker import run
+from tern.analyze.oci import run as oci_run
+from tern.analyze.docker import run as docker_run
 from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
@@ -24,7 +24,7 @@ from tern.report import errors
 
 # global logger
 from tern.utils.general import check_image_string
-
+from tern.utils.general import check_oci_image_string
 logger = logging.getLogger(constants.logger_name)
 logger.setLevel(logging.DEBUG)
 
@@ -69,6 +69,33 @@ def create_top_dir(working_dir=None):
         os.makedirs(top_dir)
 
 
+def execute_image(args):
+    ''' Executes container images using the given inputs '''
+    if args.type == "docker":
+        # Check if the image is of image:tag
+        # or image@digest_type:digest format
+        if not check_image_string(args.image):
+            sys.stderr.write('Error running Tern\n'
+                             'Please provide docker image '
+                             'string in image:tag or '
+                             'image@digest_type:digest format\n')
+            sys.exit(1)
+        if general.check_tar(args.image):
+            logger.error("%s", errors.incorrect_raw_option)
+        else:
+            docker_run.execute_docker_image(args)
+            logger.debug('Report completed.')
+    elif args.type == "oci":
+        # Check if the image is of oci://image-location:tag
+        if not check_oci_image_string(args.image):
+            sys.stderr.write('Error running Tern\n'
+                             'Please provide oci image '
+                             'oci://image-location:tag format\n')
+            sys.exit(1)
+        oci_run.execute_oci_image(args)
+        logger.debug('Report completed.')
+
+
 def do_main(args):
     '''Execute according to subcommands'''
     # set bind mount location if working in a container
@@ -84,33 +111,21 @@ def do_main(args):
     if args.clear_cache:
         logger.debug('Clearing cache...')
         cache.clear()
-    if hasattr(args, 'name') and (args.name == 'report' or
-                                  args.name == 'lock'):
+    if hasattr(args, 'name') and \
+            (args.name == 'report' or args.name == 'lock'):
         if args.name == 'lock':
-            run.execute_dockerfile(args)
+            docker_run.execute_dockerfile(args)
         elif args.dockerfile:
-            run.execute_dockerfile(args)
-        elif args.docker_image:
-            # Check if the image is of image:tag
-            # or image@digest_type:digest format
-            if not check_image_string(args.docker_image):
-                sys.stderr.write('Error running Tern\n'
-                                 'Please provide docker image '
-                                 'string in image:tag or '
-                                 'image@digest_type:digest format\n')
-                sys.exit(1)
-            if general.check_tar(args.docker_image):
-                logger.error("%s", errors.incorrect_raw_option)
-            else:
-                run.execute_docker_image(args)
-                logger.debug('Report completed.')
+            docker_run.execute_dockerfile(args)
+        elif args.image:
+            execute_image(args)
         if args.name == 'report':
             if args.raw_image:
                 if not general.check_tar(args.raw_image):
                     logger.error("%s", errors.invalid_raw_image.format(
                         image=args.raw_image))
                 else:
-                    run.execute_docker_image(args)
+                    docker_run.execute_docker_image(args)
                     logger.debug('Report completed.')
     logger.debug('Finished')
 
@@ -153,12 +168,18 @@ def main():
     parser_report.add_argument('-d', '--dockerfile', type=check_file_existence,
                                help="Dockerfile used to build the Docker"
                                " image")
-    parser_report.add_argument('-i', '--docker-image',
-                               help="Docker image that exists locally -"
+    parser_report.add_argument('-i', '--image',
+                               help="Image that exists locally -"
+                               "either can be a docker image with format"
                                " image:tag"
+                               " or an OCI image with format"
+                               " oci://<image-location>:<image-tag>"
                                " The option can be used to pull docker"
                                " images by digest as well -"
                                " <repo>@<digest-type>:<digest>")
+    parser_report.add_argument('-t', '--type',
+                               help="type of image -"
+                               " possible values could be an oci or docker")
     parser_report.add_argument('-w', '--raw-image', metavar='FILE',
                                help="Raw container image that exists locally "
                                "in the form of a tar archive.")

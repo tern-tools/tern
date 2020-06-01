@@ -23,7 +23,9 @@ from tern.utils import constants
 from tern.utils import cache
 from tern.utils import general
 from tern.utils import rootfs
+from tern.analyze.oci import helpers
 from tern.classes.docker_image import DockerImage
+from tern.classes.oci_image import OCIImage
 from tern.classes.notice import Notice
 import tern.analyze.docker.helpers as dhelper
 
@@ -41,12 +43,7 @@ def write_report(report, args):
         f.write(report)
 
 
-def setup(dfobj=None, image_tag_string=None):
-    '''Any initial setup'''
-    # generate random names for image, container, and tag
-    general.initialize_names()
-    # load the cache
-    cache.load()
+def docker_image_setup(dfobj=None, image_tag_string=None):
     # load dockerfile if present
     if dfobj is not None:
         dhelper.load_docker_commands(dfobj)
@@ -58,6 +55,42 @@ def setup(dfobj=None, image_tag_string=None):
                 logger.fatal("%s", errors.cannot_find_image.format(
                     imagetag=image_tag_string))
                 sys.exit()
+
+
+def oci_image_setup(image_tag_string):
+    path = os.path.join(general.get_top_dir(), constants.temp_folder)
+    if not os.path.exists(path):
+        os.mkdir(os.path.join(general.get_top_dir(), constants.temp_folder))
+    oci_image_index = helpers.get_oci_image_index(image_tag_string)
+    oci_image_manifest = helpers.get_oci_image_manifest(image_tag_string)
+    oci_image_config = helpers.get_oci_image_config(
+        image_tag_string, oci_image_manifest)
+    oci_image_layers = helpers.get_oci_image_layers(
+        image_tag_string, oci_image_manifest)
+    commands = list()
+    commands.append(["cp", oci_image_index, os.path.join(
+        rootfs.mount_dir, constants.temp_folder)])
+    commands.append(["cp", oci_image_manifest, os.path.join(
+        rootfs.mount_dir, constants.temp_folder, "manifest.json")])
+    commands.append(["cp", oci_image_config, os.path.join(
+        rootfs.mount_dir, constants.temp_folder)])
+    for oci_image_layer in oci_image_layers:
+        commands.append(
+            ["cp", oci_image_layer, os.path.join(rootfs.mount_dir, "temp")])
+
+    for command in commands:
+        rootfs.root_command(command)
+
+
+def setup(image_tag_string=None, dfobj=None, image_type=None):
+    '''Any initial setup'''
+    # generate random names for image, container, and tag
+    general.initialize_names()
+    # load the cache
+    cache.load()
+    if image_type == "oci":
+        return oci_image_setup(image_tag_string)
+    return docker_image_setup(dfobj, image_tag_string)
 
 
 def teardown():
@@ -106,6 +139,24 @@ def load_base_image():
         base_image.origins.add_notice_to_origins(
             dockerfile_lines, Notice(str(error), 'error'))
     return base_image
+
+
+def load_oci_image(oci_image):
+    '''Create image object from image name and return the object'''
+    test_image = OCIImage(oci_image)
+    failure_origin = formats.image_load_failure.format(
+        testimage=test_image.repotag)
+    try:
+        test_image.load_image()
+    except (NameError,
+            subprocess.CalledProcessError,
+            IOError,
+            ValueError,
+            EOFError) as error:
+        logger.warning('Error in loading image: %s', str(error))
+        test_image.origins.add_notice_to_origins(
+            failure_origin, Notice(str(error), 'error'))
+    return test_image
 
 
 def load_full_image(image_tag_string):

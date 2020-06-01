@@ -72,13 +72,13 @@ def analyze(image_obj, args, dfile_lock=False, dfobj=None):
 def execute_docker_image(args):
     '''Execution path if given a Docker image'''
     logger.debug('Setting up...')
-    image_string = args.docker_image
+    image_string = args.image
     if not args.raw_image:
         # don't check docker daemon for raw images
         container.check_docker_setup()
     else:
         image_string = args.raw_image
-    report.setup(image_tag_string=image_string)
+    report.setup(image_tag_string=image_string, image_type=args.type)
     # attempt to get built image metadata
     full_image = report.load_full_image(image_string)
     if full_image.origins.is_empty():
