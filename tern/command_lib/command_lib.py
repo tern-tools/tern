@@ -128,14 +128,16 @@ def set_command_attrs(command_obj):
         # the command is in the library
         if 'install' in command_listing.keys():
             # try to move install to a subcommand
-            if command_obj.reassign_word(command_listing['install'],
-                                         'subcommand'):
-                command_obj.set_install()
+            for install_listing in command_listing['install']:
+                if command_obj.reassign_word(install_listing, 'subcommand'):
+                    command_obj.set_install()
+                    break
         if 'remove' in command_listing.keys():
             # try to move remove to a subcommand
-            if command_obj.reassign_word(command_listing['remove'],
-                                         'subcommand'):
-                command_obj.set_remove()
+            for remove_listing in command_listing['remove']:
+                if command_obj.reassign_word(remove_listing, 'subcommand'):
+                    command_obj.set_remove()
+                    break
         if 'ignore' in command_listing.keys():
             # check if any of the words in the ignore list are in
             # the list of command words
