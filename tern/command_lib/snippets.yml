@@ -157,3 +157,14 @@ yarn:
     - 'add'
     - 'remove'
   packages: 'npm'
+
+zypper:
+  install:
+    - 'in'
+    - 'install'
+  remove:
+    - 'rm'
+    - 'remove'
+  ignore:
+    - 'clean'
+  packages: 'rpm'
