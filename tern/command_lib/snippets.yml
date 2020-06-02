@@ -7,115 +7,151 @@
 # image: the image name that the tool uses
 # tag: the image tag name that the tool uses
 apt-get:
-  install: 'install' # subcommand to install
-  remove: 'purge' # subcommand to remove a package
+  install:
+    - 'install' # subcommand to install
+  remove:
+    - 'purge' # subcommand to remove a package
   ignore: # list of subcommands that don't add or remove packages
     - 'update' 
   packages: 'dpkg' # refer to base.yml's method of collection
 
 tyum:
-  install: 'install'
-  remove: 'remove'
+  install:
+    - 'install'
+  remove:
+    - 'remove'
   ignore:
     - 'check-update'
     - 'clean'
   packages: 'tdnf'
 
 tdnf:
-  install: 'install'
-  remove: 'remove'
+  install:
+    - 'install'
+  remove:
+    - 'remove'
   ignore:
     - 'check-update'
     - 'clean'
   packages: 'tdnf'
 
 apk:
-  install: 'add'
-  remove: 'del'
+  install:
+    - 'add'
+  remove:
+    - 'del'
   packages: 'apk'
 
 pacman:
-  install: '-Syu'
-  remove: '-Rcs'
+  install:
+    - '-Syu'
+  remove:
+    - '-Rcs'
   packages: 'pacman'
 
 yum:
-  install: 'install'
-  remove: 'remove'
+  install:
+    - 'install'
+  remove:
+    - 'remove'
   ignore:
     - 'check-update'
     - 'clean'
   packages: 'rpm'
 
 dnf:
-  install: 'install'
-  remove: 'remove'
+  install:
+    - 'install'
+  remove:
+    - 'remove'
   ignore:
     - 'check-update'
     - 'clean'
   packages: 'rpm'
+
 rpm:
-   install: '-i'
-   remove: '-e'
-   packages: 'rpm'
+  install:
+    - '-i'
+    - '-U'
+  remove:
+    - '-e'
+  packages: 'rpm'
+
 pip:
-   install: 'install'
-   remove: 'uninstall'
-   ignore:
-     - 'freeze'
-     - 'list'
-     - 'download'
-     - 'show'
-     - 'check'
-     - 'config'
-     - 'hash'
-     - 'wheel'
-   packages: 'pip'
+  install:
+    - 'install'
+  remove:
+    - 'uninstall'
+  ignore:
+    - 'freeze'
+    - 'list'
+    - 'download'
+    - 'show'
+    - 'check'
+    - 'config'
+    - 'hash'
+    - 'wheel'
+  packages: 'pip'
+
 pip3:
-   install: 'install'
-   remove: 'uninstall'
-   ignore:
-     - 'freeze'
-     - 'list'
-     - 'download'
-     - 'show'
-     - 'check'
-     - 'config'
-     - 'hash'
-     - 'wheel'
-   packages: 'pip3'
+  install:
+    - 'install'
+  remove:
+    - 'uninstall'
+  ignore:
+    - 'freeze'
+    - 'list'
+    - 'download'
+    - 'show'
+    - 'check'
+    - 'config'
+    - 'hash'
+    - 'wheel'
+  packages: 'pip3'
+
 gem:
-  install: 'install'
-  remove: 'uninstall'
+  install:
+    - 'install'
+  remove:
+    - 'uninstall'
   ignore:
-      - 'fetch'
-      - 'build'
-      - 'lock'
-      - 'unpack'
-      - 'cleanup'
-      - 'check'
-      - 'mirror'
+    - 'fetch'
+    - 'build'
+    - 'lock'
+    - 'unpack'
+    - 'cleanup'
+    - 'check'
+    - 'mirror'
   packages: 'gem'
+
 bundle:
-  install: 'install'
-  remove: 'remove'
+  install:
+    - 'install'
+  remove:
+    - 'remove'
   ignore:
-      - 'update'
-      - 'config'
-      - 'add'
-      - 'init'
-      - 'package'
-      - 'exec'
+    - 'update'
+    - 'config'
+    - 'add'
+    - 'init'
+    - 'package'
+    - 'exec'
   packages: 'gem'
+
 npm:
-  install: 'install'
-  remove: 'uninstall'
+  install:
+    - 'install'
+  remove:
+    - 'uninstall'
   ignore:
     - 'ping'
   packages: 'npm'
+
 yarn:
-  install: 'install'
-  remove: 'uninstall'
+  install:
+    - 'install'
+  remove:
+    - 'uninstall'
   ignore:
     - 'publish'
     - 'add'
