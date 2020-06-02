@@ -6,7 +6,8 @@
 """
 File level helpers for SPDX tag-value document generator
 """
-import hashlib
+
+from tern.formats.spdx import formats as spdx_formats
 
 
 # basic functions
@@ -16,14 +17,15 @@ def get_file_spdxref(filedata, layer_id):
     We will use a combination of the file name, checksum and layer_id and
     calculate a hash of this string'''
     file_string = filedata.path + filedata.checksum[:7] + layer_id
-    fileid = hashlib.sha256(file_string.encode('utf-8')).hexdigest()[-7:]
+    fileid = spdx_formats.get_string_id(file_string)
     return 'SPDXRef-{}'.format(fileid)
 
 
 def get_file_checksum(filedata):
     '''Given a FileData object, return the checksum required by SPDX.
-    This should be of the form: <checksum_type>: <checksum>'''
-    return '{}: {}'.format(filedata.checksum_type.upper(), filedata.checksum)
+    This should be of the form: <checksum_type>: <checksum>
+    Currently, the spec requires a SHA1 checksum'''
+    return '{}: {}'.format('SHA1', filedata.get_checksum('sha1'))
 
 
 def get_file_comment(filedata):
@@ -47,17 +49,25 @@ def get_file_notice(filedata):
     return notice
 
 
+def get_file_licenses(filedata):
+    '''Return a unique list of file licenses'''
+    return list(set(filedata.licenses))
+
+
 # formatting functions
 def get_license_info_block(filedata):
-    '''The SPDX spec asks to list the license expressions found in a file
-    using the format: LicenseInfoInFile: <license expression>. If the license
-    expressions list is empty, this should be "NONE"'''
+    '''The SPDX spec asks to list of SPDX license identifiers or license
+    reference IDs using the format: LicenseInfoInFile: <license ref>.
+    In this case, we do not know if we are collecting SPDX license identifiers
+    or license strings or something else. So we will create license refs here.
+    If the licenses list is empty we will report NONE'''
     block = ''
-    if not filedata.license_expressions:
+    if not filedata.licenses:
         block = 'LicenseInfoInFile: NONE\n'
     else:
-        for le in filedata.license_expressions:
-            block = block + 'LicenseInfoInFile: {}'.format(le) + '\n'
+        for l in get_file_licenses(filedata):
+            block = block + 'LicenseInfoInFile: {}'.format(
+                spdx_formats.get_license_ref(l)) + '\n'
     return block
 
 
