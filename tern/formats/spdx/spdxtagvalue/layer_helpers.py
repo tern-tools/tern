@@ -92,17 +92,19 @@ def get_layer_checksum(layer_obj):
     return '{}: {}'.format(layer_obj.checksum_type.upper(), layer_obj.checksum)
 
 
-def get_file_license_expressions(layer_obj):
-    '''Return a list of unique license expressions from the files analyzed
+def get_layer_licenses(layer_obj):
+    '''Return a list of unique licenses from the files analyzed
     in the layer object. It is assumed that the files were analyzed and
     there should be some license expressions. If there are not, an empty list
     is returned'''
-    license_expressions = set()
+    licenses = set()
     for filedata in layer_obj.files:
-        if filedata.license_expressions:
-            for le in filedata.license_expressions:
-                license_expressions.add(le)
-    return list(license_expressions)
+        # we will use the SPDX license expressions here as they will be
+        # valid SPDX license identifiers
+        if filedata.licenses:
+            for l in fhelpers.get_file_licenses(filedata):
+                licenses.add(l)
+    return list(licenses)
 
 
 def get_package_license_info_block(layer_obj):
@@ -111,10 +113,11 @@ def get_package_license_info_block(layer_obj):
     not analyzed'''
     block = ''
     if layer_obj.files_analyzed:
-        license_expressions = get_file_license_expressions(layer_obj)
-        if license_expressions:
-            for le in license_expressions:
-                block += 'PackageLicenseInfoFromFiles: {}\n'.format(le)
+        licenses = get_layer_licenses(layer_obj)
+        if licenses:
+            for l in licenses:
+                block += 'PackageLicenseInfoFromFiles: {}\n'.format(
+                    spdx_formats.get_license_ref(l))
         else:
             block = 'PackageLicenseInfoFromFiles: NONE\n'
     return block

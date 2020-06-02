@@ -56,7 +56,24 @@ def get_image_packages_license_block(image_obj):
                 licenses.add(package.pkg_license)
     for l in licenses:
         block += spdx_formats.license_id.format(
-            license_ref=phelpers.get_package_license_ref(l)) + '\n'
+            license_ref=spdx_formats.get_license_ref(l)) + '\n'
+        block += spdx_formats.extracted_text.format(orig_license=l) + '\n'
+    return block
+
+
+def get_image_file_license_block(image_obj):
+    '''Given the image object, get all the licenses found for the files
+    in the image. We will make use of some helper functions from the layer
+    and file helpers'''
+    block = ''
+    licenses = set()
+    for layer in image_obj.layers:
+        if layer.files_analyzed:
+            for l in lhelpers.get_layer_licenses(layer):
+                licenses.add(l)
+    for l in licenses:
+        block += spdx_formats.license_id.format(
+            license_ref=spdx_formats.get_license_ref(l)) + '\n'
         block += spdx_formats.extracted_text.format(orig_license=l) + '\n'
     return block
 
@@ -112,4 +129,6 @@ def get_image_block(image_obj, template):
         block += pkg_block + '\n'
         # print out the license block for packages
         block += get_image_packages_license_block(image_obj)
+    else:
+        block += get_image_file_license_block(image_obj)
     return block

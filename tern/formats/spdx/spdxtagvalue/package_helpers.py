@@ -7,8 +7,6 @@
 Helper functions for packages in SPDX document
 """
 
-import hashlib
-
 from tern.formats.spdx import formats as spdx_formats
 from tern.report import content
 
@@ -31,13 +29,6 @@ def get_package_comment(package_obj):
                 notice_origin, '', '\t')
         return spdx_formats.package_comment.format(comment=comment)
     return comment
-
-
-def get_package_license_ref(package_license):
-    '''Return a LicenseRef with a unique SHA-256 ID for the package object
-    if it exists.'''
-    return 'LicenseRef-' + hashlib.sha256(package_license.encode(
-        'utf-8')).hexdigest()[-7:]
 
 
 def get_package_block(package_obj, template):
@@ -70,7 +61,7 @@ def get_package_block(package_obj, template):
     # Package License Declared (use the license ref for this)
     if mapping['PackageLicenseDeclared']:
         block += 'PackageLicenseDeclared: {}\n'.format(
-            get_package_license_ref(mapping['PackageLicenseDeclared']))
+            spdx_formats.get_license_ref(mapping['PackageLicenseDeclared']))
     else:
         block += 'PackageLicenseDeclared: NONE\n'
     # Package Copyright Text
