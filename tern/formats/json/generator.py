@@ -10,7 +10,6 @@ JSON document generator
 import json
 from tern.formats import generator
 
-
 class JSON(generator.Generate):
     def generate(self, image_obj_list):
         '''Given a list of image objects, create a json object string'''

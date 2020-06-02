@@ -7,6 +7,7 @@
 Create a report
 """
 
+import json
 import logging
 import os
 import shutil
@@ -26,6 +27,7 @@ from tern.utils import rootfs
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
 import tern.analyze.docker.helpers as dhelper
+from tern.formats.json.html import create_html
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -154,5 +156,9 @@ def report_out(args, *images):
         logger.error("%s not a recognized plugin.", args.report_format)
     elif args.output_file:
         write_report(report, args)
+        if args.report_format == "json":
+            create_html(json.loads(report),images,args,filename=args.output_file)
     else:
+        if args.report_format == "json":
+            create_html(json.loads(report),images,args)
         print(report)
