@@ -37,7 +37,7 @@ class DockerImage(Image):
             self._tag = repo_dict.get('tag')
             self.set_checksum(
                 repo_dict.get('digest_type'), repo_dict.get('digest'))
-            if not self.checksum:
+            if not self.checksum and general.check_tar(repotag) is False:
                 # if there is no checksum, get the digest type
                 docker_image = container.check_image(self.__repotag)
                 # this object could be representing an image built from
