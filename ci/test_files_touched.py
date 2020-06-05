@@ -81,6 +81,7 @@ test_suite = {
         'python tests/test_analyze_common.py',
         'tern report -i golang:alpine',
         'tern report -d samples/alpine_python/Dockerfile',
+        'tern report -w photon.tar',
         'tern lock Dockerfile'],
     # tern/report
     re.compile('tern/report'): [
@@ -106,7 +107,8 @@ test_suite = {
     re.compile('tests/test_class_command.py'):
         ['python tests/test_class_command.py'],
     re.compile('tests/test_class_docker_image.py'):
-        ['python tests/test_class_docker_image.py'],
+        ['python tests/test_class_docker_image.py',
+         'tern report -w photon.tar'],
     re.compile('tests/test_class_file_data.py'):
         ['python tests/test_class_file_data.py'],
     re.compile('tests/test_class_image.py'):
