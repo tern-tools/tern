@@ -12,7 +12,7 @@ apt-get:
   remove:
     - 'purge' # subcommand to remove a package
   ignore: # list of subcommands that don't add or remove packages
-    - 'update' 
+    - 'update'
   packages: 'dpkg' # refer to base.yml's method of collection
 
 tyum:
@@ -166,5 +166,15 @@ zypper:
     - 'rm'
     - 'remove'
   ignore:
+    - 'clean'
+  packages: 'rpm'
+
+microdnf:
+  install:
+    - 'install'
+  remove:
+    - 'remove'
+  ignore:
+    - 'check-update'
     - 'clean'
   packages: 'rpm'
