@@ -129,6 +129,5 @@ def get_image_block(image_obj, template):
         block += pkg_block + '\n'
         # print out the license block for packages
         block += get_image_packages_license_block(image_obj)
-    else:
-        block += get_image_file_license_block(image_obj)
+    block += get_image_file_license_block(image_obj)
     return block
