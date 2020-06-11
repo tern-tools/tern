@@ -74,6 +74,16 @@ def get_scancode_file(file_dict):
     return fd
 
 
+def add_scancode_headers(layer_obj, headers):
+    '''Given a list of headers from scancode data, add unique headers to
+    the list of existing headers in the layer object'''
+    unique_notices = {header.get("notice") for header in headers}
+    layer_headers = layer_obj.extension_info.get("headers", list())
+    for lh in layer_headers:
+        unique_notices.add(lh)
+    layer_obj.extension_info["headers"] = list(unique_notices)
+
+
 def collect_layer_data(layer_obj):
     '''Use scancode to collect data from a layer filesystem. This function will
     create a FileData object for every file found. After scanning, it will
@@ -93,10 +103,7 @@ def collect_layer_data(layer_obj):
     else:
         # make FileData objects for each result
         data = json.loads(result)
-        notice = data.get("headers")[0].get("notice")
-        headers = layer_obj.extension_info.get("headers", set())
-        headers.add(notice)
-        layer_obj.extension_info["headers"] = headers
+        add_scancode_headers(layer_obj, data["headers"])
         for f in data['files']:
             if f['type'] == 'file' and f['size'] != 0:
                 files.append(get_scancode_file(f))
