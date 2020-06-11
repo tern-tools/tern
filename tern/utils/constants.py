@@ -29,7 +29,7 @@ logfile = 'tern.log'
 # manifest file
 manifest_file = 'manifest.json'
 # cache file
-cache_file = 'cache.yml'
+cache_file = 'cache.json'
 # default shell
 shell = '/bin/sh'
 # path where resolv.conf lives
