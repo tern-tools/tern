@@ -17,7 +17,7 @@ It is organized in this way:
 """
 
 import os
-import yaml
+import json
 from tern.utils.constants import cache_file
 from tern.utils import rootfs
 
@@ -34,7 +34,7 @@ def load():
         return
 
     with open(os.path.join(rootfs.mount_dir, cache_file)) as f:
-        cache = yaml.safe_load(f)
+        cache = json.load(f)
 
 
 def get_packages(layer_hash):
@@ -79,7 +79,7 @@ def add_layer(layer_obj):
 def save():
     '''Save the cache to the cache file'''
     with open(os.path.join(rootfs.mount_dir, cache_file), 'w') as f:
-        yaml.dump(cache, f, default_flow_style=False)
+        json.dump(cache, f)
 
 
 def remove_layer(layer_hash):
@@ -96,4 +96,4 @@ def clear():
     global cache
     cache = {}
     with open(os.path.join(rootfs.mount_dir, cache_file), 'w') as f:
-        yaml.dump(cache, f, default_flow_style=False)
+        json.dump(cache, f)
