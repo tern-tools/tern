@@ -249,14 +249,15 @@ def parse_shell_variables_and_command(concatenated_command):
     and then parse it '''
     # pattern for matching variable, looking for '='
     variable_pattern = r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)'
-    statement = {'content': concatenated_command}
     match_res = re.match(variable_pattern, concatenated_command)
+    statement = {}
     if match_res:
         statement['variable'] = {'name': match_res.group(1),
                                  'value': match_res.group(2)}
+        statement['content'] = concatenated_command
     else:
-        # TODO remove \t \r \n \ in the command
-        statement['command'] = parse_command(concatenated_command)
+        # use clean_command() to clean tab and line indentations
+        statement['command'] = clean_command(concatenated_command)
     return statement
 
 
@@ -266,8 +267,26 @@ def parse_shell_loop_and_branch(commands_string, keyword_tuple):
     loop_start_keywords = ['for', 'while']
     statement = {'content': commands_string}
     if keyword_tuple[0] in loop_start_keywords:
-        # TODO: finish parse loop here
         statement['loop'] = {'type': keyword_tuple[0]}
+        # extract commands between 'do' and 'done'
+        loop_statements = []
+        for cmd in commands_string:
+            # 'loop_statements' is empty here, so we have not found 'do' yet.
+            if not loop_statements:
+                # find 'do', append to 'loop_statements'
+                if cmd.startswith('do'):
+                    # strip 'do' and whitespaces
+                    cmd = cmd.lstrip('do ')
+                    stat = parse_shell_variables_and_command(cmd)
+                    loop_statements.append(stat)
+            # 'loop_statements' is NOT empty here, we are in the statements now.
+            else:
+                stat = parse_shell_variables_and_command(cmd)
+                loop_statements.append(stat)
+        # 'loop_statements' are ended with done, so we can just remove
+        # the last statement which should be 'done;'
+        loop_statements.pop()
+        statement['loop'].update({'loop_statements': loop_statements})
     else:
         statement['branch'] = {'type': keyword_tuple[0]}
     return statement
