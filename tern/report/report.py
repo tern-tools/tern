@@ -152,7 +152,5 @@ def report_out(args, *images):
     report = generate_report(args, *images)
     if not report:
         logger.error("%s not a recognized plugin.", args.report_format)
-    elif args.output_file:
-        write_report(report, args)
     else:
-        print(report)
+        write_report(report, args)
