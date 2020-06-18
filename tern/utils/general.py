@@ -198,7 +198,7 @@ def split_shell_script(shell_script):
     # pattern for skipping single and double quote
     skip_pattern = r"\".*?\"(*SKIP)(*F)|'.*?'(*SKIP)(*F)"
     # pattern for split a concatenated command
-    match_pattern = r':;|&&|;|\|\||\|'
+    match_pattern = r':;|&&|;|\|\|'
     pattern = skip_pattern + '|' + match_pattern
     concatenated_commands = regex.split(pattern, shell_script)
     # use keywords to match loop, branch.
@@ -248,12 +248,20 @@ def parse_shell_variables_and_command(concatenated_command):
     '''given a concatenated command, classify the variable and command type,
     and then parse it '''
     # pattern for matching variable, looking for '='
-    variable_pattern = r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)'
+    assignment_pattern = r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)'
+    export_pattern = r'^export ([A-Za-z_][A-Za-z0-9_]*)=(.*)'
+    variable_pattern = assignment_pattern + r'|' + export_pattern
     match_res = re.match(variable_pattern, concatenated_command)
     statement = {}
     if match_res:
-        statement['variable'] = {'name': match_res.group(1),
-                                 'value': match_res.group(2)}
+        if match_res.group(1):
+            # assignment_pattern matched
+            statement['variable'] = {'name': match_res.group(1),
+                                     'value': match_res.group(2)}
+        else:
+            # export_pattern matched
+            statement['variable'] = {'name': match_res.group(3),
+                                     'value': match_res.group(4)}
         statement['content'] = concatenated_command
     else:
         # use clean_command() to clean tab and line indentations
