@@ -6,6 +6,7 @@
 import os
 import random
 import re
+import regex
 import tarfile
 import subprocess  # nosec
 from contextlib import contextmanager
@@ -182,3 +183,118 @@ def parse_image_string(image_string):
                 'digest_type': tokens[1],
                 'digest': tokens[2]}
     return None
+
+
+def split_shell_script(shell_script):
+    """Given a shell script, split it into statements:
+    - command: a single line command which may install softwares.
+    - variable: variable assignment in the shell script.
+    - loop: a block of code which iters(for while until). We will extract
+        the commands in the loop.
+    - branch: a block of code contains branches(case if). We will NOT
+        extract info in this since we are not sure which branch will
+        be executed.
+    """
+    # pattern for skipping single and double quote
+    skip_pattern = r"\".*?\"(*SKIP)(*F)|'.*?'(*SKIP)(*F)"
+    # pattern for split a concatenated command
+    match_pattern = r':;|&&|;|\|\|'
+    pattern = skip_pattern + '|' + match_pattern
+    concatenated_commands = regex.split(pattern, shell_script)
+    # use keywords to match loop, branch.
+    keywords = {'for': 'done', 'if': 'fi', 'case': 'esac', 'while': 'done'}
+    start_keywords = tuple(keywords.keys())
+    # current_keyword[0] is start_keyword, eg. 'for'.
+    # current_keyword[1] is end_keyword, eg. 'done'.
+    current_keyword = ("", "")
+    # store loop and branch commands
+    commands_string = []
+    statements = []
+    for cmd in concatenated_commands:
+        # '{...}' is a block of code, split_command() can not handle this.
+        # remove '{}' '()'
+        cmd = cmd.strip(" \t{}()")
+        # skip empty `cmd`
+        if not cmd:
+            continue
+        # `commands_string` is empty means we are not in a loop or branch,
+        # so we need to check keywords first.
+        if not commands_string:
+            # quick check on keywords
+            if cmd.startswith(start_keywords):
+                # if match, go throgh keywords to find which one is matched.
+                for k, v in keywords.items():
+                    if cmd.startswith(k):
+                        current_keyword = (k, v)
+                        commands_string.append(cmd)
+            else:
+                # not match,`cmd` should be variable or command, so we
+                # match variable here.
+                statements.append(parse_shell_variables_and_command(cmd))
+        else:
+            # `commands_string` is not empty means we are in a loop or
+            # branch, so we need to check end keyword.
+            commands_string.append(cmd)
+            if cmd.endswith(current_keyword[1]):
+                statements.append(
+                    parse_shell_loop_and_branch(
+                        commands_string, current_keyword))
+                commands_string = []
+                current_keyword = ("", "")
+    return statements
+
+
+def parse_shell_variables_and_command(concatenated_command):
+    '''given a concatenated command, classify the variable and command type,
+    and then parse it '''
+    # pattern for matching variable, looking for '='
+    assignment_pattern = r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)'
+    export_pattern = r'^export ([A-Za-z_][A-Za-z0-9_]*)=(.*)'
+    variable_pattern = assignment_pattern + r'|' + export_pattern
+    match_res = re.match(variable_pattern, concatenated_command)
+    statement = {}
+    if match_res:
+        if match_res.group(1):
+            # assignment_pattern matched
+            statement['variable'] = {'name': match_res.group(1),
+                                     'value': match_res.group(2)}
+        else:
+            # export_pattern matched
+            statement['variable'] = {'name': match_res.group(3),
+                                     'value': match_res.group(4)}
+        statement['content'] = concatenated_command
+    else:
+        # use clean_command() to clean tab and line indentations
+        statement['command'] = clean_command(concatenated_command)
+    return statement
+
+
+def parse_shell_loop_and_branch(commands_string, keyword_tuple):
+    '''given a concatenated command, classify the loop and branch type,
+    and then parse the loop '''
+    loop_start_keywords = ['for', 'while']
+    statement = {'content': commands_string}
+    if keyword_tuple[0] in loop_start_keywords:
+        statement['loop'] = {'type': keyword_tuple[0]}
+        # extract commands between 'do' and 'done'
+        loop_statements = []
+        for cmd in commands_string:
+            # 'loop_statements' is empty here, so we have not found 'do' yet.
+            if not loop_statements:
+                # find 'do', append to 'loop_statements'
+                if cmd.startswith('do'):
+                    # strip 'do' and whitespaces
+                    cmd = cmd.lstrip('do ')
+                    stat = parse_shell_variables_and_command(cmd)
+                    loop_statements.append(stat)
+            # 'loop_statements' is NOT empty here, we are in the statements now.
+            else:
+                stat = parse_shell_variables_and_command(cmd)
+                loop_statements.append(stat)
+        # 'loop_statements' are ended with done, so we can just remove
+        # the last statement which should be 'done;'
+        loop_statements.pop()
+        statement['loop'].update({'loop_statements': loop_statements})
+    else:
+        statement['branch'] = {'type': keyword_tuple[0]}
+    return statement
