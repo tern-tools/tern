@@ -2,14 +2,14 @@ name: Pull Request Lint and Test
 on: pull_request
 
 jobs:
-  PRs:
+  Prospector_Linting:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1 #equivlent to running git fetch and git checkout latest
       - uses: actions/setup-python@v1 # setup python3 environment
         with:
           python-version: '3.6.10'
-      - name: Install Deps
+      - name: Setup
         run: |
           sudo apt-get install -y attr
           pip install --upgrade pip
@@ -19,20 +19,68 @@ jobs:
         run: |
           pip install prospector>=1.1
           prospector
+  Commit_Message_Linting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.6.10'
+      - name: Setup 
+        run: |
+          sudo apt-get install -y attr
+          pip install --upgrade pip
+          pip install GitPython~=2.1
+          pip install .
       - name: Commit Message Linting
-        if: always() # run even if above step fails
         run: python ci/test_commit_message.py
+  Security_Linting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.6.10'
+      - name: Setup 
+        run: |
+          sudo apt-get install -y attr
+          pip install --upgrade pip
+          pip install GitPython~=2.1
+          pip install .
       - name: Security Linting
-        if: always() # run even if above step fails
         run: |
           pip install bandit~=1.6
-          docker pull photon:3.0 && docker save photon:3.0 > photon.tar
           c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
+  Test_Changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.6.10'
+      - name: Setup
+        run: |
+          sudo apt-get install -y attr
+          pip install --upgrade pip
+          pip install GitPython~=2.1
+          pip install .
+          docker pull photon:3.0 && docker save photon:3.0 > photon.tar
       - name: Test Changes
-        if: always() # run even if above step fails
         run: python ci/test_files_touched.py
+  Test_Coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.6.10'
+      - name: Setup
+        run: |
+          sudo apt-get install -y attr
+          pip install --upgrade pip
+          pip install GitPython~=2.1
+          pip install .
       - name: Test Coverage
-        if: always() # run even if above step fails
         run: |
           pip install coverage
           pip install .
