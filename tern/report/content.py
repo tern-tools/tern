@@ -12,6 +12,54 @@ from tern.report import formats
 from tern.utils.general import get_git_rev_or_version
 
 
+def get_layer_packages_licenses(layer):
+    '''Given a image layer collect complete list of package licenses'''
+    pkg_licenses = set()
+    for package in layer.packages:
+        package_licenses = get_package_licenses(package)
+        for package_license in package_licenses:
+            pkg_licenses.add(package_license)
+    return list(pkg_licenses)
+
+
+def get_layer_files_licenses(layer):
+    '''Given a image layer collect complete list of file licenses'''
+    file_level_licenses = set()
+    for f in layer.files:
+        for license_expression in f.license_expressions:
+            if license_expression:
+                file_level_licenses.add(license_expression)
+    return list(file_level_licenses)
+
+
+def get_licenses_only(image_obj_list):
+    '''Returns a list of all the lists found in images'''
+    full_licenses = set()
+    for image in image_obj_list:
+        for layer in image.layers:
+            pkg_licenses = get_layer_packages_licenses(layer)
+            for pkg_license in pkg_licenses:
+                full_licenses.add(pkg_license)
+
+            file_level_licenses = get_layer_files_licenses(layer)
+            for file_level_license in file_level_licenses:
+                full_licenses.add(file_level_license)
+    return list(full_licenses)
+
+
+def get_package_licenses(package):
+    '''Given a package collect complete list of package licenses'''
+    pkg_licenses = set()
+    if package.pkg_license:
+        pkg_licenses.add(package.pkg_license)
+
+    if package.pkg_licenses:
+        for pkg_license in package.pkg_licenses:
+            if pkg_license:
+                pkg_licenses.add(pkg_license)
+    return list(pkg_licenses)
+
+
 def get_tool_version():
     '''Return a string describing the version and where it came from'''
     ver_type, ver = get_git_rev_or_version()
