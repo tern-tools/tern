@@ -45,9 +45,5 @@ workdir = 'workdir'
 # rootfs directory where overlay merges filesystems
 # this is relative to where tern is
 mergedir = 'mergedir'
-# report file
-report_file = 'report.txt'
-# html report file
-html_file = 'report.html'
 # locked dockerfile
 locked_dockerfile = 'Dockerfile.lock'

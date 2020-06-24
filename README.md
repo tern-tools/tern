@@ -20,12 +20,13 @@ Tern is a software package inspection tool for containers. It's written in Pytho
   - [Getting Started with Docker](#getting-started-with-docker)
   - [Getting Started with Vagrant](#getting-started-with-vagrant)
 - [Using Tern](#using-tern)
-  - [Generating a BoM report for a Docker image](#bom-for-docker-image)
-  - [Generating a BoM report from a Dockerfile](#bom-for-dockerfile)
+  - [Generating an SBoM report for a Docker image](#sbom-for-docker-image)
+  - [Generating an SBoM report from a Dockerfile](#sbom-for-dockerfile)
   - [Generating a locked Dockerfile](#dockerfile-lock)
 - [Report Formats](#report-formats)
   - [Human Readable Format](#report-human-readable)
   - [JSON Format](#report-json)
+  - [HTML Format](#report-html)
   - [YAML Format](#report-yaml)
   - [SPDX tag-value Format](#report-spdxtagvalue)
 - [Extensions](#extensions)
@@ -164,19 +165,19 @@ $ tern report -i debian:buster -o output.txt
 
 Tern creates a report containing the Bill of Materials (BoM) of a container image, including notes about how it collects this information, and files for which it has no information about. Currently, Tern supports containers only built using Docker using image manifest version 2, schema 2. Docker image manifest version 2, schema 1 has been [deprecated](https://docs.docker.com/registry/spec/deprecated-schema-v1/) by Docker. Tern will support container images created using Docker version 19.03.0 or later. Docker is the most ubiquitous type of container image that exists so the project started with a focus on those. However, it is architected to support other images that closely follow the [OCI image spec](https://github.com/opencontainers/image-spec/blob/master/spec.md).
 
-## Generating a BoM report for a Docker image<a name="bom-for-docker-image">
+## Generating an SBoM report for a Docker image<a name="sbom-for-docker-image">
 If you have a Docker image pulled locally and want to inspect it
 ```
 $ tern report -i debian:jessie
 ```
-Take a look at report.txt to see what packages are installed in the Docker image and how Tern got this information. If you encounter any errors, please file an issue.
+The SBoM of packages that are installed in the Docker image and how Tern got this information will be printed to the console. To direct this output to a file, use the `-o file_name` command line option. If you encounter any errors, please file an issue.
 
-## Generating a BoM report from a Dockerfile<a name="bom-for-dockerfile">
-You can provide a Dockerfile to Tern to figure out the Bill of Materials and other information. Tern will build the image, analyze it with respect to the Dockerfile and discard the image. This is useful to engineers who are developing a Dockerfile for their app or in a container build and release pipeline.
+## Generating an SBoM report from a Dockerfile<a name="sbom-for-dockerfile">
+You can provide a Dockerfile to Tern to figure out the Software Bill of Materials and other information. Tern will build the image, analyze it with respect to the Dockerfile and discard the image. This is useful to engineers who are developing a Dockerfile for their app or in a container build and release pipeline.
 ```
 $ tern report -d samples/photon_git/Dockerfile
 ```
-Take a look at report.txt to see what packages you would be shipping if you were to use the given Dockerfile. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
+The SBoM of packages you would be shipping if you were to use the given Dockerfile will print to the console. To direct the output to a file, use the `-o file_name` command line option. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
 
 ## Generating a locked Dockerfile<a name="dockerfile-lock">
 Because of the way Docker builds containers, Dockerfiles are generally not declarative or reflective of what ultimately gets included in the container image that gets produced. Pinning information in your Dockerfile (base OS, packages, etc.) can help create more reproducible container images should your Dockerfile be distributed to other parties. If you have a Dockerfile that you would like to lock to a more reproducible version, Tern can help.
@@ -202,6 +203,12 @@ $ tern report -i golang:1.12-alpine -o output.txt
 You can get the results in a JSON file to pass around in a network.
 ```
 $ tern report -f json -i golang:1.12-alpine
+```
+
+## HTML Format<a name="report-html">
+You can get an html rendering of the JSON results. An output file with `.html` suffix should be provided in order to properly view the report in your browser.
+```
+$ tern report -f html -i golang:1.12-alpine -o report.html
 ```
 
 ## YAML Format<a name="report-yaml">
