@@ -35,10 +35,6 @@ def write_report(report, args):
     '''Write the report to a file'''
     if args.output_file:
         file_name = args.output_file
-    elif args.report_format == 'html':
-        file_name = constants.html_file
-    else:
-        file_name = constants.report_file
     with open(file_name, 'w') as f:
         f.write(report)
 
@@ -154,5 +150,7 @@ def report_out(args, *images):
     report = generate_report(args, *images)
     if not report:
         logger.error("%s not a recognized plugin.", args.report_format)
-    else:
+    elif args.output_file:
         write_report(report, args)
+    else:
+        print(report)

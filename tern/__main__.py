@@ -173,8 +173,8 @@ def main():
     parser_report.add_argument('-o', '--output-file', default=None,
                                metavar='FILE',
                                help="Write the report to a file. "
-                               "If no file is given the default file in "
-                               "utils/constants.py will be used")
+                               "If no file is given the report will be "
+                               "printed to the console.")
     parser_report.set_defaults(name='report')
     # subparser for dockerfile lock
     parser_lock = subparsers.add_parser('lock',
