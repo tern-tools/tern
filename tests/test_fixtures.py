@@ -46,7 +46,7 @@ class TestTemplate1(Template):
                 'files': 'layer.files'}
 
     def image(self):
-        return {'image_id': 'image.id',
+        return {'repotag': 'image.repotag',
                 'layers': 'image.layers'}
 
 
@@ -80,7 +80,7 @@ class TestTemplate2(Template):
         return mapping
 
     def image(self):
-        mapping = {'image_id': 'image.id',
+        mapping = {'repotag': 'image.repotag',
                    'layers': 'image.layers'}
         # we update the mapping with another defined mapping
         mapping.update(self.origins())

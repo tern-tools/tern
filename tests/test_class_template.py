@@ -35,7 +35,7 @@ class TestClassTemplate(unittest.TestCase):
 
     def testImage(self):
         mapping = self.template1.image()
-        self.assertEqual(mapping['image_id'], 'image.id')
+        self.assertEqual(mapping['repotag'], 'image.repotag')
         self.assertEqual(mapping['layers'], 'image.layers')
 
     def testNotice(self):
