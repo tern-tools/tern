@@ -56,7 +56,7 @@ def get_layer_notices(layer):
     '''
     notices = ''
     if len(layer.origins.origins) == 0:
-        notices = '\tLayer: {0}:\n'.format(layer.fs_hash[:10])
+        notices = '\tLayer {0}:\n'.format(layer.layer_index)
     else:
         for layer_origin in layer.origins.origins:
             notices += content.print_notices(layer_origin, '\t', '\t\t')

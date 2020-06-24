@@ -29,7 +29,7 @@ class CveBinTool(Executor):
         command = 'cve-bin-tool -x -u now'
         for layer in image_obj.layers:
             # execute the command for each layer
-            logger.debug("Analyzing layer %s", layer.fs_hash[:10])
+            logger.debug("Analyzing layer %s", layer.layer_index)
             passthrough.execute_and_pass(layer, command, True)
             # for now we just print the results for each layer
             print(layer.analyzed_output)

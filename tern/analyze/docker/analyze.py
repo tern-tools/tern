@@ -61,7 +61,7 @@ def abort_analysis():
 
 def analyze_first_layer(image_obj, master_list, redo):
     # set up a notice origin for the first layer
-    origin_first_layer = 'Layer: ' + image_obj.layers[0].fs_hash[:10]
+    origin_first_layer = 'Layer {}'.format(image_obj.layers[0].layer_index)
     # find the shell from the first layer
     shell = common.get_shell(image_obj.layers[0])
     if not shell:
@@ -166,7 +166,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
 def image_setup(image_obj):
     '''Add notices for each layer'''
     for layer in image_obj.layers:
-        origin_str = 'Layer: ' + layer.fs_hash[:10]
+        origin_str = 'Layer {}'.format(layer.layer_index)
         layer.origins.add_notice_origin(origin_str)
         if layer.import_str:
             layer.origins.add_notice_to_origins(origin_str, Notice(
