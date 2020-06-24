@@ -65,7 +65,7 @@ def execute_external_command(layer_obj, command, is_sudo=False):
     '''Given an Imagelayer object and a command in the form of a list, execute
     the command and store the results in the ImageLayer object either as
     results or as a Notice object'''
-    origin_layer = 'Layer: ' + layer_obj.fs_hash[:10]
+    origin_layer = 'Layer {}'.format(layer_obj.layer_index)
     result, error = rootfs.shell_command(is_sudo, command)
     if error:
         msg = error.decode('utf-8')

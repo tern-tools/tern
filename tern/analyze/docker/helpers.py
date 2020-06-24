@@ -152,7 +152,7 @@ def get_commands_from_history(image_layer):
     '''Given the image layer object and the shell, get the list of command
     objects that created the layer'''
     # set up notice origin for the layer
-    origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
+    origin_layer = 'Layer {}'.format(image_layer.layer_index)
     if image_layer.created_by:
         instruction = created_to_instruction(image_layer.created_by)
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(

@@ -288,7 +288,7 @@ def add_base_packages(image_layer, binary, shell):
         1. get the listing from the base.yml
         2. Invoke any commands against the base layer
         3. Make a list of packages and add them to the layer'''
-    origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
+    origin_layer = 'Layer {}'.format(image_layer.layer_index)
     if image_layer.created_by:
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             formats.layer_created_by.format(created_by=image_layer.created_by),
@@ -493,7 +493,7 @@ def add_snippet_packages(image_layer, command, pkg_listing, shell):
         4. For each unique package name, find the metadata and add to the
         layer'''
     # set up a notice origin for the layer
-    origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
+    origin_layer = 'Layer {}'.format(image_layer.layer_index)
     # find packages for the command
     cmd_msg = formats.invoke_for_snippets + '\n' + \
         content.print_package_invoke(command.name)
@@ -554,7 +554,7 @@ def get_os_style(image_layer, binary):
     might be based off of given the pkg_format + package manager. If the binary
     provided does not exist in base.yml, add a warning notice'''
     origin_command_lib = formats.invoking_base_commands
-    origin_layer = 'Layer: ' + image_layer.fs_hash[:10]
+    origin_layer = 'Layer {}'.format(image_layer.layer_index)
     pkg_format = command_lib.check_pkg_format(binary)
     os_guess = command_lib.check_os_guess(binary)
     os_release = get_os_release(image_layer)

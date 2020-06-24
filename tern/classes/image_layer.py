@@ -29,6 +29,8 @@ class ImageLayer:
         Based on how container image layers are created, this is usually the
         last layer of the image that was imported
         import_str: The string from a build tool (like a Dockerfile) that
+        layer_index: The index position of the layer in relationship to the
+        other layers in the image. The base OS would be layer 1.
         created this layer by importing it from another image
         files_analyzed: whether the files in this layer are analyzed or not
         analyzed_output: the result of the file analysis
@@ -64,6 +66,7 @@ class ImageLayer:
         self.__origins = Origins()
         self.__import_image = None
         self.__import_str = ''
+        self.__layer_index = ''
         self.__pkg_format = ''
         self.__os_guess = ''
         self.__files_analyzed = False
@@ -140,6 +143,14 @@ class ImageLayer:
     @import_str.setter
     def import_str(self, import_str):
         self.__import_str = import_str
+
+    @property
+    def layer_index(self):
+        return self.__layer_index
+
+    @layer_index.setter
+    def layer_index(self, layer_index):
+        self.__layer_index = layer_index
 
     @property
     def pkg_format(self):

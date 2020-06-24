@@ -93,7 +93,7 @@ def collect_layer_data(layer_obj):
     # run scancode against a directory
     command = 'scancode -ilpcu --quiet --timeout 300 --json -'
     full_cmd = get_filesystem_command(layer_obj, command)
-    origin_layer = 'Layer: ' + layer_obj.fs_hash[:10]
+    origin_layer = 'Layer {}'.format(layer_obj.layer_index)
     result, error = rootfs.shell_command(True, full_cmd)
     if not result:
         logger.error(
