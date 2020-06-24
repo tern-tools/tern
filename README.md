@@ -1,6 +1,6 @@
 ![Tern](/docs/img/tern_logo.png)
 
-[![CircleCI](https://circleci.com/gh/tern-tools/tern.svg?style=svg)](https://app.circleci.com/pipelines/github/tern-tools/tern)
+[![GitHub Actions](https://github.com/tern-tools/tern/workflows/Pull%20Request%20Lint%20and%20Test/badge.svg?branch=master)](https://github.com/tern-tools/tern/actions)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2689/badge)](https://bestpractices.coreinfrastructure.org/projects/2689)
 [![License](https://img.shields.io/badge/License-BSD%202--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
