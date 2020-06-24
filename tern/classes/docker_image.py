@@ -24,35 +24,31 @@ class DockerImage(Image):
         history: a list of commands used to create the filesystem layers
         to_dict: return a dict representation of the object
     '''
-    def __init__(self, repotag=None, image_id=None):
-        '''Initialize using repotag and image_id'''
-        super().__init__(image_id)
-        self.__repotag = repotag
+    def __init__(self, repotag=None):
+        '''Initialize using repotag'''
+        super().__init__(repotag)
         self.__repotags = []
         self.__history = None
-        if self.repotag is not None:
-            # parse the repotag
-            repo_dict = general.parse_image_string(self.__repotag)
-            self._name = repo_dict.get('name')
-            self._tag = repo_dict.get('tag')
-            self.set_checksum(
-                repo_dict.get('digest_type'), repo_dict.get('digest'))
-            if not self.checksum and general.check_tar(repotag) is False:
-                # if there is no checksum, get the digest type
-                docker_image = container.check_image(self.__repotag)
-                # this object could be representing an image built from
-                # a Dockerfile, so it may not have a digest
-                # so check for that condition
-                if docker_image.attrs['RepoDigests']:
-                    image_name_digest = container.get_image_digest(
-                        docker_image)
-                    repo_dict = general.parse_image_string(image_name_digest)
-                    self.set_checksum(
-                        repo_dict.get('digest_type'), repo_dict.get('digest'))
+        if self.repotag is None:
+            raise NameError("Image object initialized with no repotag")
 
-    @property
-    def repotag(self):
-        return self.__repotag
+        # parse the repotag
+        repo_dict = general.parse_image_string(self._repotag)
+        self._name = repo_dict.get('name')
+        self._tag = repo_dict.get('tag')
+        self.set_checksum(
+            repo_dict.get('digest_type'), repo_dict.get('digest'))
+        if not self.checksum and general.check_tar(repotag) is False:
+            # if there is no checksum, get the digest type
+            docker_image = container.check_image(self._repotag)
+            # this object could be representing an image built from
+            # a Dockerfile, so it may not have a digest
+            # so check for that condition
+            if docker_image.attrs['RepoDigests']:
+                image_name_digest = container.get_image_digest(docker_image)
+                repo_dict = general.parse_image_string(image_name_digest)
+                self.set_checksum(
+                    repo_dict.get('digest_type'), repo_dict.get('digest'))
 
     @property
     def repotags(self):
@@ -67,18 +63,6 @@ class DockerImage(Image):
         # this should take care of 'origins' and 'layers'
         di_dict = super().to_dict(template)
         return di_dict
-
-    def get_image_option(self):
-        '''Check to see which value was used to init the image object
-        Return the value that was used. If neither one was used raise
-        NameError. If both were used return the id'''
-        if self.repotag is not None and self.image_id is not None:
-            return self.image_id
-        if self.repotag is not None:
-            return self.repotag
-        if self.image_id is not None:
-            return self.image_id
-        raise NameError("Image object initialized with no repotag or ID")
 
     def get_image_manifest(self):
         '''Assuming that there is a temp folder with a manifest.json of
@@ -99,12 +83,6 @@ class DockerImage(Image):
     def get_image_config_file(self, manifest):
         '''Given the manifest, return the config file'''
         return manifest[0].get('Config')
-
-    def get_image_id(self, manifest):
-        '''Given the manifest, return the image id
-        This happens to be the config file's sha256sum'''
-        config_file = self.get_image_config_file(manifest)
-        return config_file.split('.')[0]
 
     def get_image_repotags(self, manifest):
         '''Given the manifest, return the list of image tag strings'''
@@ -163,10 +141,8 @@ class DockerImage(Image):
     def load_image(self):
         '''Load image metadata using docker commands'''
         try:
-            option = self.get_image_option()
-            container.extract_image_metadata(option)
+            container.extract_image_metadata(self.repotag)
             self._manifest = self.get_image_manifest()
-            self._image_id = self.get_image_id(self._manifest)
             self.__repotags = self.get_image_repotags(self._manifest)
             self._config = self.get_image_config(self._manifest)
             self.__history = self.get_image_history(self._config)

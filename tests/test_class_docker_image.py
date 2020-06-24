@@ -34,8 +34,6 @@ class TestClassDockerImage(unittest.TestCase):
                                  'a9a20752aa1ad7582c667704fda9f00'
                                  '4cc4bfd8601fac7f2656c7567bb4')
         # constants for this image
-        self.image_id = ('acb194ad84d0f9734e794fbbdbb65fb'
-                         '7db6eda83f33e9e817bcc75b1bdd99f5e')
         self.layer = ('c1c3a87012e7ff5791b31e94515b661'
                       'cdf06f6d5dc2f9a6245eda8774d257a13')
         self.no_layers = 1
@@ -76,7 +74,6 @@ class TestClassDockerImage(unittest.TestCase):
         self.assertTrue(self.image.checksum, '20b32a9a20752aa1ad7582c66'
                                              '7704fda9f004cc4bfd8601fac7'
                                              'f2656c7567bb4')
-        self.assertFalse(self.image.image_id)
         self.assertFalse(self.image.manifest)
         self.assertFalse(self.image.repotags)
         self.assertFalse(self.image.config)
@@ -98,15 +95,11 @@ class TestClassDockerImage(unittest.TestCase):
 
     def testLoadImage(self):
         self.image.load_image()
-        self.assertEqual(self.image.image_id, self.image_id)
         self.assertEqual(self.image.layers[0].diff_id, self.layer)
         self.assertEqual(len(self.image.layers), self.no_layers)
         self.assertEqual(self.image.layers[0].created_by, self.created_by)
         self.assertEqual(self.image.layers[0].checksum_type, 'sha256')
         self.assertEqual(self.image.layers[0].checksum, self.layer)
-
-    def testGetImageOption(self):
-        self.assertEqual(self.image.get_image_option(), self.image.repotag)
 
     def testGetLayerDiffIds(self):
         self.image.load_image()

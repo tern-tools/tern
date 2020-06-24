@@ -26,7 +26,7 @@ class TestClassImage(unittest.TestCase):
         del self.image3
 
     def testInstance(self):
-        self.assertEqual(self.image1.image_id, '1234abcd')
+        self.assertEqual(self.image1.repotag, '1234abcd')
         self.assertFalse(self.image1.name)
         self.assertFalse(self.image1.manifest)
         self.assertFalse(self.image1.tag)
@@ -35,7 +35,7 @@ class TestClassImage(unittest.TestCase):
         self.assertIsInstance(self.image1.origins, Origins)
 
     def testLoadImage(self):
-        self.assertEqual(self.image2.image_id, '5678efgh')
+        self.assertEqual(self.image2.repotag, '5678efgh')
         self.assertFalse(self.image2.layers)
         self.assertFalse(self.image2.name)
         self.assertFalse(self.image2.tag)
@@ -57,7 +57,7 @@ class TestClassImage(unittest.TestCase):
     def testToDict(self):
         self.image2.load_image()
         a_dict = self.image2.to_dict()
-        self.assertEqual(a_dict['image_id'], '5678efgh')
+        self.assertEqual(a_dict['repotag'], '5678efgh')
         self.assertEqual(len(a_dict['layers']), 1)
         self.assertEqual(len(a_dict['layers'][0]['packages']), 2)
 
@@ -68,7 +68,7 @@ class TestClassImage(unittest.TestCase):
         dict1 = self.image2.to_dict(template1)
         dict2 = self.image2.to_dict(template2)
         self.assertEqual(len(dict1.keys()), 2)
-        self.assertEqual(dict1['image.id'], '5678efgh')
+        self.assertEqual(dict1['image.repotag'], '5678efgh')
         self.assertEqual(len(dict1['image.layers']), 1)
         self.assertEqual(len(dict2.keys()), 3)
         self.assertFalse(dict2['notes'])

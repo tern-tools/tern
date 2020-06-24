@@ -26,9 +26,9 @@ class Image:
         add_checksums: add new checksums in the existing list of the checksums
         to_dict: return a python dictionary representation of the image
     '''
-    def __init__(self, image_id=None):
-        '''Either initialize using id'''
-        self._image_id = image_id
+    def __init__(self, repotag=None):
+        '''Initialize using the image's repo name and tag string'''
+        self._repotag = repotag
         self._name = ''
         self._tag = ''
         self._manifest = {}
@@ -44,8 +44,8 @@ class Image:
         return self._manifest
 
     @property
-    def image_id(self):
-        return self._image_id
+    def repotag(self):
+        return self._repotag
 
     @property
     def config(self):
@@ -170,7 +170,7 @@ class Image:
         '''Some reports like SPDX want a unique name for the full image
         and this is currently not supported by any image tool. So using
         a combination of image id, name and tag instead'''
-        name = self.image_id[:10]
+        name = self.repotag[:10]
         if self.name:
             name = name + '-{}'.format(self.name)
         if self.tag:
