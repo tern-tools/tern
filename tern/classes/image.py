@@ -34,9 +34,9 @@ class Image:
         self._manifest = {}
         self._config = {}
         self._layers = []
-        self.__checksum_type = ''
-        self.__checksum = ''
-        self.__checksums = []
+        self._checksum_type = ''
+        self._checksum = ''
+        self._checksums = []
         self._origins = Origins()
 
     @property
@@ -65,19 +65,15 @@ class Image:
 
     @property
     def checksum_type(self):
-        return self.__checksum_type
+        return self._checksum_type
 
     @property
     def checksum(self):
-        return self.__checksum
+        return self._checksum
 
     @property
     def checksums(self):
-        return self.__checksums
-
-    @checksums.setter
-    def checksums(self, checksums):
-        self.__checksums = checksums
+        return self._checksums
 
     @name.setter
     def name(self, name):
@@ -94,13 +90,13 @@ class Image:
     def set_checksum(self, checksum_type='', checksum=''):
         '''Set the checksum type and checksum of the image'''
         # TODO: calculate the checksum if not given
-        self.__checksum_type = checksum_type
-        self.__checksum = checksum
+        self._checksum_type = checksum_type
+        self._checksum = checksum
 
     def add_checksums(self, checksums):
         '''Add checksum tuples to checksums property'''
         for checksum in checksums:
-            self.__checksums.append(checksum)
+            self._checksums.append(checksum)
 
     def get_layer_diff_ids(self):
         '''Get a list of layer diff ids'''
