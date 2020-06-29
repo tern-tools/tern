@@ -179,8 +179,8 @@ def extract_image_metadata(image_tag_string):
             os.remove(placeholder)
         if not os.listdir(temp_path):
             raise IOError('Unable to untar Docker image')
-    except docker.errors.APIError:  # pylint: disable=try-except-raise
-        raise
+    except docker.errors.APIError as e:
+        raise docker.errors.APIError(e)
 
 
 def close_client():

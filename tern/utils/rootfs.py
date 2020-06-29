@@ -74,7 +74,7 @@ def root_command(command, *extra):
     if error:
         logger.error("Command failed. %s", error.decode())
         raise subprocess.CalledProcessError(  # nosec
-            1, cmd=full_cmd, output=error)
+            1, cmd=full_cmd, output=None, stderr=error.decode())
     return result
 
 
@@ -296,5 +296,6 @@ def calc_fs_hash(fs_path):
         with open(hash_file, 'w') as f:
             f.write(hash_contents.decode('utf-8'))
         return file_name
-    except subprocess.CalledProcessError:  # pylint: disable=try-except-raise
-        raise
+    except subprocess.CalledProcessError as e:
+        raise subprocess.CalledProcessError(  # nosec
+            1, cmd=e.cmd, output=e.output, stderr=e.stderr)

@@ -182,9 +182,10 @@ class DockerImage(Image):
                 layer_count = layer_count + 1
                 self._layers.append(layer)
             self.set_layer_created_by()
-        except NameError:  # pylint: disable=try-except-raise
-            raise
-        except subprocess.CalledProcessError:  # pylint: disable=try-except-raise
-            raise
-        except IOError:  # pylint: disable=try-except-raise
-            raise
+        except NameError as e:
+            raise NameError(e)
+        except subprocess.CalledProcessError as e:
+            raise subprocess.CalledProcessError(
+                e.returncode, cmd=e.cmd, output=e.output, stderr=e.stderr)
+        except IOError as e:
+            raise IOError(e)
