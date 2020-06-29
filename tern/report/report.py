@@ -7,6 +7,7 @@
 Create a report
 """
 
+import docker
 import logging
 import os
 import shutil
@@ -98,6 +99,7 @@ def load_base_image():
     except (NameError,
             subprocess.CalledProcessError,
             IOError,
+            docker.errors.APIError,
             ValueError,
             EOFError) as error:
         logger.warning('Error in loading base image: %s', str(error))
@@ -116,6 +118,7 @@ def load_full_image(image_tag_string):
     except (NameError,
             subprocess.CalledProcessError,
             IOError,
+            docker.errors.APIError,
             ValueError,
             EOFError) as error:
         logger.warning('Error in loading image: %s', str(error))
