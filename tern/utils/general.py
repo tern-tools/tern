@@ -8,6 +8,7 @@ import random
 import re
 import regex
 import tarfile
+import shlex
 import subprocess  # nosec
 from contextlib import contextmanager
 from pathlib import Path
@@ -264,8 +265,8 @@ def parse_shell_variables_and_command(concatenated_command):
                                      'value': match_res.group(4)}
         statement['content'] = concatenated_command
     else:
-        # use clean_command() to clean tab and line indentations
-        statement['command'] = clean_command(concatenated_command)
+        # use shlex to clean tab, line indentations and long whitespaces.
+        statement['command'] = ' '.join(shlex.split(concatenated_command))
     return statement
 
 
