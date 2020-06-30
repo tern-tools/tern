@@ -684,3 +684,33 @@ def get_git_toplevel(path):
     except (subprocess.CalledProcessError, FileNotFoundError):
         logger.debug("Cannot find git repo toplevel, path is %s", path)
     return path_to_toplevel
+
+
+def find_installed_pkg_from_shell_script(shell_script):
+    '''Given a shell script, first split it into statements, and then
+    filter the install commands to get the installed software.
+    Return a list of installing command objects and report on
+    ignored commands and unrecognized commands.'''
+    statements = general.split_shell_script(shell_script)
+    command_list = []
+    # traverse the statements, pick out the loop and commands.
+    for stat in statements:
+        if 'command' in stat:
+            command_list.append(Command(stat['command']))
+        elif 'loop' in stat:
+            loop_stat = stat['loop']['loop_statements']
+            for st in loop_stat:
+                if 'command' in st:
+                    command_list.append(Command(st['command']))
+    # filter commands
+    report = ''
+    if command_list:
+        for command in command_list:
+            command_lib.set_command_attrs(command)
+        ignore_msgs, filter1 = remove_ignored_commands(command_list)
+        unrec_msgs, filter2 = remove_unrecognized_commands(filter1)
+        if ignore_msgs:
+            report = report + formats.ignored + ignore_msgs
+        if unrec_msgs:
+            report = report + formats.unrecognized + unrec_msgs
+    return consolidate_commands(filter2), report
