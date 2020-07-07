@@ -32,11 +32,18 @@ logger = logging.getLogger(constants.logger_name)
 
 def get_shell_commands(shell_command_line):
     '''Given a shell command line, get a list of Command objects'''
-    comm_list = general.split_command(shell_command_line)
-    cleaned_list = []
-    for comm in comm_list:
-        cleaned_list.append(Command(general.clean_command(comm)))
-    return cleaned_list
+    statements = general.split_command(shell_command_line)
+    command_list = []
+    # traverse the statements, pick out the loop and commands.
+    for stat in statements:
+        if 'command' in stat:
+            command_list.append(Command(stat['command']))
+        elif 'loop' in stat:
+            loop_stat = stat['loop']['loop_statements']
+            for st in loop_stat:
+                if 'command' in st:
+                    command_list.append(Command(st['command']))
+    return command_list
 
 
 def load_from_cache(layer, redo=False):
