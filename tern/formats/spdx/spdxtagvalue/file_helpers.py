@@ -65,9 +65,9 @@ def get_license_info_block(filedata):
     if not filedata.licenses:
         block = 'LicenseInfoInFile: NONE\n'
     else:
-        for l in get_file_licenses(filedata):
+        for lic in get_file_licenses(filedata):
             block = block + 'LicenseInfoInFile: {}'.format(
-                spdx_formats.get_license_ref(l)) + '\n'
+                spdx_formats.get_license_ref(lic)) + '\n'
     return block
 
 

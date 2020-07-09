@@ -102,8 +102,8 @@ def get_layer_licenses(layer_obj):
         # we will use the SPDX license expressions here as they will be
         # valid SPDX license identifiers
         if filedata.licenses:
-            for l in fhelpers.get_file_licenses(filedata):
-                licenses.add(l)
+            for lic in fhelpers.get_file_licenses(filedata):
+                licenses.add(lic)
     return list(licenses)
 
 
@@ -115,9 +115,9 @@ def get_package_license_info_block(layer_obj):
     if layer_obj.files_analyzed:
         licenses = get_layer_licenses(layer_obj)
         if licenses:
-            for l in licenses:
+            for lic in licenses:
                 block += 'PackageLicenseInfoFromFiles: {}\n'.format(
-                    spdx_formats.get_license_ref(l))
+                    spdx_formats.get_license_ref(lic))
         else:
             block = 'PackageLicenseInfoFromFiles: NONE\n'
     return block

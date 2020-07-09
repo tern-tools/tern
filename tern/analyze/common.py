@@ -186,8 +186,8 @@ def get_os_release(base_layer):
         lines = f.readlines()
     pretty_name = ''
     # iterate through os-release file to find OS
-    for l in lines:
-        key, val = l.rstrip().split('=', 1)
+    for line in lines:
+        key, val = line.rstrip().split('=', 1)
         if key == "PRETTY_NAME":
             pretty_name = val
             break

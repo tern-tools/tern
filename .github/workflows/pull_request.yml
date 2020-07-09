@@ -17,7 +17,7 @@ jobs:
           pip install .
       - name: Prospector Linting
         run: |
-          pip install prospector>=1.1
+          pip install prospector>=1.3
           prospector
   Commit_Message_Linting:
     runs-on: ubuntu-latest
@@ -49,7 +49,7 @@ jobs:
           pip install .
       - name: Security Linting
         run: |
-          pip install bandit~=1.6
+          pip install bandit>=1.6
           c=`python ci/evaluate_docs.py`; if [ -z $c ]; then echo "No .py files to lint"; else echo $c | xargs bandit; fi
   Test_Changes:
     runs-on: ubuntu-latest
