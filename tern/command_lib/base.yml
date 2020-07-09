@@ -120,7 +120,7 @@ apk:
         container:
           # use double quotes when using awk
           - "pkgs=`apk info 2>/dev/null`"
-          - "for p in $pkgs; do apk info $p 2>/dev/null | head -1 | awk '{print $1}'; done"
+          - "for p in $pkgs; do lic=`apk info $p 2>/dev/null | head -1 | awk '{print $1}'`; echo $lic | awk -F \"${p}-\" '{print $2}'; done"
     delimiter: "\n"
   licenses:
     invoke:
