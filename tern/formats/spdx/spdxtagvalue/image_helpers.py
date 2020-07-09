@@ -54,10 +54,10 @@ def get_image_packages_license_block(image_obj):
         for package in layer.packages:
             if package.pkg_license:
                 licenses.add(package.pkg_license)
-    for l in licenses:
+    for lic in licenses:
         block += spdx_formats.license_id.format(
-            license_ref=spdx_formats.get_license_ref(l)) + '\n'
-        block += spdx_formats.extracted_text.format(orig_license=l) + '\n'
+            license_ref=spdx_formats.get_license_ref(lic)) + '\n'
+        block += spdx_formats.extracted_text.format(orig_license=lic) + '\n'
     return block
 
 
@@ -69,12 +69,12 @@ def get_image_file_license_block(image_obj):
     licenses = set()
     for layer in image_obj.layers:
         if layer.files_analyzed:
-            for l in lhelpers.get_layer_licenses(layer):
-                licenses.add(l)
-    for l in licenses:
+            for lic in lhelpers.get_layer_licenses(layer):
+                licenses.add(lic)
+    for lic in licenses:
         block += spdx_formats.license_id.format(
-            license_ref=spdx_formats.get_license_ref(l)) + '\n'
-        block += spdx_formats.extracted_text.format(orig_license=l) + '\n'
+            license_ref=spdx_formats.get_license_ref(lic)) + '\n'
+        block += spdx_formats.extracted_text.format(orig_license=lic) + '\n'
     return block
 
 

@@ -116,10 +116,10 @@ def manifest_handler(list_obj, indent):
     '''Write html code for the manifests list in the report
     with config as title'''
     html_string = '  '*indent + '<ul class ="nested"> \n'
-    for l in list_obj:
+    for lo in list_obj:
         html_string = html_string + '  '*indent + '<li><span class="caret">' \
-            + str(l["Config"][:10]) + ' : ' + '</span> \n '
-        html_string = html_string + dict_handler(l, indent+1)
+            + str(lo["Config"][:10]) + ' : ' + '</span> \n '
+        html_string = html_string + dict_handler(lo, indent+1)
         html_string = html_string + '  '*indent + '</li> \n'
     html_string = html_string + '  '*indent + '</ul> \n'
     return html_string
@@ -129,10 +129,10 @@ def layers_handler(list_obj, indent):
     '''Write html code for the origins list in the report
     with tar_file hash as title'''
     html_string = '  '*indent + '<ul class ="nested"> \n'
-    for l in list_obj:
+    for lo in list_obj:
         html_string = html_string + '  '*indent + '<li><span class="caret">' \
-            + str(l["tar_file"][:10]) + ' : ' + '</span> \n '
-        html_string = html_string + dict_handler(l, indent+1)
+            + str(lo["tar_file"][:10]) + ' : ' + '</span> \n '
+        html_string = html_string + dict_handler(lo, indent+1)
         html_string = html_string + '  '*indent + '</li> \n'
     html_string = html_string + '  '*indent + '</ul> \n'
     return html_string
@@ -142,10 +142,10 @@ def history_handler(list_obj, indent):
     '''Write html code for the history list in the report
     with time-stamp as title'''
     html_string = '  '*indent + '<ul class ="nested"> \n'
-    for l in list_obj:
+    for lo in list_obj:
         html_string = html_string + '  '*indent + '<li><span class="caret">' \
-            + str(l["created"][:19]) + ' : ' + '</span> \n '
-        html_string = html_string + dict_handler(l, indent+1)
+            + str(lo["created"][:19]) + ' : ' + '</span> \n '
+        html_string = html_string + dict_handler(lo, indent+1)
         html_string = html_string + '  '*indent + '</li> \n'
     html_string = html_string + '  '*indent + '</ul> \n'
     return html_string
@@ -155,10 +155,10 @@ def origins_handler(list_obj, indent):
     '''Write html code for the origins list in the report
     with origin string as title'''
     html_string = '  '*indent + '<ul class ="nested"> \n'
-    for l in list_obj:
+    for lo in list_obj:
         html_string = html_string + '  '*indent + '<li><span class="caret">' \
-            + str(l["origin_str"]) + '</span> \n '
-        html_string = html_string + dict_handler(l, indent+1)
+            + str(lo["origin_str"]) + '</span> \n '
+        html_string = html_string + dict_handler(lo, indent+1)
         html_string = html_string + '  '*indent + '</li> \n'
     html_string = html_string + '  '*indent + '</ul> \n'
     return html_string
@@ -259,10 +259,10 @@ def write_licenses(image_obj_list):
     html_string = html_string + '<li><span class="caret">Summary of \
         Licenses Found</span> \n'
     html_string = html_string + '<ul class ="nested"> \n'
-    for l in licenses:
+    for lic in licenses:
         html_string = html_string + \
             '<li style="font-family: \'Inconsolata\' , monospace;" >' + \
-            l + '</li>\n'
+            lic + '</li>\n'
     html_string = html_string + '</ul></li></ul> \n'
     return html_string
 

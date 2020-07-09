@@ -58,7 +58,7 @@ def get_scancode_file(file_dict):
     fd.short_file_type = get_file_type(file_dict)
     fd.add_checksums({'sha1': file_dict['sha1'], 'md5': file_dict['md5']})
     if file_dict['licenses']:
-        fd.licenses = [l['short_name'] for l in file_dict['licenses']]
+        fd.licenses = [li['short_name'] for li in file_dict['licenses']]
     fd.license_expressions = file_dict['license_expressions']
     if file_dict['copyrights']:
         fd.copyrights = [c['value'] for c in file_dict['copyrights']]
