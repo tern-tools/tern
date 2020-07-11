@@ -32,7 +32,7 @@ class TestAnalyzeCommon(unittest.TestCase):
         del self.test_dockerfile
 
     def testGetShellCommands(self):
-        command = common.get_shell_commands("yum install nfs-utils")
+        command, _ = common.get_shell_commands("yum install nfs-utils")
         self.assertEqual(type(command), list)
         self.assertEqual(len(command), 1)
         self.assertEqual(command[0].options, self.command1.options)
