@@ -36,6 +36,14 @@ class TestAnalyzeCommon(unittest.TestCase):
         self.assertEqual(type(command), list)
         self.assertEqual(len(command), 1)
         self.assertEqual(command[0].options, self.command1.options)
+        # test on branching command
+        branching_script = "if [ -z $var ]; then yum install nfs-utils; fi"
+        branch_command, report = common.get_shell_commands(branching_script)
+        self.assertEqual(type(branch_command), list)
+        # we will ignore branching command, so len should be 0
+        self.assertEqual(len(branch_command), 0)
+        # and the report should not be None
+        self.assertTrue(report)
 
     def testLoadFromCache(self):
         '''Given a layer object, populate the given layer in case the cache isn't empty'''
