@@ -24,7 +24,8 @@ from tern.analyze.docker import dockerfile as d_file
 logger = logging.getLogger(constants.logger_name)
 
 
-def analyze_docker_image(image_obj, redo=False, dfile_lock=False, dfobj=None):
+def analyze_docker_image(image_obj, redo=False, dfile_lock=False, dfobj=None,
+                         driver=None):
     '''Given a DockerImage object, for each layer, retrieve the packages, first
     looking up in cache and if not there then looking up in the command
     library. For looking up in command library first mount the filesystem
@@ -39,7 +40,7 @@ def analyze_docker_image(image_obj, redo=False, dfile_lock=False, dfobj=None):
     shell = analyze_first_layer(image_obj, master_list, redo)
     # Analyze the remaining layers
     analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj,
-                              dfile_lock)
+                              dfile_lock, driver)
     common.save_to_cache(image_obj)
 
 
@@ -103,7 +104,7 @@ def execute_base_layer(base_layer, binary, shell):
 
 
 def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  # noqa: R0912,R0913
-                              dfile_lock=False):
+                              dfile_lock=False, driver=None):
     # get packages for subsequent layers
     curr_layer = 1
     work_dir = None
@@ -122,7 +123,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
                 image_obj.layers[curr_layer])
             if command_list:
                 # mount diff layers from 0 till the current layer
-                target = mount_overlay_fs(image_obj, curr_layer)
+                target = mount_overlay_fs(image_obj, curr_layer, driver)
                 # mount dev, sys and proc after mounting diff layers
                 rootfs.prep_rootfs(target)
             # for each command look up the snippet library
@@ -178,11 +179,11 @@ def image_setup(image_obj):
                 'Imported in Dockerfile using: ' + layer.import_str, 'info'))
 
 
-def mount_overlay_fs(image_obj, top_layer):
+def mount_overlay_fs(image_obj, top_layer, driver=None):
     '''Given the image object and the top most layer, mount all the layers
     until the top layer using overlayfs'''
     tar_layers = []
     for index in range(0, top_layer + 1):
         tar_layers.append(image_obj.layers[index].tar_file)
-    target = rootfs.mount_diff_layers(tar_layers)
+    target = rootfs.mount_diff_layers(tar_layers, driver)
     return target

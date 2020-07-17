@@ -30,7 +30,7 @@ mount_sys = ['mount', '-o', 'bind', '/sys']
 mount_dev = ['mount', '-o', 'bind', '/dev']
 unmount = ['umount']
 
-mount_dir = None
+working_dir = None
 
 # enable host DNS settings
 host_dns = ['cp', constants.resolv_path]
@@ -41,19 +41,19 @@ unshare_pid = ['unshare', '-pf']
 # union mount
 union_mount = ['mount', '-t', 'overlay', 'overlay', '-o']
 
+# fuse-overlayfs mount
+fuse_mount = ['fuse-overlayfs', '-o']
+
 # global logger
 logger = logging.getLogger(constants.logger_name)
 
 
-def set_mount_dir(bind=None, working_dir=None):
-    '''Set mount directory according to --bind-mount CLI option (or lack
-    thereof). The mount_dir value is used to set the working directory
-    properly in get_working_dir().'''
-    global mount_dir
-    if bind:
-        mount_dir = bind
-    else:
-        mount_dir = general.get_top_dir(working_dir)
+def set_working_dir(wd=None):
+    '''Set the working/mount directory according to the --working-dir CLI
+    option (or lack thereof). This value is used to set the working
+    directory properly in get_working_dir().'''
+    global working_dir
+    working_dir = general.get_top_dir(wd)
 
 
 def root_command(command, *extra):
@@ -125,7 +125,7 @@ def check_tar_members(tar_file):
 def get_working_dir():
     '''General purpose utility to return the absolute path of the working
     directory'''
-    return os.path.join(mount_dir, constants.temp_folder)
+    return os.path.join(working_dir, constants.temp_folder)
 
 
 def get_untar_dir(layer_tarfile):
@@ -210,7 +210,7 @@ def mount_base_layer(base_layer_tar):
     return target_dir_path
 
 
-def mount_diff_layers(diff_layers_tar):
+def mount_diff_layers(diff_layers_tar, driver=None):
     '''Using overlayfs, mount all the layer tarballs'''
     # make a list of directory paths to give to lowerdir
     lower_dir_paths = []
@@ -222,7 +222,10 @@ def mount_diff_layers(diff_layers_tar):
     workdir_path = os.path.join(get_working_dir(), constants.workdir)
     args = 'lowerdir=' + lower_dir + ',upperdir=' + upper_dir + \
            ',workdir=' + workdir_path
-    root_command(union_mount, args, merge_dir_path)
+    if driver == 'fuse':
+        root_command(fuse_mount, args, merge_dir_path)
+    else:
+        root_command(union_mount, args, merge_dir_path)
     return merge_dir_path
 
 
@@ -288,6 +291,8 @@ def calc_fs_hash(fs_path):
     try:
         fs_hash_path = pkg_resources.resource_filename(
             "tern", "tools/fs_hash.sh")
+        # required to run in a container natively on Windows
+        root_command(["chmod", "+x", fs_hash_path])
         hash_contents = root_command(
             [fs_hash_path], os.path.abspath(fs_path))
         file_name = hashlib.sha256(hash_contents).hexdigest()
