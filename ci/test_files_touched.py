@@ -41,7 +41,7 @@ test_suite = {
     re.compile('Dockerfile'): [
         'python3 setup.py sdist && '
         'docker build -t ternd -f ci/Dockerfile . && '
-        './docker_run.sh workdir ternd "report -i golang:alpine"'],
+        './docker_run.sh ternd "report -i golang:alpine"'],
     # Files under tern directory
     re.compile('tern/__init__.py|tern/__main__.py'):
     ['tern  report -i golang:alpine'],

@@ -108,25 +108,34 @@ Build the Docker image (called `ternd` here). You may need to use sudo:
 $ docker build -t ternd .
 ```
 
+**NOTE**: By default, Tern will run with logging turned on. If you would like to silent the terminal output when running the ternd container, make the following change to the Dockerfile ENTRYPOINT before building:
+
+```
+--- a/Dockerfile
++++ b/Dockerfile
+-ENTRYPOINT ["tern", "--driver", "fuse"]
++ENTRYPOINT ["tern", "-q", "--driver", "fuse"]
+```
+
 Run the script `docker_run.sh`. You may need to use sudo. In the below command `debian` is the docker hub container image name  and `buster` is the tag that identifies the version we are interested in analyzing.
 
 ```
-$ ./docker_run.sh workdir ternd "report -i debian:buster" > output.txt
+$ ./docker_run.sh ternd "report -i debian:buster" > output.txt
 ```
 
 To produce a json report run
 ```
-$ ./docker_run.sh workdir ternd "report -f json -i debian:buster"
+$ ./docker_run.sh ternd "report -f json -i debian:buster"
 ```
 
-What the `docker_run.sh` script does is create the directory `workdir` if not present in your current working directory and run the built container as privileged with `workdir` bind mounted to it.
+What the `docker_run.sh` script does is run the built container as privileged.
 
 *WARNING:* privileged Docker containers are not secure. DO NOT run this container in production unless you have secured the node (VM or bare metal machine) that the docker daemon is running on.
 
 Tern is not distributed as Docker images yet. This is coming soon. Watch the [Project Status](#project-status) for updates.
 
 ## Getting Started with Vagrant<a name="getting-started-with-vagrant">
-Vagrant is a tool to setup an isolated virtual software development environment. If you are using Windows or Mac OSes, this is the best way to get started as Tern does not run natively in a Mac OS or Windows environment at this time.
+Vagrant is a tool to setup an isolated virtual software development environment. If you are using Windows or Mac OSes and want to run Tern from the command line (not in a Docker container) this is the best way to get started as Tern does not run natively in a Mac OS or Windows environment at this time.
 
 ### Install
 Follow the instructions on the [VirtualBox](https://www.virtualbox.org/wiki/Downloads) website to download VirtualBox on your OS.
