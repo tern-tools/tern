@@ -205,7 +205,7 @@ def invoke_in_rootfs(snippet_list, shell, package=''):
         raise
 
 
-def get_pkg_attr_list(shell, attr_dict, package_name='', chroot=True,
+def get_pkg_attr_list(shell, attr_dict, work_dir, package_name='', chroot=True,  # pylint:disable=too-many-arguments
                       override=''):
     '''The command library has package attributes listed like this:
         {invoke: {1: {container: [command1, command2]},
@@ -225,6 +225,9 @@ def get_pkg_attr_list(shell, attr_dict, package_name='', chroot=True,
             if 'container' in attr_dict['invoke'][step].keys():
                 snippet_list = attr_dict['invoke'][step]['container']
                 result = ''
+                # If work_dir exist cd into it
+                if work_dir is not None:
+                    snippet_list.insert(0, 'cd ' + work_dir)
                 # if we need to run in a chroot environment
                 if chroot:
                     try:

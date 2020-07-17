@@ -28,6 +28,15 @@ def look_up_lib(keys):
     return subd
 
 
+def get_workdir(image_obj):
+    # get the workdir from the image config where the commands will be executed
+    config = image_obj.get_image_config(image_obj.get_image_manifest())
+    workdir = config['config']['WorkingDir']
+    if workdir == '':
+        return None
+    return workdir
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='''
@@ -78,8 +87,9 @@ if __name__ == '__main__':
             info_dict = look_up_lib(args.keys)
         # try to invoke the commands
         try:
+            work_dir = get_workdir(image_obj)
             result = command_lib.get_pkg_attr_list(
-                args.shell, info_dict, args.package)
+                args.shell, info_dict, work_dir, args.package)
             print('Output list: ' + ' '.join(result[0]))
             print('Error messages: ' + result[1])
             print('Number of elements: ' + str(len(result[0])))

@@ -201,7 +201,7 @@ def get_os_release(base_layer):
     return pretty_name.strip('"')
 
 
-def collate_list_metadata(shell, listing):
+def collate_list_metadata(shell, listing, work_dir):
     '''Given the shell and the listing for the package manager, collect
     metadata that gets returned as a list'''
     pkg_dict = {}
@@ -212,7 +212,7 @@ def collate_list_metadata(shell, listing):
         return pkg_dict, msgs, warnings
     for item in command_lib.base_keys:
         if item in listing.keys():
-            items, msg = command_lib.get_pkg_attr_list(shell, listing[item])
+            items, msg = command_lib.get_pkg_attr_list(shell, listing[item], work_dir)
             msgs = msgs + msg
             pkg_dict.update({item: items})
         else:
@@ -290,7 +290,7 @@ def get_deb_package_licenses(deb_copyrights):
     return deb_licenses
 
 
-def add_base_packages(image_layer, binary, shell):
+def add_base_packages(image_layer, binary, shell, work_dir=None):
     '''Given the image layer, the binary to invoke and shell:
         1. get the listing from the base.yml
         2. Invoke any commands against the base layer
@@ -313,7 +313,7 @@ def add_base_packages(image_layer, binary, shell):
         image_layer.origins.add_notice_to_origins(
             origin_layer, Notice(snippet_msg, 'info'))
         # get all the packages in the base layer
-        pkg_dict, invoke_msg, warnings = collate_list_metadata(shell, listing)
+        pkg_dict, invoke_msg, warnings = collate_list_metadata(shell, listing, work_dir)
 
         if listing.get("pkg_format") == "deb":
             pkg_dict["pkg_licenses"] = get_deb_package_licenses(
@@ -338,7 +338,7 @@ def add_base_packages(image_layer, binary, shell):
                 listing_key=binary), 'error'))
 
 
-def fill_package_metadata(pkg_obj, pkg_listing, shell):
+def fill_package_metadata(pkg_obj, pkg_listing, shell, work_dir):
     '''Given a Package object and the Package listing from the command
     library, fill in the attribute value returned from looking up the
     data and methods of the package listing.
@@ -351,7 +351,7 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         pkg_listing, 'version')
     if version_listing:
         version_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, version_listing, package_name=pkg_obj.name)
+            shell, version_listing, work_dir, package_name=pkg_obj.name)
         if version_list:
             pkg_obj.version = version_list[0]
         else:
@@ -365,7 +365,7 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         pkg_listing, 'license')
     if license_listing:
         license_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, license_listing, package_name=pkg_obj.name)
+            shell, license_listing, work_dir, package_name=pkg_obj.name)
         if license_list:
             pkg_obj.license = license_list[0]
         else:
@@ -379,7 +379,7 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
         pkg_listing, 'proj_url')
     if url_listing:
         url_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, url_listing, package_name=pkg_obj.name)
+            shell, url_listing, work_dir, package_name=pkg_obj.name)
         if url_list:
             pkg_obj.proj_url = url_list[0]
         else:
@@ -390,7 +390,7 @@ def fill_package_metadata(pkg_obj, pkg_listing, shell):
             origin_str, Notice(listing_msg, 'warning'))
 
 
-def get_package_dependencies(package_listing, package_name, shell):
+def get_package_dependencies(package_listing, package_name, shell, work_dir=None):
     '''The package listing is the result of looking up the command name in the
     command library. Given this listing, the package name and the shell
     return a list of package dependency names'''
@@ -398,7 +398,7 @@ def get_package_dependencies(package_listing, package_name, shell):
         package_listing, 'deps')
     if deps_listing:
         deps_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, deps_listing, package_name=package_name)
+            shell, deps_listing, work_dir, package_name=package_name)
         if deps_list:
             return list(set(deps_list)), ''
         return [], invoke_msg
@@ -491,7 +491,7 @@ def filter_install_commands(shell_command_line):
     return consolidate_commands(filter2), report
 
 
-def add_snippet_packages(image_layer, command, pkg_listing, shell):
+def add_snippet_packages(image_layer, command, pkg_listing, shell, work_dir):
     '''Given an image layer object, a command object, the package listing
     and the shell used to invoke commands, add package metadata to the layer
     object. We assume the filesystem is already mounted and ready
@@ -524,7 +524,7 @@ def add_snippet_packages(image_layer, command, pkg_listing, shell):
     # get package metadata for each package name
     for pkg_name in unique_pkgs:
         pkg = Package(pkg_name)
-        fill_package_metadata(pkg, pkg_invoke, shell)
+        fill_package_metadata(pkg, pkg_invoke, shell, work_dir)
         image_layer.add_package(pkg)
 
 
