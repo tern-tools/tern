@@ -31,9 +31,11 @@ logger = logging.getLogger(constants.logger_name)
 
 
 def get_shell_commands(shell_command_line):
-    '''Given a shell command line, get a list of Command objects'''
+    '''Given a shell command line, get a list of Command objects and report on
+    branch statements'''
     statements = general.split_command(shell_command_line)
     command_list = []
+    branch_report = ''
     # traverse the statements, pick out the loop and commands.
     for stat in statements:
         if 'command' in stat:
@@ -43,7 +45,13 @@ def get_shell_commands(shell_command_line):
             for st in loop_stat:
                 if 'command' in st:
                     command_list.append(Command(st['command']))
-    return command_list
+        elif 'branch' in stat:
+            branch_report = branch_report + '\n'.join(stat['content']) + '\n\n'
+    if branch_report:
+        # add prefix
+        branch_report = '\nNon-deterministic branching statement: \n' + \
+                        branch_report
+    return command_list, branch_report
 
 
 def load_from_cache(layer, redo=False):
@@ -478,7 +486,7 @@ def filter_install_commands(shell_command_line):
         3. Return installed command objects, and messages for ignored commands
         and unrecognized commands'''
     report = ''
-    command_list = get_shell_commands(shell_command_line)
+    command_list, branch_report = get_shell_commands(shell_command_line)
     for command in command_list:
         command_lib.set_command_attrs(command)
     ignore_msgs, filter1 = remove_ignored_commands(command_list)
@@ -487,7 +495,8 @@ def filter_install_commands(shell_command_line):
         report = report + formats.ignored + ignore_msgs
     if unrec_msgs:
         report = report + formats.unrecognized + unrec_msgs
-
+    if branch_report:
+        report = report + branch_report
     return consolidate_commands(filter2), report
 
 
