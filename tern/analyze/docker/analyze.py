@@ -106,7 +106,12 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
                               dfile_lock=False):
     # get packages for subsequent layers
     curr_layer = 1
+    work_dir = None
     while curr_layer < len(image_obj.layers):  # pylint:disable=too-many-nested-blocks
+        # If workdir changes, update value accordingly
+        # so we can later execute base.yml commands from the workdir.
+        if image_obj.layers[curr_layer].get_layer_workdir() is not None:
+            work_dir = image_obj.layers[curr_layer].get_layer_workdir()
         # if there is no shell, try to see if it exists in the current layer
         if not shell:
             shell = common.get_shell(image_obj.layers[curr_layer])
@@ -126,7 +131,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
                 if isinstance(pkg_listing, str):
                     try:
                         common.add_base_packages(
-                            image_obj.layers[curr_layer], pkg_listing, shell)
+                            image_obj.layers[curr_layer], pkg_listing, shell, work_dir)
                     except KeyboardInterrupt:
                         logger.critical(errors.keyboard_interrupt)
                         abort_analysis()
@@ -134,7 +139,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
                     try:
                         common.add_snippet_packages(
                             image_obj.layers[curr_layer], command, pkg_listing,
-                            shell)
+                            shell, work_dir)
                     except KeyboardInterrupt:
                         logger.critical(errors.keyboard_interrupt)
                         abort_analysis()

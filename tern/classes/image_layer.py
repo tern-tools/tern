@@ -327,3 +327,10 @@ class ImageLayer:
                 file_data.set_checksum('sha256', attrs_tuple[2])
                 file_data.extattrs = attrs_tuple[0]
                 self.add_file(file_data)
+
+    def get_layer_workdir(self):
+        # If the layer is created by a WORKDIR command then return the workdir
+        match = re.search(r"\bWORKDIR\ (\/\w+)+\b", self.created_by)
+        if match:
+            return match.group().split()[1]
+        return None
