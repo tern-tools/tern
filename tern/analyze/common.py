@@ -465,6 +465,7 @@ def consolidate_commands(command_list):
         new_list.append(command_list.pop(0))
 
     while command_list:
+        # match the first command with its following commands.
         first = command_list.pop(0)
         for _ in range(0, len(command_list)):
             second = command_list.pop(0)
@@ -473,8 +474,11 @@ def consolidate_commands(command_list):
                 new_list.append(second)
             else:
                 if not first.merge(second):
-                    command_list.append(first)
-                new_list.append(first)
+                    # Unable to merge second, we should keep second command.
+                    command_list.append(second)
+        # after trying to merge with all following commands, add first command
+        # to the new_dict.
+        new_list.append(first)
     return new_list
 
 
