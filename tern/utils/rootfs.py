@@ -128,6 +128,21 @@ def get_working_dir():
     return os.path.join(mount_dir, constants.temp_folder)
 
 
+def create_working_dir():
+    working_dir = get_working_dir()
+    try:
+        os.mkdir(working_dir)
+    except FileExistsError:
+        # attempt to remove using user permissions
+        try:
+            shutil.rmtree(working_dir)
+            os.mkdir(working_dir)
+        except PermissionError:
+            # attempt to remove using root permissions
+            root_command(remove, working_dir)
+            os.mkdir(working_dir)
+
+
 def get_untar_dir(layer_tarfile):
     '''get the directory to untar the layer tar file'''
     return os.path.join(get_working_dir(), os.path.dirname(
