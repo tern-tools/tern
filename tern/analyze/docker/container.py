@@ -15,12 +15,15 @@ import pwd
 import requests
 import sys
 import time
-
+import json
+from dateutil import parser
+from datetime import datetime
 from tern.utils.constants import container
 from tern.utils.constants import logger_name
 from tern.utils.constants import temp_tarfile
 from tern.utils import rootfs
 from tern.utils import general
+from tern.utils.constants import docker_endpoint, temp_folder
 
 
 # timestamp tag
@@ -31,6 +34,7 @@ logger = logging.getLogger(logger_name)
 
 # global docker client
 client = None
+auth_token = None
 
 
 def check_docker_setup():
@@ -88,12 +92,33 @@ def pull_image(image_tag_string):
     '''Try to pull an image from Dockerhub'''
     logger.debug("Attempting to pull image \"%s\"", image_tag_string)
     try:
-        image = client.images.pull(image_tag_string)
-        logger.debug("Image \"%s\" downloaded", image_tag_string)
-        return image
-    except (docker.errors.ImageNotFound, docker.errors.NotFound):
-        logger.warning("No such image: \"%s\"", image_tag_string)
+        rootfs.create_working_dir()
+        logger.debug("Downloading Image \"%s\"", image_tag_string)
+        image = os.path.join(rootfs.mount_dir, temp_folder)
+        image_name, image_tag = image_tag_string.split(":")
+        manifest = pull_image_manifest(image_name, image_tag)
+        with open(os.path.join(image, "manifest.json"), "w") as f:
+            json.dump(manifest, f)
+
+        digest = manifest.get("config").get("digest")
+        config = pull_image_config(image_name, image_tag, digest)
+        config_name = digest.split(":")[1]
+        with open(os.path.join(image, config_name), "w") as f:
+            json.dump(config, f)
+
+        layers = manifest.get("layers")
+        for layer, content in pull_image_layers(image_name, image_tag, layers):
+            with open(os.path.join(image, layer), "wb") as f:
+                f.write(content)
+
+    except Exception as ex:
+        logger.warning(ex)
         return None
+
+    logger.debug("Image saved \"%s\"", image_tag_string)
+    logger.debug("Image \"%s\" downloaded", image_tag_string)
+
+    return image
 
 
 def get_image(image_tag_string):
@@ -192,3 +217,104 @@ def close_client():
         # it should either already be closed, no socker is in use,
         # or docker is not setup -- either way, the socket is closed
         pass
+
+
+def generate_manifest_url(image_name, image_tag):
+    '''
+    Generate a docker image manifest url end point with
+    given image name and tag
+    '''
+    url = "{0}/{1}/manifests/{2}"
+    return url.format(docker_endpoint, image_name, image_tag)
+
+
+def generage_image_blobs_url(image_name, digest):
+    '''
+    Generate a docker image blobs url end point with
+    given image name and tag
+    '''
+    url = "{0}/{1}/blobs/{2}"
+    return url.format(docker_endpoint, image_name, digest)
+
+
+def is_token_expired(auth_token):
+    '''method to validtae if Docker HTTP Rest API auth token is expired'''
+    token_expires_in = int(auth_token.get("expires_in"))
+    token_issued_at = auth_token.get("issued_at")
+    start = datetime.timestamp(parser.isoparse(token_issued_at))
+    end = datetime.timestamp(datetime.now())
+    if end - start > token_expires_in:
+        return True
+
+    return False
+
+
+def generate_auth_token(image_name, image_tag):
+    '''
+    method to generate Docker HTTP Rest API auth token
+    for given image_name and image_tag
+    '''
+    global auth_token
+    url = generate_manifest_url(image_name, image_tag)
+    response = requests.get(url)
+    authentication = response.headers.get("Www-Authenticate").split(",")
+    auth_url = authentication[0].split('=').pop().strip('\"')
+    params = {}
+    for item in authentication[1:]:
+        param_list = item.split('=')
+        params[param_list[0]] = param_list[1].strip('\"')
+
+    auth_token = general.get_auth_token(auth_url, params)
+
+
+def pull_image_manifest(image_name, image_tag):
+    '''download and return the image manifest'''
+    global auth_token
+    url = generate_manifest_url(image_name, image_tag)
+    generate_auth_token(image_name, image_tag)
+    token_value = auth_token.get("token")
+    headers = dict()
+    headers['Authorization'] = 'Bearer {0}'.format(token_value)
+    headers['Accept'] = 'application/vnd.docker.distribution.manifest.v2+json'
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        raise Exception(response.text)
+
+    return response.json()
+
+
+def pull_image_layers(image_name, image_tag, layers):
+    '''Given manifest data, saves the image layers inside mount dir'''
+    global auth_token
+    headers = dict()
+    headers['Accept'] = 'application/vnd.docker.image.rootfs.diff.tar.gzip'
+    for layer in layers:
+        digest = layer.get("digest")
+        url = generage_image_blobs_url(image_name, digest)
+        # to generate token if it is expired while downloading a layer
+        if is_token_expired(auth_token):
+            generate_auth_token(image_name, image_tag)
+        token_value = auth_token.get("token")
+        headers['Authorization'] = 'Bearer {0}'.format(token_value)
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            raise Exception(response.text)
+        layer_name = digest.split(":")[1]
+        yield layer_name, response.text.encode()
+
+
+def pull_image_config(image_name, image_tag, digest):
+    '''Given manifest data, return the image config digest'''
+    global auth_token
+    url = generage_image_blobs_url(image_name, digest)
+    if is_token_expired(auth_token):
+        generate_auth_token(image_name, image_tag)
+    token_value = auth_token.get("token")
+    headers = dict()
+    headers['Authorization'] = 'Bearer {0}'.format(token_value)
+    headers['Accept'] = 'application/vnd.docker.container.image.v1+json'
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        raise Exception(response.text)
+
+    return response.json()

@@ -14,3 +14,4 @@ stevedore>=1.32
 pbr>=5.4
 debut>=0.9
 regex>=2020.5.14
+python-dateutil>=2.8.1

@@ -51,12 +51,12 @@ def setup(dfobj=None, image_tag_string=None):
         dhelper.load_docker_commands(dfobj)
     # check if the docker image is present
     if image_tag_string and general.check_tar(image_tag_string) is False:
-        if container.check_image(image_tag_string) is None:
-            # if no docker image is present, try to pull it
-            if container.pull_image(image_tag_string) is None:
-                logger.fatal("%s", errors.cannot_find_image.format(
-                    imagetag=image_tag_string))
-                sys.exit()
+        # if container.check_image(image_tag_string) is None:
+        # if no docker image is present, try to pull it
+        if container.pull_image(image_tag_string) is None:
+            logger.fatal("%s", errors.cannot_find_image.format(
+                imagetag=image_tag_string))
+            sys.exit()
 
 
 def teardown():

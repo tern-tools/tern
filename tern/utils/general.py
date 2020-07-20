@@ -6,6 +6,7 @@
 import os
 import random
 import re
+import requests
 import regex
 import tarfile
 import shlex
@@ -13,7 +14,6 @@ import subprocess  # nosec
 from contextlib import contextmanager
 from pathlib import Path
 from pbr.version import VersionInfo
-
 from tern.utils import constants
 
 
@@ -292,3 +292,12 @@ def parse_image_string(image_string):
                 'digest_type': tokens[1],
                 'digest': tokens[2]}
     return None
+
+
+def get_auth_token(endpoint, params=None):
+    ''' Generate HTTP Rest API auth token '''
+    response = requests.get(endpoint, params=params)
+    if response.status_code != 200:
+        raise Exception(response.text)
+
+    return response.json()

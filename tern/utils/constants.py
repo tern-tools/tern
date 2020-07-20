@@ -47,3 +47,6 @@ workdir = 'workdir'
 mergedir = 'mergedir'
 # locked dockerfile
 locked_dockerfile = 'Dockerfile.lock'
+
+# docker end point
+docker_endpoint = "https://index.docker.io/v2/library"
