@@ -10,7 +10,7 @@ from tern.__main__ import create_top_dir
 from tern.analyze.docker import container
 from tern.analyze.docker.container import check_image, check_docker_setup
 from tern.classes.docker_image import DockerImage
-from tern.utils.rootfs import set_mount_dir
+from tern.utils.rootfs import set_working_dir
 
 
 class TestClassDockerImage(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestClassDockerImage(unittest.TestCase):
         '''Using a specific image here. If this test fails due to the image
         not being found anymore, pick a different image to test against
         For now use Docker to pull the image from Dockerhub'''
-        set_mount_dir()
+        set_working_dir()
         create_top_dir()
         check_docker_setup()
         if not check_image('vmware/tern@sha256:20b32a9a20752aa1ad'
