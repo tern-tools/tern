@@ -66,7 +66,8 @@ def analyze(image_obj, args, dfile_lock=False, dfobj=None):
     if not dfile_lock and args.extend:
         run_extension(image_obj, args.extend, args.redo)
     else:
-        analyze_docker_image(image_obj, args.redo, dfile_lock, dfobj)
+        analyze_docker_image(image_obj, args.redo, dfile_lock, dfobj,
+                             args.driver)
 
 
 def execute_docker_image(args):

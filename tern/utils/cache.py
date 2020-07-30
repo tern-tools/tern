@@ -30,10 +30,10 @@ def load():
     global cache
 
     # Do not try to populate the cache if there is no cache available
-    if not os.path.exists(os.path.join(rootfs.mount_dir, cache_file)):
+    if not os.path.exists(os.path.join(rootfs.working_dir, cache_file)):
         return
 
-    with open(os.path.join(rootfs.mount_dir, cache_file)) as f:
+    with open(os.path.join(rootfs.working_dir, cache_file)) as f:
         cache = json.load(f)
 
 
@@ -78,7 +78,7 @@ def add_layer(layer_obj):
 
 def save():
     '''Save the cache to the cache file'''
-    with open(os.path.join(rootfs.mount_dir, cache_file), 'w') as f:
+    with open(os.path.join(rootfs.working_dir, cache_file), 'w') as f:
         json.dump(cache, f)
 
 
@@ -95,5 +95,5 @@ def clear():
     '''Empty the cache - don't use unless you really have to'''
     global cache
     cache = {}
-    with open(os.path.join(rootfs.mount_dir, cache_file), 'w') as f:
+    with open(os.path.join(rootfs.working_dir, cache_file), 'w') as f:
         json.dump(cache, f)

@@ -59,7 +59,7 @@ if __name__ == '__main__':
     # do initial setup to analyze docker image
     container.check_docker_setup()
     # set some global variables
-    rootfs.set_mount_dir()
+    rootfs.set_working_dir()
     # try to load the image
     image_obj = report.load_full_image(args.image)
     if image_obj.origins.is_empty():

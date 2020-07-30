@@ -71,8 +71,8 @@ def create_top_dir(working_dir=None):
 
 def do_main(args):
     '''Execute according to subcommands'''
-    # set bind mount location if working in a container
-    rootfs.set_mount_dir(args.bind_mount, args.working_dir)
+    # Set mount/working dir according to user
+    rootfs.set_working_dir(args.working_dir)
     # create working directory
     create_top_dir(args.working_dir)
     if not args.quiet:
@@ -131,14 +131,17 @@ def main():
     parser.add_argument('-k', '--keep-wd', action='store_true',
                         help="Keep the working directory after execution."
                         " Useful when debugging container images")
-    parser.add_argument('-b', '--bind-mount', metavar='BIND_DIR',
-                        help="Absolute path to bind mount target. Needed"
-                        " when running from within a container.")
     parser.add_argument('-r', '--redo', action='store_true',
                         help="Repopulate the cache for found layers")
     parser.add_argument('-wd', '--working-dir', metavar='PATH',
                         help="Change default working directory to specified"
                         "absolute path.")
+    parser.add_argument('-d', '--driver', metavar="DRIVER_OPTION",
+                        help="Required when running Tern in a container."
+                        "Using 'fuse' will enable the fuse-overlayfs driver "
+                        "to mount the diff layers of the container. If no "
+                        "input is provided, 'fuse' will be used as the "
+                        "default option.")
     # sys.version gives more information than we care to print
     py_ver = sys.version.replace('\n', '').split('[')[0]
     parser.add_argument('-v', '--version', action='version',

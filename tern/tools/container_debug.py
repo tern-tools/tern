@@ -90,7 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('--clean', action='store_true',
                         help='Clean up the mounts')
     args = parser.parse_args()
-    rootfs.set_mount_dir()
+    rootfs.set_working_dir()
 
     # check if we need to clean
     if args.clean:
