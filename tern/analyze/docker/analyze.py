@@ -63,6 +63,12 @@ def abort_analysis():
 def analyze_first_layer(image_obj, master_list, redo):
     # set up a notice origin for the first layer
     origin_first_layer = 'Layer {}'.format(image_obj.layers[0].layer_index)
+    # check if the layer is empty
+    if common.is_empty_layer(image_obj.layers[0]):
+        logger.warning(errors.empty_layer)
+        image_obj.layers[0].origins.add_notice_to_origins(
+            origin_first_layer, Notice(errors.empty_layer, 'warning'))
+        return ''
     # find the shell from the first layer
     shell = common.get_shell(image_obj.layers[0])
     if not shell:
@@ -109,6 +115,17 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
     curr_layer = 1
     work_dir = None
     while curr_layer < len(image_obj.layers):  # pylint:disable=too-many-nested-blocks
+        # make a notice for each layer
+        origin_next_layer = 'Layer {}'.format(
+            image_obj.layers[curr_layer].layer_index)
+        # check if this is an empty layer
+        if common.is_empty_layer(image_obj.layers[curr_layer]):
+            # we continue to the next layer
+            logger.warning(errors.empty_layer)
+            image_obj.layers[curr_layer].origins.add_notice_to_origins(
+                origin_next_layer, Notice(errors.empty_layer, 'warning'))
+            curr_layer = curr_layer + 1
+            continue
         # If workdir changes, update value accordingly
         # so we can later execute base.yml commands from the workdir.
         if image_obj.layers[curr_layer].get_layer_workdir() is not None:

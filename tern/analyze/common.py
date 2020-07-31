@@ -181,6 +181,14 @@ def get_shell(layer):
     return shell
 
 
+def is_empty_layer(layer):
+    '''Return True if the given image layer is empty'''
+    cwd = rootfs.get_untar_dir(layer.tar_file)
+    if len(os.listdir(cwd)) == 0:
+        return True
+    return False
+
+
 def get_os_release(base_layer):
     '''Given the base layer object, determine if an os-release file exists and
     return the PRETTY_NAME string from it. If no release file exists,
