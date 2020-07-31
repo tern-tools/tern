@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -77,6 +77,7 @@ no_running_docker_container = '''Cannot invoke commands in a container '''\
     '''as there is no running container.\n'''
 cannot_find_image = '''Cannot find image {imagetag} locally or from remote '''\
     '''registry.\n'''
+empty_layer = '''Empty layer. Nothing to do.\n'''
 
 # not error messages but stuff for the logger
 no_base_image = '''Base image is FROM scratch. Skipping to build'''

@@ -117,8 +117,6 @@ def check_tar_members(tar_file):
         else:
             logger.error("Malformed tar: %s", error_msg)
             raise EOFError("Malformed tarball: {}".format(tar_file))
-    if not result:
-        raise ValueError("Empty tarball: {}".format(tar_file))
     return result
 
 
