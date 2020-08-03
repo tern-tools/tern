@@ -201,3 +201,10 @@ def set_imported_layers(docker_image):
         # index was set so all layers before this index has been imported
         for i in range(0, index):
             docker_image.layers[i].import_str = from_line
+
+
+def get_env_vars(image_obj):
+    '''Given a docker image object, return the list of environment variables,
+    if any, based on their values in the config.'''
+    config = image_obj.get_image_config(image_obj.get_image_manifest())
+    return config['config']['Env']

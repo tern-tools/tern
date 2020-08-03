@@ -146,10 +146,13 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
             # for each command look up the snippet library
             for command in command_list:
                 pkg_listing = command_lib.get_package_listing(command.name)
+                # get list of environment variables
+                envs = dhelper.get_env_vars(image_obj)
                 if isinstance(pkg_listing, str):
                     try:
                         common.add_base_packages(
-                            image_obj.layers[curr_layer], pkg_listing, shell, work_dir)
+                            image_obj.layers[curr_layer], pkg_listing, shell,
+                            work_dir, envs)
                     except KeyboardInterrupt:
                         logger.critical(errors.keyboard_interrupt)
                         abort_analysis()
@@ -157,7 +160,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
                     try:
                         common.add_snippet_packages(
                             image_obj.layers[curr_layer], command, pkg_listing,
-                            shell, work_dir)
+                            shell, work_dir, envs)
                     except KeyboardInterrupt:
                         logger.critical(errors.keyboard_interrupt)
                         abort_analysis()

@@ -205,8 +205,8 @@ def invoke_in_rootfs(snippet_list, shell, package=''):
         raise
 
 
-def get_pkg_attr_list(shell, attr_dict, work_dir, package_name='', chroot=True,  # pylint:disable=too-many-arguments
-                      override=''):
+def get_pkg_attr_list(shell, attr_dict, work_dir, envs, package_name='',  # pylint:disable=too-many-arguments
+                      chroot=True, override=''):
     '''The command library has package attributes listed like this:
         {invoke: {1: {container: [command1, command2]},
                   2: {host: [command1, command2]}}, delimiter: <delimiter}
@@ -225,6 +225,11 @@ def get_pkg_attr_list(shell, attr_dict, work_dir, package_name='', chroot=True, 
             if 'container' in attr_dict['invoke'][step].keys():
                 snippet_list = attr_dict['invoke'][step]['container']
                 result = ''
+                # If environment variables exist, set them
+                if envs:
+                    for var in envs:
+                        snippet_list.insert(0, 'export ' + var.split('=')[0] +
+                                            '=' + var.split('=')[1])
                 # If work_dir exist cd into it
                 if work_dir is not None:
                     snippet_list.insert(0, 'cd ' + work_dir)
