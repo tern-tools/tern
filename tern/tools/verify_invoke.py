@@ -16,6 +16,7 @@ from tern.utils import rootfs
 from tern.report import report
 from tern.analyze.docker import container
 from tern.analyze.docker import analyze
+from tern.analyze.docker import helpers
 
 
 def look_up_lib(keys):
@@ -88,8 +89,9 @@ if __name__ == '__main__':
         # try to invoke the commands
         try:
             work_dir = get_workdir(image_obj)
+            envs = helpers.get_env_vars(image_obj)
             result = command_lib.get_pkg_attr_list(
-                args.shell, info_dict, work_dir, args.package)
+                args.shell, info_dict, work_dir, envs, args.package)
             print('Output list: ' + ' '.join(result[0]))
             print('Error messages: ' + result[1])
             print('Number of elements: ' + str(len(result[0])))
