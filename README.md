@@ -94,8 +94,6 @@ $ tern report -o output.txt -i debian:buster
 ```
 
 ## Getting Started with Docker<a name="getting-started-with-docker">
-Note Mac users: running Tern natively as a docker container is currently unsupported. Another option is to use Vagrant in your Mac environment and then follow the steps below. For Vagrant setup, see [Getting Started with Vagrant](#getting-started-with-vagrant).
-
 Docker is the most widely used tool to build and run containers. If you already have Docker installed, you can run Tern by building a container with the Dockerfile provided and the `docker_run.sh` script:
 
 Clone this repository:
