@@ -178,3 +178,13 @@ microdnf:
     - 'check-update'
     - 'clean'
   packages: 'rpm'
+
+go:
+  install:
+    - 'build'
+    - 'mod'
+  remove:
+    - 'remove'
+  ignore:
+    - 'clean'
+  packages: 'go'
