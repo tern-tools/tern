@@ -379,3 +379,35 @@ npm:
           - "pkgs=`npm list -g | sed 's/\\(^[^a-z]*\\)\\([_.a-z0-9-]*\\)\\(@.*\\)/\\2/g' | grep -v '/usr*' | uniq`"
           - "for p in $pkgs; do npm view $p repository.url; done"
     delimiter: "\n"
+# golang----------------------------------------------------------------------
+go:
+  pkg_format: ''
+  os_guess:
+    - 'None'
+  path:
+    - 'usr/local/go/bin'
+  names:
+    invoke:
+      1:  
+        container:
+          - "go list -m all | tail -n +2 | cut -d ' ' -f 1" 
+    delimiter: "\n"
+  versions:
+    invoke:
+      1:
+        container:
+          - "go list -m all | tail -n +2 | cut -d ' ' -f 2"
+    delimiter: "\n"
+  copyrights:
+    invoke:
+      1:
+        container:
+          - "dirs=`go list -m -f={{{{.Dir}}}} all | tail -n+2`"
+          - "for d in $dirs; do find $d -type f -iname 'License' -o -iname 'license.txt' -o -iname 'license.md' | xargs cat; echo LICF; done"
+    delimiter: "LICF"
+  proj_urls:
+    invoke:
+      1:
+        container:
+          - "go list -m all | tail -n +2 | cut -d ' ' -f 1"
+    delimiter: "\n"
