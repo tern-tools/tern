@@ -175,6 +175,13 @@ def get_shell(layer):
     shell = ''
     cwd = rootfs.get_untar_dir(layer.tar_file)
     for sh in command_lib.command_lib['common']['shells']:
+        realpath = os.path.realpath(os.path.join(cwd, sh[1:]))
+        # If realpath is a symlink and points to the root of the container,
+        # check for existence of the linked binary in current working dir
+        if realpath[0] == '/' and os.path.exists(os.path.join(cwd,
+                                                              realpath[1:])):
+            return sh
+        # otherwise, just follow symlink in same folder and
         # remove leading forwardslash before joining paths
         if os.path.exists(os.path.join(cwd, sh[1:])):
             return sh
