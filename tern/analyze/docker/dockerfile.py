@@ -10,6 +10,7 @@ Dockerfile information retrieval and modification
 from dockerfile_parse import DockerfileParser
 import re
 import logging
+import os
 
 from tern.utils import general
 from tern.utils import constants
@@ -333,3 +334,52 @@ def write_locked_dockerfile(dfile, destination=None):
         file_name = constants.locked_dockerfile
     with open(file_name, 'w') as f:
         f.write(dfile)
+
+
+def check_multistage_dockerfile(dfobj):
+    """Given a dockerfile object, return the index(es) of FROM line(s)
+    in the dfobj structure."""
+    from_lines = []
+    for idx, st in enumerate(dfobj.structure):
+        if st['instruction'] == 'FROM':
+            from_lines.append(idx)
+    return from_lines
+
+
+def get_multistage_image_dockerfiles(dfobj_multi):
+    """Given a multistage dockerfile object, return a list of structures
+     for building image."""
+    file_path_list = []
+    structure = []
+    file_idx = 0
+    from_lines = check_multistage_dockerfile(dfobj_multi)
+    # Pop the first FROM
+    from_lines.pop(0)
+    # Get the temp folder path
+    temp_folder_path = os.path.join(os.path.dirname(dfobj_multi.filepath),
+                                    constants.multistage_dir)
+    if not os.path.isdir(temp_folder_path):
+        os.mkdir(temp_folder_path)
+    for idx in range(len(dfobj_multi.structure)):
+        if idx in from_lines:
+            if structure:
+                df_folder_path = temp_folder_path + '/%d' % (file_idx)
+                # we make a new dir for the dockerfile of each stage.
+                if not os.path.isdir(df_folder_path):
+                    os.mkdir(df_folder_path)
+                file_path = df_folder_path + '/Dockerfile'
+                file_idx += 1
+                write_dockerfile_by_structure(file_path, structure)
+                file_path_list.append(file_path)
+        structure.append(dfobj_multi.structure[idx])
+    if structure:
+        file_path_list.append(dfobj_multi.filepath)
+    return file_path_list
+
+
+def write_dockerfile_by_structure(file_name, structure):
+    """Given a dockerfile name and its structure, write the content into the
+    dockerfile."""
+    with open(file_name, 'w') as f:
+        for st in structure:
+            f.write(st['content'])
