@@ -47,3 +47,5 @@ workdir = 'workdir'
 mergedir = 'mergedir'
 # locked dockerfile
 locked_dockerfile = 'Dockerfile.lock'
+# temporary directory for multistage Dockerfile analysis
+multistage_dir = 'dftemp'
