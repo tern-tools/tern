@@ -124,9 +124,8 @@ def collect_layer_data(layer_obj):
         for f in data['files']:
             if f['type'] == 'file' and f['size'] != 0:
                 files.append(get_scancode_file(f))
-                if len(f['packages']) > 0:
-                    for package in f['packages']:
-                        packages.append(get_scancode_package(package))
+                for package in f['packages']:
+                    packages.append(get_scancode_package(package))
     return files, packages
 
 
@@ -141,6 +140,17 @@ def add_file_data(layer_obj, collected_files):
         for f in layer_obj.files:
             if f.merge(checkfile):
                 break
+
+
+def add_package_data(layer_obj, collected_packages):
+    '''Use the package data collected with scancode to fill in the package data
+    for an ImageLayer object'''
+    for collected_package in collected_packages:
+        for package in layer_obj.packages:
+            if package.merge(collected_package):
+                break
+        # If the package wasn't in the layer, add it
+        layer_obj.packages.append(collected_package)
 
 
 class Scancode(Executor):
@@ -158,7 +168,6 @@ class Scancode(Executor):
                 if file_list:
                     add_file_data(layer, file_list)
                     layer.files_analyzed = True
-                if package_list:
-                    layer.packages.extend(package_list)
+                add_package_data(layer, package_list)
         # save data to the cache
         common.save_to_cache(image_obj)

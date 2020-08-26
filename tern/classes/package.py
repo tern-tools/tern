@@ -202,3 +202,22 @@ class Package:
             if value != other_pkg_dict[key]:
                 return False
         return True
+
+    def merge(self, other):
+        '''Compare another Package object to this instance. If the name and
+        version are the same, we use the other object to fill in missing
+        metadata in the first one excluding the files and origins. This
+        method can be used in situations where an external scanner is used to
+        collect package data that we didn't find ourselves'''
+        if not isinstance(other, Package):
+            return False
+        if self.name == other.name and self.version == other.version:
+            other_pkg_dict = other.to_dict()
+            for key, value in self.to_dict().items():
+                if value == '' and other_pkg_dict[key] != '':
+                    setattr(self, key, other_pkg_dict[key])
+                    for lic in other.pkg_licenses:
+                        if lic not in self.pkg_licenses:
+                            self.pkg_licenses.append(lic)
+            return True
+        return False
