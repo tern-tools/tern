@@ -22,6 +22,7 @@ from tern.analyze.passthrough import get_filesystem_command
 from tern.analyze import common
 from tern.classes.notice import Notice
 from tern.classes.file_data import FileData
+from tern.classes.package import Package
 from tern.extensions.executor import Executor
 from tern.utils import constants
 from tern.utils import rootfs
@@ -74,6 +75,20 @@ def get_scancode_file(file_dict):
     return fd
 
 
+def get_scancode_package(package_dict):
+    '''Given a package dictionary from the scancode results, return a Package
+    object with the results'''
+    package = Package(package_dict['name'])
+    package.version = package_dict['version']
+    package.pkg_license = package_dict['declared_license']
+    package.copyright = package_dict['copyright']
+    package.proj_url = package_dict['repository_homepage_url']
+    package.download_url = package_dict['download_url']
+    package.licenses = [package_dict['declared_license'],
+                        package_dict['license_expression']]
+    return package
+
+
 def add_scancode_headers(layer_obj, headers):
     '''Given a list of headers from scancode data, add unique headers to
     the list of existing headers in the layer object'''
@@ -86,10 +101,12 @@ def add_scancode_headers(layer_obj, headers):
 
 def collect_layer_data(layer_obj):
     '''Use scancode to collect data from a layer filesystem. This function will
-    create a FileData object for every file found. After scanning, it will
-    return a list of FileData objects.
+    create FileData and Package objects for every File and Package found. After
+    scanning, it will return a tuple with a list of FileData and a list of
+    Package objects.
     '''
     files = []
+    packages = []
     # run scancode against a directory
     command = 'scancode -ilpcu --quiet --timeout 300 --json -'
     full_cmd = get_filesystem_command(layer_obj, command)
@@ -107,7 +124,9 @@ def collect_layer_data(layer_obj):
         for f in data['files']:
             if f['type'] == 'file' and f['size'] != 0:
                 files.append(get_scancode_file(f))
-    return files
+                for package in f['packages']:
+                    packages.append(get_scancode_package(package))
+    return files, packages
 
 
 def add_file_data(layer_obj, collected_files):
@@ -123,6 +142,17 @@ def add_file_data(layer_obj, collected_files):
                 break
 
 
+def add_package_data(layer_obj, collected_packages):
+    '''Use the package data collected with scancode to fill in the package data
+    for an ImageLayer object'''
+    for collected_package in collected_packages:
+        for package in layer_obj.packages:
+            if package.merge(collected_package):
+                break
+        # If the package wasn't in the layer, add it
+        layer_obj.packages.append(collected_package)
+
+
 class Scancode(Executor):
     '''Execute scancode'''
     def execute(self, image_obj, redo=False):
@@ -134,9 +164,10 @@ class Scancode(Executor):
             common.load_from_cache(layer)
             if redo or not layer.files_analyzed:
                 # the layer doesn't have analyzed files, so run analysis
-                file_list = collect_layer_data(layer)
+                file_list, package_list = collect_layer_data(layer)
                 if file_list:
                     add_file_data(layer, file_list)
                     layer.files_analyzed = True
+                add_package_data(layer, package_list)
         # save data to the cache
         common.save_to_cache(image_obj)

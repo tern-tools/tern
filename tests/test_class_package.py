@@ -173,6 +173,23 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(p.origins.origins[0].notices[2].message,
                          "No metadata for key: download_url")
 
+    def testMerge(self):
+        p1 = Package('p1')
+        p1.version = '1.0'
+        p1.pkg_licenses = ['license1']
+        p2 = Package('p1')
+        p2.version = '1.0'
+        p2.download_url = 'SomeUrl'
+        p2.checksum = 'abc'
+        p2.pkg_licenses = ['license2']
+        self.assertFalse(p1.merge('astring'))
+        self.assertTrue(p1.merge(p2))
+        self.assertEqual(p1.download_url, 'SomeUrl')
+        self.assertEqual(p1.checksum, 'abc')
+        self.assertEqual(p1.pkg_licenses, ['license1', 'license2'])
+        p2.version = '2.0'
+        self.assertFalse(p1.merge(p2))
+
 
 if __name__ == '__main__':
     unittest.main()
