@@ -46,6 +46,11 @@ def print_full_report(image):
             notes += formats.layer_licenses_list.format(list=", ".join(
                 layer_license_list) if layer_license_list else 'None')
             notes = notes + formats.package_demarkation
+    # Collect completeness data
+    percent, not_covered = content.get_completeness_of_scan(image.layers)
+    notes += formats.completeness_percentage.format(num=percent)
+    notes += formats.not_covered_files.format(list="\n".join(not_covered))
+    notes = notes + formats.package_demarkation
     return notes
 
 

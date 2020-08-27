@@ -68,6 +68,27 @@ def get_tool_version():
     return formats.packaged_version.format(version=ver)
 
 
+def get_completeness_of_scan(layers):
+    '''Return a tuple with the completeness percentage and a list of the files
+    that are not covered by the scan. The completeness percentage is calculated
+    from all the files in the container versus the ones that belong to a
+    detected package. The "not covered" files are ones that can't be associated
+    to any package.'''
+    covered = []
+    layers_files = []
+    for layer in layers:
+        layer_files = layer.files
+        layers_files.extend(layer_files)
+        for f in layer_files:
+            for package in layer.packages:
+                package_files = [f.path for f in package.files]
+                if '/' + f.path in package_files:
+                    covered.append(f)
+    percent = round((len(covered) / float(len(layers_files))) * 100, 2)
+    not_covered = ['/' + f.path for f in layers_files if f not in covered]
+    return percent, not_covered
+
+
 def print_invoke_list(info_dict, info):
     '''Print out the list of command snippets that get invoked to retrive
     package information.

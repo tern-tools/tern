@@ -51,6 +51,11 @@ full_licenses_list = '''###########################################\n'''\
     '''# Summary of licenses found in Container: #\n'''\
     '''###########################################\n{list}\n'''
 
+completeness_percentage = '''Completeness percentage: {num} %\n\n'''
+not_covered_files = '''##################################################\n''' \
+    '''Files that don't belong to any detected package: #\n''' \
+    '''##################################################\n{list}\n'''
+
 # notes
 package_notes = '''Errors: {package_info_retrieval_errors}\n''' \
     '''Improvements: {package_info_reporting_improvements}\n'''
