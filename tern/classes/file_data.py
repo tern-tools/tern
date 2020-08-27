@@ -262,3 +262,15 @@ class FileData:
                     self.origins.add_notice_to_origins(o.origin_str, n)
             return True
         return False
+
+    def is_equal(self, other):
+        '''This method performs a deep comparison between two objects by
+        iterating over the dictionary for each object returned by to_dict
+        and comparing the vales for each key in both. This function will only
+        return true if every key value pair matches between the two
+        dictionaries.'''
+        other_file_dict = other.to_dict()
+        for key, value in self.to_dict().items():
+            if value != other_file_dict[key]:
+                return False
+        return True

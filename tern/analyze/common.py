@@ -86,14 +86,6 @@ def load_packages_from_cache(layer):
         logger.debug(
             'Loading packages from cache: layer \"%s\"', layer.fs_hash[:10])
         for pkg_dict in raw_pkg_list:
-            raw_file_list = pkg_dict.get('files', False)
-            if raw_file_list:
-                file_list = []
-                for file_dict in raw_file_list:
-                    fd = FileData(file_dict['name'], file_dict['path'])
-                    fd.fill(file_dict)
-                    file_list.append(fd)
-                pkg_dict['files'] = file_list
             pkg = Package(pkg_dict['name'])
             pkg.fill(pkg_dict)
             # collect package origins
@@ -359,9 +351,7 @@ def add_base_packages(image_layer, binary, shell, work_dir=None, envs=None):
         if warnings:
             image_layer.origins.add_notice_to_origins(
                 origin_command_lib, Notice(warnings, 'warning'))
-        layer_file_list = image_layer.files
         if 'names' in pkg_dict and len(pkg_dict['names']) > 1:
-            get_package_files(layer_file_list, pkg_dict)
             pkg_list = convert_to_pkg_dicts(pkg_dict)
             for pkg_dict in pkg_list:
                 pkg = Package(pkg_dict['name'])
@@ -372,25 +362,6 @@ def add_base_packages(image_layer, binary, shell, work_dir=None, envs=None):
         image_layer.origins.add_notice_to_origins(
             origin_command_lib, Notice(errors.no_listing_for_base_key.format(
                 listing_key=binary), 'error'))
-
-
-def get_package_files(layer_file_list, pkg_dict):
-    '''For each file in a package fetch its details from the
-    layer file list'''
-
-    files = pkg_dict['files']
-    new_layer_file_list = []
-
-    for f in files:
-        file_list = f.split('\n')
-        new_fd_list = []
-        for file in file_list:
-            for fd in layer_file_list:
-                if file == '/'+fd.path:
-                    new_fd_list.append(fd)
-        new_layer_file_list.append(new_fd_list)
-
-    pkg_dict['files'] = new_layer_file_list
 
 
 def fill_package_metadata(pkg_obj, pkg_listing, shell, work_dir, envs):
