@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 #
 # Please only add direct dependencies here, i.e., do not update with the
@@ -7,10 +7,10 @@
 # what should be updated.
 
 PyYAML>=5.3
-docker~=4.2
-dockerfile-parse~=0.0
-requests~=2.23
-stevedore>=1.32
+docker~=4.3
+dockerfile-parse~=1.0
+requests~=2.24
+stevedore>=3.2
 pbr>=5.4
 debut>=0.9
-regex>=2020.5.14
+regex>=2020.7
