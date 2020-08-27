@@ -4,17 +4,18 @@ This is a checklist for cutting a release
 
 - [ ] Prepare Release PR.
     * Freeze development on master.
-    * Create a fresh environment and activate it.
-    * Clone the `tern/master` repository and `cd` into it.
-    * Create a branch for the release.
+    * Prepare your local development environment by committing or stashing your changes. Work at the tip of master.
+    * In a separate folder, create a fresh environment and activate it.
+    * Clone the `tern/master` repository by running `git clone --single-branch git@github.com:tern-tools/tern.git` and `cd` into it.
+    * Create a branch for the release: `git checkout -b <release branch name>`.
 
 - [ ] Update direct dependencies and run tests.
     * Run `pip install wheel pip-tools twine`.
-    * Run `pip-compile --upgrade`.
+    * Run `pip-compile --upgrade --output-file upgrade.txt`.
     * Compare the dependency versions from the output of the pip-compile command to the current dependency versions listed in the `requirements.txt` file. Upgrade `requirements.txt` if necessary.
     * Run `pip install .` to install tern.
     * Run appropriate tests. Roll back requirements if necessary.
-    * When satisfied, run `pip-compile --generate-hashes --output-file docs/releases/v<release>-requirements.txt`.
+    * When satisfied, run `pip-compile --generate-hashes --output-file v<release>-requirements.txt` where <release> is of the form `major_minor_patch`.
 
 - [ ] Write release notes.
     * Create a new file for the release notes: `docs/releases/v<release>.md`
