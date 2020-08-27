@@ -101,8 +101,8 @@ dpkg:
       1:
         container:
         - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-        - 'for p in $pkgs; do files=`dpkg-query -L $p`; for file in $files; do if [[ -f $file ]]; then echo $file; fi; done; echo LICF; done'
-    delimiter: 'LICF'
+        - "for p in $pkgs; do files=`dpkg-query -L $p`; for file in $files; do if [ -f $file ]; then echo $file; fi; done; echo LICF; done"
+    delimiter: "LICF"
   proj_urls: {}
 
 # apk ---------------------------------------------------------------------------------------------------------
@@ -142,8 +142,8 @@ apk:
       1:
         container:
         - 'pkgs=`apk info 2>/dev/null`'
-        - 'for p in $pkgs; do files=`apk -L info $p 2>/dev/null`; for file in $files; do if [[ -f $file ]]; then echo $file; fi; done; echo LICF; done'
-    delimiter: 'LICF'
+        - "for p in $pkgs; do files=`apk -L info $p 2>/dev/null`; for file in $files; do if [ -f $file ]; then echo $file; fi; done; echo LICF; done"
+    delimiter: "LICF"
   proj_urls:
     invoke:
       1:
@@ -185,8 +185,8 @@ pacman:
       1:
         container:
         - 'pkgs=`pacman -Qq 2>/dev/null`'
-        - 'for p in $pkgs; do files=`pacman -Ql $p 2>/dev/null`; for file in $files; do if [[ -f $file ]]; then echo $file; fi; done; echo LICF; done'
-    delimiter: 'LICF'
+        - "for p in $pkgs; do files=`pacman -Ql $p 2>/dev/null`; for file in $files; do if [ -f $file ]; then echo $file; fi; done; echo LICF; done"
+    delimiter: "LICF"
   proj_urls:
     invoke:
       1:
@@ -230,8 +230,8 @@ rpm:
       1:
         container:
         - 'pkgs=`rpm --query --all --queryformat "%{name}\n" 2>/dev/null`'
-        - 'for p in $pkgs; do files=`rpm -ql $p  2>/dev/null`; for file in $files; do if [[ -f $file ]]; then echo $file; fi; done; echo LICF; done'
-    delimiter: 'LICF'
+        - "for p in $pkgs; do files=`rpm -ql $p  2>/dev/null`; for file in $files; do if [ -f $file ]; then echo $file; fi; done; echo LICF; done"
+    delimiter: "LICF"
   proj_urls:
     invoke:
       1:

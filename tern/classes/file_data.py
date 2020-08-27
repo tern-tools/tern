@@ -262,3 +262,11 @@ class FileData:
                     self.origins.add_notice_to_origins(o.origin_str, n)
             return True
         return False
+
+    def is_equal(self, other):
+        '''Returns true if the two FileData objects have the same name, path
+        and checksum properties'''
+        if not isinstance(other, FileData):
+            return False
+        return (self.name == other.name and self.path == other.path and
+                self.checksum == other.checksum)
