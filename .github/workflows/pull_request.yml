@@ -8,7 +8,7 @@ jobs:
       - uses: actions/checkout@v1 #equivlent to running git fetch and git checkout latest
       - uses: actions/setup-python@v1 # setup python3 environment
         with:
-          python-version: '3.6.11'
+          python-version: '3.7'
       - name: Setup
         run: |
           sudo apt-get install -y attr
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.6.11'
+          python-version: '3.7'
       - name: Setup 
         run: |
           sudo apt-get install -y attr
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.6.11'
+          python-version: '3.7'
       - name: Setup 
         run: |
           sudo apt-get install -y attr
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.6.11'
+          python-version: '3.7'
       - name: Setup
         run: |
           sudo apt-get install -y attr
@@ -73,7 +73,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.6.11'
+          python-version: '3.7'
       - name: Setup
         run: |
           sudo apt-get install -y attr
