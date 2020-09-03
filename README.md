@@ -16,6 +16,7 @@ Tern is a software package inspection tool for containers. It's written in Pytho
   - [Navigating the Code](/docs/navigating-the-code.md)
   - [Data Model](/docs/data-model.md)
 - [Getting Started](#getting-started)
+  - [GitHub Action](#github-action)
   - [Getting Started on Linux](#getting-started-on-linux)
   - [Getting Started with Docker](#getting-started-with-docker)
   - [Getting Started with Vagrant](#getting-started-with-vagrant)
@@ -53,6 +54,9 @@ Tern gives you a deeper understanding of your container's bill of materials so y
 
 
 # Getting Started<a name="getting-started"/>
+
+## GitHub Action<a name="github-action"/>
+A [GitHub Action](https://github.com/marketplace/actions/tern-action) is available if you just want to scan Docker container images to find the Base OS and packages installed. Please contribute changes [here](https://github.com/philips-labs/tern-action). Thanks to Jeroen Knoops @JeroenKnoops for their work on this.
 
 ## Getting Started on Linux<a name="getting-started-on-linux">
 If you have a Linux OS you will need a distro with a kernel version >= 4.0 (Ubuntu 16.04 or newer or Fedora 25 or newer are good selections) and will need to install the following requirements:
