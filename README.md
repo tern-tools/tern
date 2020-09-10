@@ -107,7 +107,7 @@ $ git clone https://github.com/tern-tools/tern.git
 
 Build the Docker image (called `ternd` here). You may need to use sudo:
 ```
-$ docker build -t ternd .
+$ docker build -f docker/Dockerfile -t ternd .
 ```
 
 **NOTE**: By default, Tern will run with logging turned on. If you would like to silent the terminal output when running the ternd container, make the following change to the Dockerfile ENTRYPOINT before building:
