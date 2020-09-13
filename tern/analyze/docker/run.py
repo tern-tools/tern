@@ -8,6 +8,8 @@ Execute a Docker container image
 """
 
 import logging
+import copy
+import os
 
 from tern.report import formats
 from tern.report import report
@@ -181,3 +183,20 @@ def execute_dockerfile(args):  # noqa C901,R0912
     if args.name == 'report':
         if not args.keep_wd:
             report.clean_working_dir()
+
+
+def execute_multistage_dockerfile(args):
+    """Split the multistage dockerfile, and then analzye on each stage."""
+    dfobj_multi = dockerfile.get_dockerfile_obj(args.dockerfile)
+    # split the multistage dockerfile
+    file_path_list = dockerfile.get_multistage_image_dockerfiles(dfobj_multi)
+    report_folder_path = os.path.join(os.path.dirname(dfobj_multi.filepath),
+                                      'report')
+    temp_arg = copy.copy(args)
+    for idx, dfile in enumerate(file_path_list):
+        temp_arg.dockerfile = dfile
+        if args.output_file:
+            temp_arg.output_file = args.output_file + "%d" % idx
+        else:
+            temp_arg.output_file = report_folder_path + "%d" % idx
+        execute_dockerfile(args)
