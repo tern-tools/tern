@@ -112,25 +112,40 @@ def split_command(shell_script):
 def parse_shell_variables_and_command(concatenated_command):
     '''given a concatenated command, classify the variable and command type,
     and then parse it '''
+    # append white space at the end since we are matching white space for
+    # the end of an assignment, and this white space will be removed by
+    # clean_command()
+    concatenated_command += ' '
     # pattern for matching variable, looking for '='
-    assignment_pattern = r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)'
+    # the second group first macthes a string assignment, if not, it will macth
+    # until it first meets a white space
+    assignment_pattern = r'([A-Za-z_][A-Za-z0-9_]*)=((".*")|(.*?)(?=[\s]))'
     export_pattern = r'^export ([A-Za-z_][A-Za-z0-9_]*)=(.*)'
-    variable_pattern = assignment_pattern + r'|' + export_pattern
-    match_res = re.match(variable_pattern, concatenated_command)
+    match_export = re.match(export_pattern, concatenated_command)
+    match_assignment = re.finditer(assignment_pattern, concatenated_command)
     statement = {}
-    if match_res:
-        if match_res.group(1):
-            # assignment_pattern matched
-            statement['variable'] = {'name': match_res.group(1),
-                                     'value': match_res.group(2)}
-        else:
-            # export_pattern matched
-            statement['variable'] = {'name': match_res.group(3),
-                                     'value': match_res.group(4)}
-        statement['content'] = concatenated_command
+    # export_pattern matched
+    if match_export:
+        # assignment_pattern matched
+        statement['variable'] = [{'name': match_export.group(1),
+                                 'value': match_export.group(2)}]
+    # check on assignment_pattern
     else:
-        # use clean_command() to clean tab and line indentations
-        statement['command'] = clean_command(concatenated_command)
+        variable_list = []
+        last_idx = 0
+        # extract assignments
+        for m in match_assignment:
+            # variable assignment should be continous and start at the beginning
+            if len(concatenated_command[last_idx: m.span(0)[0]].strip()) > 0:
+                continue
+            variable_list.append({'name': m.group(1), 'value': m.group(2)})
+            last_idx = m.span(0)[1]
+        if variable_list:
+            statement['variable'] = variable_list
+        cleaned_command = clean_command(concatenated_command[last_idx:])
+        # exists command after assignment OR begins with command
+        if cleaned_command:
+            statement['command'] = cleaned_command
     return statement
 
 
