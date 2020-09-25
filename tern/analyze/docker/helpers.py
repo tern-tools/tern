@@ -207,4 +207,7 @@ def get_env_vars(image_obj):
     '''Given a docker image object, return the list of environment variables,
     if any, based on their values in the config.'''
     config = image_obj.get_image_config(image_obj.get_image_manifest())
+    # replace '\t' with '\\t'  in the ENV
+    for idx, env_str in enumerate(config['config']['Env']):
+        config['config']['Env'][idx] = env_str.replace('\t', '\\t')
     return config['config']['Env']
