@@ -2,6 +2,9 @@
 #
 # Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
+
+import os
+
 from tern.classes.file_data import FileData
 from tern.classes.notice import Notice
 from tern.classes.origins import Origins
@@ -49,6 +52,10 @@ class Package:
     @property
     def files(self):
         return self.__files
+
+    @files.setter
+    def files(self, files):
+        self.__files = files
 
     @property
     def version(self):
@@ -180,10 +187,21 @@ class Package:
             pkg_license: <package license string>
             copyright: <package copyright text>
             proj_url: <project url>
+            files: <package files>
         the way to use this method is to instantiate the class with the
         name and then give it a package dictionary to fill in the rest
         return true if package name is the same as the one used to instantiate
         the object, false if not'''
+        raw_file_list = package_dict.get('files', False)
+        if raw_file_list:
+            file_list = []
+            for file_path in raw_file_list.split('\n'):
+                if file_path != '':
+                    file_name = os.path.split(file_path)[1]
+                    fd = FileData(file_name, file_path)
+                    fd.fill({'name': file_name, 'path': file_path})
+                    file_list.append(fd)
+            package_dict['files'] = file_list
         success = True
         if self.name == package_dict['name']:
             self.__fill_properties(package_dict)

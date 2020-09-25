@@ -256,7 +256,8 @@ def convert_to_pkg_dicts(pkg_dict):
                'pkg_license': 'licenses',
                'copyright': 'copyrights',
                'proj_url': 'proj_urls',
-               'pkg_licenses': 'pkg_licenses'}
+               'pkg_licenses': 'pkg_licenses',
+               'files': 'files'}
     pkg_list = []
     len_names = len(pkg_dict['names'])
     # make a list of keys that correspond with package property names
@@ -314,6 +315,16 @@ def get_deb_package_licenses(deb_copyrights):
     return deb_licenses
 
 
+def remove_duplicate_layer_files(layer):
+    '''Given an image layer, removes duplicate FileData objects that are found
+    both at the layer and package level'''
+    for layer_file in layer.files:
+        for pkg in layer.packages:
+            for pkg_file in pkg.files:
+                if layer_file.is_equal(pkg_file):
+                    layer.remove_file(layer_file.path)
+
+
 def add_base_packages(image_layer, binary, shell, work_dir=None, envs=None):
     '''Given the image layer, the binary to invoke and shell:
         1. get the listing from the base.yml
@@ -332,8 +343,8 @@ def add_base_packages(image_layer, binary, shell, work_dir=None, envs=None):
     listing = command_lib.get_base_listing(binary)
     if listing:
         # put info notice about what is going to be invoked
-        snippet_msg = formats.invoke_for_base + '\n' + \
-            content.print_base_invoke(binary)
+        snippet_msg = (formats.invoke_for_base + '\n' +
+                       content.print_base_invoke(binary))
         image_layer.origins.add_notice_to_origins(
             origin_layer, Notice(snippet_msg, 'info'))
         # get all the packages in the base layer
@@ -356,6 +367,7 @@ def add_base_packages(image_layer, binary, shell, work_dir=None, envs=None):
                 pkg = Package(pkg_dict['name'])
                 pkg.fill(pkg_dict)
                 image_layer.add_package(pkg)
+            remove_duplicate_layer_files(image_layer)
     # if there is no listing add a notice
     else:
         image_layer.origins.add_notice_to_origins(
@@ -534,8 +546,8 @@ def add_snippet_packages(image_layer, command, pkg_listing, shell, work_dir,  # 
     # set up a notice origin for the layer
     origin_layer = 'Layer {}'.format(image_layer.layer_index)
     # find packages for the command
-    cmd_msg = formats.invoke_for_snippets + '\n' + \
-        content.print_package_invoke(command.name)
+    cmd_msg = (formats.invoke_for_snippets + '\n' +
+               content.print_package_invoke(command.name))
     image_layer.origins.add_notice_to_origins(origin_layer, Notice(
         cmd_msg, 'info'))
     pkg_list = get_installed_package_names(command)
