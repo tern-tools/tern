@@ -112,3 +112,59 @@ def close_client(client):
         # it should either already be closed, no socket is in use,
         # or docker is not setup -- either way, the socket is closed
         pass
+
+
+# These functions should be deprecated
+def check_image(image_tag_string, client):
+    """Check if the image and tag exist on disk"""
+    logger.debug(
+        "Checking if image \"%s\" is available on disk...", image_tag_string)
+    try:
+        image_obj = client.images.get(image_tag_string)
+        logger.debug("Image \"%s\" found", image_tag_string)
+        return image_obj
+    except docker.errors.ImageNotFound:
+        return None
+
+
+def pull_image(image_tag_string, client):
+    """Pull an image from a container registry using Docker
+    Note: this function uses the Docker API to pull from a container
+    registry and is not responsible for configuring what registry to use"""
+    logger.debug("Attempting to pull image \"%s\"", image_tag_string)
+    try:
+        image = client.images.pull(image_tag_string)
+        logger.debug("Image \"%s\" downloaded", image_tag_string)
+        return image
+    except (docker.errors.ImageNotFound, docker.errors.NotFound):
+        logger.warning("No such image: \"%s\"", image_tag_string)
+        return None
+
+
+def get_docker_image(image_tag_string, client):
+    """Try to retrieve a docker image using the docker API.
+    image_tag_string: can be in image:tag or image@digest_type:digest format"""
+    image = check_image(image_tag_string, client)
+    if image is None:
+        image = pull_image(image_tag_string, client)
+    return image
+
+
+def get_docker_image_digest(docker_image):
+    '''Given a docker image object return the digest information of the
+    unique image in 'image@sha_type:digest' format.'''
+    return docker_image.attrs['RepoDigests'][0]
+
+
+def dump_docker_image(image_tag):
+    """Given an image and tag or image and digest, use the Docker API to get
+    a container image representation into the working directory"""
+    # open up a client first
+    # if this fails we cannot proceed further so we will exit
+    client = check_docker_setup()
+    image = get_docker_image(image_tag, client)
+    # this should return whether the operation succeeded or not
+    success = extract_image(image)
+    # now the client can be closed
+    close_client(client)
+    return success

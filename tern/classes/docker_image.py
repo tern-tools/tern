@@ -10,7 +10,7 @@ import subprocess  # nosec
 from tern.utils import rootfs
 from tern.utils import general
 from tern.utils.constants import manifest_file
-from tern.analyze.docker import container
+from tern.load import docker_api
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
@@ -40,12 +40,15 @@ class DockerImage(Image):
             repo_dict.get('digest_type'), repo_dict.get('digest'))
         if not self.checksum and general.check_tar(repotag) is False:
             # if there is no checksum, get the digest type
-            docker_image = container.check_image(self._repotag)
+            client = docker_api.check_docker_setup()
+            docker_image = docker_api.check_image(self._repotag, client)
+            docker_api.close_client(client)
             # this object could be representing an image built from
             # a Dockerfile, so it may not have a digest
             # so check for that condition
             if docker_image.attrs['RepoDigests']:
-                image_name_digest = container.get_image_digest(docker_image)
+                image_name_digest = docker_api.get_docker_image_digest(
+                    docker_image)
                 repo_dict = general.parse_image_string(image_name_digest)
                 self.set_checksum(
                     repo_dict.get('digest_type'), repo_dict.get('digest'))
@@ -139,9 +142,10 @@ class DockerImage(Image):
                 index = index + 1
 
     def load_image(self):
-        '''Load image metadata using docker commands'''
+        """Load metadata from an extracted docker image. This assumes the
+        image has already been downloaded and extracted into the working
+        directory"""
         try:
-            container.extract_image_metadata(self.repotag)
             self._manifest = self.get_image_manifest()
             self.__repotags = self.get_image_repotags(self._manifest)
             self._config = self.get_image_config(self._manifest)
