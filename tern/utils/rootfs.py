@@ -173,6 +173,8 @@ def extract_tarfile(tar_path, directory_path):
     if not success:
         # attempt to extract using root permissions
         root_command(extract_tar, tar_path, '-C', directory_path)
+        success = True
+    return success
 
 
 def prep_rootfs(rootfs_dir):

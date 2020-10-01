@@ -14,11 +14,11 @@ import logging
 import os
 import sys
 
+from tern import prep
 from tern.analyze.docker import run
 from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
-from tern.utils import rootfs
 from tern.report import errors
 
 
@@ -62,56 +62,38 @@ def get_version():
     return message
 
 
-def create_top_dir(working_dir=None):
-    '''Create the top level working directory'''
-    top_dir = general.get_top_dir(working_dir)
-    if not os.path.isdir(top_dir):
-        os.makedirs(top_dir)
-
-
 def do_main(args):
-    '''Execute according to subcommands'''
-    # Set mount/working dir according to user
-    rootfs.set_working_dir(args.working_dir)
-    # create working directory
-    create_top_dir(args.working_dir)
+    """Execute according to subcommands"""
+    # Set up environment
     if not args.quiet:
         # set up console logs
         global logger
         global console
         logger.addHandler(console)
-    logger.debug('Starting...')
+        logger.debug("Starting...")
+    prep.setup(args.working_dir)
     if args.clear_cache:
         logger.debug('Clearing cache...')
         cache.clear()
-    if hasattr(args, 'name') and (args.name == 'report' or
-                                  args.name == 'lock'):
+    if hasattr(args, 'name'):
         if args.name == 'lock':
             run.execute_dockerfile(args)
-        elif args.dockerfile:
-            run.execute_dockerfile(args)
-        elif args.docker_image:
-            # Check if the image is of image:tag
-            # or image@digest_type:digest format
-            if not check_image_string(args.docker_image):
-                sys.stderr.write('Error running Tern\n'
-                                 'Please provide docker image '
-                                 'string in image:tag or '
-                                 'image@digest_type:digest format\n')
-                sys.exit(1)
-            if general.check_tar(args.docker_image):
-                logger.error("%s", errors.incorrect_raw_option)
-            else:
+        elif args.name == 'report':
+            if args.dockerfile:
+                run.execute_dockerfile(args)
+            elif args.docker_image:
+                # Check if the image string is a tarball
+                if general.check_tar(args.docker_image):
+                    logger.critical(errors.incorrect_raw_option)
+                    sys.exit(1)
+                # Check if the image string has the right format
+                if not check_image_string(args.docker_image):
+                    logger.critical(errors.incorrect_image_string_format)
+                    sys.exit(1)
+                # If the checks are OK, execute for docker image
                 run.execute_docker_image(args)
-                logger.debug('Report completed.')
-        if args.name == 'report':
-            if args.raw_image:
-                if not general.check_tar(args.raw_image):
-                    logger.error("%s", errors.invalid_raw_image.format(
-                        image=args.raw_image))
-                else:
-                    run.execute_docker_image(args)
-                    logger.debug('Report completed.')
+    # Tear down the environment
+    prep.teardown(args.keep_wd)
     logger.debug('Finished')
 
 

@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
-Execute a Docker container image
+Run analysis on a container image or Dockerfile
 """
 
 import logging
@@ -12,6 +12,9 @@ import logging
 from tern.report import formats
 from tern.report import report
 from tern.utils import constants
+from tern.utils import rootfs
+from tern import prep
+from tern.load import docker_api
 from tern.analyze.docker import container
 from tern.classes.notice import Notice
 from tern.analyze import common
@@ -72,15 +75,25 @@ def analyze(image_obj, args, dfile_lock=False, dfobj=None):
 
 def execute_docker_image(args):
     '''Execution path if given a Docker image'''
-    logger.debug('Setting up...')
-    image_string = args.docker_image
-    if not args.raw_image:
-        # don't check docker daemon for raw images
-        container.check_docker_setup()
-    else:
-        image_string = args.raw_image
-    report.setup(image_tag_string=image_string)
-    # attempt to get built image metadata
+    logger.debug('Starting analysis...')
+    if args.docker_image:
+        # extract the docker image
+        if docker_api.dump_docker_image(args.docker_image):
+            image_string = args.docker_image
+        else:
+            logger.critical("Cannot extract Docker image")
+            return None
+    if args.raw_image:
+        # for now we assume that the raw image tarball is always
+        # the product of "docker save", hence it will be in
+        # the docker style layout
+        if rootfs.extract_tarfile(args.raw_image, rootfs.get_working_dir()):
+            image_string = args.raw_image
+        else:
+            logger.critical("Cannot extract raw image")
+            return None
+    # Image should be successfully extracted at this point
+    # attempt to load the image's metadata
     full_image = report.load_full_image(image_string)
     if full_image.origins.is_empty():
         # image loading was successful
@@ -89,17 +102,13 @@ def execute_docker_image(args):
             formats.docker_image.format(imagetag=image_string))
         # analyze image
         analyze(full_image, args)
-        # generate report
+        # report out
         report.report_out(args, full_image)
     else:
         # we cannot load the full image
-        logger.warning('Cannot retrieve full image metadata')
+        logger.error('Cannot retrieve full image metadata')
     if not args.keep_wd:
-        report.clean_image_tars(full_image)
-    logger.debug('Teardown...')
-    report.teardown()
-    if not args.keep_wd:
-        report.clean_working_dir()
+        prep.clean_image_tars(full_image)
 
 
 def execute_dockerfile(args):  # noqa C901,R0912
