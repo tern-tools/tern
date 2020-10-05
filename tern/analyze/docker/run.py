@@ -73,17 +73,17 @@ def analyze(image_obj, args, dfile_lock=False, dfobj=None):
                              args.driver)
 
 
-def execute_docker_image(args):
+def execute_docker_image(args):  # pylint: disable=too-many-branches
     '''Execution path if given a Docker image'''
     logger.debug('Starting analysis...')
+    image_string = ''
     if args.docker_image:
         # extract the docker image
         if docker_api.dump_docker_image(args.docker_image):
             image_string = args.docker_image
         else:
             logger.critical("Cannot extract Docker image")
-            return None
-    if args.raw_image:
+    elif args.raw_image:
         # for now we assume that the raw image tarball is always
         # the product of "docker save", hence it will be in
         # the docker style layout
@@ -91,22 +91,22 @@ def execute_docker_image(args):
             image_string = args.raw_image
         else:
             logger.critical("Cannot extract raw image")
-            return None
-    # Image should be successfully extracted at this point
-    # attempt to load the image's metadata
-    full_image = report.load_full_image(image_string)
-    if full_image.origins.is_empty():
-        # image loading was successful
-        # Add an image origin here
-        full_image.origins.add_notice_origin(
-            formats.docker_image.format(imagetag=image_string))
-        # analyze image
-        analyze(full_image, args)
-        # report out
-        report.report_out(args, full_image)
-    else:
-        # we cannot load the full image
-        logger.error('Cannot retrieve full image metadata')
+    # If the image has been extracted, load the metadata
+    if image_string:
+        full_image = report.load_full_image(image_string)
+        # check if the image was loaded successfully
+        if full_image.origins.is_empty():
+            # Add an image origin here
+            full_image.origins.add_notice_origin(
+                formats.docker_image.format(imagetag=image_string))
+            # analyze image
+            analyze(full_image, args)
+            # report out
+            report.report_out(args, full_image)
+        else:
+            # we cannot load the full image
+            logger.error('Cannot retrieve full image metadata')
+    # cleanup
     if not args.keep_wd:
         prep.clean_image_tars(full_image)
 

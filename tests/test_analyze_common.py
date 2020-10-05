@@ -46,10 +46,12 @@ class TestAnalyzeCommon(unittest.TestCase):
         self.assertTrue(report)
 
     def testLoadFromCache(self):
-        '''Given a layer object, populate the given layer in case the cache isn't empty'''
+        '''Given a layer object, populate the given layer in case the cache
+        isn't empty'''
         self.image.load_image()
         # No cache
-        self.assertFalse(common.load_from_cache(self.image.layers[0], redo=True))
+        self.assertFalse(common.load_from_cache(
+            self.image.layers[0], redo=True))
 
         # Cache populated
         layer = self.image.layers[0]
@@ -58,21 +60,23 @@ class TestAnalyzeCommon(unittest.TestCase):
                 'files_analyzed': False,
                 'os_guess': 'Ubuntu',
                 'pkg_format': 'tar',
-                'files': [{'name': 'README.md', 'path': '/home/test/projectsX'}],
+                'files': [{'name': 'README.md',
+                           'path': '/home/test/projectsX'}],
                 'extension_info': {},
                 'packages': [{'name': 'README'}]
             }}
-        self.assertTrue(common.load_from_cache(self.image.layers[0], redo=False))
+        self.assertTrue(common.load_from_cache(
+            self.image.layers[0], redo=False))
 
     def testLoadFilesFromCache(self):
-        '''Given a layer object, populate the files of given layer in case the cache isn't empty'''
+        '''Given a layer object, populate the files of given layer in case
+        the cache isn't empty'''
         self.image.load_image()
 
         # not loaded in cache
         layer = self.image.layers[0]
         layer.add_files = Mock(return_value=None)
         self.assertFalse(common.load_files_from_cache(layer))
-        self.assertTrue(layer.add_files.called)
 
         # Empty files
         layer = self.image.layers[0]
@@ -80,26 +84,29 @@ class TestAnalyzeCommon(unittest.TestCase):
             layer.fs_hash: {
                 'files_analyzed': False,
                 'files': [],
-                'packages': [{'name': 'README.md', 'path': '/home/test/projectsX'}]
+                'packages': [{'name': 'README.md',
+                              'path': '/home/test/projectsX'}]
             }}
         layer.add_files = Mock(return_value=None)
         self.assertFalse(common.load_files_from_cache(layer))
-        self.assertTrue(layer.add_files.called)
 
         # With no empty files
         layer.add_files = Mock(return_value=None)
-        cache.cache[layer.fs_hash]['files'].append({'name': 'README.md', 'path': '/home/test/projectsX', 'origins': [
-            {'origin_str': 'security issue', 'notices': [{
-                'message': 'Missing security policy',
-                'level': 'info'
-            }]}
-        ]})
+        cache.cache[layer.fs_hash]['files'].append(
+            {'name': 'README.md',
+             'path': '/home/test/projectsX',
+             'origins': [{'origin_str': 'security issue',
+                          'notices': [{
+                              'message': 'Missing security policy',
+                              'level': 'info'}]}
+                         ]})
 
         self.assertEqual(common.load_files_from_cache(layer), None)
         self.assertFalse(layer.add_files.called)
 
     def testLoadPackagesFromCache(self):
-        '''Given a layer object, populate the packages of given layer in case the cache isn't empty'''
+        '''Given a layer object, populate the packages of given layer in case
+        the cache isn't empty'''
         self.image.load_image()
 
         # not loaded in cache
@@ -122,18 +129,21 @@ class TestAnalyzeCommon(unittest.TestCase):
 
         # With no empty files
         layer.add_package = Mock(return_value=None)
-        cache.cache[layer.fs_hash]['packages'].append({'name': 'README.md', 'origins': [
-            {'origin_str': 'security issue', 'notices': [{
-                'message': 'Missing security policy',
-                'level': 'info'
-            }]}
-        ]})
+        cache.cache[layer.fs_hash]['packages'].append(
+            {'name': 'README.md',
+             'origins': [{
+                 'origin_str': 'security issue',
+                 'notices': [{
+                     'message': 'Missing security policy',
+                     'level': 'info'}]}
+             ]})
 
         self.assertTrue(common.load_packages_from_cache(layer))
         self.assertTrue(layer.add_package.called)
 
     def testLoadNoticesFromCache(self):
-        '''Given a layer object, populate the notices messages of given layer in case the cache isn't empty'''
+        '''Given a layer object, populate the notices messages of given
+        layer in case the cache isn't empty'''
         origin_str = 'security issue'
 
         self.image.load_image()

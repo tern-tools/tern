@@ -190,20 +190,19 @@ class Package:
         name and then give it a package dictionary to fill in the rest
         return true if package name is the same as the one used to instantiate
         the object, false if not'''
-        file_list = package_dict.get('files', False)
-        if file_list:
-            fd_list = []
-            for file_dict in file_list:
-                fd = FileData(file_dict['name'], file_dict['path'])
-                fd.fill(file_dict)
-                fd_list.append(fd)
-            package_dict['files'] = fd_list
-            success = True
         if self.name == package_dict['name']:
+            # update the package dictionary with file info
+            file_list = package_dict.get('files', False)
+            if file_list:
+                fd_list = []
+                for file_dict in file_list:
+                    fd = FileData(file_dict['name'], file_dict['path'])
+                    fd.fill(file_dict)
+                    fd_list.append(fd)
+                package_dict['files'] = fd_list
             self.__fill_properties(package_dict)
-        else:
-            success = False
-        return success
+            return True
+        return False
 
     def is_equal(self, other):
         '''This method performs a deep comparison between two objects by
