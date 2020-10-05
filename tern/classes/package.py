@@ -3,8 +3,6 @@
 # Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
-import os
-
 from tern.classes.file_data import FileData
 from tern.classes.notice import Notice
 from tern.classes.origins import Origins
@@ -192,17 +190,15 @@ class Package:
         name and then give it a package dictionary to fill in the rest
         return true if package name is the same as the one used to instantiate
         the object, false if not'''
-        raw_file_list = package_dict.get('files', False)
-        if raw_file_list:
-            file_list = []
-            for file_path in raw_file_list.split('\n'):
-                if file_path != '':
-                    file_name = os.path.split(file_path)[1]
-                    fd = FileData(file_name, file_path)
-                    fd.fill({'name': file_name, 'path': file_path})
-                    file_list.append(fd)
-            package_dict['files'] = file_list
-        success = True
+        file_list = package_dict.get('files', False)
+        if file_list:
+            fd_list = []
+            for file_dict in file_list:
+                fd = FileData(file_dict['name'], file_dict['path'])
+                fd.fill(file_dict)
+                fd_list.append(fd)
+            package_dict['files'] = fd_list
+            success = True
         if self.name == package_dict['name']:
             self.__fill_properties(package_dict)
         else:
