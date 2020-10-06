@@ -114,6 +114,27 @@ def close_client(client):
         pass
 
 
+def build_and_dump(dockerfile):
+    """Given a path to the dockerfile, use the Docker API to build the
+    container image and extract the image into a working directory. Return
+    true if this succeeded and false if it didn't"""
+    image_metadata = None
+    # open up a client first
+    # if this fails we cannot proceed further so we will exit
+    client = check_docker_setup()
+    image = build_image(dockerfile, client)
+    if image:
+        # the build succeeded, so we should be able to extract it
+        if extract_image(image):
+            image_metadata = image.attrs
+            remove_image(image, client)
+    else:
+        # we didn't succeed building the image
+        logger.warning("Could not build Docker image")
+    close_client(client)
+    return image_metadata
+
+
 # These functions should be deprecated
 def check_image(image_tag_string, client):
     """Check if the image and tag exist on disk"""
@@ -159,12 +180,14 @@ def get_docker_image_digest(docker_image):
 def dump_docker_image(image_tag):
     """Given an image and tag or image and digest, use the Docker API to get
     a container image representation into the working directory"""
+    image_metadata = None
     # open up a client first
     # if this fails we cannot proceed further so we will exit
     client = check_docker_setup()
     image = get_docker_image(image_tag, client)
     # this should return whether the operation succeeded or not
-    success = extract_image(image)
+    if extract_image(image):
+        image_metadata = image.attrs
     # now the client can be closed
     close_client(client)
-    return success
+    return image_metadata

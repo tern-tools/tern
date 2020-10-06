@@ -17,6 +17,7 @@ import sys
 from stevedore import driver
 from stevedore.exception import NoMatches
 
+from tern.load import docker_api
 from tern.report import errors
 from tern.report import formats
 from tern.analyze.docker import container
@@ -89,28 +90,25 @@ def load_base_image():
     '''Create base image from dockerfile instructions and return the image'''
     base_image, dockerfile_lines = dhelper.get_dockerfile_base()
     # try to get image metadata
-    if container.check_image(base_image.repotag) is None:
-        # if no base image is found, give a warning and continue
-        if container.pull_image(base_image.repotag) is None:
-            logger.warning("%s", errors.cannot_find_image.format(
-                imagetag=base_image.repotag))
-    try:
-        base_image.load_image()
-    except (NameError,
-            subprocess.CalledProcessError,
-            IOError,
-            docker.errors.APIError,
-            ValueError,
-            EOFError) as error:
-        logger.warning('Error in loading base image: %s', str(error))
-        base_image.origins.add_notice_to_origins(
-            dockerfile_lines, Notice(str(error), 'error'))
+    if docker_api.dump_docker_image(base_image.repotag):
+        # now see if we can load the image
+        try:
+            base_image.load_image()
+        except (NameError,
+                subprocess.CalledProcessError,
+                IOError,
+                docker.errors.APIError,
+                ValueError,
+                EOFError) as error:
+            logger.warning('Error in loading base image: %s', str(error))
+            base_image.origins.add_notice_to_origins(
+                dockerfile_lines, Notice(str(error), 'error'))
     return base_image
 
 
-def load_full_image(image_tag_string):
+def load_full_image(image_tag_string, digest_string):
     '''Create image object from image name and tag and return the object'''
-    test_image = DockerImage(image_tag_string)
+    test_image = DockerImage(image_tag_string, digest_string)
     failure_origin = formats.image_load_failure.format(
         testimage=test_image.repotag)
     try:

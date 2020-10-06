@@ -15,7 +15,6 @@ from tern.utils import constants
 from tern.utils import rootfs
 from tern import prep
 from tern.load import docker_api
-from tern.analyze.docker import container
 from tern.classes.notice import Notice
 from tern.analyze import common
 import tern.analyze.docker.helpers as dhelper
@@ -77,10 +76,15 @@ def execute_docker_image(args):  # pylint: disable=too-many-branches
     '''Execution path if given a Docker image'''
     logger.debug('Starting analysis...')
     image_string = ''
+    image_digest = ''
     if args.docker_image:
         # extract the docker image
-        if docker_api.dump_docker_image(args.docker_image):
-            image_string = args.docker_image
+        image_attrs = docker_api.dump_docker_image(args.docker_image)
+        if image_attrs:
+            if image_attrs['RepoTags']:
+                image_string = image_attrs['RepoTags'][0]
+            if image_attrs['RepoDigests']:
+                image_digest = image_attrs['RepoDigests'][0]
         else:
             logger.critical("Cannot extract Docker image")
     elif args.raw_image:
@@ -93,7 +97,7 @@ def execute_docker_image(args):  # pylint: disable=too-many-branches
             logger.critical("Cannot extract raw image")
     # If the image has been extracted, load the metadata
     if image_string:
-        full_image = report.load_full_image(image_string)
+        full_image = report.load_full_image(image_string, image_digest)
         # check if the image was loaded successfully
         if full_image.origins.is_empty():
             # Add an image origin here
@@ -113,8 +117,6 @@ def execute_docker_image(args):  # pylint: disable=too-many-branches
 
 def execute_dockerfile(args):  # noqa C901,R0912
     '''Execution path if given a dockerfile'''
-    container.check_docker_setup()
-    logger.debug('Setting up...')
     dfile = ''
     dfile_lock = False
     if args.name == 'report':
@@ -122,20 +124,19 @@ def execute_dockerfile(args):  # noqa C901,R0912
     else:
         dfile = args.lock
         dfile_lock = True
+    logger.debug("Parsing Dockerfile...")
     dfobj = dockerfile.get_dockerfile_obj(dfile)
     # expand potential ARG values so base image tag is correct
     dockerfile.expand_arg(dfobj)
     dockerfile.expand_vars(dfobj)
-    report.setup(dfobj=dfobj)
+    # Store dockerfile path and commands so we can access it during execution
+    dhelper.load_docker_commands(dfobj)
     # attempt to build the image
     logger.debug('Building Docker image...')
-    # placeholder to check if we can analyze the full image
-    completed = True
-    build, _ = dhelper.is_build()
-    if build:
-        # attempt to get built image metadata
-        image_tag_string = dhelper.get_dockerfile_image_tag()
-        full_image = report.load_full_image(image_tag_string)
+    image_info = docker_api.build_and_dump(dfile)
+    if image_info:
+        # attempt to load the built image metadata
+        full_image = report.load_full_image(dfile, '')
         if full_image.origins.is_empty():
             # image loading was successful
             # Add an image origin here
@@ -143,22 +144,21 @@ def execute_dockerfile(args):  # noqa C901,R0912
                 formats.dockerfile_image.format(dockerfile=dfile))
             # analyze image
             analyze(full_image, args, dfile_lock, dfobj)
+            completed = True
         else:
-            # we cannot load the full image
+            # we cannot analyze the full image, but maybe we can
+            # analyze the base image
             logger.warning('Cannot retrieve full image metadata')
-            completed = False
-        # clean up image
-        container.remove_image(full_image.repotag)
+        # clean up image tarballs
         if not args.keep_wd:
-            report.clean_image_tars(full_image)
+            prep.clean_image_tars(full_image)
     else:
         # cannot build the image
         logger.warning('Cannot build image')
-        completed = False
     # check if we have analyzed the full image or not
     if not completed:
-        # get the base image
-        logger.debug('Loading base image...')
+        # Try to analyze the base image
+        logger.debug('Analyzing base image...')
         base_image = report.load_base_image()
         if base_image.origins.is_empty():
             # image loading was successful
@@ -185,8 +185,6 @@ def execute_dockerfile(args):  # noqa C901,R0912
         logger.debug('Parsing Dockerfile to generate report...')
         output = dockerfile.create_locked_dockerfile(dfobj)
         dockerfile.write_locked_dockerfile(output, args.output_file)
-    logger.debug('Teardown...')
-    report.teardown()
-    if args.name == 'report':
-        if not args.keep_wd:
-            report.clean_working_dir()
+    # cleanup
+    if not args.keep_wd:
+        prep.clean_image_tars(full_image)

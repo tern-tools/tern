@@ -72,13 +72,11 @@ class TestClassDockerImage(unittest.TestCase):
         self.assertFalse(self.image.layers)
         self.assertFalse(self.image.history)
         # test instantiating with a tag
-        dump_docker_image('vmware/tern:testimage')
         d = DockerImage('vmware/tern:testimage')
         self.assertEqual(d.name, 'vmware/tern')
         self.assertEqual(d.tag, 'testimage')
-        self.assertEqual(d.checksum_type, 'sha256')
-        self.assertEqual(d.checksum, '20b32a9a20752aa1ad7582c667704fda9f004cc4'
-                                     'bfd8601fac7f2656c7567bb4')
+        self.assertFalse(d.checksum_type)
+        self.assertFalse(d.checksum)
 
     def testLoadImage(self):
         self.image.load_image()

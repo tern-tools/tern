@@ -10,7 +10,6 @@ import subprocess  # nosec
 from tern.utils import rootfs
 from tern.utils import general
 from tern.utils.constants import manifest_file
-from tern.load import docker_api
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
@@ -24,7 +23,7 @@ class DockerImage(Image):
         history: a list of commands used to create the filesystem layers
         to_dict: return a dict representation of the object
     '''
-    def __init__(self, repotag=None):
+    def __init__(self, repotag=None, repo_digest=None):
         '''Initialize using repotag'''
         super().__init__(repotag)
         self.__repotags = []
@@ -39,19 +38,10 @@ class DockerImage(Image):
         self.set_checksum(
             repo_dict.get('digest_type'), repo_dict.get('digest'))
         if not self.checksum and general.check_tar(repotag) is False:
-            # if there is no checksum, get the digest type
-            client = docker_api.check_docker_setup()
-            docker_image = docker_api.check_image(self._repotag, client)
-            docker_api.close_client(client)
-            # this object could be representing an image built from
-            # a Dockerfile, so it may not have a digest
-            # so check for that condition
-            if docker_image.attrs['RepoDigests']:
-                image_name_digest = docker_api.get_docker_image_digest(
-                    docker_image)
-                repo_dict = general.parse_image_string(image_name_digest)
-                self.set_checksum(
-                    repo_dict.get('digest_type'), repo_dict.get('digest'))
+            # see if we can set it via the repo_digest string
+            if repo_digest and ':' in repo_digest:
+                repo_digest_list = repo_digest.split(':')
+                self.set_checksum(repo_digest_list[0], repo_digest_list[1])
 
     @property
     def repotags(self):
