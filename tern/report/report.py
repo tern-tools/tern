@@ -12,18 +12,12 @@ import logging
 import os
 import shutil
 import subprocess  # nosec
-import sys
-
 from stevedore import driver
 from stevedore.exception import NoMatches
 
 from tern.load import docker_api
-from tern.report import errors
 from tern.report import formats
-from tern.analyze.docker import container
 from tern.utils import constants
-from tern.utils import cache
-from tern.utils import general
 from tern.utils import rootfs
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
@@ -39,35 +33,6 @@ def write_report(report, args):
         file_name = args.output_file
     with open(file_name, 'w') as f:
         f.write(report)
-
-
-def setup(dfobj=None, image_tag_string=None):
-    '''Any initial setup'''
-    # generate random names for image, container, and tag
-    general.initialize_names()
-    # load the cache
-    cache.load()
-    # load dockerfile if present
-    if dfobj is not None:
-        dhelper.load_docker_commands(dfobj)
-    # check if the docker image is present
-    if image_tag_string and general.check_tar(image_tag_string) is False:
-        if container.check_image(image_tag_string) is None:
-            # if no docker image is present, try to pull it
-            if container.pull_image(image_tag_string) is None:
-                logger.fatal("%s", errors.cannot_find_image.format(
-                    imagetag=image_tag_string))
-                sys.exit()
-
-
-def teardown():
-    '''Tear down tern setup'''
-    # close docker client if any
-    container.close_client()
-    # save the cache
-    cache.save()
-    # remove folders for rootfs operations
-    rootfs.clean_up()
 
 
 def clean_image_tars(image_obj):

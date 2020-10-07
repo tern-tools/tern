@@ -7,7 +7,6 @@
 Docker specific functions - used when trying to retrieve packages when
 given a Dockerfile
 """
-import docker
 import logging
 import os
 import re
@@ -16,7 +15,6 @@ import sys
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
 from tern.analyze.docker import dockerfile
-from tern.analyze.docker import container
 from tern.utils import constants
 from tern.report import errors
 from tern.report import formats
@@ -114,24 +112,6 @@ def get_dockerfile_image_tag():
     image_tag_string = constants.image + dockerfile.tag_separator + \
         constants.tag
     return image_tag_string
-
-
-def is_build():
-    '''Attempt to build a given dockerfile
-    If it does not build return False. Else return True'''
-    image_tag_string = get_dockerfile_image_tag()
-    success = False
-    msg = ''
-    try:
-        container.build_container(dockerfile_global, image_tag_string)
-    except (docker.errors.APIError, docker.errors.BuildError) as error:
-        success = False
-        logger.error('Error building image: %s', str(error))
-        msg = str(error)
-    else:
-        logger.debug('Successfully built image')
-        success = True
-    return success, msg
 
 
 def created_to_instruction(created_by):

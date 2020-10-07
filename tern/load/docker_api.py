@@ -171,10 +171,21 @@ def get_docker_image(image_tag_string, client):
     return image
 
 
-def get_docker_image_digest(docker_image):
-    '''Given a docker image object return the digest information of the
-    unique image in 'image@sha_type:digest' format.'''
-    return docker_image.attrs['RepoDigests'][0]
+def get_docker_image_digest(image_tag):
+    """Given an image and tag, get the image's digest in
+    'image@sha_type:digest' format"""
+    digest = ""
+    # open up a client first
+    # if this fails we cannot proceed further so we will exit
+    client = check_docker_setup()
+    # get the image
+    image = get_docker_image(image_tag, client)
+    if image:
+        digest = image.attrs['RepoDigests'][0]
+    # cleanup
+    remove_image(image, client)
+    close_client(client)
+    return digest
 
 
 def dump_docker_image(image_tag):

@@ -14,7 +14,7 @@ import os
 
 from tern.utils import general
 from tern.utils import constants
-from tern.analyze.docker import container
+from tern.load import docker_api
 from tern.analyze import common
 from tern.command_lib import command_lib
 
@@ -172,10 +172,10 @@ def expand_from_images(dfobj):
         if not img['digest_type'] and not img['digest']:
             if not img['tag']:
                 img['tag'] = 'latest'
-            image = container.get_image(img['name'] + tag_separator +
-                                        img['tag'])
-            if image is not None:
-                dfobj.parent_images[i] = container.get_image_digest(image)
+            digest = docker_api.get_docker_image_digest(
+                img['name'] + tag_separator + img['tag'])
+            if digest:
+                dfobj.parent_images[i] = digest
             else:
                 logger.error("Error pinning digest to '%s'. Image not found.",
                              dfobj.parent_images[i])
