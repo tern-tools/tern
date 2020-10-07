@@ -13,7 +13,6 @@ import subprocess  # nosec
 import yaml
 import pkg_resources
 
-from tern.analyze.docker import container
 from tern.utils import constants
 from tern.utils import rootfs
 from tern.report import errors
@@ -38,7 +37,8 @@ with open(os.path.abspath(snippet_file)) as f:
 # list of package information keys that the command library can accomodate
 base_keys = {'names', 'versions', 'licenses', 'copyrights', 'proj_urls',
              'srcs', 'files'}
-package_keys = {'name', 'version', 'license', 'copyright', 'proj_url', 'src', 'files'}
+package_keys = {'name', 'version', 'license', 'copyright', 'proj_url', 'src',
+                'files'}
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -162,32 +162,6 @@ def collate_snippets(snippet_list, package=''):
     return full_cmd
 
 
-def invoke_in_container(snippet_list, shell, package='', override=''):
-    '''Invoke the commands from the invoke dictionary within a running
-    container
-    To override the name of the running container pass the name of another
-    running container'''
-    # construct the full command
-    full_cmd = collate_snippets(snippet_list, package)
-    try:
-        if override:
-            result = container.docker_command(
-                container.execute, override, shell, '-c', full_cmd)
-        else:
-            result = container.docker_command(
-                container.execute, container, shell, '-c', full_cmd)
-        # convert from bytestream to string
-        try:
-            result = result.decode('utf-8')
-        except AttributeError:
-            pass
-        return result
-    except subprocess.CalledProcessError as error:
-        logger.warning("Error executing command inside the container")
-        raise subprocess.CalledProcessError(
-            1, cmd=full_cmd, output=error.output.decode('utf-8'))
-
-
 def invoke_in_rootfs(snippet_list, shell, package=''):
     '''Invoke the commands from the invoke dictionary in a root filesystem
     assuming the root filesystem is ready to accept commands'''
@@ -205,8 +179,7 @@ def invoke_in_rootfs(snippet_list, shell, package=''):
         raise
 
 
-def get_pkg_attr_list(shell, attr_dict, work_dir, envs, package_name='',  # pylint:disable=too-many-arguments
-                      chroot=True, override=''):
+def get_pkg_attr_list(shell, attr_dict, work_dir, envs, package_name=''):
     '''The command library has package attributes listed like this:
         {invoke: {1: {container: [command1, command2]},
                   2: {host: [command1, command2]}}, delimiter: <delimiter}
@@ -234,20 +207,11 @@ def get_pkg_attr_list(shell, attr_dict, work_dir, envs, package_name='',  # pyli
                 if work_dir is not None:
                     snippet_list.insert(0, 'cd ' + work_dir)
                 # if we need to run in a chroot environment
-                if chroot:
-                    try:
-                        result = invoke_in_rootfs(
-                            snippet_list, shell, package=package_name)
-                    except subprocess.CalledProcessError as error:
-                        error_msgs = error_msgs + error.output
-                else:
-                    # if we need to run in a container
-                    try:
-                        result = invoke_in_container(
-                            snippet_list, shell, package=package_name,
-                            override=override)
-                    except subprocess.CalledProcessError as error:
-                        error_msgs = error_msgs + error.output
+                try:
+                    result = invoke_in_rootfs(
+                        snippet_list, shell, package=package_name)
+                except subprocess.CalledProcessError as error:
+                    error_msgs = error_msgs + error.output
                 result = result[:-1]
                 if 'delimiter' in attr_dict.keys():
                     res_list = result.split(attr_dict['delimiter'])

@@ -83,6 +83,9 @@ test_suite = {
         'tern report -d samples/alpine_python/Dockerfile',
         'tern report -w photon.tar',
         'tern lock Dockerfile'],
+    # tern/load
+    re.compile('tern/load'): [
+        'python tests/test_load_docker_api.py'],
     # tern/report
     re.compile('tern/report'): [
         'tern report -i golang:alpine',

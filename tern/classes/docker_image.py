@@ -10,7 +10,6 @@ import subprocess  # nosec
 from tern.utils import rootfs
 from tern.utils import general
 from tern.utils.constants import manifest_file
-from tern.analyze.docker import container
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
@@ -24,7 +23,7 @@ class DockerImage(Image):
         history: a list of commands used to create the filesystem layers
         to_dict: return a dict representation of the object
     '''
-    def __init__(self, repotag=None):
+    def __init__(self, repotag=None, repo_digest=None):
         '''Initialize using repotag'''
         super().__init__(repotag)
         self.__repotags = []
@@ -39,16 +38,10 @@ class DockerImage(Image):
         self.set_checksum(
             repo_dict.get('digest_type'), repo_dict.get('digest'))
         if not self.checksum and general.check_tar(repotag) is False:
-            # if there is no checksum, get the digest type
-            docker_image = container.check_image(self._repotag)
-            # this object could be representing an image built from
-            # a Dockerfile, so it may not have a digest
-            # so check for that condition
-            if docker_image.attrs['RepoDigests']:
-                image_name_digest = container.get_image_digest(docker_image)
-                repo_dict = general.parse_image_string(image_name_digest)
-                self.set_checksum(
-                    repo_dict.get('digest_type'), repo_dict.get('digest'))
+            # see if we can set it via the repo_digest string
+            if repo_digest and ':' in repo_digest:
+                repo_digest_list = repo_digest.split(':')
+                self.set_checksum(repo_digest_list[0], repo_digest_list[1])
 
     @property
     def repotags(self):
@@ -139,9 +132,10 @@ class DockerImage(Image):
                 index = index + 1
 
     def load_image(self):
-        '''Load image metadata using docker commands'''
+        """Load metadata from an extracted docker image. This assumes the
+        image has already been downloaded and extracted into the working
+        directory"""
         try:
-            container.extract_image_metadata(self.repotag)
             self._manifest = self.get_image_manifest()
             self.__repotags = self.get_image_repotags(self._manifest)
             self._config = self.get_image_config(self._manifest)

@@ -61,10 +61,7 @@ def load_from_cache(layer, redo=False):
     matching the origin_str'''
     loaded = False
     if not redo:
-        # check if packages are available in the cache
-        if load_packages_from_cache(layer):
-            loaded = True
-        # load some extra properties into the layer if available
+        # check if the layer has been cached
         if layer.fs_hash in cache.get_layers():
             layer.files_analyzed = cache.cache.get(layer.fs_hash).get(
                 'files_analyzed', False)
@@ -74,7 +71,14 @@ def load_from_cache(layer, redo=False):
                 'pkg_format', '')
             layer.extension_info = cache.cache.get(layer.fs_hash).get(
                 'extension_info', {})
-        load_files_from_cache(layer)
+            load_packages_from_cache(layer)
+            load_files_from_cache(layer)
+            loaded = True
+        else:
+            # if the hash is not present in the cache, load that data from the
+            # hash file
+            logger.debug('Reading files in filesystem...')
+            layer.add_files()
     return loaded
 
 
@@ -117,11 +121,6 @@ def load_files_from_cache(layer):
                             origin_dict['origin_str'], Notice(
                                 notice['message'], notice['level']))
             layer.add_file(f)
-    else:
-        # if there are no files, generate them from the pre-calculated
-        # hash file
-        logger.debug('Reading files in filesystem...')
-        layer.add_files()
 
 
 def load_notices_from_cache(layer):
@@ -238,7 +237,19 @@ def collate_list_metadata(shell, listing, work_dir, envs):
             items, msg = command_lib.get_pkg_attr_list(shell, listing[item],
                                                        work_dir, envs)
             msgs = msgs + msg
-            pkg_dict.update({item: items})
+            if item == 'files':
+                # convert this data into a list before adding it to the
+                # package dictionary
+                file_list = []
+                for files_str in items:
+                    # convert the string into a list
+                    files = []
+                    for filepath in filter(bool, files_str.split('\n')):
+                        files.append(filepath.lstrip('/'))
+                    file_list.append(files)
+                pkg_dict.update({item: file_list})
+            else:
+                pkg_dict.update({item: items})
         else:
             warnings = warnings + errors.no_listing_for_base_key.format(
                 listing_key=item)
@@ -272,7 +283,16 @@ def convert_to_pkg_dicts(pkg_dict):
     for index, _ in enumerate(new_dict['name']):
         a_pkg = {}
         for key, value in new_dict.items():
-            a_pkg.update({key: value[index]})
+            if key == 'files':
+                # update the list with FileData objects in dictionary format
+                fd_list = []
+                for filepath in value[index]:
+                    fd_dict = FileData(
+                        os.path.split(filepath)[1], filepath).to_dict()
+                    fd_list.append(fd_dict)
+                a_pkg.update({'files': fd_list})
+            else:
+                a_pkg.update({key: value[index]})
         pkg_list.append(a_pkg)
     return pkg_list
 

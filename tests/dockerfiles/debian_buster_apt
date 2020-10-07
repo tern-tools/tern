@@ -1,0 +1,13 @@
+# Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-2-Clause
+
+FROM debian:buster
+
+# Install some dependencies
+RUN apt-get update && \
+    apt-get -y install tar && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Make a default command
+CMD ["bash"]

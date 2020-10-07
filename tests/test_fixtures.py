@@ -7,10 +7,30 @@
 Objects to use for testing
 """
 
+import os
+import shutil
+
 from tern.classes.package import Package
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
 from tern.classes.template import Template
+from tern.utils import constants
+from tern.utils import general
+
+
+def create_working_dir():
+    """Create the working directory for tests"""
+    working_dir = os.path.join(general.get_top_dir(), constants.temp_folder)
+    if not os.path.isdir(working_dir):
+        os.makedirs(working_dir)
+
+
+def remove_working_dir():
+    """Remove the working directory for tests"""
+    # don't remove the cache, just the temp folder
+    working_dir = os.path.join(general.get_top_dir(), constants.temp_folder)
+    if os.path.exists(working_dir):
+        shutil.rmtree(working_dir)
 
 
 class TestImage(Image):

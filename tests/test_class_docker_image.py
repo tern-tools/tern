@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 import unittest
-import subprocess  # nosec
 
-from tern.__main__ import create_top_dir
-from tern.analyze.docker import container
-from tern.analyze.docker.container import check_image, check_docker_setup
+from tern.load.docker_api import dump_docker_image
 from tern.classes.docker_image import DockerImage
-from tern.utils.rootfs import set_working_dir
+from tern.utils import rootfs
+from test_fixtures import create_working_dir
+from test_fixtures import remove_working_dir
 
 
 class TestClassDockerImage(unittest.TestCase):
@@ -19,20 +18,13 @@ class TestClassDockerImage(unittest.TestCase):
         '''Using a specific image here. If this test fails due to the image
         not being found anymore, pick a different image to test against
         For now use Docker to pull the image from Dockerhub'''
-        set_working_dir()
-        create_top_dir()
-        check_docker_setup()
-        if not check_image('vmware/tern@sha256:20b32a9a20752aa1ad'
-                           '7582c667704fda9f004cc4bfd8601fac7f2656c7567bb4'):
-            try:
-                container.pull_image('vmware/tern@sha256:20b32a9a20'
-                                     '752aa1ad7582c667704fda9f004cc4'
-                                     'bfd8601fac7f2656c7567bb4')
-            except subprocess.CalledProcessError as error:
-                print(error.output)
-        self.image = DockerImage('vmware/tern@sha256:20b32'
-                                 'a9a20752aa1ad7582c667704fda9f00'
-                                 '4cc4bfd8601fac7f2656c7567bb4')
+        create_working_dir()
+        rootfs.set_working_dir()
+        # this should check if the docker image extraction is successful
+        dump_docker_image('vmware/tern@sha256:20b32a9a20752aa1ad7582c667704f'
+                          'da9f004cc4bfd8601fac7f2656c7567bb4')
+        self.image = DockerImage('vmware/tern@sha256:20b32a9a20752aa1ad7582c6'
+                                 '67704fda9f004cc4bfd8601fac7f2656c7567bb4')
         # constants for this image
         self.layer = ('c1c3a87012e7ff5791b31e94515b661'
                       'cdf06f6d5dc2f9a6245eda8774d257a13')
@@ -61,8 +53,8 @@ class TestClassDockerImage(unittest.TestCase):
         ]
 
     def tearDown(self):
-        container.close_client()
         del self.image
+        remove_working_dir()
 
     def testInstance(self):
         self.assertEqual(self.image.repotag, 'vmware/tern@sha256:20b32a9a2'
@@ -80,18 +72,11 @@ class TestClassDockerImage(unittest.TestCase):
         self.assertFalse(self.image.layers)
         self.assertFalse(self.image.history)
         # test instantiating with a tag
-        if not check_image('vmware/tern:testimage'):
-            try:
-                container.pull_image('vmware/tern:testimage')
-            except subprocess.CalledProcessError as error:
-                print(error.output)
-
         d = DockerImage('vmware/tern:testimage')
         self.assertEqual(d.name, 'vmware/tern')
         self.assertEqual(d.tag, 'testimage')
-        self.assertEqual(d.checksum_type, 'sha256')
-        self.assertEqual(d.checksum, '20b32a9a20752aa1ad7582c667704fda9f004cc4'
-                                     'bfd8601fac7f2656c7567bb4')
+        self.assertFalse(d.checksum_type)
+        self.assertFalse(d.checksum)
 
     def testLoadImage(self):
         self.image.load_image()

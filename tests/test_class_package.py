@@ -154,18 +154,13 @@ class TestClassPackage(unittest.TestCase):
         self.assertTrue(self.p2.is_equal(p))
 
     def testFill(self):
-        f_dict1 = {'name': 'a.txt', 'path': '/usr/a.txt'}
-        f_dict2 = {'name': 'b.txt', 'path': '/lib/b.txt'}
-        fd1 = FileData(f_dict1['name'], f_dict1['path'])
-        fd2 = FileData(f_dict2['name'], f_dict2['path'])
-        fd1.fill(f_dict1)
-        fd2.fill(f_dict2)
         p_dict = {'name': 'p1',
                   'version': '1.0',
                   'pkg_license': 'Apache 2.0',
                   'checksum': 'abcxyz',
                   'pkg_licenses': ['MIT', 'GPL'],
-                  'files': '/usr/a.txt\n/lib/b.txt'}
+                  'files': [{'name': 'a.txt', 'path': '/usr/a.txt'},
+                            {'name': 'b.txt', 'path': '/lib/b.txt'}]}
         p = Package('p1')
         p.fill(p_dict)
         self.assertEqual(p.name, 'p1')
@@ -173,8 +168,9 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(p.pkg_license, 'Apache 2.0')
         self.assertEqual(p.checksum, 'abcxyz')
         self.assertEqual(p.pkg_licenses, ['MIT', 'GPL'])
-        self.assertTrue(fd1.is_equal(p.files[0]))
-        self.assertTrue(fd2.is_equal(p.files[1]))
+        self.assertEqual(len(p.files), 2)
+        self.assertEqual(p.files[0].name, 'a.txt')
+        self.assertEqual(p.files[0].path, '/usr/a.txt')
         self.assertFalse(p.copyright)
         self.assertFalse(p.proj_url)
         self.assertEqual(len(p.origins.origins), 1)
