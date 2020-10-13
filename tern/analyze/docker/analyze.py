@@ -60,55 +60,6 @@ def abort_analysis():
     sys.exit(1)
 
 
-def analyze_first_layer(image_obj, master_list, redo):
-    # set up a notice origin for the first layer
-    origin_first_layer = 'Layer {}'.format(image_obj.layers[0].layer_index)
-    # check if the layer is empty
-    if common.is_empty_layer(image_obj.layers[0]):
-        logger.warning(errors.empty_layer)
-        image_obj.layers[0].origins.add_notice_to_origins(
-            origin_first_layer, Notice(errors.empty_layer, 'warning'))
-        return ''
-    # find the shell from the first layer
-    shell = common.get_shell(image_obj.layers[0])
-    if not shell:
-        logger.warning(errors.no_shell)
-        image_obj.layers[0].origins.add_notice_to_origins(
-            origin_first_layer, Notice(errors.no_shell, 'warning'))
-    # find the binary from the first layer
-    binary = common.get_base_bin(image_obj.layers[0])
-    if not binary:
-        logger.warning(errors.no_package_manager)
-        image_obj.layers[0].origins.add_notice_to_origins(
-            origin_first_layer, Notice(errors.no_package_manager, 'warning'))
-    # try to load packages from cache
-    if not common.load_from_cache(image_obj.layers[0], redo):
-        # set a possible OS
-        common.get_os_style(image_obj.layers[0], binary)
-        # if there is a binary, extract packages
-        if shell and binary:
-            execute_base_layer(image_obj.layers[0], binary, shell)
-    # populate the master list with all packages found in the first layer
-    for p in image_obj.layers[0].packages:
-        master_list.append(p)
-    return shell
-
-
-def execute_base_layer(base_layer, binary, shell):
-    '''Execute retrieving base layer packages'''
-    try:
-        target = rootfs.mount_base_layer(base_layer.tar_file)
-        rootfs.prep_rootfs(target)
-        common.add_base_packages(base_layer, binary, shell)
-    except KeyboardInterrupt:
-        logger.critical(errors.keyboard_interrupt)
-        abort_analysis()
-    finally:
-        # unmount proc, sys and dev
-        rootfs.undo_mount()
-        rootfs.unmount_rootfs()
-
-
 def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  # noqa: R0912,R0913
                               dfile_lock=False, driver=None):
     # get packages for subsequent layers
