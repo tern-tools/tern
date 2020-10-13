@@ -44,78 +44,36 @@ def get_shell(layer):
     return shell
 
 
-def collate_list_metadata(shell, listing, work_dir, envs):
-    '''Given the shell and the listing for the package manager, collect
-    metadata that gets returned as a list'''
-    pkg_dict = {}
-    msgs = ''
-    warnings = ''
-    if not shell:
-        msgs = "Cannot invoke commands without a shell\n"
-        return pkg_dict, msgs, warnings
-    for item in command_lib.base_keys:
-        if item in listing.keys():
-            items, msg = command_lib.get_pkg_attr_list(shell, listing[item],
-                                                       work_dir, envs)
-            msgs = msgs + msg
-            if item == 'files':
-                # convert this data into a list before adding it to the
-                # package dictionary
-                file_list = []
-                for files_str in items:
-                    # convert the string into a list
-                    files = []
-                    for filepath in filter(bool, files_str.split('\n')):
-                        files.append(filepath.lstrip('/'))
-                    file_list.append(files)
-                pkg_dict.update({item: file_list})
-            else:
-                pkg_dict.update({item: items})
-        else:
-            warnings = warnings + errors.no_listing_for_base_key.format(
-                listing_key=item)
-    return pkg_dict, msgs, warnings
+def get_base_bin(first_layer):
+    '''Find the binary used to identify the base OS for the container image.
+    We do this by providing the path to the first layer of the container
+    image and looking for known binaries there. Assume that the layer has
+    already been unpacked with the filesystem'''
+    binary = ''
+    cwd = rootfs.get_untar_dir(first_layer.tar_file)
+    for key, value in command_lib.command_lib['base'].items():
+        for path in value['path']:
+            if os.path.exists(os.path.join(cwd, path)):
+                binary = key
+                break
+    return binary
 
 
-def convert_to_pkg_dicts(pkg_dict):
-    '''The pkg_dict is what gets returned after collecting individual
-    metadata as a list. It looks like this if property collected:
-        {'names': [....], 'versions': [...], 'licenses': [...], ....}
-    Convert these into a package dictionary expected by the Package
-    Object'''
-    mapping = {'name': 'names',
-               'version': 'versions',
-               'pkg_license': 'licenses',
-               'copyright': 'copyrights',
-               'proj_url': 'proj_urls',
-               'pkg_licenses': 'pkg_licenses',
-               'files': 'files'}
-    pkg_list = []
-    len_names = len(pkg_dict['names'])
-    # make a list of keys that correspond with package property names
-    new_dict = {}
-    for key, value in mapping.items():
-        if value in pkg_dict.keys():
-            if len(pkg_dict[value]) == len_names:
-                new_dict.update({key: pkg_dict[value]})
-            else:
-                logger.warning("Inconsistent lengths for key: %s", value)
-    # convert each of the keys into package dictionaries
-    for index, _ in enumerate(new_dict['name']):
-        a_pkg = {}
-        for key, value in new_dict.items():
-            if key == 'files':
-                # update the list with FileData objects in dictionary format
-                fd_list = []
-                for filepath in value[index]:
-                    fd_dict = FileData(
-                        os.path.split(filepath)[1], filepath).to_dict()
-                    fd_list.append(fd_dict)
-                a_pkg.update({'files': fd_list})
-            else:
-                a_pkg.update({key: value[index]})
-        pkg_list.append(a_pkg)
-    return pkg_list
+def invoke_in_rootfs(snippet_list, shell, package=''):
+    '''Invoke the commands from the invoke dictionary in a root filesystem
+    assuming the root filesystem is ready to accept commands'''
+    # construct the full command
+    full_cmd = collate_snippets(snippet_list, package)
+    try:
+        result = rootfs.run_chroot_command(full_cmd, shell)
+        try:
+            result = result.decode('utf-8')
+        except AttributeError:
+            pass
+        return result
+    except subprocess.CalledProcessError as error:
+        logger.warning('Error executing snippets: %s', error)
+        raise
 
 
 def fill_package_metadata(pkg_obj, pkg_listing, shell, work_dir, envs):
@@ -184,97 +142,6 @@ def get_package_dependencies(package_listing, package_name, shell,
             return list(set(deps_list)), ''
         return [], invoke_msg
     return [], deps_msg
-
-
-def get_installed_package_names(command):
-    '''Given a Command object, return a list of package names'''
-    pkgs = []
-    # check if the command attributes are set
-    if command.is_set() and command.is_install():
-        for word in command.words:
-            pkgs.append(word)
-    return pkgs
-
-
-def remove_ignored_commands(command_list):
-    '''For a list of Command objects, examine if the command is ignored.
-    Return all the ignored command strings. This is a filtering operation
-    so all the ignored command objects will be removed from the original
-    list'''
-    ignore_commands = ''
-    filtered_list = []
-    while command_list:
-        command = command_list.pop(0)
-        if command.is_set() and command.is_ignore():
-            ignore_commands = ignore_commands + command.shell_command + '\n'
-        else:
-            filtered_list.append(command)
-    return ignore_commands, filtered_list
-
-
-def remove_unrecognized_commands(command_list):
-    '''For a list of Command objects, examine if the command is not recognized.
-    Return all the unrecognized command strings. This is a filtering operation
-    so all the unrecognized command objects will be removed from the original
-    list'''
-    unrec_commands = ''
-    filtered_list = []
-    while command_list:
-        command = command_list.pop(0)
-        if not command.is_set():
-            unrec_commands = unrec_commands + command.shell_command + '\n'
-        else:
-            filtered_list.append(command)
-    return unrec_commands, filtered_list
-
-
-def consolidate_commands(command_list):
-    '''Given a list of Command objects, consolidate the install and remove
-    commands into one install command and return a list of resulting
-    command objects'''
-    new_list = []
-
-    if len(command_list) == 1:
-        new_list.append(command_list.pop(0))
-
-    while command_list:
-        # match the first command with its following commands.
-        first = command_list.pop(0)
-        for _ in range(0, len(command_list)):
-            second = command_list.pop(0)
-            if first.is_remove() and second.is_install():
-                # if remove then install, ignore the remove command
-                new_list.append(second)
-            else:
-                if not first.merge(second):
-                    # Unable to merge second, we should keep second command.
-                    command_list.append(second)
-        # after trying to merge with all following commands, add first command
-        # to the new_dict.
-        new_list.append(first)
-    return new_list
-
-
-def filter_install_commands(shell_command_line):
-    '''Given a shell command line:
-        1. Create a list of Command objects
-        2. For each command, check against the command library for installed
-        commands
-        3. Return installed command objects, and messages for ignored commands
-        and unrecognized commands'''
-    report = ''
-    command_list, branch_report = get_shell_commands(shell_command_line)
-    for command in command_list:
-        command_lib.set_command_attrs(command)
-    ignore_msgs, filter1 = remove_ignored_commands(command_list)
-    unrec_msgs, filter2 = remove_unrecognized_commands(filter1)
-    if ignore_msgs:
-        report = report + formats.ignored + ignore_msgs
-    if unrec_msgs:
-        report = report + formats.unrecognized + unrec_msgs
-    if branch_report:
-        report = report + branch_report
-    return consolidate_commands(filter2), report
 
 
 def add_snippet_packages(image_layer, command, pkg_listing, shell, work_dir,  # pylint:disable=too-many-arguments,too-many-locals

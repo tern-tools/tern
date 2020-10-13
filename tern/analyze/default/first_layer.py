@@ -23,21 +23,6 @@ from tern.utils import rootfs
 logger = logging.getLogger(constants.logger_name)
 
 
-def get_base_bin(first_layer):
-    '''Find the binary used to identify the base OS for the container image.
-    We do this by providing the path to the first layer of the container
-    image and looking for known binaries there. Assume that the layer has
-    already been unpacked with the filesystem'''
-    binary = ''
-    cwd = rootfs.get_untar_dir(first_layer.tar_file)
-    for key, value in command_lib.command_lib['base'].items():
-        for path in value['path']:
-            if os.path.exists(os.path.join(cwd, path)):
-                binary = key
-                break
-    return binary
-
-
 def get_os_release(base_layer):
     '''Given the base layer object, determine if an os-release file exists and
     return the PRETTY_NAME string from it. If no release file exists,

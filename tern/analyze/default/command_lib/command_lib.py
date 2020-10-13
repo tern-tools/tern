@@ -9,12 +9,10 @@ Invoking commands in the command library
 
 import logging
 import os
-import subprocess  # nosec
 import yaml
 import pkg_resources
 
 from tern.utils import constants
-from tern.utils import rootfs
 from tern.report import errors
 
 
@@ -160,67 +158,6 @@ def collate_snippets(snippet_list, package=''):
     full_cmd = full_cmd + snippet_list[last_index].format_map(
         FormatAwk(package=package))
     return full_cmd
-
-
-def invoke_in_rootfs(snippet_list, shell, package=''):
-    '''Invoke the commands from the invoke dictionary in a root filesystem
-    assuming the root filesystem is ready to accept commands'''
-    # construct the full command
-    full_cmd = collate_snippets(snippet_list, package)
-    try:
-        result = rootfs.run_chroot_command(full_cmd, shell)
-        try:
-            result = result.decode('utf-8')
-        except AttributeError:
-            pass
-        return result
-    except subprocess.CalledProcessError as error:
-        logger.warning('Error executing snippets: %s', error)
-        raise
-
-
-def get_pkg_attr_list(shell, attr_dict, work_dir, envs, package_name=''):
-    '''The command library has package attributes listed like this:
-        {invoke: {1: {container: [command1, command2]},
-                  2: {host: [command1, command2]}}, delimiter: <delimiter}
-    Given the shell to use, the attribute dictionary and the package name, get
-    the result of the invokes, apply the delimiter to create a list and
-    return the list.
-    chroot is used to indicate whether to run the commands in a chroot
-    environment and defaults to True
-    override is used for an alternate container name and defaults to
-    an empty string'''
-    attr_list = []
-    error_msgs = ''
-    if 'invoke' in attr_dict.keys():
-        # invoke the commands
-        for step in range(1, len(attr_dict['invoke'].keys()) + 1):
-            if 'container' in attr_dict['invoke'][step].keys():
-                snippet_list = attr_dict['invoke'][step]['container']
-                result = ''
-                # If environment variables exist, set them
-                if envs:
-                    for var in envs:
-                        snippet_list.insert(0, 'export ' + var.split('=')[0] +
-                                            '=' + var.split('=')[1])
-                # If work_dir exist cd into it
-                if work_dir is not None:
-                    snippet_list.insert(0, 'cd ' + work_dir)
-                # if we need to run in a chroot environment
-                try:
-                    result = invoke_in_rootfs(
-                        snippet_list, shell, package=package_name)
-                except subprocess.CalledProcessError as error:
-                    error_msgs = error_msgs + error.output
-                result = result[:-1]
-                if 'delimiter' in attr_dict.keys():
-                    res_list = result.split(attr_dict['delimiter'])
-                    if res_list[-1] == '':
-                        res_list.pop()
-                    attr_list.extend(res_list)
-                else:
-                    attr_list.append(result)
-    return attr_list, error_msgs
 
 
 def check_sourcable(command, package_name):
