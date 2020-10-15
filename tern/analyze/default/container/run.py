@@ -10,18 +10,17 @@ Run analysis on a container image or Dockerfile
 import logging
 
 from tern.report import formats
-from tern.report import report
 from tern.utils import constants
 from tern.utils import rootfs
 from tern import prep
 from tern.load import docker_api
+from tern.analyze.default.analyze_image import analyze
 from tern.classes.notice import Notice
 from tern.analyze import common
 import tern.analyze.docker.helpers as dhelper
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
 from tern.classes.package import Package
-from tern.analyze.docker.analyze import analyze_docker_image
 from tern.analyze.passthrough import run_extension
 from tern.analyze.docker import dockerfile
 
@@ -62,21 +61,10 @@ def get_dockerfile_packages():
     return stub_image
 
 
-def analyze(image_obj, args, dfile_lock=False, dfobj=None):
-    '''Analyze the image object either using the default method or the extended
-    method'''
-    if not dfile_lock and args.extend:
-        run_extension(image_obj, args.extend, args.redo)
-    else:
-        analyze_docker_image(image_obj, args.redo, dfile_lock, dfobj,
-                             args.driver)
-
-
-def execute_docker_image(args):  # pylint: disable=too-many-branches
-    '''Execution path if given a Docker image'''
-    logger.debug('Starting analysis...')
-    image_string = ''
-    image_digest = ''
+def extract_image(args):
+    """The image can either be downloaded from a container registry or provided
+    as an image tarball. Extract the image into a working directory accordingly
+    Return an image name and tag and an image digest if it exists"""
     if args.docker_image:
         # extract the docker image
         image_attrs = docker_api.dump_docker_image(args.docker_image)
@@ -85,26 +73,35 @@ def execute_docker_image(args):  # pylint: disable=too-many-branches
                 image_string = image_attrs['RepoTags'][0]
             if image_attrs['RepoDigests']:
                 image_digest = image_attrs['RepoDigests'][0]
+            return image_string, image_digest
         else:
             logger.critical("Cannot extract Docker image")
-    elif args.raw_image:
+            return None, None
+    if args.raw_image:
         # for now we assume that the raw image tarball is always
         # the product of "docker save", hence it will be in
         # the docker style layout
         if rootfs.extract_tarfile(args.raw_image, rootfs.get_working_dir()):
-            image_string = args.raw_image
+            return args.raw_image, None
         else:
             logger.critical("Cannot extract raw image")
+            return None, None
+
+
+def execute_image(args):
+    """Execution path for container images"""
+    logger.debug('Starting analysis...')
+    image_string, image_digest = extract_image(args)
     # If the image has been extracted, load the metadata
     if image_string:
-        full_image = report.load_full_image(image_string, image_digest)
+        full_image = image.load_full_image(image_string, image_digest)
         # check if the image was loaded successfully
         if full_image.origins.is_empty():
             # Add an image origin here
             full_image.origins.add_notice_origin(
                 formats.docker_image.format(imagetag=image_string))
             # analyze image
-            analyze(full_image, args)
+            image.analyze(full_image, args)
             # report out
             report.report_out(args, full_image)
         else:
