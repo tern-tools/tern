@@ -13,11 +13,13 @@ import os
 
 from tern.classes.notice import Notice
 from tern.command_lib import command_lib
-from tern.analyze import common
 from tern.report import formats
 from tern.report import errors
 from tern.utils import constants
 from tern.utils import rootfs
+from tern.analyze import common as com
+from tern.analyze.default import default_common as dcom
+from tern.analyze.default.container import core
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -89,49 +91,44 @@ def get_os_style(image_layer, binary):
                     os_list=image_layer.os_guess), 'info'))
 
 
-def execute_base_layer(base_layer, binary, shell):
-    '''Execute retrieving base layer packages'''
-    try:
-        target = rootfs.mount_base_layer(base_layer.tar_file)
-        rootfs.prep_rootfs(target)
-        common.add_base_packages(base_layer, binary, shell)
-    except KeyboardInterrupt:
-        logger.critical(errors.keyboard_interrupt)
-        abort_analysis()
-    finally:
-        # unmount proc, sys and dev
-        rootfs.undo_mount()
-        rootfs.unmount_rootfs()
-
-
 def analyze_first_layer(image_obj, master_list, redo):
+    """Analyze the first layer of an image. Return the installed shell.
+    If there is no installed shell, return None
+    1. Check if the layer is empty. If it is then we can't find a shell
+    2. See if we can load the layer from cache
+    3. If we can't load from cache
+    3.1 See if we can find any information about the rootfs
+    3.2 If we are able to find any information, use any prescribed methods
+        to extract package information
+    4. Process and bundle that information into the image object
+    5. Return the shell for subsequent layer processing"""
     # set up a notice origin for the first layer
     origin_first_layer = 'Layer {}'.format(image_obj.layers[0].layer_index)
     # check if the layer is empty
-    if common.is_empty_layer(image_obj.layers[0]):
+    if com.is_empty_layer(image_obj.layers[0]):
         logger.warning(errors.empty_layer)
         image_obj.layers[0].origins.add_notice_to_origins(
             origin_first_layer, Notice(errors.empty_layer, 'warning'))
-        return ''
+        return None
     # find the shell from the first layer
-    shell = common.get_shell(image_obj.layers[0])
+    shell = dcom.get_shell(image_obj.layers[0])
     if not shell:
         logger.warning(errors.no_shell)
         image_obj.layers[0].origins.add_notice_to_origins(
             origin_first_layer, Notice(errors.no_shell, 'warning'))
     # find the binary from the first layer
-    binary = common.get_base_bin(image_obj.layers[0])
+    binary = dcom.get_base_bin(image_obj.layers[0])
     if not binary:
         logger.warning(errors.no_package_manager)
         image_obj.layers[0].origins.add_notice_to_origins(
             origin_first_layer, Notice(errors.no_package_manager, 'warning'))
     # try to load packages from cache
-    if not common.load_from_cache(image_obj.layers[0], redo):
+    if not com.load_from_cache(image_obj.layers[0], redo):
         # set a possible OS
-        common.get_os_style(image_obj.layers[0], binary)
+        get_os_style(image_obj.layers[0], binary)
         # if there is a binary, extract packages
         if shell and binary:
-            execute_base_layer(image_obj.layers[0], binary, shell)
+            core.execute_base(image_obj.layers[0], binary, shell)
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)

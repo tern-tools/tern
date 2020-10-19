@@ -39,8 +39,6 @@ def teardown(keep=False):
     logger.debug("Tearing down...")
     # save the cache
     cache.save()
-    # remove folders for rootfs operations
-    rootfs.clean_up()
     # clean up the working directory if user has not asked to keep it
     if not keep:
         clean_working_dir()

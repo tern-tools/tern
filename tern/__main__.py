@@ -14,11 +14,12 @@ import logging
 import os
 import sys
 
-from tern import prep
-from tern.analyze.docker import run
 from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
+from tern import prep
+from tern.analyze.default.container import run as crun
+from tern.analyze.default.dockerfile import run as drun
 from tern.report import errors
 
 
@@ -77,10 +78,10 @@ def do_main(args):
         cache.clear()
     if hasattr(args, 'name'):
         if args.name == 'lock':
-            run.execute_dockerfile(args)
+            drun.execute_dockerfile(args)
         elif args.name == 'report':
             if args.dockerfile:
-                run.execute_dockerfile(args)
+                drun.execute_dockerfile(args)
             elif args.docker_image:
                 # Check if the image string is a tarball
                 if general.check_tar(args.docker_image):
@@ -91,7 +92,7 @@ def do_main(args):
                     logger.critical(errors.incorrect_image_string_format)
                     sys.exit(1)
                 # If the checks are OK, execute for docker image
-                run.execute_docker_image(args)
+                crun.execute_image(args)
     # Tear down the environment
     prep.teardown(args.keep_wd)
     logger.debug('Finished')
