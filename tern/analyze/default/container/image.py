@@ -16,7 +16,7 @@ from tern.classes.docker_image import DockerImage
 from tern.utils import constants
 from tern.analyze.default.container import single_layer
 from tern.analyze.default.container import multi_layer
-import tern.analyze.docker.helpers as dhelper
+from tern.analyze.default.dockerfile import helpers as dhelper
 from tern.load import docker_api
 from tern.report import formats
 
@@ -80,7 +80,8 @@ def analyze(image_obj, redo=False, driver=None):
     master_list = []
     # Analyze the first layer and get the shell
     shell = single_layer.analyze_first_layer(image_obj, master_list, redo)
-    # Analyze the remaining layers
-    multi_layer.analyze_subsequent_layers(
-        image_obj, shell, master_list, redo, driver)
+    # Analyze the remaining layers if there are more
+    if len(image_obj.layers) > 1:
+        multi_layer.analyze_subsequent_layers(
+            image_obj, shell, master_list, redo, driver)
     return image_obj

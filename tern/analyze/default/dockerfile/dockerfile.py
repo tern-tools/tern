@@ -16,7 +16,7 @@ from tern.utils import general
 from tern.utils import constants
 from tern.load import docker_api
 from tern.analyze import common
-from tern.command_lib import command_lib
+from tern.analyze.default.command_lib import command_lib
 
 # global logger
 logger = logging.getLogger(constants.logger_name)

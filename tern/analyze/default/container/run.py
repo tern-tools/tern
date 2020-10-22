@@ -36,18 +36,15 @@ def extract_image(args):
             if image_attrs['RepoDigests']:
                 image_digest = image_attrs['RepoDigests'][0]
             return image_string, image_digest
-        else:
-            logger.critical("Cannot extract Docker image")
-            return None, None
+        logger.critical("Cannot extract Docker image")
     if args.raw_image:
         # for now we assume that the raw image tarball is always
         # the product of "docker save", hence it will be in
         # the docker style layout
         if rootfs.extract_tarfile(args.raw_image, rootfs.get_working_dir()):
             return args.raw_image, None
-        else:
-            logger.critical("Cannot extract raw image")
-            return None, None
+        logger.critical("Cannot extract raw image")
+    return None, None
 
 
 def setup(image_obj):

@@ -14,7 +14,7 @@ import sys
 
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
-from tern.analyze.docker import dockerfile
+from tern.analyze.default.dockerfile import dockerfile
 from tern.utils import constants
 from tern.report import errors
 from tern.report import formats

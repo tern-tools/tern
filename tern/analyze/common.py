@@ -12,6 +12,8 @@ import os
 import subprocess  # nosec
 
 from tern.classes.notice import Notice
+from tern.classes.package import Package
+from tern.classes.file_data import FileData
 from tern.classes.command import Command
 from tern.utils import cache
 from tern.utils import constants

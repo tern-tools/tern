@@ -10,16 +10,16 @@ Common functions to analyze a container in default mode
 
 import logging
 import os
+import sys
 
 from tern.classes.notice import Notice
-from tern.classes.file_data import FileData
 from tern.classes.package import Package
-from tern.command_lib import command_lib
 from tern.report import content
 from tern.report import formats
-from tern.report import errors
 from tern.utils import constants
 from tern.utils import rootfs
+from tern.analyze.default.command_lib import command_lib
+from tern.analyze.default import filter
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -57,23 +57,6 @@ def get_base_bin(first_layer):
                 binary = key
                 break
     return binary
-
-
-def invoke_in_rootfs(snippet_list, shell, package=''):
-    '''Invoke the commands from the invoke dictionary in a root filesystem
-    assuming the root filesystem is ready to accept commands'''
-    # construct the full command
-    full_cmd = collate_snippets(snippet_list, package)
-    try:
-        result = rootfs.run_chroot_command(full_cmd, shell)
-        try:
-            result = result.decode('utf-8')
-        except AttributeError:
-            pass
-        return result
-    except subprocess.CalledProcessError as error:
-        logger.warning('Error executing snippets: %s', error)
-        raise
 
 
 def fill_package_metadata(pkg_obj, pkg_listing, shell, work_dir, envs):
@@ -160,7 +143,7 @@ def add_snippet_packages(image_layer, command, pkg_listing, shell, work_dir,  # 
                content.print_package_invoke(command.name))
     image_layer.origins.add_notice_to_origins(origin_layer, Notice(
         cmd_msg, 'info'))
-    pkg_list = get_installed_package_names(command)
+    pkg_list = filter.get_installed_package_names(command)
     # collect all the dependencies for each package name
     all_pkgs = []
     for pkg_name in pkg_list:
@@ -206,3 +189,9 @@ def update_master_list(master_list, layer_obj):
     while unique:
         layer_obj.packages.append(unique.pop(0))
     del unique
+
+
+def abort_analysis():
+    """Abort due to some external event"""
+    rootfs.recover()
+    sys.exit(1)

@@ -15,9 +15,9 @@ from tern.utils import constants
 from tern.utils import rootfs
 from tern.classes.notice import Notice
 from tern.analyze import common
-import tern.analyze.docker.helpers as dhelper
-from tern.command_lib import command_lib
-from tern.analyze.docker import dockerfile as d_file
+from tern.analyze.default.dockerfile import helpers as dhelper
+from tern.analyze.default.command_lib import command_lib
+from tern.analyze.default.dockerfile import dockerfile as d_file
 
 
 # global logger

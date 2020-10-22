@@ -9,17 +9,11 @@ Functions to categorize commands into install, remove and ignore commands
 
 
 import logging
-import os
 
-from tern.classes.notice import Notice
-from tern.classes.file_data import FileData
-from tern.classes.package import Package
-from tern.command_lib import command_lib
-from tern.report import content
+from tern.analyze.default.command_lib import command_lib
+from tern.analyze import common
 from tern.report import formats
-from tern.report import errors
 from tern.utils import constants
-from tern.utils import rootfs
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -102,7 +96,7 @@ def filter_install_commands(shell_command_line):
         3. Return installed command objects, and messages for ignored commands
         and unrecognized commands'''
     report = ''
-    command_list, branch_report = get_shell_commands(shell_command_line)
+    command_list, branch_report = common.get_shell_commands(shell_command_line)
     for command in command_list:
         command_lib.set_command_attrs(command)
     ignore_msgs, filter1 = remove_ignored_commands(command_list)

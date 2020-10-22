@@ -10,16 +10,17 @@ Functions to analyze the first layer of a container image in default mode
 
 import logging
 import os
+import subprocess  # nosec
 
 from tern.classes.notice import Notice
-from tern.command_lib import command_lib
+from tern.analyze.default.command_lib import command_lib
 from tern.report import formats
 from tern.report import errors
 from tern.utils import constants
 from tern.utils import rootfs
 from tern.analyze import common as com
 from tern.analyze.default import default_common as dcom
-from tern.analyze.default.container import core
+from tern.analyze.default import core
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -91,6 +92,19 @@ def get_os_style(image_layer, binary):
                     os_list=image_layer.os_guess), 'info'))
 
 
+def mount_first_layer(layer_obj):
+    try:
+        target = rootfs.mount_base_layer(layer_obj.tar_file)
+        rootfs.prep_rootfs(target)
+        return target
+    except subprocess.CalledProcessError as e:  # nosec
+        logger.critical("Cannot mount filesystem and/or device nodes: %s", e)
+        dcom.abort_analysis()
+    except KeyboardInterrupt:
+        logger.critical(errors.keyboard_interrupt)
+        dcom.abort_analysis()
+
+
 def analyze_first_layer(image_obj, master_list, redo):
     """Analyze the first layer of an image. Return the installed shell.
     If there is no installed shell, return None
@@ -128,7 +142,13 @@ def analyze_first_layer(image_obj, master_list, redo):
         get_os_style(image_obj.layers[0], binary)
         # if there is a binary, extract packages
         if shell and binary:
-            core.execute_base(image_obj.layers[0], binary, shell)
+            # mount the first layer
+            mount_first_layer(image_obj.layers[0])
+            # core default execution on the first layer
+            core.execute_base(image_obj.layers[0], shell, binary)
+            # unmount
+            rootfs.undo_mount()
+            rootfs.unmount_rootfs()
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)

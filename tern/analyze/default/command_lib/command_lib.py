@@ -17,12 +17,14 @@ from tern.report import errors
 
 
 # base image command library
-base_file = pkg_resources.resource_filename('tern', 'command_lib/base.yml')
+base_file = pkg_resources.resource_filename(
+    'tern', 'analyze/default/command_lib/base.yml')
 # general snippets in command library
-snippet_file = pkg_resources.resource_filename('tern',
-                                               'command_lib/snippets.yml')
+snippet_file = pkg_resources.resource_filename(
+    'tern', 'analyze/default/command_lib/snippets.yml')
 # common information
-common_file = pkg_resources.resource_filename('tern', 'command_lib/common.yml')
+common_file = pkg_resources.resource_filename(
+    'tern', 'analyze/default/command_lib/common.yml')
 
 # command library
 command_lib = {'common': {}, 'base': {}, 'snippets': {}}
