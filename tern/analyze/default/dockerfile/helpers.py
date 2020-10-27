@@ -191,3 +191,18 @@ def get_env_vars(image_obj):
     for idx, env_str in enumerate(config['config']['Env']):
         config['config']['Env'][idx] = env_str.replace('\t', '\\t')
     return config['config']['Env']
+
+
+def lock_dockerfile(dfobj, image_layer):
+    # collect list of RUN commands that could install pkgs
+    run_dict = d_file.get_run_layers(dfobj)
+    # use the run_dict to get list of packages being installed
+    install_list = d_file.get_install_packages(run_dict[image_layer.index - 1])
+    for install_pkg in install_list:
+        for layer_pkg in image_obj.layers[curr_layer].packages:
+            if install_pkg == layer_pkg.name:
+                # dockerfile package in layer, let's pin it
+                d_file.expand_package(
+                    run_dict[image_layer.index - 1], install_pkg,
+                    layer_pkg.version, command_lib.check_pinning_separator(
+                        pkg_listing))

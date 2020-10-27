@@ -13,13 +13,11 @@ import os
 import sys
 
 from tern.classes.notice import Notice
-from tern.classes.package import Package
-from tern.report import content
-from tern.report import formats
+from tern.report import errors
 from tern.utils import constants
 from tern.utils import rootfs
 from tern.analyze.default.command_lib import command_lib
-from tern.analyze.default import filter
+from tern.analyze.default import filter as fltr
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -127,42 +125,24 @@ def get_package_dependencies(package_listing, package_name, shell,
     return [], deps_msg
 
 
-def add_snippet_packages(image_layer, command, pkg_listing, shell, work_dir,  # pylint:disable=too-many-arguments,too-many-locals
-                         envs):
-    '''Given an image layer object, a command object, the package listing
-    and the shell used to invoke commands, add package metadata to the layer
-    object. We assume the filesystem is already mounted and ready
-        1. Get the packages installed by the command
-        3. For each package get the dependencies
-        4. For each unique package name, find the metadata and add to the
-        layer'''
-    # set up a notice origin for the layer
+def get_commands_from_metadata(image_layer):
+    """Given the image layer object, get the list of command objects that
+    created the layer. Return an empty list of we can't do that"""
+    # set up notice origin for the layer
     origin_layer = 'Layer {}'.format(image_layer.layer_index)
-    # find packages for the command
-    cmd_msg = (formats.invoke_for_snippets + '\n' +
-               content.print_package_invoke(command.name))
-    image_layer.origins.add_notice_to_origins(origin_layer, Notice(
-        cmd_msg, 'info'))
-    pkg_list = filter.get_installed_package_names(command)
-    # collect all the dependencies for each package name
-    all_pkgs = []
-    for pkg_name in pkg_list:
-        pkg_invoke = command_lib.check_for_unique_package(
-            pkg_listing, pkg_name)
-        deps, deps_msg = get_package_dependencies(
-            pkg_invoke, pkg_name, shell)
-        if deps_msg:
-            logger.warning(deps_msg)
-            image_layer.origins.add_notice_to_origins(
-                origin_layer, Notice(deps_msg, 'error'))
-        all_pkgs.append(pkg_name)
-        all_pkgs.extend(deps)
-    unique_pkgs = list(set(all_pkgs))
-    # get package metadata for each package name
-    for pkg_name in unique_pkgs:
-        pkg = Package(pkg_name)
-        fill_package_metadata(pkg, pkg_invoke, shell, work_dir, envs)
-        image_layer.add_package(pkg)
+    # check if there is a key containing the script that created the layer
+    if image_layer.created_by:
+        command_line = fltr.get_run_command(image_layer.created_by)
+        if command_line:
+            command_list, msg = fltr.filter_install_commands(command_line)
+            if msg:
+                image_layer.origins.add_notice_to_origins(
+                    origin_layer, Notice(msg, 'warning'))
+            return command_list
+    image_layer.origins.add_notice_to_origins(
+        origin_layer, Notice(errors.unknown_content.format(
+            files=command_line), 'warning'))
+    return []
 
 
 def update_master_list(master_list, layer_obj):

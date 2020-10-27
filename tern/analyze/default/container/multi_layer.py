@@ -8,16 +8,16 @@ Functions to analyze the subsequent layers in default mode
 """
 
 import logging
-import sys
 
 from tern.report import errors
 from tern.utils import constants
 from tern.utils import rootfs
 from tern.classes.notice import Notice
 from tern.analyze import common
+from tern.analyze.default import default_common as dcom
+from tern.analyze.default import core
 from tern.analyze.default.dockerfile import helpers as dhelper
 from tern.analyze.default.command_lib import command_lib
-from tern.analyze.default.dockerfile import dockerfile as d_file
 
 
 # global logger
@@ -34,12 +34,24 @@ def mount_overlay_fs(image_obj, top_layer, driver=None):
     return target
 
 
-def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  # noqa: R0912,R0913
-                              dfile_lock=False, driver=None):
-    # get packages for subsequent layers
+def analyze_subsequent_layers(image_obj, shell, master_list, redo,
+                              driver=None):
+    """Assuming that we have a shell and have completed analyzing the first
+    layer of the given image object, we now analyze the remaining layers.
+    While we have layers:
+        1. Check if the layer is empty. If it is, then we can't do anything and
+        we should continue
+        2. See if we can load the layer from cache. If we can't then
+        2.1 Check if we have a shell, if not then see if we can find a shell
+        2.2 Check if we can find any info in the container history (created_by)
+        2.3 If this exists then check if we can parse the command to figure out
+        what package managers were used.
+        2.4 Use the prescribed methods for the package managers to retrieve
+        package information and bundle it into the image object"""
     curr_layer = 1
-    work_dir = None
-    while curr_layer < len(image_obj.layers):  # pylint:disable=too-many-nested-blocks
+    # get list of environment variables
+    envs = dhelper.get_env_vars(image_obj)
+    while curr_layer < len(image_obj.layers):
         # make a notice for each layer
         origin_next_layer = 'Layer {}'.format(
             image_obj.layers[curr_layer].layer_index)
@@ -51,64 +63,33 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo, dfobj=None,  
                 origin_next_layer, Notice(errors.empty_layer, 'warning'))
             curr_layer = curr_layer + 1
             continue
-        # If workdir changes, update value accordingly
-        # so we can later execute base.yml commands from the workdir.
-        if image_obj.layers[curr_layer].get_layer_workdir() is not None:
-            work_dir = image_obj.layers[curr_layer].get_layer_workdir()
-        # if there is no shell, try to see if it exists in the current layer
-        if not shell:
-            shell = common.get_shell(image_obj.layers[curr_layer])
         if not common.load_from_cache(image_obj.layers[curr_layer], redo):
+            # if there is no shell, try to see if it exists in the current
+            # layer
+            if not shell:
+                shell = dcom.get_shell(image_obj.layers[curr_layer])
             # get commands that created the layer
             # for docker images this is retrieved from the image history
-            command_list = dhelper.get_commands_from_history(
+            command_list = dcom.get_commands_from_metadata(
                 image_obj.layers[curr_layer])
             if command_list:
                 # mount diff layers from 0 till the current layer
                 target = mount_overlay_fs(image_obj, curr_layer, driver)
                 # mount dev, sys and proc after mounting diff layers
                 rootfs.prep_rootfs(target)
-            # for each command look up the snippet library
-            for command in command_list:
-                pkg_listing = command_lib.get_package_listing(command.name)
-                # get list of environment variables
-                envs = dhelper.get_env_vars(image_obj)
-                if isinstance(pkg_listing, str):
-                    try:
-                        common.add_base_packages(
-                            image_obj.layers[curr_layer], pkg_listing, shell,
-                            work_dir, envs)
-                    except KeyboardInterrupt:
-                        logger.critical(errors.keyboard_interrupt)
-                        abort_analysis()
-                else:
-                    try:
-                        common.add_snippet_packages(
+                # for each command look up the snippet library
+                for command in command_list:
+                    pkg_listing = command_lib.get_package_listing(command.name)
+                    if isinstance(pkg_listing, str):
+                        core.execute_base(
+                            image_obj.layers[curr_layer], shell, pkg_listing,
+                            envs)
+                    else:
+                        core.execute_snippets(
                             image_obj.layers[curr_layer], command, pkg_listing,
-                            shell, work_dir, envs)
-                    except KeyboardInterrupt:
-                        logger.critical(errors.keyboard_interrupt)
-                        abort_analysis()
-                # pin any installed packages to a locked dockerfile.
-                if dfile_lock:
-                    # collect list of RUN commands that could install pkgs
-                    run_dict = d_file.get_run_layers(dfobj)
-                    # use the run_dict to get list of packages being installed
-                    install_list = d_file.get_install_packages(
-                        run_dict[curr_layer - 1])
-                    for install_pkg in install_list:
-                        for layer_pkg in image_obj.layers[curr_layer].packages:
-                            if install_pkg == layer_pkg.name:
-                                # dockerfile package in layer, let's pin it
-                                d_file.expand_package(
-                                    run_dict[curr_layer - 1],
-                                    install_pkg,
-                                    layer_pkg.version,
-                                    command_lib.check_pinning_separator(
-                                        pkg_listing))
-            if command_list:
+                            shell, envs)
                 rootfs.undo_mount()
                 rootfs.unmount_rootfs()
         # update the master list
-        common.update_master_list(master_list, image_obj.layers[curr_layer])
+        dcom.update_master_list(master_list, image_obj.layers[curr_layer])
         curr_layer = curr_layer + 1

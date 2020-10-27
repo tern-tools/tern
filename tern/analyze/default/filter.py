@@ -9,6 +9,7 @@ Functions to categorize commands into install, remove and ignore commands
 
 
 import logging
+import re
 
 from tern.analyze.default.command_lib import command_lib
 from tern.analyze import common
@@ -108,3 +109,12 @@ def filter_install_commands(shell_command_line):
     if branch_report:
         report = report + branch_report
     return consolidate_commands(filter2), report
+
+
+def get_run_command(value):
+    """A general function to return the command line that created a layer
+    given the value of some metadata key from the container image"""
+    # we check for '/bin/sh -c' in the value
+    if '/bin/sh -c' in value:
+        return re.sub('/bin/sh -c ', '', value).strip()
+    return ''
