@@ -16,33 +16,10 @@ from tern.classes.docker_image import DockerImage
 from tern.utils import constants
 from tern.analyze.default.container import single_layer
 from tern.analyze.default.container import multi_layer
-from tern.analyze.default.dockerfile import helpers as dhelper
-from tern.load import docker_api
 from tern.report import formats
-
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
-
-
-def load_base_image():
-    '''Create base image from dockerfile instructions and return the image'''
-    base_image, dockerfile_lines = dhelper.get_dockerfile_base()
-    # try to get image metadata
-    if docker_api.dump_docker_image(base_image.repotag):
-        # now see if we can load the image
-        try:
-            base_image.load_image()
-        except (NameError,
-                subprocess.CalledProcessError,
-                IOError,
-                docker.errors.APIError,
-                ValueError,
-                EOFError) as error:
-            logger.warning('Error in loading base image: %s', str(error))
-            base_image.origins.add_notice_to_origins(
-                dockerfile_lines, Notice(str(error), 'error'))
-    return base_image
 
 
 def load_full_image(image_tag_string, digest_string):

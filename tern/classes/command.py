@@ -104,7 +104,6 @@ class Command:
 
     def set_ignore(self):
         '''Set ignore flag'''
-        print(self.__set_bit)
         self.__flags = self.__set_bit
 
     def is_install(self):

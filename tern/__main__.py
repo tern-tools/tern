@@ -78,7 +78,7 @@ def do_main(args):
         cache.clear()
     if hasattr(args, 'name'):
         if args.name == 'lock':
-            drun.execute_dockerfile(args)
+            drun.execute_dockerfile(args, True)
         elif args.name == 'report':
             if args.dockerfile:
                 drun.execute_dockerfile(args)

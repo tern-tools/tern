@@ -16,7 +16,7 @@ from tern.classes.notice import Notice
 from tern.analyze import common
 from tern.analyze.default import default_common as dcom
 from tern.analyze.default import core
-from tern.analyze.default.dockerfile import helpers as dhelper
+from tern.analyze.default.dockerfile import lock
 from tern.analyze.default.command_lib import command_lib
 
 
@@ -50,7 +50,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo,
         package information and bundle it into the image object"""
     curr_layer = 1
     # get list of environment variables
-    envs = dhelper.get_env_vars(image_obj)
+    envs = lock.get_env_vars(image_obj)
     while curr_layer < len(image_obj.layers):
         # make a notice for each layer
         origin_next_layer = 'Layer {}'.format(

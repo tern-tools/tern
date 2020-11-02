@@ -14,11 +14,12 @@ import sys
 
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
-from tern.analyze.default.dockerfile import dockerfile
 from tern.utils import constants
 from tern.report import errors
 from tern.report import formats
 from tern.analyze import common
+from tern.analyze.default.command_lib import command_lib
+from tern.analyze.default.dockerfile import parse
 from tern.utils.general import check_image_string
 
 # dockerfile
@@ -109,7 +110,7 @@ def get_base_image_tag(dockerfile_lines):
 
 def get_dockerfile_image_tag():
     '''Return the image and tag used to build an image from the dockerfile'''
-    image_tag_string = constants.image + dockerfile.tag_separator + \
+    image_tag_string = constants.image + parse.tag_separator + \
         constants.tag
     return image_tag_string
 
@@ -122,7 +123,7 @@ def created_to_instruction(created_by):
     instruction = re.sub('/bin/sh -c ', '', created_by).strip()
     instruction = re.sub(re.escape('#(nop) '), '', instruction).strip()
     first = instruction.split(' ').pop(0)
-    if first and first not in dockerfile.directives and \
+    if first and first not in parse.directives and \
             'RUN' not in instruction:
         instruction = 'RUN ' + instruction
     return instruction
@@ -171,7 +172,7 @@ def set_imported_layers(docker_image):
         if cmd['instruction'] == 'FROM':
             from_line = cmd['content'].rstrip()
             break
-    command_list = dockerfile.get_command_list(dockerfile_lines)
+    command_list = parse.get_command_list(dockerfile_lines)
     for layer in docker_image.layers:
         instr = created_to_instruction(layer.created_by)
         if instr in command_list:
@@ -193,16 +194,16 @@ def get_env_vars(image_obj):
     return config['config']['Env']
 
 
-def lock_dockerfile(dfobj, image_layer):
+def lock_dockerfile(dfobj, image_layer, pkg_listing):
     # collect list of RUN commands that could install pkgs
-    run_dict = d_file.get_run_layers(dfobj)
+    run_dict = parse.get_run_layers(dfobj)
     # use the run_dict to get list of packages being installed
-    install_list = d_file.get_install_packages(run_dict[image_layer.index - 1])
+    install_list = parse.get_install_packages(run_dict[image_layer.index - 1])
     for install_pkg in install_list:
-        for layer_pkg in image_obj.layers[curr_layer].packages:
+        for layer_pkg in image_layer.packages:
             if install_pkg == layer_pkg.name:
                 # dockerfile package in layer, let's pin it
-                d_file.expand_package(
+                parse.expand_package(
                     run_dict[image_layer.index - 1], install_pkg,
                     layer_pkg.version, command_lib.check_pinning_separator(
                         pkg_listing))

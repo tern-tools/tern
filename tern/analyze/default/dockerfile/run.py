@@ -7,17 +7,25 @@
 Run analysis on a Dockerfile
 """
 
+import docker
 import logging
+import subprocess  # nosec
 
+from tern.utils import constants
+from tern.utils import rootfs
 from tern.classes.notice import Notice
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
 from tern.classes.package import Package
-from tern.utils import constants
-from tern.analyze.default import filter
-from tern.analyze.default.dockerfile import helpers as dhelper
-from tern.analyze.default.dockerfile import dockerfile
+from tern.load import docker_api
+from tern import prep
+from tern.analyze import common
+from tern.analyze.default.dockerfile import parse
+from tern.analyze.default.dockerfile import lock
+from tern.analyze.default.container import run as crun
+from tern.analyze.default.container import image as cimage
 from tern.report import report
+from tern.report import formats
 
 
 # global logger
@@ -35,7 +43,7 @@ def get_dockerfile_packages():
         4. Return stub image'''
     stub_image = Image('easteregg:cookie')
     layer_count = 0
-    for cmd in dhelper.docker_commands:
+    for cmd in parse.docker_commands:
         if cmd['instruction'] == 'RUN':
             layer_count = layer_count + 1
             layer = ImageLayer(layer_count)
@@ -56,76 +64,115 @@ def get_dockerfile_packages():
     return stub_image
 
 
-def execute_dockerfile(args):  # noqa C901,R0912
-    '''Execution path if given a dockerfile'''
+def analyze_full_image(full_image, redo, driver):
+    """If we are able to load a full image after a build, we can run an
+    analysis on it"""
+    # set up for analysis
+    crun.setup(full_image)
+    # analyze image
+    cimage.analyze(full_image, redo, driver)
+    # clean up after analysis
+    rootfs.clean_up()
+    # we should now be able to set imported layers
+    lock.set_imported_layers(full_image)
+    # save to the cache
+    common.save_to_cache(full_image)
+    return [full_image]
+
+
+def load_base_image():
+    '''Create base image from dockerfile instructions and return the image'''
+    base_image, dockerfile_lines = lock.get_dockerfile_base()
+    # try to get image metadata
+    if docker_api.dump_docker_image(base_image.repotag):
+        # now see if we can load the image
+        try:
+            base_image.load_image()
+        except (NameError,
+                subprocess.CalledProcessError,
+                IOError,
+                docker.errors.APIError,
+                ValueError,
+                EOFError) as error:
+            logger.warning('Error in loading base image: %s', str(error))
+            base_image.origins.add_notice_to_origins(
+                dockerfile_lines, Notice(str(error), 'error'))
+    return base_image
+
+
+def analyze_base_image(base_image, redo, driver):
+    """If we are unable to load the full image, we will try to analyze
+    the base image and try to extrapolate"""
+    # set up for analysis
+    crun.setup(base_image)
+    # analyze image
+    cimage.analyze(base_image, redo, driver)
+    # clean up
+    rootfs.clean_up()
+    # save the base image to cache
+    common.save_to_cache(base_image)
+    # let's try to figure out what packages were going to be installed in
+    # the dockerfile anyway
+    stub_image = get_dockerfile_packages()
+    return [base_image, stub_image]
+
+
+def execute_dockerfile(args, locking=False):
+    """Execution path for Dockerfiles"""
     dfile = ''
-    dfile_lock = False
-    if args.name == 'report':
-        dfile = args.dockerfile
-    else:
+    if locking:
         dfile = args.lock
-        dfile_lock = True
+    else:
+        dfile = args.dockerfile
     logger.debug("Parsing Dockerfile...")
-    dfobj = dockerfile.get_dockerfile_obj(dfile)
+    dfobj = parse.get_dockerfile_obj(dfile)
     # expand potential ARG values so base image tag is correct
-    dockerfile.expand_arg(dfobj)
-    dockerfile.expand_vars(dfobj)
+    parse.expand_arg(dfobj)
+    parse.expand_vars(dfobj)
     # Store dockerfile path and commands so we can access it during execution
-    dhelper.load_docker_commands(dfobj)
+    lock.load_docker_commands(dfobj)
     # attempt to build the image
     logger.debug('Building Docker image...')
     image_info = docker_api.build_and_dump(dfile)
+    image_list = []
     if image_info:
+        logger.debug('Docker image successfully built. Analyzing...')
         # attempt to load the built image metadata
-        full_image = report.load_full_image(dfile, '')
+        full_image = cimage.load_full_image(dfile, '')
         if full_image.origins.is_empty():
-            # image loading was successful
             # Add an image origin here
             full_image.origins.add_notice_origin(
                 formats.dockerfile_image.format(dockerfile=dfile))
-            # analyze image
-            analyze(full_image, args, dfile_lock, dfobj)
-            completed = True
+            image_list = analyze_full_image(full_image, args.redo, args.driver)
         else:
             # we cannot analyze the full image, but maybe we can
             # analyze the base image
-            logger.warning('Cannot retrieve full image metadata')
-        # clean up image tarballs
+            logger.error('Cannot retrieve full image metadata')
+        # cleanup for full images
         if not args.keep_wd:
             prep.clean_image_tars(full_image)
     else:
         # cannot build the image
         logger.warning('Cannot build image')
-    # check if we have analyzed the full image or not
-    if not completed:
         # Try to analyze the base image
         logger.debug('Analyzing base image...')
-        base_image = report.load_base_image()
+        # this will pull, dump and load the base image
+        base_image = load_base_image()
         if base_image.origins.is_empty():
-            # image loading was successful
             # add a notice stating failure to build image
-            base_image.origins.add_notice_to_origins(
-                dfile, Notice(
-                    formats.image_build_failure, 'warning'))
-            # analyze image
-            analyze(base_image, args, dfile_lock, dfobj)
+            base_image.origins.add_notice_to_origins(dfile, Notice(
+                formats.image_build_failure, 'warning'))
+            image_list = analyze_base_image(base_image, args.redo, args.driver)
         else:
             # we cannot load the base image
             logger.warning('Cannot retrieve base image metadata')
-        stub_image = get_dockerfile_packages()
-        if args.name == 'report':
-            if not args.keep_wd:
-                report.clean_image_tars(base_image)
+        # cleanup for base images
+        if not args.keep_wd:
+            prep.clean_image_tars(base_image)
     # generate report based on what images were created
-    if not dfile_lock:
-        if completed:
-            report.report_out(args, full_image)
-        else:
-            report.report_out(args, base_image, stub_image)
+    if not locking:
+        report.report_out(args, *image_list)
     else:
         logger.debug('Parsing Dockerfile to generate report...')
-        output = dockerfile.create_locked_dockerfile(dfobj)
-        dockerfile.write_locked_dockerfile(output, args.output_file)
-    # cleanup
-    if not args.keep_wd:
-        prep.clean_image_tars(full_image)
+        output = lock.create_locked_dockerfile(dfobj)
+        lock.write_locked_dockerfile(output, args.output_file)
