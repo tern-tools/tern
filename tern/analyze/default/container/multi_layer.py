@@ -34,6 +34,41 @@ def mount_overlay_fs(image_obj, top_layer, driver=None):
     return target
 
 
+def fresh_analysis(image_obj, curr_layer, shell, driver, envs):
+    """This is a subroutine that is run if there is no chached results or if
+    the user wants to redo the analysis
+    1 Check if we have a shell, if not then see if we can find a shell
+    2 Check if we can find any info in the container history (created_by)
+    3 If this exists then check if we can parse the command to figure out
+      what package managers were used.
+    4 Use the prescribed methods for the package managers to retrieve
+    """
+    # if there is no shell, try to see if it exists in the current layer
+    if not shell:
+        shell = dcom.get_shell(image_obj.layers[curr_layer])
+    # get commands that created the layer
+    # for docker images this is retrieved from the image history
+    command_list = dcom.get_commands_from_metadata(
+        image_obj.layers[curr_layer])
+    if command_list:
+        # mount diff layers from 0 till the current layer
+        target = mount_overlay_fs(image_obj, curr_layer, driver)
+        # mount dev, sys and proc after mounting diff layers
+        rootfs.prep_rootfs(target)
+        # for each command look up the snippet library
+        for command in command_list:
+            pkg_listing = command_lib.get_package_listing(command.name)
+            if isinstance(pkg_listing, str):
+                core.execute_base(
+                    image_obj.layers[curr_layer], shell, pkg_listing, envs)
+            else:
+                core.execute_snippets(
+                    image_obj.layers[curr_layer], command, pkg_listing, shell,
+                    envs)
+        rootfs.undo_mount()
+        rootfs.unmount_rootfs()
+
+
 def analyze_subsequent_layers(image_obj, shell, master_list, redo,
                               driver=None):
     """Assuming that we have a shell and have completed analyzing the first
@@ -41,13 +76,10 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo,
     While we have layers:
         1. Check if the layer is empty. If it is, then we can't do anything and
         we should continue
-        2. See if we can load the layer from cache. If we can't then
-        2.1 Check if we have a shell, if not then see if we can find a shell
-        2.2 Check if we can find any info in the container history (created_by)
-        2.3 If this exists then check if we can parse the command to figure out
-        what package managers were used.
-        2.4 Use the prescribed methods for the package managers to retrieve
-        package information and bundle it into the image object"""
+        2. See if we can load the layer from cache. If we can't then do a
+        fresh analysis
+        package information and bundle it into the image object
+        3. Update the master list"""
     curr_layer = 1
     # get list of environment variables
     envs = lock.get_env_vars(image_obj)
@@ -64,32 +96,7 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo,
             curr_layer = curr_layer + 1
             continue
         if not common.load_from_cache(image_obj.layers[curr_layer], redo):
-            # if there is no shell, try to see if it exists in the current
-            # layer
-            if not shell:
-                shell = dcom.get_shell(image_obj.layers[curr_layer])
-            # get commands that created the layer
-            # for docker images this is retrieved from the image history
-            command_list = dcom.get_commands_from_metadata(
-                image_obj.layers[curr_layer])
-            if command_list:
-                # mount diff layers from 0 till the current layer
-                target = mount_overlay_fs(image_obj, curr_layer, driver)
-                # mount dev, sys and proc after mounting diff layers
-                rootfs.prep_rootfs(target)
-                # for each command look up the snippet library
-                for command in command_list:
-                    pkg_listing = command_lib.get_package_listing(command.name)
-                    if isinstance(pkg_listing, str):
-                        core.execute_base(
-                            image_obj.layers[curr_layer], shell, pkg_listing,
-                            envs)
-                    else:
-                        core.execute_snippets(
-                            image_obj.layers[curr_layer], command, pkg_listing,
-                            shell, envs)
-                rootfs.undo_mount()
-                rootfs.unmount_rootfs()
+            fresh_analysis(image_obj, curr_layer, shell, driver, envs)
         # update the master list
         dcom.update_master_list(master_list, image_obj.layers[curr_layer])
         curr_layer = curr_layer + 1

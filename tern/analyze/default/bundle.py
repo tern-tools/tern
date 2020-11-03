@@ -18,8 +18,28 @@ from tern.classes.file_data import FileData
 logger = logging.getLogger(constants.logger_name)
 
 
-def convert_to_pkg_dicts(pkg_dict):
-    '''The pkg_dict is what gets returned after collecting individual
+def get_pkg_dict_for_index(attr_list, index):
+    """Given the package dictionary with attribute lists of the form
+    {'name': [...], 'version': [...],...} and an index, return
+    a package dictionary of the form {'name': x1, 'version': x2,...} for that
+    index"""
+    pkg_dict = {}
+    for key in attr_list.keys():
+        if key == 'files':
+            # convert file paths into FileData dictionaries
+            fd_list = []
+            for filepath in attr_list['files']:
+                fd_dict = FileData(os.path.split(
+                    filepath)[1], filepath).to_dict()
+                fd_list.append(fd_dict)
+            pkg_dict.update({'files': fd_list})
+        else:
+            pkg_dict.update({key: attr_list[key][index]})
+    return pkg_dict
+
+
+def convert_to_pkg_dicts(attr_lists):
+    '''attr_lists is what gets returned after collecting individual
     metadata as a list. It looks like this if property collected:
         {'names': [....], 'versions': [...], 'licenses': [...], ....}
     Convert these into a package dictionary expected by the Package
@@ -32,30 +52,18 @@ def convert_to_pkg_dicts(pkg_dict):
                'pkg_licenses': 'pkg_licenses',
                'files': 'files'}
     pkg_list = []
-    len_names = len(pkg_dict['names'])
+    len_names = len(attr_lists['names'])
     # make a list of keys that correspond with package property names
-    new_dict = {}
+    filtered_attr_list = {}
     for key, value in mapping.items():
-        if value in pkg_dict.keys():
-            if len(pkg_dict[value]) == len_names:
-                new_dict.update({key: pkg_dict[value]})
+        if value in attr_lists.keys():
+            if len(attr_lists[value]) == len_names:
+                filtered_attr_list.update({key: attr_lists[value]})
             else:
                 logger.warning("Inconsistent lengths for key: %s", value)
     # convert each of the keys into package dictionaries
-    for index, _ in enumerate(new_dict['name']):
-        a_pkg = {}
-        for key, value in new_dict.items():
-            if key == 'files':
-                # update the list with FileData objects in dictionary format
-                fd_list = []
-                for filepath in value[index]:
-                    fd_dict = FileData(
-                        os.path.split(filepath)[1], filepath).to_dict()
-                    fd_list.append(fd_dict)
-                a_pkg.update({'files': fd_list})
-            else:
-                a_pkg.update({key: value[index]})
-        pkg_list.append(a_pkg)
+    for index in range(0, len_names):
+        pkg_list.append(get_pkg_dict_for_index(filtered_attr_list, index))
     return pkg_list
 
 

@@ -119,6 +119,23 @@ def get_package_listing(command_name):
     return get_command_listing(command_name)['packages']
 
 
+def set_subcommand(command_obj, subcommand_type, subcommand_words):
+    """This subroutine will check to see if subcommand_words can be reassigned
+    as a subcommand. If it can, then set the command as the subcommand_type.
+    If not, then do not set the command_obj as anything. subcommand_type can
+    be 'install', 'remove' or 'ignore'"""
+    for word in subcommand_words:
+        if command_obj.reassign_word(word, 'subcommand'):
+            if subcommand_type == 'install':
+                command_obj.set_install()
+            elif subcommand_type == 'remove':
+                command_obj.set_remove()
+            else:
+                command_obj.set_ignore()
+            return True
+    return False
+
+
 def set_command_attrs(command_obj):
     '''Given the command object, move the install and remove listings to
     subcommands and set the flags, then return True. If the command name
@@ -126,25 +143,14 @@ def set_command_attrs(command_obj):
     command_listing = get_command_listing(command_obj.name)
     if command_listing:
         # the command is in the library
+        # look for install, remove and ignore commands
         if 'install' in command_listing.keys():
-            # try to move install to a subcommand
-            for install_listing in command_listing['install']:
-                if command_obj.reassign_word(install_listing, 'subcommand'):
-                    command_obj.set_install()
-                    break
+            set_subcommand(command_obj, 'install', command_listing['install'])
         if 'remove' in command_listing.keys():
-            # try to move remove to a subcommand
-            for remove_listing in command_listing['remove']:
-                if command_obj.reassign_word(remove_listing, 'subcommand'):
-                    command_obj.set_remove()
-                    break
+            set_subcommand(command_obj, 'remove', command_listing['remove'])
         if 'ignore' in command_listing.keys():
             # check if any of the words in the ignore list are in
-            # the list of command words
-            for ignore_word in command_listing['ignore']:
-                if ignore_word in command_obj.words:
-                    command_obj.set_ignore()
-                    break
+            set_subcommand(command_obj, 'ignore', command_listing['ignore'])
         return True
     return False
 

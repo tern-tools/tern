@@ -117,6 +117,48 @@ def analyze_base_image(base_image, redo, driver):
     return [base_image, stub_image]
 
 
+def full_image_analysis(dfile, redo, driver, keep):
+    """This subroutine is executed when a Dockerfile is successfully built"""
+    image_list = []
+    # attempt to load the built image metadata
+    full_image = cimage.load_full_image(dfile, '')
+    if full_image.origins.is_empty():
+        # Add an image origin here
+        full_image.origins.add_notice_origin(
+            formats.dockerfile_image.format(dockerfile=dfile))
+        image_list = analyze_full_image(full_image, redo, driver)
+    else:
+        # we cannot analyze the full image, but maybe we can
+        # analyze the base image
+        logger.error('Cannot retrieve full image metadata')
+    # cleanup for full images
+    if not keep:
+        prep.clean_image_tars(full_image)
+    return image_list
+
+
+def base_and_run_analysis(dfile, redo, driver, keep):
+    """This subroutine is executed when a Dockerfile fails build. It returns
+    a base image and any RUN commands in the Dockerfile."""
+    image_list = []
+    # Try to analyze the base image
+    logger.debug('Analyzing base image...')
+    # this will pull, dump and load the base image
+    base_image = load_base_image()
+    if base_image.origins.is_empty():
+        # add a notice stating failure to build image
+        base_image.origins.add_notice_to_origins(dfile, Notice(
+            formats.image_build_failure, 'warning'))
+        image_list = analyze_base_image(base_image, redo, driver)
+    else:
+        # we cannot load the base image
+        logger.warning('Cannot retrieve base image metadata')
+    # cleanup for base images
+    if not keep:
+        prep.clean_image_tars(base_image)
+    return image_list
+
+
 def execute_dockerfile(args, locking=False):
     """Execution path for Dockerfiles"""
     dfile = ''
@@ -137,38 +179,15 @@ def execute_dockerfile(args, locking=False):
     image_list = []
     if image_info:
         logger.debug('Docker image successfully built. Analyzing...')
-        # attempt to load the built image metadata
-        full_image = cimage.load_full_image(dfile, '')
-        if full_image.origins.is_empty():
-            # Add an image origin here
-            full_image.origins.add_notice_origin(
-                formats.dockerfile_image.format(dockerfile=dfile))
-            image_list = analyze_full_image(full_image, args.redo, args.driver)
-        else:
-            # we cannot analyze the full image, but maybe we can
-            # analyze the base image
-            logger.error('Cannot retrieve full image metadata')
-        # cleanup for full images
-        if not args.keep_wd:
-            prep.clean_image_tars(full_image)
+        # analyze the full image
+        image_list = full_image_analysis(
+            dfile, args.redo, args.driver, args.keep_wd)
     else:
         # cannot build the image
         logger.warning('Cannot build image')
-        # Try to analyze the base image
-        logger.debug('Analyzing base image...')
-        # this will pull, dump and load the base image
-        base_image = load_base_image()
-        if base_image.origins.is_empty():
-            # add a notice stating failure to build image
-            base_image.origins.add_notice_to_origins(dfile, Notice(
-                formats.image_build_failure, 'warning'))
-            image_list = analyze_base_image(base_image, args.redo, args.driver)
-        else:
-            # we cannot load the base image
-            logger.warning('Cannot retrieve base image metadata')
-        # cleanup for base images
-        if not args.keep_wd:
-            prep.clean_image_tars(base_image)
+        # analyze the base image and any RUN lines in the Dockerfile
+        image_list = base_and_run_analysis(
+            dfile, args.redo, args.driver, args.keep_wd)
     # generate report based on what images were created
     if not locking:
         report.report_out(args, *image_list)
