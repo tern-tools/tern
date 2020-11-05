@@ -80,7 +80,7 @@ def execute_image(args):
             # Set up for analysis
             setup(full_image)
             # analyze image
-            cimage.analyze(full_image, args.redo, args.driver)
+            cimage.analyze(full_image, args.redo, args.driver, args.extend)
             # report out
             report.report_out(args, full_image)
             # clean up

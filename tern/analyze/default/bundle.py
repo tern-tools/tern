@@ -28,7 +28,7 @@ def get_pkg_dict_for_index(attr_list, index):
         if key == 'files':
             # convert file paths into FileData dictionaries
             fd_list = []
-            for filepath in attr_list['files']:
+            for filepath in attr_list['files'][index]:
                 fd_dict = FileData(os.path.split(
                     filepath)[1], filepath).to_dict()
                 fd_list.append(fd_dict)

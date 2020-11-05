@@ -14,6 +14,7 @@ import subprocess  # nosec
 from tern.classes.notice import Notice
 from tern.classes.docker_image import DockerImage
 from tern.utils import constants
+from tern.analyze import passthrough
 from tern.analyze.default.container import single_layer
 from tern.analyze.default.container import multi_layer
 from tern.report import formats
@@ -41,7 +42,7 @@ def load_full_image(image_tag_string, digest_string):
     return test_image
 
 
-def analyze(image_obj, redo=False, driver=None):
+def default_analyze(image_obj, redo=False, driver=None):
     """ Steps to analyze a container image (we assume it is a DockerImage
     object for now)
     1. Analyze the first layer to get a baseline list of packages
@@ -62,3 +63,12 @@ def analyze(image_obj, redo=False, driver=None):
         multi_layer.analyze_subsequent_layers(
             image_obj, shell, master_list, redo, driver)
     return image_obj
+
+
+def analyze(image_obj, redo=False, driver=None, extension=None):
+    """Either analyze a container image using the default method or pass
+    analysis to an external tool"""
+    if extension:
+        passthrough.run_extension(image_obj, extension, redo)
+    else:
+        default_analyze(image_obj, redo, driver)
