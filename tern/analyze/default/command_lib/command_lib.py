@@ -207,11 +207,13 @@ def check_os_guess(binary):
         return ''
 
 
-def check_pinning_separator(binary):
-    '''Given a binary package manager, return the associated pinning_separator
-    from base.yml. If the binary is not valid in base.yml, return an empty
-    string.'''
-    try:
-        return command_lib['base'][binary]['pinning_separator']
-    except KeyError:
-        return ''
+def check_pinning_separator(command_name):
+    '''Given command name, look up the name in snippets.yml and find the
+    corresponding package manager's pinning separator'''
+    pkg_listing = get_package_listing(command_name)
+    if isinstance(pkg_listing, str):
+        try:
+            return command_lib['base'][pkg_listing]['pinning_separator']
+        except KeyError:
+            return ''
+    return ''

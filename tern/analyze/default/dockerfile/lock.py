@@ -15,9 +15,10 @@ import sys
 from tern.classes.docker_image import DockerImage
 from tern.classes.notice import Notice
 from tern.utils import constants
+from tern.utils import general
 from tern.report import errors
 from tern.report import formats
-from tern.analyze import common
+from tern.analyze.default import filter as fltr
 from tern.analyze.default.command_lib import command_lib
 from tern.analyze.default.dockerfile import parse
 from tern.utils.general import check_image_string
@@ -154,7 +155,7 @@ def get_commands_from_history(image_layer):
         # return an empty list as we cannot find any commands
         return []
     # for RUN instructions we can return a list of commands
-    command_list, msg = common.filter_install_commands(command_line)
+    command_list, msg = fltr.filter_install_commands(command_line)
     if msg:
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             msg, 'warning'))
@@ -180,7 +181,7 @@ def set_imported_layers(docker_image):
             break
     if index != -1:
         # index was set so all layers before this index has been imported
-        for i in range(0, index):
+        for i in range(0, index-1):
             docker_image.layers[i].import_str = from_line
 
 
@@ -194,16 +195,75 @@ def get_env_vars(image_obj):
     return config['config']['Env']
 
 
-def lock_dockerfile(dfobj, image_layer, pkg_listing):
-    # collect list of RUN commands that could install pkgs
-    run_dict = parse.get_run_layers(dfobj)
-    # use the run_dict to get list of packages being installed
-    install_list = parse.get_install_packages(run_dict[image_layer.index - 1])
-    for install_pkg in install_list:
-        for layer_pkg in image_layer.packages:
-            if install_pkg == layer_pkg.name:
-                # dockerfile package in layer, let's pin it
-                parse.expand_package(
-                    run_dict[image_layer.index - 1], install_pkg,
-                    layer_pkg.version, command_lib.check_pinning_separator(
-                        pkg_listing))
+def lock_layer_instruction(dfobj, line_index, commands, image_layer):
+    """Given the Dockerfile object, the line index that we are replacing,
+    the list command objects that installed packages, and the image layer,
+    rewrite the corresponding line in the Dockerfile with the package and
+    the version installed"""
+    for command in commands:
+        # get the version separator
+        vsep = command_lib.check_pinning_separator(command.name)
+        # replace the packages with package separators for each of the words
+        for word in command.words:
+            for pkg in image_layer.packages:
+                if pkg.name == word:
+                    parse.expand_package(
+                        dfobj.structure[line_index], pkg.name, pkg.version,
+                        vsep)
+    return dfobj
+
+
+def lock_dockerfile(dfobj, image_obj):
+    """Given a Dockerfile object and the corresponding Image object, rewrite
+    the content to pin packages to their versions"""
+    # get all the RUN commands in the dockerfile
+    run_list = parse.get_run_layers(dfobj)
+    # go through the image layers to find the corresponding to the Dockerfile
+    # RUN lines
+    for layer in image_obj.layers:
+        if not layer.import_str:
+            # this layer is not from a FROM line
+            # we get the layer instruction
+            command = fltr.get_run_command(layer.created_by)
+            # check which run command has this instruction
+            for run_dict in run_list:
+                if run_dict['value'] == command:
+                    # this is the run instruction that created this layer
+                    # get the list of install commands
+                    command_list, _ = fltr.filter_install_commands(
+                        general.clean_command(run_dict['value']))
+                    # pin packages installed by each command
+                    run_index = dfobj.structure.index(run_dict)
+                    dfobj = lock_layer_instruction(
+                        dfobj, run_index, command_list, layer)
+    return dfobj
+
+
+def create_locked_dockerfile(dfobj):
+    '''Given a dockerfile object, the information in a new Dockerfile object
+    Copy the dfobj info to the destination output Dockerfile location'''
+    # packages in RUN lines, ENV, and ARG values are already expanded
+    parse.expand_from_images(dfobj)
+    parse.expand_add_command(dfobj)
+    # create the output file
+    dfile = ''
+    prev_endline = 0
+    for command_dict in dfobj.structure:
+        endline = command_dict["endline"]
+        diff = endline - prev_endline
+        # calculate number of new line characters to
+        # add before each line of content
+        delimeter = "\n" * (diff - 1) if diff > 1 else ""
+        dfile = dfile + delimeter + command_dict['content']
+        prev_endline = endline
+    return dfile
+
+
+def write_locked_dockerfile(dfile, destination=None):
+    '''Write the pinned Dockerfile to a file'''
+    if destination is not None:
+        file_name = destination
+    else:
+        file_name = constants.locked_dockerfile
+    with open(file_name, 'w') as f:
+        f.write(dfile)

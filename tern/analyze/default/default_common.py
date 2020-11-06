@@ -16,6 +16,7 @@ from tern.classes.notice import Notice
 from tern.report import errors
 from tern.utils import constants
 from tern.utils import rootfs
+from tern.utils import general
 from tern.analyze.default.command_lib import command_lib
 from tern.analyze.default import filter as fltr
 
@@ -134,7 +135,8 @@ def get_commands_from_metadata(image_layer):
     if image_layer.created_by:
         command_line = fltr.get_run_command(image_layer.created_by)
         if command_line:
-            command_list, msg = fltr.filter_install_commands(command_line)
+            command_list, msg = fltr.filter_install_commands(
+                general.clean_command(command_line))
             if msg:
                 image_layer.origins.add_notice_to_origins(
                     origin_layer, Notice(msg, 'warning'))

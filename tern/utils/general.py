@@ -48,7 +48,7 @@ def initialize_names():
 def clean_command(command):
     '''Given a command string (only contains one command, does not contain &&
     or ;), clean out all whitespaces, tabs and line indentations'''
-    return ' '.join(shlex.split(command))
+    return ' '.join(shlex.split(command)).replace('\n', '')
 
 
 def split_command(shell_script):
@@ -152,7 +152,7 @@ def parse_shell_loop_and_branch(commands_string, keyword_tuple):
                     cmd = cmd.lstrip('do ')
                     stat = parse_shell_variables_and_command(cmd)
                     loop_statements.append(stat)
-            # 'loop_statements' is NOT empty here, we are in the statements now.
+            # 'loop_statements' is NOT empty here, we are in the statements now
             else:
                 stat = parse_shell_variables_and_command(cmd)
                 loop_statements.append(stat)

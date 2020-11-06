@@ -150,7 +150,8 @@ def main():
                                "in the form of a tar archive.")
     parser_report.add_argument('-x', '--extend', metavar='EXTENSION',
                                help="Use an extension to analyze a container "
-                               "image. Available extensions: cve-bin-tool")
+                               "image. Available extensions:\n cve-bin-tool\n"
+                               "scancode\n")
     parser_report.add_argument('-f', '--report-format',
                                metavar='REPORT_FORMAT',
                                help="Format the report using one of the "
@@ -176,6 +177,10 @@ def main():
                              "annotated Dockerfile to a file. If no report "
                              "is given, a new file, Dockerfile.new, will "
                              "be created in the current directory.")
+    parser_lock.add_argument('-x', '--extend', metavar='EXTENSION',
+                             help="Use an extension to analyze a container "
+                             "image. Available extensions:\n cve-bin-tool\n"
+                             "scancode\n")
     parser_lock.set_defaults(name='lock')
     args = parser.parse_args()
 

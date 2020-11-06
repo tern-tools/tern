@@ -192,6 +192,8 @@ def execute_dockerfile(args, locking=False):
     if not locking:
         report.report_out(args, *image_list)
     else:
-        logger.debug('Parsing Dockerfile to generate report...')
-        output = lock.create_locked_dockerfile(dfobj)
+        logger.debug('Generating locked Dockerfile...')
+        # we can only lock based on a fully built image for now
+        locked_dfobj = lock.lock_dockerfile(dfobj, image_list[0])
+        output = lock.create_locked_dockerfile(locked_dfobj)
         lock.write_locked_dockerfile(output, args.output_file)

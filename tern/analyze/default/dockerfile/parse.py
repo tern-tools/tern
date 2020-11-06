@@ -303,39 +303,6 @@ def expand_add_command(dfobj):
                 + ' # ' + comment_line
 
 
-def create_locked_dockerfile(dfobj):
-    '''Given a dockerfile object, the information in a new Dockerfile object
-    Copy the dfobj info to the destination output Dockerfile location'''
-    # packages in RUN lines, ENV, and ARG values are already expanded
-    expand_from_images(dfobj)
-    expand_add_command(dfobj)
-
-    # create the output file
-    dfile = ''
-    prev_endline = 0
-
-    for command_dict in dfobj.structure:
-        endline = command_dict["endline"]
-        diff = endline - prev_endline
-        # calculate number of new line characters to
-        # add before each line of content
-        delimeter = "\n" * (diff - 1) if diff > 1 else ""
-        dfile = dfile + delimeter + command_dict['content']
-        prev_endline = endline
-
-    return dfile
-
-
-def write_locked_dockerfile(dfile, destination=None):
-    '''Write the pinned Dockerfile to a file'''
-    if destination is not None:
-        file_name = destination
-    else:
-        file_name = constants.locked_dockerfile
-    with open(file_name, 'w') as f:
-        f.write(dfile)
-
-
 def check_multistage_dockerfile(dfobj):
     """Given a dockerfile object, return the index(es) of FROM line(s)
     in the dfobj structure."""
