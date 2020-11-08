@@ -61,53 +61,26 @@ def get_base_bin(first_layer):
 def fill_package_metadata(pkg_obj, pkg_listing, shell, work_dir, envs):
     '''Given a Package object and the Package listing from the command
     library, fill in the attribute value returned from looking up the
-    data and methods of the package listing.
-    Fill out: version, license and proj_url
-    If there are errors, fill out notices'''
+    data and methods of the package listing.If there are errors, fill out
+    notices'''
     # create a NoticeOrigin for the package
     origin_str = 'command_lib/snippets.yml'
-    # version
-    version_listing, listing_msg = command_lib.check_library_key(
-        pkg_listing, 'version')
-    if version_listing:
-        version_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, version_listing, work_dir, envs, package_name=pkg_obj.name)
-        if version_list:
-            pkg_obj.version = version_list[0]
+    pkg_dict = {}
+    for key in command_lib.package_keys:
+        key_listing, listing_msg = command_lib.check_library_key(
+            pkg_listing, key)
+        if key_listing:
+            key_list, invoke_msg = command_lib.get_pkg_attr_list(
+                shell, key_listing, work_dir, envs, package_name=pkg_obj.name)
+            if key_list:
+                pkg_dict.update({key: key_list})
+            else:
+                pkg_obj.origins.add_notice_to_origins(
+                    origin_str, Notice(invoke_msg, 'error'))
         else:
             pkg_obj.origins.add_notice_to_origins(
-                origin_str, Notice(invoke_msg, 'error'))
-    else:
-        pkg_obj.origins.add_notice_to_origins(
-            origin_str, Notice(listing_msg, 'warning'))
-    # license
-    license_listing, listing_msg = command_lib.check_library_key(
-        pkg_listing, 'license')
-    if license_listing:
-        license_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, license_listing, work_dir, envs, package_name=pkg_obj.name)
-        if license_list:
-            pkg_obj.license = license_list[0]
-        else:
-            pkg_obj.origins.add_notice_to_origins(
-                origin_str, Notice(invoke_msg, 'error'))
-    else:
-        pkg_obj.origins.add_notice_to_origins(
-            origin_str, Notice(listing_msg, 'warning'))
-    # proj_urls
-    url_listing, listing_msg = command_lib.check_library_key(
-        pkg_listing, 'proj_url')
-    if url_listing:
-        url_list, invoke_msg = command_lib.get_pkg_attr_list(
-            shell, url_listing, work_dir, envs, package_name=pkg_obj.name)
-        if url_list:
-            pkg_obj.proj_url = url_list[0]
-        else:
-            pkg_obj.origins.add_notice_to_origins(
-                origin_str, Notice(invoke_msg, 'error'))
-    else:
-        pkg_obj.origins.add_notice_to_origins(
-            origin_str, Notice(listing_msg, 'warning'))
+                origin_str, Notice(listing_msg, 'warning'))
+    pkg_obj.fill(pkg_dict)
 
 
 def get_package_dependencies(package_listing, package_name, shell,
