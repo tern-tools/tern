@@ -75,9 +75,9 @@ test_suite = {
         'tern report -i alpine:3.9',
         'tern report -i archlinux:latest',
         'tern report -i centos:7'],
-    # tern/analyze/docker
-    re.compile('tern/analyze/docker'): [
-        'python tests/test_analyze_docker_dockerfile.py',
+    # tern/analyze/default/dockerfile
+    re.compile('tern/analyze/default/dockerfile'): [
+        'python tests/test_analyze_default_dockerfile_parse.py',
         'python tests/test_analyze_common.py',
         'tern report -i golang:alpine',
         'tern report -d samples/alpine_python/Dockerfile',
@@ -108,6 +108,10 @@ test_suite = {
     # tests
     re.compile('tests/test_analyze_common.py'):
         ['python tests/test_analyze_common.py'],
+    re.compile('tests/test_analyze_default_filter.py'):
+        ['python tests/test_analyze_default_filter.py'],
+    re.compile('tests/test_analyze_default_dockerfile_parse.py'):
+        ['python tests/test_analyze_default_dockerfile_parse.py'],
     re.compile('tests/test_class_command.py'):
         ['python tests/test_class_command.py'],
     re.compile('tests/test_class_docker_image.py'):

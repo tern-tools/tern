@@ -6,7 +6,7 @@
 import unittest
 
 from tern.classes.command import Command
-from tern.analyze.common import get_installed_package_names
+from tern.analyze.default.filter import get_installed_package_names
 
 
 class TestClassCommand(unittest.TestCase):
