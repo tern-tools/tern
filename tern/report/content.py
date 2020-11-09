@@ -7,7 +7,7 @@
 Functions to generate content for the report
 """
 
-from tern.command_lib import command_lib
+from tern.analyze.default.command_lib import command_lib
 from tern.report import formats
 from tern.utils.general import get_git_rev_or_version
 

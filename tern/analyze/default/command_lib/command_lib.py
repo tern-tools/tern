@@ -9,22 +9,22 @@ Invoking commands in the command library
 
 import logging
 import os
-import subprocess  # nosec
 import yaml
 import pkg_resources
 
 from tern.utils import constants
-from tern.utils import rootfs
 from tern.report import errors
 
 
 # base image command library
-base_file = pkg_resources.resource_filename('tern', 'command_lib/base.yml')
+base_file = pkg_resources.resource_filename(
+    'tern', 'analyze/default/command_lib/base.yml')
 # general snippets in command library
-snippet_file = pkg_resources.resource_filename('tern',
-                                               'command_lib/snippets.yml')
+snippet_file = pkg_resources.resource_filename(
+    'tern', 'analyze/default/command_lib/snippets.yml')
 # common information
-common_file = pkg_resources.resource_filename('tern', 'command_lib/common.yml')
+common_file = pkg_resources.resource_filename(
+    'tern', 'analyze/default/command_lib/common.yml')
 
 # command library
 command_lib = {'common': {}, 'base': {}, 'snippets': {}}
@@ -119,6 +119,23 @@ def get_package_listing(command_name):
     return get_command_listing(command_name)['packages']
 
 
+def set_subcommand(command_obj, subcommand_type, subcommand_words):
+    """This subroutine will check to see if subcommand_words can be reassigned
+    as a subcommand. If it can, then set the command as the subcommand_type.
+    If not, then do not set the command_obj as anything. subcommand_type can
+    be 'install', 'remove' or 'ignore'"""
+    for word in subcommand_words:
+        if command_obj.reassign_word(word, 'subcommand'):
+            if subcommand_type == 'install':
+                command_obj.set_install()
+            elif subcommand_type == 'remove':
+                command_obj.set_remove()
+            else:
+                command_obj.set_ignore()
+            return True
+    return False
+
+
 def set_command_attrs(command_obj):
     '''Given the command object, move the install and remove listings to
     subcommands and set the flags, then return True. If the command name
@@ -126,25 +143,14 @@ def set_command_attrs(command_obj):
     command_listing = get_command_listing(command_obj.name)
     if command_listing:
         # the command is in the library
+        # look for install, remove and ignore commands
         if 'install' in command_listing.keys():
-            # try to move install to a subcommand
-            for install_listing in command_listing['install']:
-                if command_obj.reassign_word(install_listing, 'subcommand'):
-                    command_obj.set_install()
-                    break
+            set_subcommand(command_obj, 'install', command_listing['install'])
         if 'remove' in command_listing.keys():
-            # try to move remove to a subcommand
-            for remove_listing in command_listing['remove']:
-                if command_obj.reassign_word(remove_listing, 'subcommand'):
-                    command_obj.set_remove()
-                    break
+            set_subcommand(command_obj, 'remove', command_listing['remove'])
         if 'ignore' in command_listing.keys():
             # check if any of the words in the ignore list are in
-            # the list of command words
-            for ignore_word in command_listing['ignore']:
-                if ignore_word in command_obj.words:
-                    command_obj.set_ignore()
-                    break
+            set_subcommand(command_obj, 'ignore', command_listing['ignore'])
         return True
     return False
 
@@ -160,67 +166,6 @@ def collate_snippets(snippet_list, package=''):
     full_cmd = full_cmd + snippet_list[last_index].format_map(
         FormatAwk(package=package))
     return full_cmd
-
-
-def invoke_in_rootfs(snippet_list, shell, package=''):
-    '''Invoke the commands from the invoke dictionary in a root filesystem
-    assuming the root filesystem is ready to accept commands'''
-    # construct the full command
-    full_cmd = collate_snippets(snippet_list, package)
-    try:
-        result = rootfs.run_chroot_command(full_cmd, shell)
-        try:
-            result = result.decode('utf-8')
-        except AttributeError:
-            pass
-        return result
-    except subprocess.CalledProcessError as error:
-        logger.warning('Error executing snippets: %s', error)
-        raise
-
-
-def get_pkg_attr_list(shell, attr_dict, work_dir, envs, package_name=''):
-    '''The command library has package attributes listed like this:
-        {invoke: {1: {container: [command1, command2]},
-                  2: {host: [command1, command2]}}, delimiter: <delimiter}
-    Given the shell to use, the attribute dictionary and the package name, get
-    the result of the invokes, apply the delimiter to create a list and
-    return the list.
-    chroot is used to indicate whether to run the commands in a chroot
-    environment and defaults to True
-    override is used for an alternate container name and defaults to
-    an empty string'''
-    attr_list = []
-    error_msgs = ''
-    if 'invoke' in attr_dict.keys():
-        # invoke the commands
-        for step in range(1, len(attr_dict['invoke'].keys()) + 1):
-            if 'container' in attr_dict['invoke'][step].keys():
-                snippet_list = attr_dict['invoke'][step]['container']
-                result = ''
-                # If environment variables exist, set them
-                if envs:
-                    for var in envs:
-                        snippet_list.insert(0, 'export ' + var.split('=')[0] +
-                                            '=' + var.split('=')[1])
-                # If work_dir exist cd into it
-                if work_dir is not None:
-                    snippet_list.insert(0, 'cd ' + work_dir)
-                # if we need to run in a chroot environment
-                try:
-                    result = invoke_in_rootfs(
-                        snippet_list, shell, package=package_name)
-                except subprocess.CalledProcessError as error:
-                    error_msgs = error_msgs + error.output
-                result = result[:-1]
-                if 'delimiter' in attr_dict.keys():
-                    res_list = result.split(attr_dict['delimiter'])
-                    if res_list[-1] == '':
-                        res_list.pop()
-                    attr_list.extend(res_list)
-                else:
-                    attr_list.append(result)
-    return attr_list, error_msgs
 
 
 def check_sourcable(command, package_name):
@@ -262,11 +207,13 @@ def check_os_guess(binary):
         return ''
 
 
-def check_pinning_separator(binary):
-    '''Given a binary package manager, return the associated pinning_separator
-    from base.yml. If the binary is not valid in base.yml, return an empty
-    string.'''
-    try:
-        return command_lib['base'][binary]['pinning_separator']
-    except KeyError:
-        return ''
+def check_pinning_separator(command_name):
+    '''Given command name, look up the name in snippets.yml and find the
+    corresponding package manager's pinning separator'''
+    pkg_listing = get_package_listing(command_name)
+    if isinstance(pkg_listing, str):
+        try:
+            return command_lib['base'][pkg_listing]['pinning_separator']
+        except KeyError:
+            return ''
+    return ''

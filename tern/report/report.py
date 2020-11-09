@@ -7,21 +7,14 @@
 Create a report
 """
 
-import docker
 import logging
 import os
 import shutil
-import subprocess  # nosec
 from stevedore import driver
 from stevedore.exception import NoMatches
 
-from tern.load import docker_api
-from tern.report import formats
 from tern.utils import constants
 from tern.utils import rootfs
-from tern.classes.docker_image import DockerImage
-from tern.classes.notice import Notice
-import tern.analyze.docker.helpers as dhelper
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -49,45 +42,6 @@ def clean_working_dir():
     path = rootfs.get_working_dir()
     if os.path.exists(path):
         shutil.rmtree(path)
-
-
-def load_base_image():
-    '''Create base image from dockerfile instructions and return the image'''
-    base_image, dockerfile_lines = dhelper.get_dockerfile_base()
-    # try to get image metadata
-    if docker_api.dump_docker_image(base_image.repotag):
-        # now see if we can load the image
-        try:
-            base_image.load_image()
-        except (NameError,
-                subprocess.CalledProcessError,
-                IOError,
-                docker.errors.APIError,
-                ValueError,
-                EOFError) as error:
-            logger.warning('Error in loading base image: %s', str(error))
-            base_image.origins.add_notice_to_origins(
-                dockerfile_lines, Notice(str(error), 'error'))
-    return base_image
-
-
-def load_full_image(image_tag_string, digest_string):
-    '''Create image object from image name and tag and return the object'''
-    test_image = DockerImage(image_tag_string, digest_string)
-    failure_origin = formats.image_load_failure.format(
-        testimage=test_image.repotag)
-    try:
-        test_image.load_image()
-    except (NameError,
-            subprocess.CalledProcessError,
-            IOError,
-            docker.errors.APIError,
-            ValueError,
-            EOFError) as error:
-        logger.warning('Error in loading image: %s', str(error))
-        test_image.origins.add_notice_to_origins(
-            failure_origin, Notice(str(error), 'error'))
-    return test_image
 
 
 def generate_report(args, *images):

@@ -5,10 +5,10 @@
 
 import unittest
 
-from tern.analyze.docker import dockerfile
+from tern.analyze.default.dockerfile import parse
 
 
-class TestAnalyzeDockerDockerfile(unittest.TestCase):
+class TestAnalyzeDefaultDockerfileParse(unittest.TestCase):
 
     def setUp(self):
         self.buildpack = 'tests/dockerfiles/buildpack_deps_jessie_curl'
@@ -25,11 +25,11 @@ class TestAnalyzeDockerDockerfile(unittest.TestCase):
         del self.pin_add
 
     def testDockerfileObject(self):
-        dfobj = dockerfile.Dockerfile()
+        dfobj = parse.Dockerfile()
         self.assertTrue(dfobj.is_none())
 
     def testDockerfileParserWithoutEnv(self):
-        dfobj = dockerfile.get_dockerfile_obj(self.buildpack)
+        dfobj = parse.get_dockerfile_obj(self.buildpack)
         self.assertFalse(dfobj.is_none())
         self.assertEqual(dfobj.parent_images, ['debian:jessie'])
         structure = [{'instruction': 'FROM',
@@ -67,19 +67,18 @@ class TestAnalyzeDockerDockerfile(unittest.TestCase):
         self.assertFalse(dfobj.envs)
 
     def testDockerfileParserWithEnv(self):
-        dfobj = dockerfile.get_dockerfile_obj(self.buildpack,
-                                              {'buildno': '123abc'})
+        dfobj = parse.get_dockerfile_obj(self.buildpack, {'buildno': '123abc'})
         self.assertFalse(dfobj.is_none())
         self.assertEqual(dfobj.prev_env, {'buildno': '123abc'})
 
     def testReplaceEnv(self):
-        dfobj = dockerfile.get_dockerfile_obj(self.golang)
+        dfobj = parse.get_dockerfile_obj(self.golang)
         envs = {'GOLANG_VERSION': '1.13.6',
                 'GOPATH': '/go',
                 'PATH': '/go/bin:/usr/local/go/bin:'}
         self.assertEqual(dfobj.envs, envs)
         struct = dfobj.structure[9]
-        dockerfile.replace_env(dfobj.envs, struct)
+        parse.replace_env(dfobj.envs, struct)
         self.assertEqual(struct['content'], 'WORKDIR /go\n')
         self.assertEqual(struct['value'], '/go')
         replace_content = ('\n\turl="https://golang.org/dl/go1.13.6.'
@@ -87,19 +86,19 @@ class TestAnalyzeDockerDockerfile(unittest.TestCase):
         replace_value = (' \t\turl="https://golang.org/dl/go1.13.6'
                          '.${goRelArch}.tar.gz"')
         struct = dfobj.structure[5]
-        dockerfile.replace_env(dfobj.envs, struct)
+        parse.replace_env(dfobj.envs, struct)
         self.assertEqual(struct['content'].split('\\')[14], replace_content)
         self.assertEqual(struct['value'].split(';')[28], replace_value)
 
     def testParseFromImage(self):
-        dfobj = dockerfile.get_dockerfile_obj(self.buildpack)
-        image_list = dockerfile.parse_from_image(dfobj)
+        dfobj = parse.get_dockerfile_obj(self.buildpack)
+        image_list = parse.parse_from_image(dfobj)
         self.assertEqual(image_list, [{'name': 'debian',
                                        'tag': 'jessie',
                                        'digest_type': '',
                                        'digest': ''}])
-        dfobj = dockerfile.get_dockerfile_obj(self.buildpackpinned)
-        image_list = dockerfile.parse_from_image(dfobj)
+        dfobj = parse.get_dockerfile_obj(self.buildpackpinned)
+        image_list = parse.parse_from_image(dfobj)
         debian_digest = ('e25703ee6ab5b2fac31510323d959cdae31eebdf48e88891c54'
                          '9e55b25ad7e94')
         self.assertEqual(image_list, [{'name': 'debian',
@@ -108,8 +107,8 @@ class TestAnalyzeDockerDockerfile(unittest.TestCase):
                                        'digest': debian_digest}])
 
     def testExpandArg(self):
-        dfobj = dockerfile.get_dockerfile_obj(self.buildpackarg)
-        dockerfile.expand_arg(dfobj)
+        dfobj = parse.get_dockerfile_obj(self.buildpackarg)
+        parse.expand_arg(dfobj)
         replace_content = 'FROM debian:jessie\n'
         replace_value = 'debian:jessie'
         struct = dfobj.structure[1]
@@ -119,16 +118,16 @@ class TestAnalyzeDockerDockerfile(unittest.TestCase):
     # test find the git project name
     def testFindGitInfo(self):
         sample_line = 'ADD plain_file /tmp'
-        comment_line = dockerfile.find_git_info(sample_line, self.pin_add)
+        comment_line = parse.find_git_info(sample_line, self.pin_add)
         project_name = comment_line.split(',')[0]
         self.assertIn(project_name, ['git project name: project',
                                      'git project name: tern'])
 
     # test adding the comments
     def testExpandAddCommand(self):
-        dfobj = dockerfile.get_dockerfile_obj(self.pin_add)
+        dfobj = parse.get_dockerfile_obj(self.pin_add)
         self.assertFalse(dfobj.is_none())
-        dockerfile.expand_add_command(dfobj)
+        parse.expand_add_command(dfobj)
         content = dfobj.structure[1]['content']
         value = dfobj.structure[1]['value']
         content_name = content.split(',')[0]
