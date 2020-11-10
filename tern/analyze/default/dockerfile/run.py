@@ -121,7 +121,7 @@ def full_image_analysis(dfile, redo, driver, keep, extension):
     """This subroutine is executed when a Dockerfile is successfully built"""
     image_list = []
     # attempt to load the built image metadata
-    full_image = cimage.load_full_image(dfile, '')
+    full_image = cimage.load_full_image(dfile)
     if full_image.origins.is_empty():
         # Add an image origin here
         full_image.origins.add_notice_origin(
