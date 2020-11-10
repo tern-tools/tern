@@ -23,9 +23,9 @@ from tern.report import formats
 logger = logging.getLogger(constants.logger_name)
 
 
-def load_full_image(image_tag_string, digest_string):
+def load_full_image(image_tag_string):
     '''Create image object from image name and tag and return the object'''
-    test_image = DockerImage(image_tag_string, digest_string)
+    test_image = DockerImage(image_tag_string)
     failure_origin = formats.image_load_failure.format(
         testimage=test_image.repotag)
     try:
