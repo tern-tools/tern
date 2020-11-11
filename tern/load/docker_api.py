@@ -158,7 +158,7 @@ def pull_image(image_tag_string, client):
         logger.debug("Image \"%s\" downloaded", image_tag_string)
         return image
     except (docker.errors.ImageNotFound, docker.errors.NotFound):
-        logger.warning("No such image: \"%s\"", image_tag_string)
+        logger.error("No such image: \"%s\"", image_tag_string)
         return None
 
 
@@ -196,9 +196,9 @@ def dump_docker_image(image_tag):
     # if this fails we cannot proceed further so we will exit
     client = check_docker_setup()
     image = get_docker_image(image_tag, client)
-    # this should return whether the operation succeeded or not
-    if extract_image(image):
-        image_metadata = image.attrs
+    if image:
+        if extract_image(image):
+            image_metadata = image.attrs
     # now the client can be closed
     close_client(client)
     return image_metadata

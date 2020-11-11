@@ -90,6 +90,5 @@ def execute_image(args):
         else:
             # we cannot load the full image
             logger.error('Cannot retrieve full image metadata')
-    # cleanup
-    if not args.keep_wd:
-        prep.clean_image_tars(full_image)
+        if not args.keep_wd:
+            prep.clean_image_tars(full_image)
