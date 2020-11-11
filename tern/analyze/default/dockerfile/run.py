@@ -20,6 +20,7 @@ from tern.classes.package import Package
 from tern.load import docker_api
 from tern import prep
 from tern.analyze import common
+from tern.analyze.default import filter as fltr
 from tern.analyze.default.dockerfile import parse
 from tern.analyze.default.dockerfile import lock
 from tern.analyze.default.container import run as crun
@@ -43,18 +44,17 @@ def get_dockerfile_packages():
         4. Return stub image'''
     stub_image = Image('easteregg:cookie')
     layer_count = 0
-    for cmd in parse.docker_commands:
+    for cmd in lock.docker_commands:
         if cmd['instruction'] == 'RUN':
             layer_count = layer_count + 1
             layer = ImageLayer(layer_count)
-            install_commands, msg = \
-                filter.filter_install_commands(cmd['value'])
+            install_commands, msg = fltr.filter_install_commands(cmd['value'])
             if msg:
                 layer.origins.add_notice_to_origins(
                     cmd['value'], Notice(msg, 'info'))
             pkg_names = []
             for command in install_commands:
-                pkg_names.append(filter.get_installed_package_names(command))
+                pkg_names.append(fltr.get_installed_package_names(command))
             for pkg_name in pkg_names:
                 pkg = Package(pkg_name)
                 # shell parser does not parse version pins yet
@@ -97,7 +97,8 @@ def load_base_image():
             logger.warning('Error in loading base image: %s', str(error))
             base_image.origins.add_notice_to_origins(
                 dockerfile_lines, Notice(str(error), 'error'))
-    return base_image
+        return base_image
+    return None
 
 
 def analyze_base_image(base_image, redo, driver, extension):
@@ -145,17 +146,21 @@ def base_and_run_analysis(dfile, redo, driver, keep, extension):
     logger.debug('Analyzing base image...')
     # this will pull, dump and load the base image
     base_image = load_base_image()
-    if base_image.origins.is_empty():
-        # add a notice stating failure to build image
-        base_image.origins.add_notice_to_origins(dfile, Notice(
-            formats.image_build_failure, 'warning'))
-        image_list = analyze_base_image(base_image, redo, driver, extension)
+    if base_image:
+        if base_image.origins.is_empty():
+            # add a notice stating failure to build image
+            base_image.origins.add_notice_to_origins(dfile, Notice(
+                formats.image_build_failure, 'warning'))
+            image_list = analyze_base_image(
+                base_image, redo, driver, extension)
+        else:
+            # we cannot load the base image
+            logger.warning('Cannot retrieve base image metadata')
+        # cleanup for base images
+        if not keep:
+            prep.clean_image_tars(base_image)
     else:
-        # we cannot load the base image
-        logger.warning('Cannot retrieve base image metadata')
-    # cleanup for base images
-    if not keep:
-        prep.clean_image_tars(base_image)
+        logger.error('Cannot analyze base image')
     return image_list
 
 
@@ -189,11 +194,12 @@ def execute_dockerfile(args, locking=False):
         image_list = base_and_run_analysis(
             dfile, args.redo, args.driver, args.keep_wd, args.extend)
     # generate report based on what images were created
-    if not locking:
-        report.report_out(args, *image_list)
-    else:
-        logger.debug('Generating locked Dockerfile...')
-        # we can only lock based on a fully built image for now
-        locked_dfobj = lock.lock_dockerfile(dfobj, image_list[0])
-        output = lock.create_locked_dockerfile(locked_dfobj)
-        lock.write_locked_dockerfile(output, args.output_file)
+    if image_list:
+        if not locking:
+            report.report_out(args, *image_list)
+        else:
+            logger.debug('Generating locked Dockerfile...')
+            # we can only lock based on a fully built image for now
+            locked_dfobj = lock.lock_dockerfile(dfobj, image_list[0])
+            output = lock.create_locked_dockerfile(locked_dfobj)
+            lock.write_locked_dockerfile(output, args.output_file)
