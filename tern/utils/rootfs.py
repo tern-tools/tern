@@ -238,10 +238,10 @@ def run_chroot_command(command_string, shell):
         result = root_command(unshare_pid, mount_proc, 'chroot', target_dir,
                               shell, '-c', command_string)
         return result
-    except subprocess.CalledProcessError as error:
+    except subprocess.CalledProcessError as e:
         logger.warning("Error executing command in chroot")
         raise subprocess.CalledProcessError(
-            1, cmd=command_string, output=error.output.decode('utf-8'))
+            1, cmd=command_string, output=None, stderr=e.stderr)
 
 
 def undo_mount():
