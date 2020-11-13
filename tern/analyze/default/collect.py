@@ -78,7 +78,7 @@ def get_pkg_attrs(attr_dict, shell, work_dir=None, envs=None, package_name=''):
                         snippet_list, shell, package=package_name)
                     result = result[:-1]
                 except subprocess.CalledProcessError as error:
-                    error_msgs = error_msgs + error.output
+                    error_msgs = error_msgs + error.stderr
     if 'delimiter' in attr_dict.keys():
         res_list = result.split(attr_dict['delimiter'])
         if res_list[-1] == '':
