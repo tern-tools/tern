@@ -7,8 +7,10 @@
 Run analysis on a Dockerfile
 """
 
+import copy
 import docker
 import logging
+import os
 import subprocess  # nosec
 
 from tern.utils import constants
@@ -203,3 +205,20 @@ def execute_dockerfile(args, locking=False):
             locked_dfobj = lock.lock_dockerfile(dfobj, image_list[0])
             output = lock.create_locked_dockerfile(locked_dfobj)
             lock.write_locked_dockerfile(output, args.output_file)
+
+
+def execute_multistage_dockerfile(args, locking=False):
+    """Split the multistage dockerfile, and then analzye on each stage."""
+    dfobj_multi = parse.get_dockerfile_obj(args.dockerfile)
+    # split the multistage dockerfile
+    file_path_list = parse.get_multistage_image_dockerfiles(dfobj_multi)
+    report_folder_path = os.path.join(os.path.dirname(dfobj_multi.filepath),
+                                      'report')
+    temp_arg = copy.copy(args)
+    for idx, dfile in enumerate(file_path_list):
+        temp_arg.dockerfile = dfile
+        if args.output_file:
+            temp_arg.output_file = args.output_file + "%d" % idx
+        else:
+            temp_arg.output_file = report_folder_path + "%d" % idx
+        execute_dockerfile(args)
