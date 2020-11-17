@@ -119,7 +119,7 @@ def main():
     parser.add_argument('-wd', '--working-dir', metavar='PATH',
                         help="Change default working directory to specified"
                         "absolute path.")
-    parser.add_argument('-d', '--driver', metavar="DRIVER_OPTION",
+    parser.add_argument('-dr', '--driver', metavar="DRIVER_OPTION",
                         help="Required when running Tern in a container."
                         "Using 'fuse' will enable the fuse-overlayfs driver "
                         "to mount the diff layers of the container. If no "
