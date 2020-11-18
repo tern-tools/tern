@@ -231,7 +231,8 @@ def write_dockerfile_stages(dfobj):
     dockerfiles = []
     filepath, filename = os.path.split(dfobj.filepath)
     for stage in stages:
-        stagefile = '{}-{}'.format(filename, stages.index(stage) + 1)
+        stagefile = os.path.join(
+            filepath, '{}_{}'.format(filename, stages.index(stage) + 1))
         with open(stagefile, 'w') as f:
             f.write(stage)
         dockerfiles.append(stagefile)

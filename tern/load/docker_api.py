@@ -56,10 +56,10 @@ def build_image(dfile, client):
     # source:
     # https://github.com/docker/docker-py/issues/2105#issuecomment-613685891
     dfcontents = ''
-    with open(df_path) as f:
-        dfcontents = f.read()
     dfcontext = os.path.dirname(df_path)
     try:
+        with open(df_path) as f:
+            dfcontents = f.read()
         # terrible bypass of the API
         docker.api.build.process_dockerfile = lambda dockerfile, path: (
             df_path, dockerfile)
