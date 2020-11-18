@@ -10,7 +10,6 @@ Dockerfile information retrieval and modification
 from dockerfile_parse import DockerfileParser
 import re
 import logging
-import os
 
 from tern.utils import general
 from tern.utils import constants
@@ -82,6 +81,7 @@ def get_dockerfile_obj(dockerfile_name, prev_env=None):
         dfobj.envs = parser.envs
         dfobj.prev_env = prev_env
         dfobj.parent_images = parser.parent_images
+        dfobj.is_multistage = parser.is_multistage
     return dfobj
 
 
@@ -303,8 +303,8 @@ def expand_add_command(dfobj):
                 + ' # ' + comment_line
 
 
-def check_multistage_dockerfile(dfobj):
-    """Given a dockerfile object, return the index(es) of FROM line(s)
+def get_from_indices(dfobj):
+    """Given a dockerfile object, return the indices of FROM lines
     in the dfobj structure."""
     from_lines = []
     for idx, st in enumerate(dfobj.structure):
@@ -313,40 +313,18 @@ def check_multistage_dockerfile(dfobj):
     return from_lines
 
 
-def get_multistage_image_dockerfiles(dfobj_multi):
-    """Given a multistage dockerfile object, return a list of structures
-     for building image."""
-    file_path_list = []
-    structure = []
-    file_idx = 0
-    from_lines = check_multistage_dockerfile(dfobj_multi)
+def get_dockerfile_stages(dfobj_multi):
+    """Given a multistage dockerfile object, return a list of content for
+    each stage"""
+    stages = []
+    from_lines = get_from_indices(dfobj_multi)
     # Pop the first FROM
-    from_lines.pop(0)
-    # Get the temp folder path
-    temp_folder_path = os.path.join(os.path.dirname(dfobj_multi.filepath),
-                                    constants.multistage_dir)
-    if not os.path.isdir(temp_folder_path):
-        os.mkdir(temp_folder_path)
-    for idx in range(len(dfobj_multi.structure)):
-        if idx in from_lines:
-            if structure:
-                df_folder_path = temp_folder_path + '/%d' % (file_idx)
-                # we make a new dir for the dockerfile of each stage.
-                if not os.path.isdir(df_folder_path):
-                    os.mkdir(df_folder_path)
-                file_path = df_folder_path + '/Dockerfile'
-                file_idx += 1
-                write_dockerfile_by_structure(file_path, structure)
-                file_path_list.append(file_path)
-        structure.append(dfobj_multi.structure[idx])
-    if structure:
-        file_path_list.append(dfobj_multi.filepath)
-    return file_path_list
-
-
-def write_dockerfile_by_structure(file_name, structure):
-    """Given a dockerfile name and its structure, write the content into the
-    dockerfile."""
-    with open(file_name, 'w') as f:
-        for st in structure:
-            f.write(st['content'])
+    start_line = from_lines.pop(0)
+    while len(from_lines) >= 1:
+        stage = ""
+        end_line = from_lines.pop(0)
+        for idx in range(start_line, end_line):
+            if dfobj_multi.structure[idx]['instruction'] != 'COMMENT':
+                stage = stage + dfobj_multi.structure[idx]['content']
+        stages.append(stage)
+    return stages
