@@ -9,6 +9,7 @@ Run analysis on a Dockerfile
 
 import docker
 import logging
+import os
 import subprocess  # nosec
 
 from tern.utils import constants
@@ -164,6 +165,32 @@ def base_and_run_analysis(dfile, redo, driver, keep, extension):
     return image_list
 
 
+def analyze_single_dockerfile(dockerfile, redo, driver, keep_wd, extend):
+    """Run image analysis for a single Dockerfile. Return a list of images.
+    Inputs are:
+        dockerfile: the Dockerfile file
+        redo: True if analysis needs to be redone
+        driver: The filesystem driver used
+        keep_wd: True if the working directory must not be cleaned up
+        extend: the extension used for analysis"""
+    # attempt to build the image
+    logger.debug('Building Docker image with Dockerfile: %s', dockerfile)
+    image_info = docker_api.build_and_dump(dockerfile)
+    image_list = []
+    if image_info:
+        logger.debug('Docker image successfully built. Analyzing...')
+        # analyze the full image
+        image_list = full_image_analysis(
+            dockerfile, redo, driver, keep_wd, extend)
+    else:
+        # cannot build the image
+        logger.warning('Cannot build image')
+        # analyze the base image and any RUN lines in the Dockerfile
+        image_list = base_and_run_analysis(
+            dockerfile, redo, driver, keep_wd, extend)
+    return image_list
+
+
 def execute_dockerfile(args, locking=False):
     """Execution path for Dockerfiles"""
     dfile = ''
@@ -171,6 +198,7 @@ def execute_dockerfile(args, locking=False):
         dfile = args.lock
     else:
         dfile = args.dockerfile
+    image_list = []
     logger.debug("Parsing Dockerfile...")
     dfobj = parse.get_dockerfile_obj(dfile)
     # expand potential ARG values so base image tag is correct
@@ -178,20 +206,11 @@ def execute_dockerfile(args, locking=False):
     parse.expand_vars(dfobj)
     # Store dockerfile path and commands so we can access it during execution
     lock.load_docker_commands(dfobj)
-    # attempt to build the image
-    logger.debug('Building Docker image...')
-    image_info = docker_api.build_and_dump(dfile)
-    image_list = []
-    if image_info:
-        logger.debug('Docker image successfully built. Analyzing...')
-        # analyze the full image
-        image_list = full_image_analysis(
-            dfile, args.redo, args.driver, args.keep_wd, args.extend)
+    if dfobj.is_multistage:
+        image_list = analyze_multistage_dockerfile(
+            dfobj, args.redo, args.driver, args.keep_wd, args.extend)
     else:
-        # cannot build the image
-        logger.warning('Cannot build image')
-        # analyze the base image and any RUN lines in the Dockerfile
-        image_list = base_and_run_analysis(
+        image_list = analyze_single_dockerfile(
             dfile, args.redo, args.driver, args.keep_wd, args.extend)
     # generate report based on what images were created
     if image_list:
@@ -199,7 +218,51 @@ def execute_dockerfile(args, locking=False):
             report.report_out(args, *image_list)
         else:
             logger.debug('Generating locked Dockerfile...')
-            # we can only lock based on a fully built image for now
+            # we can only lock one image for now
             locked_dfobj = lock.lock_dockerfile(dfobj, image_list[0])
             output = lock.create_locked_dockerfile(locked_dfobj)
             lock.write_locked_dockerfile(output, args.output_file)
+
+
+def write_dockerfile_stages(dfobj):
+    """Given a Dockerfile object, create Dockerfiles for each of the
+    stages for analysis. Return a list of Dockerfiles"""
+    stages = parse.get_dockerfile_stages(dfobj)
+    dockerfiles = []
+    filepath, filename = os.path.split(dfobj.filepath)
+    for stage in stages:
+        stagefile = os.path.join(
+            filepath, '{}_{}'.format(filename, stages.index(stage) + 1))
+        with open(stagefile, 'w') as f:
+            f.write(stage)
+        dockerfiles.append(stagefile)
+    return dockerfiles
+
+
+def clean_dockerfile_stages(dockerfiles):
+    """Remove all the intermediate dockerfiles"""
+    for dockerfile in dockerfiles:
+        os.remove(dockerfile)
+
+
+def analyze_multistage_dockerfile(dfobj, redo, driver, keep_wd, extend):
+    """Split the multistage dockerfile, and then analyze on each stage.
+    Inputs:
+        dfobj: the Dockerfile object
+        redo: True when we want to redo the analysis
+        driver: the filesystem driver to use
+        keep_wd: keep working directory
+        extend: the extension to use for analysis"""
+    # split the multistage dockerfile into single stages for analysis
+    dockerfiles = write_dockerfile_stages(dfobj)
+    image_list = []
+    for dfile in dockerfiles:
+        imlist = analyze_single_dockerfile(
+            dfile, redo, driver, keep_wd, extend)
+        image_list.extend(imlist)
+    clean_dockerfile_stages(dockerfiles)
+    # finally build the existing Dockerfile
+    finallist = analyze_single_dockerfile(
+        dfobj.filepath, redo, driver, keep_wd, extend)
+    image_list.extend(finallist)
+    return image_list

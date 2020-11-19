@@ -42,20 +42,31 @@ def check_docker_setup():
         sys.exit(1)
 
 
-def build_image(dockerfile, client):
+def build_image(dfile, client):
     """Invoke docker build with the given dockerfile. It is assumed that
     docker is installed and the docker daemon is running"""
-    df_path = os.path.abspath(dockerfile)
+    df_path = os.path.abspath(dfile)
     image_tag = '{name}:{tag}'.format(name=constants.image,
                                       tag=str(int(time.time())))
     # try to build the image
+    # TODO: docker's upstream API does not support build
+    # contexts yet. You are expected to provide that as
+    # a tarball as of the 4.3.1 release
+    # This is a hack to get around that
+    # source:
+    # https://github.com/docker/docker-py/issues/2105#issuecomment-613685891
+    dfcontents = ''
+    dfcontext = os.path.dirname(df_path)
     try:
-        with open(df_path, 'rb') as f:
-            image_obj, _ = client.images.build(fileobj=f,
-                                               tag=image_tag,
-                                               nocache=True,
-                                               forcerm=True)
-            return image_obj
+        with open(df_path) as f:
+            dfcontents = f.read()
+        # terrible bypass of the API
+        docker.api.build.process_dockerfile = lambda dockerfile, path: (
+            df_path, dockerfile)
+        image_obj, _ = client.images.build(
+            tag=image_tag, path=dfcontext, dockerfile=dfcontents, nocache=True,
+            forcerm=True)
+        return image_obj
     except FileNotFoundError as e:
         logger.critical('Dockerfile not found: %s', e)
         return None
