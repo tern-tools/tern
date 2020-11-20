@@ -5,20 +5,21 @@ This is a checklist for cutting a release
 - [ ] Prepare Release PR.
     * Freeze development on master.
     * Prepare your local development environment by committing or stashing your changes. Work at the tip of master.
+    * Create a branch for the release: `git checkout -b <release branch name>`.
     * In a separate folder, create a fresh environment and activate it.
     * Clone the `tern/master` repository by running `git clone --single-branch git@github.com:tern-tools/tern.git` and `cd` into it.
-    * Create a branch for the release: `git checkout -b <release branch name>`.
 
 - [ ] Update direct dependencies and run tests.
-    * Run `pip install wheel pip-tools twine`.
+    * In the fresh environment, run `pip install wheel pip-tools twine`.
     * Run `pip-compile --upgrade --output-file upgrade.txt`.
-    * Compare the dependency versions from the output of the pip-compile command to the current dependency versions listed in the `requirements.txt` file. Upgrade `requirements.txt` if necessary.
-    * Run `pip install .` to install tern.
+    * Compare the module versions in upgrade.txt with requirements.txt in the development environment. Bump up versions if needed.
+    * In the fresh environment, run `pip install .` to install tern.
     * Run appropriate tests. Roll back requirements if necessary.
     * When satisfied, run `pip-compile --generate-hashes --output-file v<release>-requirements.txt` where <release> is of the form `major_minor_patch`.
+    * Copy this file to the `docs/releases/` folder in the development environment.
 
 - [ ] Write release notes.
-    * Create a new file for the release notes: `docs/releases/v<release>.md`
+    * In the development environment, create a new file for the release notes: `docs/releases/v<release>.md`
     * If you are writing release notes for a patched release, only include:
       - A link to the primary release notes.
       - A brief summary of what the patched release changes do.
@@ -39,15 +40,8 @@ This is a checklist for cutting a release
 
     * Update the Project Status part of the README.md to reflect this release and add it to the list of releases.
 
-- [ ] Commit release notes and create patch for your changes
-    * `git add` and `git commit` any changes. This will likely include`v<release>-requirements.txt`, any changes to `requirements.txt` and `v<release>.md`. **Do not push these changes to master!**
-    * Run `git format-patch -n1`. This will create a patch file of the release changes you just committed called `0001-<commit_title>.patch`.
-    * Open a new terminal and `cd` into a development virtual environment that contains your forked version of the Tern repo. `cd` into the forked Tern repo directory.
-    * Create a new branch. You will use this branch to submit a PR for the release changes.
-    * Copy the patch file you just created into your new forked repo environment.
-    * Run `git am 0001-<commit_message_title>.patch`.
-    * Run `git push origin <branch-you-created>` to push the changes to your forked repo.
-    * The changes are now available in your forked repo. You can verify this by running `git log` and looking at the top commit from the output.
+- [ ] Commit release notes and submit a PR
+    * `git add` and `git commit` any changes. This will likely include`v<release>-requirements.txt`, any changes to `requirements.txt` and `v<release>.md`.
     * Open a pull request in the Tern project repository for your release changes.
     * Request a review from another maintainer. Update PR as needed based on feedback. Merge the PR. This commit is where the release will be tagged.
 
