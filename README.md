@@ -288,11 +288,11 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Release 2.2.0 is out! See the [release notes](docs/releases/v2_2_0.md) for more information.
+Release 2.3.0 is out! See the [release notes](docs/releases/v2_3_0.md) for more information.
 
 We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 3.0.0.
 
-## Releases
+## Previous Releases
 * [v2.2.0](docs/releases/v2_2_0.md)
 * [v2.1.0](docs/releases/v2_1_0.md)
 * [v2.0.0](docs/releases/v2_0_0.md)

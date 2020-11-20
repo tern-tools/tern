@@ -8,9 +8,9 @@
 
 PyYAML>=5.3
 docker~=4.3
-dockerfile-parse~=1.0
-requests~=2.24
+dockerfile-parse~=1.1
+requests~=2.25
 stevedore>=3.2
-pbr>=5.4
+pbr>=5.5
 debut>=0.9
-regex>=2020.7
+regex>=2020.11
