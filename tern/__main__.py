@@ -197,6 +197,11 @@ def main():
                                          "command library or drivers used "
                                          "for mounting the container image "
                                          "layers.")
+    parser_debug.add_argument('--recover', action='store_true',
+                              help="If an unexpected error occurs during "
+                              "mounting of the filesystem and device nodes, "
+                              "recover the filesystem by undoing all the "
+                              "mounts.")
     parser_debug.add_argument('-i', '--docker-image',
                               help="Docker image that exists locally -"
                               " image:tag"
@@ -215,6 +220,11 @@ def main():
                               help="A package name that the command needs to "
                               "execute with. Useful when testing commands in "
                               "the snippet library")
+    parser_debug.add_argument('--step', action='store_true',
+                              help="An interactive mode in which the "
+                              "container image will be mounted upto the given "
+                              "layer and provide an environment to explore "
+                              "the filesystem at that layer ")
     parser_debug.set_defaults(name='debug')
 
     args = parser.parse_args()
