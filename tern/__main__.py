@@ -20,6 +20,7 @@ from tern.utils import general
 from tern import prep
 from tern.analyze.default.container import run as crun
 from tern.analyze.default.dockerfile import run as drun
+from tern.analyze.default.debug import run as derun
 from tern.report import errors
 
 
@@ -93,6 +94,8 @@ def do_main(args):
                     sys.exit(1)
                 # If the checks are OK, execute for docker image
                 crun.execute_image(args)
+        elif args.name == 'debug':
+            derun.execute_debug(args)
     # Tear down the environment
     prep.teardown(args.keep_wd)
     logger.debug('Finished')
@@ -125,12 +128,14 @@ def main():
                         "to mount the diff layers of the container. If no "
                         "input is provided, 'fuse' will be used as the "
                         "default option.")
+
     # sys.version gives more information than we care to print
     py_ver = sys.version.replace('\n', '').split('[')[0]
     parser.add_argument('-v', '--version', action='version',
                         version="{ver_str}\n   python version = {py_v}".format(
                             ver_str=get_version(), py_v=py_ver))
     subparsers = parser.add_subparsers(help='Subcommands')
+
     # subparser for report
     parser_report = subparsers.add_parser('report',
                                           help="Create a BoM report."
@@ -163,6 +168,7 @@ def main():
                                "If no file is given the report will be "
                                "printed to the console.")
     parser_report.set_defaults(name='report')
+
     # subparser for dockerfile lock
     parser_lock = subparsers.add_parser('lock',
                                         help="Create an annotated Dockerfile"
@@ -182,6 +188,45 @@ def main():
                              "image. Available extensions:\n cve-bin-tool\n"
                              "scancode\n")
     parser_lock.set_defaults(name='lock')
+
+    # subparser for container "debug"
+    parser_debug = subparsers.add_parser('debug',
+                                         help="Debug pieces of operation by "
+                                         "themselves. This is useful when "
+                                         "debugging scripts entered into the "
+                                         "command library or drivers used "
+                                         "for mounting the container image "
+                                         "layers.")
+    parser_debug.add_argument('--recover', action='store_true',
+                              help="If an unexpected error occurs during "
+                              "mounting of the filesystem and device nodes, "
+                              "recover the filesystem by undoing all the "
+                              "mounts.")
+    parser_debug.add_argument('-i', '--docker-image',
+                              help="Docker image that exists locally -"
+                              " image:tag"
+                              " The option can be used to pull docker"
+                              " images by digest as well -"
+                              " <repo>@<digest-type>:<digest>")
+    parser_debug.add_argument('-w', '--raw-image', metavar='FILE',
+                              help="Raw container image that exists locally "
+                              "in the form of a tar archive.")
+    parser_debug.add_argument('--keys', nargs='+',
+                              help="List of keys to look up in the command "
+                              "library. Eg: base dpkg names")
+    parser_debug.add_argument('--shell', default='/bin/sh',
+                              help="The shell executable that the image uses")
+    parser_debug.add_argument('--package', default='',
+                              help="A package name that the command needs to "
+                              "execute with. Useful when testing commands in "
+                              "the snippet library")
+    parser_debug.add_argument('--step', action='store_true',
+                              help="An interactive mode in which the "
+                              "container image will be mounted upto the given "
+                              "layer and provide an environment to explore "
+                              "the filesystem at that layer ")
+    parser_debug.set_defaults(name='debug')
+
     args = parser.parse_args()
 
     # execute

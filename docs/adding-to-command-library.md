@@ -12,9 +12,11 @@ in the right format.
 The shell scripts are listed in the [Command Library](glossary.md) which is
 simply two yaml files: `command_lib/base.yml` and `command_lib/snippets.yml`.
 
-base.yml lists snippets that operate on full root filesystems that typically
-come with a package manager or some other way of grokking the manifest of
-the filesystem. snippets.yml lists shell scripts for command line instructions
+base.yml lists files that are typically found in the filesystem of a known
+Linux distribution. They are typically package managers but they can be any
+unique file that identifies the type of base OS for the container image.
+
+Alternatively, snippets.yml lists shell scripts for command line instructions
 used to create the diff filesystems that make up a container image. These are
 for imperative commands like `apt-get install` or `wget web_package && ...`.
 
@@ -109,8 +111,6 @@ report will be full of messages telling you to add the other information
 which will be *hugely* appreciated by your fellow users and developers
 like the version, licenses and project urls for the packages.
 
-This listing will now work for any debian based container OS or a minimal root filesystem that comes with dpkg.
-
 ## Adding to the Snippet Command Library
 
 Once Tern analyzes the base layer of the container image, it will try to figure
@@ -181,31 +181,22 @@ given the name of the package to be 'default', Tern will run the shell scripts
 on every package name it has parsed from the container manifest that was installed
 with apt-get.
 
-## Using verify_invoke.py to check your script
+Alternatively, you can point to the `base.yml` way of listing packages. For example,
+you can point `apt-get` back to `dpkg` like this:
+
+```
+  packages: 'dpkg'
+```
+
+This is currently the most ubiquitous way of enabling inventorying using a package
+manager.
+
+
+## Using Tern's 'debug' option to check your script
 
 To check if your script is producing accurate results that Tern can understand,
-you can make use of the verify_invoke.py script for both base.yml and
-snippets.yml listing
-
-```
-$ export PYTHONPATH=`pwd
-$ python tools/verify_invoke.py -h
-usage: verify_invoke.py [-h] [--container CONTAINER] [--keys KEYS [KEYS ...]]                                                   
-                        [--shell SHELL] [--package PACKAGE]
-
-A script to test if the set of commands that get executed within a container                                                    
-produce expected results. Give a list of keys to point to in the command                                                        
-library and the image
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --container CONTAINER
-                        Name of the running container
-  --keys KEYS [KEYS ...]
-                        List of keys to look up in the command library                                                          
-  --shell SHELL         The shell executable that the container uses                                                            
-  --package PACKAGE     A package name that the command needs to execute with
-```
+you can make use of Tern's 'debug' option for both base.yml and
+snippets.yml listing.
 
 I assume here that you have already installed Docker and are familiar with
 how to run a container. verify_invoke.py will not do this for you, but you
@@ -224,21 +215,17 @@ $ pip install -r requirements.txt
 
 Generally here is the workflow:
 
-### For base.yml
+(This workflow only works for base.yml)
 
-1. Run your container using `docker run -td --name test <image:tag>` to run your container in the background and with a pseudo-tty and to give it a name `test`
-2. Export PYTHONPATH to the current directory assuming you have already cd'd into the tern directory
+Run tern in the following way:
+
 ```
-$ export PYTHONPATH=`pwd`
-```
-3. Run verify_invoke with the following flags
-```
-$ python tools/verify_invoke.py --container test --keys base <package_manager> <names/versions/licenses/src_urls> --shell '/usr/bin/bash'
+$ tern debug -i <image:tag> --keys base <package_manager> <names/versions/licenses/src_urls> --shell '/usr/bin/bash'
 ```
 
 This should give you a result that looks something like this:
 ```
-$ python tools/verify_invoke.py --container pensive_kapitsa --keys base tdnf names --shell '/usr/bin/bash'
+$ tern debug -i photon:2.0 --keys base tdnf names --shell '/usr/bin/bash'
 Output list: bash bzip2-libs ca-certificates ca-certificates-pki curl curl-libs e2fsprogs-libs elfutils-libelf expat-libs filesystem glibc hawkey krb5 libcap libdb libgcc libsolv libssh2 ncurses-libs nspr nss-libs openssl photon-release photon-repos popt readline rpm-libs sqlite-libs tdnf toybox xz-libs zlib
 Error messages: 
 Number of elements: 32
@@ -262,44 +249,57 @@ base.yml, you should see a listing with and 'invoke' key like this:
 
 You can now verify if this result is what you expect for the list of package
 names, the number of elements in the list i.e. the number of installed packages
-and if there were any error messages
+and if there were any error messages.
 
-### For snippets.yml
+What if you encounter an error? Tern's debug option can also help you chroot into the filesystem to try running the script manually.
 
-1. Run your container using `docker run -td --name test <image:tag>` to run your container in the background and with a pseudo-tty and to give it a name `test`
-2. Export the PYTHONPATH to the current directory assuming you have cd'd into the tern directory
-```
-$ export PYTHONPATH=`pwd`
-```
-3. Run verify_invoke with the following flags
-```
-$ python tools/verify_invoke.py --container test --keys snippets <command> packages <version/license/proj_url> --shell '/usr/bin/bash' --package <package name>
-```
-
-This should give you a result that looks something like this:
-```
-$ python tools/verify_invoke.py --container pensive_kapitsa --keys snippets tyum packages version --shell '/usr/bin/bash' --package bash
-Output list: 4.4-6.ph2
-Error messages:
-Number of elements: 1
-```
-
-For snippets.yml the first key is 'snippets'. If you look up tyum > packages in
-snippets.yml, you should see a list of dictionaries. Go ahead and give the required
-attribute (version, license or proj_url) as the next key. The listing containing the
-'invoke' key should look something like this:
-```
-      version:
-        invoke:
-          1:
-            container:
-              - 'list=`tdnf list installed {package}`'
-              - 'c=0; for l in $list; do if [ $c == 1 ]; then echo $l; fi; c=$(((c+1)%3)); done;'
+**WARNING** This only works on Linux distros. Windows and MacOS are not supported.
 
 ```
-You can now verify if this result is what you expect for the version number for
-the given package name and if there were any error messages. The number of elements
-should always be 1 as you are querying for only one package name.
+$ tern debug -i <image:tag> --step
+```
+
+This will drop you into an interactive mode where you will be asked to pick the layer you want to debug
+
+```
+*************************************************************
+          Container Image Interactive Debug Mode             
+*************************************************************
+
+[0] /bin/sh -c #(nop) ADD file:240dde03c4d9f0ad759f8d1291fb45ab2745b6a108c6164d746766239d3420ab in / 
+[1] /bin/sh -c dnf -y update && dnf install -y make git golang golang-github-cpuguy83-md2man    btrfs-progs-devel       device-mapper-devel     libassuan-devel gpgme-devel     gnupg   httpd-tools     which tar wget hostname util-linux bsdtar socat ethtool device-mapper iptables tree findutils nmap-ncat e2fsprogs xfsprogs lsof docker iproute         bats jq podman runc      golint  openssl         && dnf clean all
+[2] /bin/sh -c set -x   && REGISTRY_COMMIT_SCHEMA1=ec87e9b6971d831f0eff752ddb54fb64693e51cd     && REGISTRY_COMMIT=47a064d4195a9b56133891bbb13620c3ac83a827     && export GOPATH="$(mktemp -d)"         && git clone https://github.com/docker/distribution.git "$GOPATH/src/github.com/docker/distribution"    && (cd "$GOPATH/src/github.com/docker/distribution" && git checkout -q "$REGISTRY_COMMIT")      && GOPATH="$GOPATH/src/github.com/docker/distribution/Godeps/_workspace:$GOPATH"                go build -o /usr/local/bin/registry-v2 github.com/docker/distribution/cmd/registry      && (cd "$GOPATH/src/github.com/docker/distribution" && git checkout -q "$REGISTRY_COMMIT_SCHEMA1")      && GOPATH="$GOPATH/src/github.com/docker/distribution/Godeps/_workspace:$GOPATH"               go build -o /usr/local/bin/registry-v2-schema1 github.com/docker/distribution/cmd/registry       && rm -rf "$GOPATH"
+[3] /bin/sh -c set -x   && export GOPATH=$(mktemp -d)   && git clone --depth 1 -b v1.5.0-alpha.3 git://github.com/openshift/origin "$GOPATH/src/github.com/openshift/origin"    && sed -i -e 's/\[\[ "\${go_version\[2]}" < "go1.5" ]]/false/' "$GOPATH/src/github.com/openshift/origin/hack/common.sh"         && (cd "$GOPATH/src/github.com/openshift/origin" && make clean build && make all WHAT=cmd/dockerregistry)       && cp -a "$GOPATH/src/github.com/openshift/origin/_output/local/bin/linux"/*/* /usr/local/bin   && cp "$GOPATH/src/github.com/openshift/origin/images/dockerregistry/config.yml" /atomic-registry-config.yml    && rm -rf "$GOPATH"     && mkdir /registry
+[4] /bin/sh -c go version
+[5] /bin/sh -c #(nop) WORKDIR /go/src/github.com/containers/skopeo
+[6] /bin/sh -c #(nop) COPY dir:8e7a6d060051c80f562171cdc69069a21b60ed3b5e3355a9dabe31523a31d432 in /go/src/github.com/containers/skopeo 
+
+Pick a layer to debug: 
+```
+
+After picking a layer, you should get some instructions on how to proceed with your debugging
+
+```
+Run 'cd /home/nisha/.tern/temp/mergedir && sudo chroot . /bin/sh' to look around
+
+After exiting from your session, run 'cd -' to go back and 'tern debug --recover' to clean up.
+```
+
+You should get something like this if you run the first command
+
+```
+root@ubuntu / $ ls
+atomic-registry-config.yml  boot  etc   lib    lost+found  mnt  proc      root  sbin  sys  usr
+bin                         dev   home  lib64  media       opt  registry  run   srv   tmp  var
+```
+
+This is what the container filesystem looks like at that specific layer. To exit out of this, run `exit`. At this point you should still be in the working directory. To get back, run `cd -`.
+
+To recover the filesystem, run the following:
+
+```
+$ tern debug --recover
+```
 
 As always, don't hesitate to ask questions by filing an issue with 'Question:'
 as the prefix of the subject, on the Slack channel or on the mailing list.
