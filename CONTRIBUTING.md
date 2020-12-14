@@ -6,8 +6,10 @@ We are excited to work with anyone at any level contributing their time and effo
 
 You can contribute in the following ways:
 
+**Start a Discussion**
+- Ask questions about the project goals, features, a specific use case, or clarification on documentation. Asking questions lead to issues being filed, eventually making the project more usable.
+
 **File Issues**
-- Ask questions about the project goals, a specific use case, or clarification on documentation. Asking questions lead to issues being filed, eventually making the project more usable.
 - Run the code against any Docker image you are using, or any of the tests and submit bug reports when you find them.
 
 **Contribute Documentation**
