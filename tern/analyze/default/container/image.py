@@ -23,13 +23,14 @@ from tern.report import formats
 logger = logging.getLogger(constants.logger_name)
 
 
-def load_full_image(image_tag_string):
-    '''Create image object from image name and tag and return the object'''
+def load_full_image(image_tag_string, load_until_layer=0):
+    '''Create image object from image name and tag and return the object.
+    Loads only as much layers as needed.'''
     test_image = DockerImage(image_tag_string)
     failure_origin = formats.image_load_failure.format(
         testimage=test_image.repotag)
     try:
-        test_image.load_image()
+        test_image.load_image(load_until_layer)
     except (NameError,
             subprocess.CalledProcessError,
             IOError,

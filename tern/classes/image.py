@@ -15,7 +15,10 @@ class Image:
         identification scheme, this can be any string.
         manifest: the json object representing the image manifest
         config: the image config metadata
-        layers: list of layer objects in the image
+        layers: list of loaded layer objects from the image
+                (depends on --layer option)
+        load_until_layer: image should be loaded up to this layer
+        total_layers: total number of layers in image.
         checksum_type: the digest algorithm used to create the image checksum
         checksum: the checksum
         checksums: a list of tuples of the form (checksum_type, checksum)
@@ -34,6 +37,8 @@ class Image:
         self._manifest = {}
         self._config = {}
         self._layers = []
+        self._load_until_layer = 0
+        self._total_layers = 0
         self._checksum_type = ''
         self._checksum = ''
         self._checksums = []
@@ -54,6 +59,14 @@ class Image:
     @property
     def layers(self):
         return self._layers
+
+    @property
+    def load_until_layer(self):
+        return self._load_until_layer
+
+    @property
+    def total_layers(self):
+        return self._total_layers
 
     @property
     def origins(self):
@@ -135,7 +148,7 @@ class Image:
                 return layer
         return None
 
-    def load_image(self):
+    def load_image(self, load_until_layer=0):
         '''Load image metadata
         Currently there is no standard way to do this. For a specific tool,
         Inherit from this class and override this method'''

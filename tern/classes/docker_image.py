@@ -131,7 +131,7 @@ class DockerImage(Image):
                     self._layers[index].created_by = ''
                 index = index + 1
 
-    def load_image(self):
+    def load_image(self, load_until_layer=0):
         """Load metadata from an extracted docker image. This assumes the
         image has already been downloaded and extracted into the working
         directory"""

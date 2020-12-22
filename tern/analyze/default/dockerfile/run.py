@@ -88,7 +88,7 @@ def load_base_image():
     if docker_api.dump_docker_image(base_image.repotag):
         # now see if we can load the image
         try:
-            base_image.load_image()
+            base_image.load_image(load_until_layer=0)
         except (NameError,
                 subprocess.CalledProcessError,
                 IOError,
