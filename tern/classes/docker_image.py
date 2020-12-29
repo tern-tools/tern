@@ -130,11 +130,16 @@ class DockerImage(Image):
                 else:
                     self._layers[index].created_by = ''
                 index = index + 1
+                if index is self.load_until_layer:
+                    break
 
     def load_image(self, load_until_layer=0):
         """Load metadata from an extracted docker image. This assumes the
         image has already been downloaded and extracted into the working
         directory"""
+        if load_until_layer > 0:
+            self._load_until_layer = load_until_layer
+        # else defaults to 0 - handles negative load_until_layer
         try:
             self._manifest = self.get_image_manifest()
             self.__repotags = self.get_image_repotags(self._manifest)
@@ -146,11 +151,19 @@ class DockerImage(Image):
             layer_count = 1
             while layer_diffs and layer_paths:
                 layer = ImageLayer(layer_diffs.pop(0), layer_paths.pop(0))
-                layer.set_checksum(checksum_type, layer.diff_id)
-                layer.gen_fs_hash()
-                layer.layer_index = layer_count
+                # Only load metadata for the layers we need to report on according to the --layers command line option
+                # If  --layers option is not present, load all the layers
+                if self.load_until_layer >= layer_count or self.load_until_layer == 0:
+                    layer.set_checksum(checksum_type, layer.diff_id)
+                    layer.gen_fs_hash()
+                    layer.layer_index = layer_count
+                    self._layers.append(layer)
                 layer_count = layer_count + 1
-                self._layers.append(layer)
+            self._total_layers = layer_count - 1
+            if self.load_until_layer > self.total_layers:
+                # if user asked to analyze more layers than image has
+                # turn off the load_until_layer feature
+                self._load_until_layer = 0
             self.set_layer_created_by()
         except NameError as e:
             raise NameError(e)

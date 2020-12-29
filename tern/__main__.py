@@ -81,10 +81,13 @@ def do_main(args):
         if args.name == 'lock':
             drun.execute_dockerfile(args, True)
         elif args.name == 'report':
-            if args.layer or args.layer_inclusive:
-                raise NotImplementedError("This feature is not implemented yet!")
             if args.dockerfile:
-                drun.execute_dockerfile(args)
+                if (not args.load_until_layer):
+                    drun.execute_dockerfile(args)
+                else:
+                    logger.critical("Currently --layer/-y can only be used with"
+                                    " --docker-image/-i")
+                    sys.exit(1)
             elif args.docker_image:
                 # Check if the image string is a tarball
                 if general.check_tar(args.docker_image):

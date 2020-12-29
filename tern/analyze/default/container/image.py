@@ -25,7 +25,7 @@ logger = logging.getLogger(constants.logger_name)
 
 def load_full_image(image_tag_string, load_until_layer=0):
     '''Create image object from image name and tag and return the object.
-    Loads only as much layers as needed.'''
+    Loads only as many layers as needed.'''
     test_image = DockerImage(image_tag_string)
     failure_origin = formats.image_load_failure.format(
         testimage=test_image.repotag)
@@ -47,8 +47,8 @@ def default_analyze(image_obj, redo=False, driver=None):
     """ Steps to analyze a container image (we assume it is a DockerImage
     object for now)
     1. Analyze the first layer to get a baseline list of packages
-    3. Analyze subsequent layers
-    4. Return the final image with all metadata filled in
+    2. Analyze subsequent loaded layers
+    3. Return the final image with all metadata filled in
     Options:
         redo: do not use the cache; False by default
         driver: mount using the chosen driver;
