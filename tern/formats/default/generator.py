@@ -19,9 +19,14 @@ from tern.utils import constants
 logger = logging.getLogger(constants.logger_name)
 
 
-def print_full_report(image):
-    '''Given an image, go through the Origins object and collect all the
-    notices for the image, layers and packages'''
+def print_full_report(image, print_inclusive):
+    '''Generate a report for:
+        1. Full image if image.load_until_layer is 0
+        2. Only layer image.load_until_layer if print_inclusive is False
+        3. Layers up to image.load_until_layer if print_inclusive is True
+    Goes through the Origins object and collects all necessary (as outlined
+    above) notices for the image, layers and packages'''
+
     notes = ''
     for image_origin in image.origins.origins:
         notes = notes + content.print_notices(image_origin, '', '\t')
@@ -32,8 +37,12 @@ def print_full_report(image):
         notes = notes + header + '\n\n'
 
     for layer in image.layers:
+        if image.load_until_layer != 0 and \
+           layer.layer_index is not image.load_until_layer and \
+           print_inclusive is False:
+            continue
         if layer.import_image:
-            notes = notes + print_full_report(layer.import_image)
+            notes = notes + print_full_report(layer.import_image, print_inclusive)
         else:
             notes = notes + get_layer_notices(layer)
             (layer_pkg_list, layer_license_list,
@@ -121,6 +130,11 @@ class Default(generator.Generate):
         report = formats.disclaimer.format(
             version_info=content.get_tool_version())
         logger.debug('Creating a detailed report of components in image...')
+        report_only = False
         for image in image_obj_list:
-            report = report + print_full_report(image)
+            if not print_inclusive and image.load_until_layer != 0:
+                report_only = True
+            report = report + print_full_report(image, print_inclusive)
+        if report_only:
+            return report
         return report + print_licenses_only(image_obj_list)
