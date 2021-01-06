@@ -21,7 +21,7 @@ def print_yaml_report(image):
 
 
 class YAML(generator.Generate):
-    def generate(self, image_obj_list):
+    def generate(self, image_obj_list, print_inclusive=False):
         '''Generate a yaml report'''
         report = formats.disclaimer_yaml.format(
             version_info=get_git_rev_or_version())

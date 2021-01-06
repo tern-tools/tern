@@ -47,11 +47,11 @@ def clean_working_dir():
 def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     if args.report_format:
-        return generate_format(images, args.report_format)
-    return generate_format(images, 'default')
+        return generate_format(images, args.report_format, args.print_inclusive)
+    return generate_format(images, 'default', args.print_inclusive)
 
 
-def generate_format(images, format_string):
+def generate_format(images, format_string, print_inclusive):
     '''Generate a report in the format of format_string given one or more
     image objects. Here we will load the required module and run the generate
     function to get back a report'''
@@ -61,7 +61,7 @@ def generate_format(images, format_string):
             name=format_string,
             invoke_on_load=True,
         )
-        return mgr.driver.generate(images)
+        return mgr.driver.generate(images, print_inclusive)
     except NoMatches:
         pass
 

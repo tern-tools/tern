@@ -12,7 +12,7 @@ from tern.formats import generator
 
 
 class JSON(generator.Generate):
-    def generate(self, image_obj_list):
+    def generate(self, image_obj_list, print_inclusive=False):
         '''Given a list of image objects, create a json object string'''
         image_list = []
         for image in image_obj_list:

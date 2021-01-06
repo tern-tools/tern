@@ -116,7 +116,7 @@ def print_licenses_only(image_obj_list):
 
 
 class Default(generator.Generate):
-    def generate(self, image_obj_list):
+    def generate(self, image_obj_list, print_inclusive=False):
         '''Generate a default report'''
         report = formats.disclaimer.format(
             version_info=content.get_tool_version())
