@@ -81,7 +81,7 @@ def do_main(args):
         if args.name == 'lock':
             drun.execute_dockerfile(args, True)
         elif args.name == 'report':
-            if args.layer:
+            if args.layer or args.layer_inclusive:
                 raise NotImplementedError("This feature is not implemented yet!")
             if args.dockerfile:
                 drun.execute_dockerfile(args)
@@ -162,6 +162,11 @@ def main():
                                " Base OS layer is 1. Can only be used with"
                                " --docker-image/-i analysis. No argument"
                                " will scan Base OS layer only.")
+    parser_report.add_argument('-li', '--layer-inclusive',
+                               action='store_true', dest='print_inclusive',
+                               help="Usable only with --layer/-y parameter."
+                               " When used, report will include all"
+                               " preceding layers info.")
     parser_report.add_argument('-x', '--extend', metavar='EXTENSION',
                                help="Use an extension to analyze a container "
                                "image. Available extensions:\n cve-bin-tool\n"
