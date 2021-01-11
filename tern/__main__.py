@@ -121,7 +121,7 @@ def main():
                         help="Repopulate the cache for found layers")
     parser.add_argument('-wd', '--working-dir', metavar='PATH',
                         help="Change default working directory to specified"
-                        "absolute path.")
+                        " absolute path.")
     parser.add_argument('-dr', '--driver', metavar="DRIVER_OPTION",
                         help="Required when running Tern in a container."
                         "Using 'fuse' will enable the fuse-overlayfs driver "
