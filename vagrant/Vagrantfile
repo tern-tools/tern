@@ -8,6 +8,12 @@
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
+
+# Customize the amount of memory on the VM:
+VM_MEMORY = 4 * 1024
+# Customize amount of cores for the VM:
+VM_CPUS = 2
+
 Vagrant.configure("2") do |config|
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
@@ -15,7 +21,7 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "ubuntu/bionic64"
+  config.vm.box = "generic/ubuntu1804"
   config.vm.provision :shell, path: "bootstrap.sh"
 
   config.vm.synced_folder '.', '/vagrant', disabled: true
@@ -59,10 +65,16 @@ Vagrant.configure("2") do |config|
   #   # Display the VirtualBox GUI when booting the machine
   #   vb.gui = true
   #
-  #   # Customize the amount of memory on the VM:
-    vb.memory = "4096"
+    vb.memory = VM_MEMORY
+    vb.cpus = VM_CPUS
   end
-  #
+
+  config.vm.provider :libvirt do |lv|
+    lv.memory = VM_MEMORY
+    lv.cpus = VM_CPUS
+    lv.storage_pool_name = "default"
+  end
+
   # View the documentation for the provider you are using for more
   # information on available options.
 
