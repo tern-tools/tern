@@ -7,25 +7,8 @@
 File level helpers for SPDX tag-value document generator
 """
 
-from tern.formats.spdx import formats as spdx_formats
-
-
-# basic functions
-def get_file_spdxref(filedata, layer_id):
-    '''Given a FileData object, return a unique identifier for the SPDX
-    document. According to the spec, this should be of the form: SPDXRef-<id>
-    We will use a combination of the file name, checksum and layer_id and
-    calculate a hash of this string'''
-    file_string = filedata.path + filedata.checksum[:7] + layer_id
-    fileid = spdx_formats.get_string_id(file_string)
-    return 'SPDXRef-{}'.format(fileid)
-
-
-def get_file_checksum(filedata):
-    '''Given a FileData object, return the checksum required by SPDX.
-    This should be of the form: <checksum_type>: <checksum>
-    Currently, the spec requires a SHA1 checksum'''
-    return '{}: {}'.format('SHA1', filedata.get_checksum('sha1'))
+from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
+from tern.formats.spdx import spdx_common
 
 
 def get_file_comment(filedata):
@@ -40,20 +23,6 @@ def get_file_comment(filedata):
     return comment
 
 
-def get_file_notice(filedata):
-    '''Return a formatted string with all copyrights found in a file. Return
-    an empty string if there are no copyrights'''
-    notice = ''
-    for cp in filedata.copyrights:
-        notice = notice + cp + '\n'
-    return notice
-
-
-def get_file_licenses(filedata):
-    '''Return a unique list of file licenses'''
-    return list(set(filedata.licenses))
-
-
 # formatting functions
 def get_license_info_block(filedata):
     '''The SPDX spec asks to list of SPDX license identifiers or license
@@ -65,7 +34,7 @@ def get_license_info_block(filedata):
     if not filedata.licenses:
         block = 'LicenseInfoInFile: NONE\n'
     else:
-        for lic in get_file_licenses(filedata):
+        for lic in spdx_common.get_file_licenses(filedata):
             block = block + 'LicenseInfoInFile: {}'.format(
                 spdx_formats.get_license_ref(lic)) + '\n'
     return block
@@ -93,12 +62,12 @@ def get_file_block(filedata, template, layer_id):
     block = block + 'FileName: {}'.format(mapping['FileName']) + '\n'
     # SPDX ID
     block = block + 'SPDXID: {}'.format(
-        get_file_spdxref(filedata, layer_id)) + '\n'
+        spdx_common.get_file_spdxref(filedata, layer_id)) + '\n'
     # File Type
     block = block + 'FileType: {}'.format(mapping['FileType']) + '\n'
     # File checksum
-    block = block + 'FileChecksum: {}'.format(get_file_checksum(filedata)) + \
-        '\n'
+    block = block + 'FileChecksum: {}'.format(
+        spdx_common.get_file_checksum(filedata)) + '\n'
     # Concluded license - we won't provide this
     block = block + 'LicenseConcluded: NOASSERTION' + '\n'
     # License info in file
@@ -106,11 +75,11 @@ def get_file_block(filedata, template, layer_id):
     # File copyright text - we don't know this
     block = block + 'FileCopyrightText: NOASSERTION' + '\n'
     # File comment - we add this only if there is a comment
-    comment = get_file_comment(filedata)
+    comment = spdx_common.get_file_comment(filedata)
     if comment:
         block = block + 'FileComment: <text>\n' + comment + '</text>' + '\n'
     # File Notice - we add this only if there is a notice
-    notice = get_file_notice(filedata)
+    notice = spdx_common.get_file_notice(filedata)
     if notice:
         block = block + 'FileNotice: <text>\n' + notice + '</text>' + '\n'
     # File Contributor - we add this only if there are contributors

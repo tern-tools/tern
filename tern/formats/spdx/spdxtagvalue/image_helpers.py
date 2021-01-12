@@ -7,25 +7,20 @@
 Helper functions for image level SPDX document blocks
 Images for SPDX act like a Package
 """
-from tern.formats.spdx import formats as spdx_formats
+from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
 from tern.formats.spdx.spdxtagvalue import layer_helpers as lhelpers
 from tern.formats.spdx.spdxtagvalue import package_helpers as phelpers
-
-
-def get_image_spdxref(image_obj):
-    '''Given the image object, return an SPDX reference ID'''
-    # here we return the image name, tag and id
-    return 'SPDXRef-{}'.format(image_obj.get_human_readable_id())
+from tern.formats.spdx import spdx_common
 
 
 def get_image_layer_relationships(image_obj):
     '''Given the image object, return the relationships to the layers'''
     block = ''
-    image_reference = get_image_spdxref(image_obj)
+    image_reference = spdx_common.get_image_spdxref(image_obj)
     for layer in image_obj.layers:
         block = block + spdx_formats.contains.format(
             outer=image_reference,
-            inner=lhelpers.get_layer_spdxref(layer)) + '\n'
+            inner=lhelpers.spdx_common.get_layer_spdxref(layer)) + '\n'
     return block
 
 
@@ -37,7 +32,7 @@ def get_image_packages_block(image_obj, template):
     package_refs = set()
     for layer in image_obj.layers:
         for package in layer.packages:
-            pkg_ref = phelpers.get_package_spdxref(package)
+            pkg_ref = spdx_common.get_package_spdxref(package)
             if pkg_ref not in package_refs:
                 block += phelpers.get_package_block(package, template) + '\n'
                 package_refs.add(pkg_ref)
@@ -56,7 +51,7 @@ def get_image_packages_license_block(image_obj):
                 licenses.add(package.pkg_license)
     for lic in licenses:
         block += spdx_formats.license_id.format(
-            license_ref=spdx_formats.get_license_ref(lic)) + '\n'
+            license_ref=spdx_common.get_license_ref(lic)) + '\n'
         block += spdx_formats.extracted_text.format(orig_license=lic) + '\n'
     return block
 
@@ -73,7 +68,7 @@ def get_image_file_license_block(image_obj):
                 licenses.add(lic)
     for lic in licenses:
         block += spdx_formats.license_id.format(
-            license_ref=spdx_formats.get_license_ref(lic)) + '\n'
+            license_ref=spdx_common.get_license_ref(lic)) + '\n'
         block += spdx_formats.extracted_text.format(orig_license=lic) + '\n'
     return block
 
@@ -91,7 +86,7 @@ def get_image_block(image_obj, template):
     # Package Name
     block += 'PackageName: {}\n'.format(mapping['PackageName'])
     # Package SPDXID
-    block += 'SPDXID: {}\n'.format(get_image_spdxref(image_obj))
+    block += 'SPDXID: {}\n'.format(spdx_common.get_image_spdxref(image_obj))
     # Package Version
     block += 'PackageVersion: {}\n'.format(mapping['PackageVersion'])
     # Package Download Location

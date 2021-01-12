@@ -7,16 +7,9 @@
 Helper functions for packages in SPDX document
 """
 
-from tern.formats.spdx import formats as spdx_formats
+from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
+from tern.formats.spdx import spdx_common
 from tern.report import content
-
-
-def get_package_spdxref(package_obj):
-    '''Given the package object, return an SPDX reference ID'''
-    return 'SPDXRef-{}'.format(
-        spdx_formats.package_id.format(
-            name=package_obj.name,
-            ver=package_obj.version).replace(':', '-', 1))
 
 
 def get_package_comment(package_obj):
@@ -44,7 +37,8 @@ def get_package_block(package_obj, template):
     # Package Name
     block += 'PackageName: {}\n'.format(mapping['PackageName'])
     # SPDXID
-    block += 'SPDXID: {}\n'.format(get_package_spdxref(package_obj))
+    block += 'SPDXID: {}\n'.format(
+        spdx_common.get_package_spdxref(package_obj))
     # Package Version
     if mapping['PackageVersion']:
         block += 'PackageVersion: {}\n'.format(mapping['PackageVersion'])
@@ -61,7 +55,7 @@ def get_package_block(package_obj, template):
     # Package License Declared (use the license ref for this)
     if mapping['PackageLicenseDeclared']:
         block += 'PackageLicenseDeclared: {}\n'.format(
-            spdx_formats.get_license_ref(mapping['PackageLicenseDeclared']))
+            spdx_common.get_license_ref(mapping['PackageLicenseDeclared']))
     else:
         block += 'PackageLicenseDeclared: NONE\n'
     # Package Copyright Text
