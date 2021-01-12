@@ -7,7 +7,7 @@
 Helper functions for image level SPDX document blocks
 Images for SPDX act like a Package
 """
-from tern.formats.spdx import formats as spdx_formats
+from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
 from tern.formats.spdx.spdxtagvalue import layer_helpers as lhelpers
 from tern.formats.spdx.spdxtagvalue import package_helpers as phelpers
 

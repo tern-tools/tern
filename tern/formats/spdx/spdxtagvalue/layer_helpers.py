@@ -11,7 +11,7 @@ import hashlib
 import logging
 import os
 
-from tern.formats.spdx import formats as spdx_formats
+from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
 from tern.utils import constants
 from tern.formats.spdx.spdxtagvalue import file_helpers as fhelpers
 from tern.formats.spdx.spdxtagvalue import package_helpers as phelpers

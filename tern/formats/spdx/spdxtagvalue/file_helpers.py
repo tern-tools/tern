@@ -7,7 +7,7 @@
 File level helpers for SPDX tag-value document generator
 """
 
-from tern.formats.spdx import formats as spdx_formats
+from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
 
 
 # basic functions

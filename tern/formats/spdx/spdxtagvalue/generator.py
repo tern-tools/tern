@@ -13,7 +13,7 @@ import logging
 from tern.formats.spdx.spdx import SPDX
 from tern.utils.general import get_git_rev_or_version
 from tern.utils import constants
-from tern.formats.spdx import formats as spdx_formats
+from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
 from tern.formats.spdx.spdxtagvalue import image_helpers as mhelpers
 from tern.formats import generator
 
