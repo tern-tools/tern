@@ -11,6 +11,7 @@ import datetime
 import logging
 
 from tern.formats.spdx.spdx import SPDX
+from tern.formats.spdx import spdx_common
 from tern.utils.general import get_git_rev_or_version
 from tern.utils import constants
 from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
@@ -28,7 +29,7 @@ def get_document_namespace(image_obj):
     and the uuid'''
     return spdx_formats.document_namespace.format(
         version=get_git_rev_or_version()[1], image=image_obj.name,
-        uuid=spdx_formats.get_uuid())
+        uuid=spdx_common.get_uuid())
 
 
 def get_document_block(image_obj):

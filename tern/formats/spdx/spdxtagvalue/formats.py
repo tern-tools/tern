@@ -7,9 +7,6 @@
 SPDX document formatting
 """
 
-import hashlib
-import uuid
-
 # basic strings
 tag_value = '{tag}: {value}'
 block_text = '<text>\n{message}\n</text>'
@@ -38,18 +35,3 @@ prereq = 'Relationship: {after} HAS_PREREQUISITE {before}'
 # License Reference Information
 license_id = 'LicenseID: {license_ref}'
 extracted_text = 'ExtractedText: <text>Original license: {orig_license}</text>'
-
-
-def get_uuid():
-    """ Return a UUID string"""
-    return str(uuid.uuid4())
-
-
-def get_string_id(string):
-    """ Return a unique identifier for the given string"""
-    return hashlib.sha256(string.encode('utf-8')).hexdigest()[-7:]
-
-
-def get_license_ref(license_string):
-    """ For SPDX tag-value format, return a LicenseRef string """
-    return 'LicenseRef-' + get_string_id(license_string)
