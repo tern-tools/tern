@@ -22,7 +22,7 @@ creator = 'Tool: tern-{version}'
 created = '{timestamp}'
 
 
-# Relationship Formatting
+# Dictionary Formatting
 def get_relationship_dict(element_id, related_element_id, relationship_type):
     '''Given two SPDX element IDs and their relationship type, return a
     dictionary that represents the relationship. Assume that the element_id
@@ -36,4 +36,17 @@ def get_relationship_dict(element_id, related_element_id, relationship_type):
         "spdxElementId": element_id,
         "relatedSpdxElement": related_element_id,
         "relationshipType": relationship_type
+    }
+
+
+def get_extracted_text_dict(extracted_text, license_ref):
+    '''Given a plain text license string and the corresponding license_ref,
+    return a dictionary that describes the key-value pair:
+        {
+            "extractedText" : "extracted_text"
+            "licenseId": "license_ref"
+        }'''
+    return {
+        "extractedText": extracted_text,
+        "licenseId": license_ref
     }
