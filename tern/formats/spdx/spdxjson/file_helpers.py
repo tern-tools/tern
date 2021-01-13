@@ -43,8 +43,11 @@ def get_file_dict(filedata, template, layer_id):
     if not filedata.licenses:
         file_dict['licenseInfoInFiles'] = ['NONE']
     else:
-        file_dict['licenseInfoInFiles'] = spdx_common.get_file_licenses(
-            filedata)
+        file_license_refs = []
+        for lic in spdx_common.get_file_licenses(filedata):
+            # Add the LicenseRef to the list instead of license expression
+            file_license_refs.append(spdx_common.get_license_ref(lic))
+        file_dict['licenseInfoInFiles'] = file_license_refs
 
     # We only add this if there is a notice
     file_notice = spdx_common.get_file_notice(filedata)

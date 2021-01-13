@@ -141,9 +141,14 @@ def get_layer_dict(layer_obj, template, image_loc=''):
         layer_dict['comment'] = layer_pkg_comment
 
     # Include layer licenses from files only if they exist
+    # List will be blank if no filedata information exists
     layer_licenses = spdx_common.get_layer_licenses(layer_obj)
+    layer_license_refs = []
     if layer_licenses:
-        layer_dict['licenseInfoFromFiles'] = layer_licenses
+        # Use the layer LicenseRef in the list instead of license expression
+        for lic in layer_licenses:
+            layer_license_refs.append(spdx_common.get_license_ref(lic))
+        layer_dict['licenseInfoFromFiles'] = layer_license_refs
 
     return layer_dict
 
