@@ -7,7 +7,6 @@
 File level helpers for SPDX tag-value document generator
 """
 
-from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
 from tern.formats.spdx import spdx_common
 
 
@@ -36,7 +35,7 @@ def get_license_info_block(filedata):
     else:
         for lic in spdx_common.get_file_licenses(filedata):
             block = block + 'LicenseInfoInFile: {}'.format(
-                spdx_formats.get_license_ref(lic)) + '\n'
+                spdx_common.get_license_ref(lic)) + '\n'
     return block
 
 

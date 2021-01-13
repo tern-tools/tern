@@ -68,7 +68,7 @@ def get_package_license_info_block(layer_obj):
         if licenses:
             for lic in licenses:
                 block += 'PackageLicenseInfoFromFiles: {}\n'.format(
-                    spdx_formats.get_license_ref(lic))
+                    spdx_common.get_license_ref(lic))
         else:
             block = 'PackageLicenseInfoFromFiles: NONE\n'
     return block

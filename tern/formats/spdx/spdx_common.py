@@ -126,7 +126,7 @@ def get_file_spdxref(filedata, layer_id):
     We will use a combination of the file name, checksum and layer_id and
     calculate a hash of this string'''
     file_string = filedata.path + filedata.checksum[:7] + layer_id
-    fileid = spdx_formats.get_string_id(file_string)
+    fileid = get_string_id(file_string)
     return 'SPDXRef-{}'.format(fileid)
 
 
