@@ -11,6 +11,32 @@ from tern.formats.spdx import spdx_common
 from tern.formats.spdx.spdxjson import formats as json_formats
 
 
+def get_image_extracted_licenses(image_obj):
+    '''Given an image_obj, return a unique list of extractedText dictionaries
+    that contain all the file and package license key-value pairs for a
+    LicenseRef and its corresponding plain text. The dictionaries will
+    contain the following information:
+        {
+            "extractedText": "Plain text of license",
+            "licenseId": "Corresponding LicenseRef"
+        }'''
+
+    unique_licenses = set()
+    for layer in image_obj.layers:
+        # Get all of the unique file licenses, if they exist
+        unique_licenses.update(spdx_common.get_layer_licenses(layer))
+        # Next, collect any package licenses not already accounted for
+        for package in layer.packages:
+            if package.pkg_license:
+                unique_licenses.add(package.pkg_license)
+    extracted_texts = []
+    for lic in list(unique_licenses):
+        extracted_texts.append(json_formats.get_extracted_text_dict(
+            extracted_text=lic, license_ref=spdx_common.get_license_ref(
+                lic)))
+    return extracted_texts
+
+
 def get_image_layer_relationships(image_obj):
     '''Given an image object, return a list of dictionaries describing the
     relationship between each layer "package" and the image "package".

@@ -75,6 +75,11 @@ def get_document_dict(image_obj, template):
     if files:
         docu_dict['files'] = files
 
+    # Add package and file extracted license texts, if they exist
+    extracted_texts = mhelpers.get_image_extracted_licenses(image_obj)
+    if extracted_texts:
+        docu_dict['hasExtractedLicensingInfos'] = extracted_texts
+
     return docu_dict
 
 
