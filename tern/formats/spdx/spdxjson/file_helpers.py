@@ -29,7 +29,6 @@ def get_file_dict(filedata, template, layer_id):
     file_dict = {
         'fileName': mapping['FileName'],
         'SPDXID': spdx_common.get_file_spdxref(filedata, layer_id),
-        'fileTypes': [mapping['FileType']],
         'checksums': [{
             'algorithm':
                 spdx_common.get_file_checksum(filedata).split(': ')[0],
@@ -39,6 +38,10 @@ def get_file_dict(filedata, template, layer_id):
         'licenseConcluded': 'NOASSERTION',  # we don't provide this
         'copyrightText': 'NOASSERTION'  # we don't know this
     }
+
+    # Some files may not have a fileType available
+    if mapping['FileType']:
+        file_dict['fileTypes'] = [mapping['FileType']]
 
     if not filedata.licenses:
         file_dict['licenseInfoInFiles'] = ['NONE']
