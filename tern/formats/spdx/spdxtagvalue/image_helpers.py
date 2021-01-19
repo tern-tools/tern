@@ -64,7 +64,7 @@ def get_image_file_license_block(image_obj):
     licenses = set()
     for layer in image_obj.layers:
         if layer.files_analyzed:
-            for lic in lhelpers.get_layer_licenses(layer):
+            for lic in spdx_common.get_layer_licenses(layer):
                 licenses.add(lic)
     for lic in licenses:
         block += spdx_formats.license_id.format(

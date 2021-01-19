@@ -29,7 +29,6 @@ def get_file_dict(filedata, template, layer_id):
     file_dict = {
         'fileName': mapping['FileName'],
         'SPDXID': spdx_common.get_file_spdxref(filedata, layer_id),
-        'fileTypes': [mapping['FileType']],
         'checksums': [{
             'algorithm':
                 spdx_common.get_file_checksum(filedata).split(': ')[0],
@@ -40,11 +39,18 @@ def get_file_dict(filedata, template, layer_id):
         'copyrightText': 'NOASSERTION'  # we don't know this
     }
 
+    # Some files may not have a fileType available
+    if mapping['FileType']:
+        file_dict['fileTypes'] = [mapping['FileType']]
+
     if not filedata.licenses:
         file_dict['licenseInfoInFiles'] = ['NONE']
     else:
-        file_dict['licenseInfoInFiles'] = spdx_common.get_file_licenses(
-            filedata)
+        file_license_refs = []
+        for lic in spdx_common.get_file_licenses(filedata):
+            # Add the LicenseRef to the list instead of license expression
+            file_license_refs.append(spdx_common.get_license_ref(lic))
+        file_dict['licenseInfoInFiles'] = file_license_refs
 
     # We only add this if there is a notice
     file_notice = spdx_common.get_file_notice(filedata)
