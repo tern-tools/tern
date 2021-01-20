@@ -63,7 +63,7 @@ def get_document_dict(image_obj, template):
     }
 
     # Add list of layer dictionaries to packages list
-    docu_dict['packages'] += lhelpers.get_layers_list(image_obj, template)
+    docu_dict['packages'] += lhelpers.get_layers_list(image_obj)
 
     # Add list of package dictionaries to packages list, if they exist
     pkgs_dict_list = phelpers.get_packages_list(image_obj, template)

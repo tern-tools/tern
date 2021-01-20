@@ -74,9 +74,8 @@ def get_layer_package_comment(layer_obj):
 
 
 def get_layer_file_data_list(layer_obj):
-    '''Given a layer object and the template object, return the SPDX list of
-    of file refs in the layer. Return an empty string if the files are not
-    analyzed'''
+    '''Given a layer object return the SPDX list of file refs in the layer.
+    Return an empty string if the files are not analyzed'''
     layer_lics = []
     if layer_obj.files_analyzed:
         layer_checksum = spdx_common.get_layer_checksum(layer_obj)
@@ -95,23 +94,16 @@ def get_layer_file_data_list(layer_obj):
     return layer_lics
 
 
-def get_layer_dict(layer_obj, template, image_loc=''):
-    '''Given an layer object and its SPDX template mapping, return a SPDX
-    JSON/dictionary representation of the layer. An image layer in
-    SPDX behaves like a Package. The analyzed files will go in a separate
-    dictionary for the JSON document.
+def get_layer_dict(layer_obj):
+    '''Given an layer object, return a SPDX JSON/dictionary representation
+    of the layer. An image layer in SPDX behaves like a Package. The analyzed
+    files will go in a separate dictionary for the JSON document.'''
 
-    We also pass the image location as optional for where the layers were
-    downloaded from. Registries can be implemented as distributed storage
-    or images can be stored as whole tarballs. Either way, the layer
-    would be downloaded along with the image.'''
-    mapping = layer_obj.to_dict(template)
     layer_dict = {
         'name': os.path.basename(layer_obj.tar_file),
         'SPDXID': spdx_common.get_layer_spdxref(layer_obj),
         'fileName': layer_obj.tar_file,
-        'downloadLocation': mapping['PackageFileName'] if image_loc
-        else 'NOASSERTION',
+        'downloadLocation': 'NONE',
         'filesAnalyzed': 'true' if layer_obj.files_analyzed else 'false',
         'checksums': [{
             'algorithm':
@@ -153,19 +145,16 @@ def get_layer_dict(layer_obj, template, image_loc=''):
     return layer_dict
 
 
-def get_layers_list(image_obj, template):
-    '''Given an image object and the template object for SPDX, return a list
-    of SPDX dictionary representations of each of the layers in the image.
-    Each layer will be represented as a package and hence follows the JSON
-    spec for packages.
+def get_layers_list(image_obj):
+    '''Given an image object for SPDX, return a list of SPDX dictionary
+    representations of each of the layers in the image. Each layer will be
+    represented as a package and hence follows the JSON spec for packages.
         name
         versionInfo
         downloadLocation'''
     layer_dicts = []
-    mapping = image_obj.to_dict(template)
     for layer in image_obj.layers:
         # Create a list of dictionaries. Each dictionary represents one
         # layer as a SPDX package
-        layer_dicts.append(get_layer_dict(layer, template,
-                                          mapping['PackageDownloadLocation']))
+        layer_dicts.append(get_layer_dict(layer))
     return layer_dicts
