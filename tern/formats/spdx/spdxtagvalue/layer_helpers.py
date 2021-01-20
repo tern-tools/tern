@@ -98,31 +98,22 @@ def get_layer_file_data_block(layer_obj, template):
     return block
 
 
-def get_layer_block(layer_obj, template, image_loc=''):
+def get_layer_block(layer_obj, template):
     '''Given a layer object and its SPDX template mapping, return a SPDX
     document block for the layer. An image layer in SPDX behaves like a
     Package with relationships to the Packages within it. If the files
     are analyzed though, we just list the files in the block. The mapping
     should have keys:
-        PackageFileName
-    We also pass the image location as optional for where the layers were
-    downloaded from. Registries can be implemented as distributed storage
-    or images can be stored as whole tarballs. Either way, the layers
-    would be downloaded along with the image.'''
+        PackageFileName'''
     block = ''
-    mapping = layer_obj.to_dict(template)
     # Package Name
     block += 'PackageName: {}\n'.format(os.path.basename(layer_obj.tar_file))
     # Package SPDXID
     block += 'SPDXID: {}\n'.format(spdx_common.get_layer_spdxref(layer_obj))
     # Package File Name
     block += 'PackageFileName: {}\n'.format(layer_obj.tar_file)
-    # Package Download Location
-    if image_loc:
-        block += 'PackageDownloadLocation: {}\n'.format(
-            mapping['PackageFileName'])
-    else:
-        block += 'PackageDownloadLocation: NONE\n'
+    # Package Download Location (always NONE for layers)
+    block += 'PackageDownloadLocation: NONE\n'
     # Files Analyzed
     if layer_obj.files_analyzed:
         # we need a package verification code
