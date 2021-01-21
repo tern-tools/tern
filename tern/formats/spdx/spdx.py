@@ -26,5 +26,4 @@ class SPDX(Template):
 
     def image(self):
         return {'name': 'PackageName',
-                'tag': 'PackageVersion',
-                'repotag': 'PackageDownloadLocation'}
+                'tag': 'PackageVersion'}

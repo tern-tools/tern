@@ -89,9 +89,8 @@ def get_image_block(image_obj, template):
     block += 'SPDXID: {}\n'.format(spdx_common.get_image_spdxref(image_obj))
     # Package Version
     block += 'PackageVersion: {}\n'.format(mapping['PackageVersion'])
-    # Package Download Location
-    block += 'PackageDownloadLocation: {}\n'.format(
-        mapping['PackageDownloadLocation'])
+    # Package Download Location (always NOASSERTION)
+    block += 'PackageDownloadLocation: NOASSERTION\n'
     # Files Analyzed (always false)
     block += 'FilesAnalyzed: false\n'
     # Concluded Package License (always NOASSERTION)
@@ -108,8 +107,7 @@ def get_image_block(image_obj, template):
     block += '\n'
     # Describe each layer 'package' that the image contains
     for index, layer in enumerate(image_obj.layers):
-        block += lhelpers.get_layer_block(
-            layer, template, mapping['PackageDownloadLocation']) + '\n'
+        block += lhelpers.get_layer_block(layer, template) + '\n'
         # print layer relationship to previous layer if there is one
         if index != 0:
             block += lhelpers.get_layer_prereq(
