@@ -167,6 +167,9 @@ def main():
                                help="Write the report to a file. "
                                "If no file is given the report will be "
                                "printed to the console.")
+    parser_report.add_argument('-l', '--live', action='store_true',
+                               help="Generate a report for the current state of the filesystem. "
+                               "This is useful when running Tern in a new namespace or VM.")
     parser_report.set_defaults(name='report')
 
     # subparser for dockerfile lock
