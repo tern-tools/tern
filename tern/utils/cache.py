@@ -5,15 +5,20 @@
 
 """
 Docker layer cache related modules
-The cache is currently stored in a yaml file called cache.yml
+The cache is currently stored in a json file called cache.json
 It is organized in this way:
-    layer sha:
-        packages:
-           - name:
-             version:
-             license:
-             proj_url:
-        .....
+{
+  "layer sha": {
+    "packages": [
+      {
+        "name": null,
+        "version": null,
+        "license": null,
+        "proj_url": null
+      }
+    ]
+  }
+}
 """
 
 import os
