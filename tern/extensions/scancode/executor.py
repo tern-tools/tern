@@ -108,7 +108,11 @@ def collect_layer_data(layer_obj):
     files = []
     packages = []
     # run scancode against a directory
-    command = 'scancode -ilpcu --quiet --timeout 300 --json -'
+    try:
+        processes = len(os.sched_getaffinity(0))
+        command = "scancode -ilpcu --quiet --timeout 300 -n {} --json -".format(processes)
+    except (AttributeError, NotImplementedError):
+        command = "scancode -ilpcu --quiet --timeout 300 --json -"
     full_cmd = get_filesystem_command(layer_obj, command)
     origin_layer = 'Layer {}'.format(layer_obj.layer_index)
     result, error = rootfs.shell_command(True, full_cmd)
