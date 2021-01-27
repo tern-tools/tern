@@ -41,6 +41,7 @@ Tern is a software package inspection tool for containers. It's written in Pytho
   - [Creating Report Formats](/docs/creating-custom-templates.md)
   - [Creating Tool Extensions](/docs/creating-tool-extensions.md)
   - [Adding to the Command Library](/docs/adding-to-command-library.md)
+  - [Community Meeting Information](#community-meetings)
 
 # What is Tern?<a name="what-is-tern">
 Tern is an inspection tool to find the metadata of the packages installed in a container image. The overall operation looks like this:
@@ -320,3 +321,12 @@ Do you have questions about Tern? Do you think it can do better? Would you like 
 Please read our [code of conduct](/CODE_OF_CONDUCT.md) first.
 
 Next, take a look at the [contributing guide](/CONTRIBUTING.md) to find out how you can start.
+
+## Community Meetings<a name="community-meetings"/>
+
+We host community meetings via Zoom every other Tuesday at 7am Pacific Time (GMT-8:00). The meeting is an opportunity to discuss project direction, collaboration work, feature requests or any other Tern related topic. Meeting minutes are recorded live [here](https://drive.google.com/drive/u/0/folders/1u5KghB5UIfc6zCv7T9QKd4OxO4arFm__) and copied later to [GitHub](https://github.com/tern-tools/meetings). 
+
+To receive meeting-related correspondence subscribe to the [mailing list](https://groups.linuxfoundation.org/g/tern). You can also join the call directly via Zoom. Click [here](https://VMware.zoom.us/j/97596075735?pwd=UzYzQVl6ZVBMVStneUVOTW0vcEhoUT09) to join the call, or you can dial in. Meeting ID: 975 9607 5735 Password: 186677
+
+### 2021 Meeting Dates
+A calendar of the meeting dates is available [here](https://groups.linuxfoundation.org/g/tern/calendar).
