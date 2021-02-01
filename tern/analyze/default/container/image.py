@@ -18,6 +18,7 @@ from tern.analyze import passthrough
 from tern.analyze.default.container import single_layer
 from tern.analyze.default.container import multi_layer
 from tern.report import formats
+from tern.analyze.options import Options
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -60,8 +61,9 @@ def default_analyze(image_obj, redo=False, driver=None):
     shell = single_layer.analyze_first_layer(image_obj, master_list, redo)
     # Analyze the remaining layers if there are more
     if len(image_obj.layers) > 1:
+        options = Options(shell, redo, driver)
         multi_layer.analyze_subsequent_layers(
-            image_obj, shell, master_list, redo, driver)
+            image_obj, master_list, options)
     return image_obj
 
 

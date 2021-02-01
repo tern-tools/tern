@@ -69,8 +69,7 @@ def fresh_analysis(image_obj, curr_layer, shell, driver, envs):
         rootfs.unmount_rootfs()
 
 
-def analyze_subsequent_layers(image_obj, shell, master_list, redo,
-                              driver=None):
+def analyze_subsequent_layers(image_obj, master_list, options):
     """Assuming that we have a shell and have completed analyzing the first
     layer of the given image object, we now analyze the remaining layers.
     While we have layers:
@@ -95,8 +94,8 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo,
                 origin_next_layer, Notice(errors.empty_layer, 'warning'))
             curr_layer = curr_layer + 1
             continue
-        if not common.load_from_cache(image_obj.layers[curr_layer], redo):
-            fresh_analysis(image_obj, curr_layer, shell, driver, envs)
+        if not common.load_from_cache(image_obj.layers[curr_layer], options.redo):
+            fresh_analysis(image_obj, curr_layer, options.shell, options.driver, envs)
         # update the master list
         dcom.update_master_list(master_list, image_obj.layers[curr_layer])
         curr_layer = curr_layer + 1
