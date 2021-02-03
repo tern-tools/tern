@@ -169,12 +169,12 @@ class Image:
     def get_human_readable_id(self):
         '''Some reports like SPDX want a unique name for the full image
         and this is currently not supported by any image tool. So using
-        a combination of image id, name and tag instead'''
-        name = self.repotag[:10]
-        if self.name:
-            name = name + '-{}'.format(self.name)
+        a combination of name and tag or name and checksum instead'''
+        name = self.name
         if self.tag:
             name = name + '-{}'.format(self.tag)
+        elif self.checksum:
+            name = name + '-{}'.format(self.checksum)
         return name
 
     def get_download_location(self):
