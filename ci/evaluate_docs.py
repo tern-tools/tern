@@ -23,7 +23,7 @@ except GitCommandError:
 repo.git.fetch('upstream')
 
 hcommit = repo.head.commit
-diff = hcommit.diff('upstream/master')
+diff = hcommit.diff('upstream/main')
 
 if not diff:
     sys.exit(0)
