@@ -67,9 +67,9 @@ if __name__ == '__main__':
     except GitCommandError:
         pass
     repo.git.fetch('upstream')
-    # Will return commit IDs differentiating HEAD and master
-    commitstr = repo.git.rev_list('HEAD', '^upstream/master', no_merges=True)
-    # If we are on the main project's master branch then there will be no
+    # Will return commit IDs differentiating HEAD and main
+    commitstr = repo.git.rev_list('HEAD', '^upstream/main', no_merges=True)
+    # If we are on the project's main branch then there will be no
     # difference and the result will be an empty string
     # So we will not proceed if there is no difference
     if commitstr:

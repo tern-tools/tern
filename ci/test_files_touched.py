@@ -22,7 +22,7 @@ except GitCommandError:
 repo.git.fetch('upstream')
 
 hcommit = repo.head.commit
-diff = hcommit.diff('upstream/master')
+diff = hcommit.diff('upstream/main')
 
 changes = []
 for d in diff:
