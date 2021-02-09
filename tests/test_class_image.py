@@ -16,7 +16,7 @@ class TestClassImage(unittest.TestCase):
 
     def setUp(self):
         '''Test a generic Image class'''
-        self.image1 = Image('1234abcd')
+        self.image1 = Image('repo:tag')
         self.image2 = TestImage('5678efgh')
         self.image3 = TestImage('f380a61e')
 
@@ -26,7 +26,7 @@ class TestClassImage(unittest.TestCase):
         del self.image3
 
     def testInstance(self):
-        self.assertEqual(self.image1.repotag, '1234abcd')
+        self.assertEqual(self.image1.repotag, 'repo:tag')
         self.assertFalse(self.image1.name)
         self.assertFalse(self.image1.manifest)
         self.assertFalse(self.image1.tag)
@@ -76,10 +76,18 @@ class TestClassImage(unittest.TestCase):
         self.assertEqual(len(dict2['image.layers'][0]['layer.packages']), 2)
 
     def testGetHumanReadableId(self):
-        self.assertEqual(self.image1.get_human_readable_id(), '1234abcd')
+        self.image1.name = 'repo'
+        self.image1.tag = 'tag'
+        self.assertEqual(self.image1.get_human_readable_id(), 'repo-tag')
         self.image2.load_image()
+        self.image2.set_checksum('sha256', '12345abcde')
         self.assertEqual(
-            self.image2.get_human_readable_id(), '5678efgh-testimage-testtag')
+            self.image2.get_human_readable_id(),
+            'testimage-testtag')
+        self.image1.tag = ''
+        self.image1.set_checksum('sha256', '12345abcde')
+        self.assertEqual(
+            self.image1.get_human_readable_id(), 'repo-12345abcde')
 
     def testSetImageImport(self):
         self.image1.load_image()
