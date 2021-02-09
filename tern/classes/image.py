@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 from tern.classes.origins import Origins
@@ -10,9 +10,9 @@ from tern.utils.general import prop_names
 class Image:
     '''A representation of the image to be analyzed
     attributes:
-        image_id: this is a unique identifier for the image - for OCI spec
-        this could be the digest. For now this is the sha256sum of the
-        config.json
+        repotag: The image's repository and tag or the repository and
+        digest. However, in order to be compatible with any future image
+        identification scheme, this can be any string.
         manifest: the json object representing the image manifest
         config: the image config metadata
         layers: list of layer objects in the image
