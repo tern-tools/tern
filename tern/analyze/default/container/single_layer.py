@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -60,36 +60,31 @@ def get_os_style(image_layer, binary):
     is not available, make an educated guess as to what kind of OS the layer
     might be based off of given the pkg_format + package manager. If the binary
     provided does not exist in base.yml, add a warning notice'''
-    origin_command_lib = formats.invoking_base_commands
     origin_layer = 'Layer {}'.format(image_layer.layer_index)
-    pkg_format = command_lib.check_pkg_format(binary)
-    os_guess = command_lib.check_os_guess(binary)
+    # see if we can find what OS this is
     os_release = get_os_release(image_layer)
     if os_release:
         # We know with high degree of certainty what the OS is
         image_layer.origins.add_notice_to_origins(origin_layer, Notice(
             formats.os_release.format(os_style=os_release), 'info'))
-    elif not binary:
-        # No binary and no os-release means we have no idea about base OS
-        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
-            errors.no_etc_release, 'warning'))
+        # we can set the OS of the image layer
+        image_layer.os_guess = os_release
     else:
-        # We make a guess about the OS based on pkg_format + binary
-        # First check that binary exists in base.yml
-        if not pkg_format or not os_guess:
-            image_layer.origins.add_notice_to_origins(
-                origin_command_lib, Notice(
-                    errors.no_listing_for_base_key.format(listing_key=binary),
-                    'warning'))
-        else:
-            # Assign image layer attributes and guess OS
-            image_layer.pkg_format = pkg_format
-            image_layer.os_guess = os_guess
+        # We will try looking for the possible OSs based on the binary
+        os_guess = command_lib.check_os_guess(binary)
+        if os_guess:
+            # We can make a guess
             image_layer.origins.add_notice_to_origins(origin_layer, Notice(
                 formats.os_style_guess.format(
-                    package_manager=binary,
-                    package_format=image_layer.pkg_format,
-                    os_list=image_layer.os_guess), 'info'))
+                    package_manager=binary, os_list=os_guess), 'info'))
+            image_layer.os_guess = os_guess
+        else:
+            # No binary and no os-release means we have no idea about base OS
+            image_layer.origins.add_notice_to_origins(origin_layer, Notice(
+                errors.no_etc_release, 'warning'))
+
+    # set a package format if there is one for this binary
+    image_layer.pkg_format = command_lib.check_pkg_format(binary)
 
 
 def mount_first_layer(layer_obj):
