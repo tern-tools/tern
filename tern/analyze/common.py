@@ -69,6 +69,7 @@ def load_from_cache(layer, redo=False):
                 'extension_info', {})
             load_packages_from_cache(layer)
             load_files_from_cache(layer)
+            load_notices_from_cache(layer)
             loaded = True
         else:
             # if the hash is not present in the cache, load that data from the
