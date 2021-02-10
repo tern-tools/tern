@@ -60,11 +60,15 @@ jobs:
           python-version: '3.7'
       - name: Setup
         run: |
-          sudo apt-get install -y attr
+          sudo apt-get update && sudo apt-get install -y attr openjdk-8-jdk-headless maven
           pip install --upgrade pip
           pip install GitPython~=2.1
           pip install .
           docker pull photon:3.0 && docker save photon:3.0 > photon.tar
+          # build SPDX validation tool from source
+          git clone https://github.com/spdx/tools-java.git && cd tools-java
+          export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+          mvn clean install && cd ..
       - name: Test Changes
         run: python ci/test_files_touched.py
   Test_Coverage:
