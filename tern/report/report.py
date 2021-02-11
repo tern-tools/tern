@@ -67,6 +67,14 @@ def generate_format(images, format_string, print_inclusive):
 
 
 def report_out(args, *images):
+    for img in images:
+        if args.load_until_layer > img.total_layers and args.load_until_layer != 0:
+            # The actual ignoring is done in docker_image.py
+            # Warning is given here for visibility to user
+            logger.warning(f'Given layer {args.load_until_layer} exceeds total'
+                           + f' number of layers in image ({img.total_layers}).'
+                           + ' Ignoring --layer option and generating report for'
+                           + f' {img.total_layers} total layers')
     report = generate_report(args, *images)
     if not report:
         logger.error("%s not a recognized plugin.", args.report_format)
