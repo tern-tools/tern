@@ -127,3 +127,17 @@ def run_extension(image_obj, ext_string, redo=False):
         return mgr.driver.execute(image_obj, redo)
     except NoMatches:
         pass
+
+
+def run_extension_layer(image_layer, ext_string, redo=False):
+    '''Depending on what tool the user has chosen to extend with, load that
+    extension and run it'''
+    try:
+        mgr = driver.DriverManager(
+            namespace='tern.extensions',
+            name=ext_string,
+            invoke_on_load=True,
+        )
+        return mgr.driver.execute_layer(image_layer, redo)
+    except NoMatches:
+        pass
