@@ -14,3 +14,7 @@ class Executor(metaclass=ABCMeta):
         '''Return a string consisting of the command the tool should execute
         for the container image filesystem. Allow for the filesystem directory
         to be incorporated in the command'''
+
+    @abstractmethod
+    def execute_layer(self, image_layer, redo=False):
+        '''...'''

@@ -33,3 +33,10 @@ class CveBinTool(Executor):
             passthrough.execute_and_pass(layer, command, True)
             # for now we just print the results for each layer
             print(layer.analyzed_output)
+
+    def execute_layer(self, image_layer, redo=False):
+        command = 'cve-bin-tool -x -u now'
+        logger.debug("Analyzing layer %s", image_layer.layer_index)
+        passthrough.execute_and_pass(image_layer, command, True)
+        # for now we just print the results for each image_layer
+        print(image_layer.analyzed_output)

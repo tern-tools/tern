@@ -175,3 +175,11 @@ class Scancode(Executor):
                 add_package_data(layer, package_list)
         # save data to the cache
         common.save_to_cache(image_obj)
+
+    def execute_layer(self, image_layer, redo=False):
+        if redo or not image_layer.files_analyzed:
+            file_list, package_list = collect_layer_data(image_layer)
+            if file_list:
+                add_file_data(image_layer, file_list)
+                image_layer.files_analyzed = True
+            add_package_data(image_layer, package_list)
