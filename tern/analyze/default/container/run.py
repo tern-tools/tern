@@ -32,11 +32,13 @@ def extract_image(args):
         image_attrs = docker_api.dump_docker_image(args.docker_image)
         if image_attrs:
             # repo name and digest is preferred, but if that doesn't exist
-            # the repo name and tag will do
-            if image_attrs['RepoDigests']:
-                image_string = image_attrs['RepoDigests'][0]
+            # the repo name and tag will do. If neither exist use repo Id.
+            if image_attrs['Id']:
+                image_string = image_attrs['Id']
             if image_attrs['RepoTags']:
                 image_string = image_attrs['RepoTags'][0]
+            if image_attrs['RepoDigests']:
+                image_string = image_attrs['RepoDigests'][0]
             return image_string
         logger.critical("Cannot extract Docker image")
     if args.raw_image:
