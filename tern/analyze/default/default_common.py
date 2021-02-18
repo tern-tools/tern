@@ -115,8 +115,7 @@ def get_commands_from_metadata(image_layer):
                     origin_layer, Notice(msg, 'warning'))
             return command_list
     image_layer.origins.add_notice_to_origins(
-        origin_layer, Notice(errors.unknown_content.format(
-            files=command_line), 'warning'))
+        origin_layer, Notice(errors.no_layer_created_by, 'warning'))
     return []
 
 
