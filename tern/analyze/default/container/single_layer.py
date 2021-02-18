@@ -148,3 +148,37 @@ def analyze_first_layer(image_obj, master_list, redo):
     for p in image_obj.layers[0].packages:
         master_list.append(p)
     return shell
+
+
+def analyze_live(image_layer):
+    # set up a notice origin for the given image layer
+    origin_image_layer = 'Layer {}'.format(image_layer.layer_index)
+    # check if the layer is empty
+    if com.is_empty_layer(image_layer):
+        logger.warning(errors.empty_layer)
+        image_layer.origins.add_notice_to_origins(
+            origin_image_layer, Notice(errors.empty_layer, 'warning'))
+        return None
+    # find the shell from the given image layer
+    shell = dcom.get_shell(image_layer)
+    if not shell:
+        logger.warning(errors.no_shell)
+        image_layer.origins.add_notice_to_origins(
+            origin_image_layer, Notice(errors.no_shell, 'warning'))
+    # find the binary from the given image layer
+    binary = dcom.get_base_bin(image_layer)
+    if not binary:
+        logger.warning(errors.no_package_manager)
+        image_layer.origins.add_notice_to_origins(
+            origin_image_layer, Notice(errors.no_package_manager, 'warning'))
+    # set a possible OS
+    get_os_style(image_layer, binary)
+    # if there is a binary, extract packages
+    if shell and binary:
+        # core default execution on the given image layer
+        core.execute_base(image_layer, shell, binary)
+    # populate the package list with all packages found in the image layer
+    package_list = []
+    for p in image_layer.packages:
+        package_list.append(p)
+    return package_list
