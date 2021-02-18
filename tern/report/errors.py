@@ -81,6 +81,7 @@ no_running_docker_container = '''Cannot invoke commands in a container '''\
 cannot_find_image = '''Cannot find image {imagetag} locally or from remote '''\
     '''registry.\n'''
 empty_layer = '''Empty layer. Nothing to do.\n'''
+no_layer_created_by = "No created_by information for layer."
 
 # not error messages but stuff for the logger
 no_base_image = '''Base image is FROM scratch. Skipping to build'''
