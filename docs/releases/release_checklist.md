@@ -3,11 +3,11 @@
 This is a checklist for cutting a release
 
 - [ ] Prepare Release PR.
-    * Freeze development on master.
-    * Prepare your local development environment by committing or stashing your changes. Work at the tip of master.
+    * Freeze development on main.
+    * Prepare your local development environment by committing or stashing your changes. Work at the tip of main.
     * Create a branch for the release: `git checkout -b <release branch name>`.
     * In a separate folder, create a fresh environment and activate it.
-    * Clone the `tern/master` repository by running `git clone --single-branch git@github.com:tern-tools/tern.git` and `cd` into it.
+    * Clone the `tern/main` repository by running `git clone --single-branch git@github.com:tern-tools/tern.git` and `cd` into it.
 
 - [ ] Update direct dependencies and run tests.
     * In the fresh environment, run `pip install wheel pip-tools twine`.
@@ -34,8 +34,8 @@ This is a checklist for cutting a release
       - Future Work
       - Changelog     
         * "Note: This changelog will not include these release notes"
-        * "Changelog produced by command: `git log --pretty=format:"%h %s" v<tag>..master`"
-      - Contributors (look at Authors in the changelog `git log --pretty=format:"%an %ae" v<tag>..master | sort | uniq`). Remove the maintainers name from the contributor list.
+        * "Changelog produced by command: `git log --pretty=format:"%h %s" v<tag>..main`"
+      - Contributors (look at Authors in the changelog `git log --pretty=format:"%an %ae" v<tag>..main | sort | uniq`). Remove the maintainers name from the contributor list.
       - Contact the Maintainers
 
     * Update the Project Status part of the README.md to reflect this release and add it to the list of releases.
@@ -50,7 +50,7 @@ This is a checklist for cutting a release
     * Provide a link to the release notes.
 
 - [ ] Deploy to PyPI
-    * Run the following steps in the fresh environment where you first cloned tern/master.
+    * Run the following steps in the fresh environment where you first cloned tern/main.
     * Run `git fetch --tags` to get the release tag.
     * Run `git checkout -b release <release_tag>`.
     * Run `pip-compile`.
@@ -69,4 +69,4 @@ This is a checklist for cutting a release
     * Run `tar cvzf tern-<release_tag>-vendor.tar.gz vendor/`.
     * Upload the vendor tarball to the GitHub release page.
 
-- [ ] Upload the wheel package to the GitHub release page. The wheel package can be found under the `dist/` directory in the environment where you first cloned tern/master or it can be downloaded for the PyPI release page.
+- [ ] Upload the wheel package to the GitHub release page. The wheel package can be found under the `dist/` directory in the environment where you first cloned tern/main or it can be downloaded for the PyPI release page.

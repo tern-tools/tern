@@ -6,11 +6,11 @@
 # transitive dependencies listed make it more difficult to figure out
 # what should be updated.
 
-PyYAML>=5.3
-docker~=4.3
+PyYAML>=5.4
+docker~=4.4
 dockerfile-parse~=1.1
 requests~=2.25
-stevedore>=3.2
+stevedore>=3.3
 pbr>=5.5
 debut>=0.9
 regex>=2020.11
