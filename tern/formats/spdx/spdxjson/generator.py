@@ -84,7 +84,7 @@ def get_document_dict(image_obj, template):
 
 
 class SpdxJSON(generator.Generate):
-    def generate(self, image_obj_list):
+    def generate(self, image_obj_list, print_inclusive=False):
         '''Generate an SPDX document
         WARNING: This assumes that the list consists of one image or the base
         image and a stub image, in which case, the information in the stub

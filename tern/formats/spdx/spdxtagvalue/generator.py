@@ -51,7 +51,7 @@ def get_document_block(image_obj):
 
 
 class SpdxTagValue(generator.Generate):
-    def generate(self, image_obj_list):
+    def generate(self, image_obj_list, print_inclusive=False):
         '''Generate an SPDX document
         WARNING: This assumes that the list consists of one image or the base
         image and a stub image, in which case, the information in the stub

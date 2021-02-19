@@ -75,7 +75,7 @@ def execute_image(args):
     image_string = extract_image(args)
     # If the image has been extracted, load the metadata
     if image_string:
-        full_image = cimage.load_full_image(image_string)
+        full_image = cimage.load_full_image(image_string, args.load_until_layer)
         # check if the image was loaded successfully
         if full_image.origins.is_empty():
             # Add an image origin here

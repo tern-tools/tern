@@ -292,7 +292,7 @@ def get_report_dict(image_obj_list):
 
 
 class HTML(generator.Generate):
-    def generate(self, image_obj_list):
+    def generate(self, image_obj_list, print_inclusive=False):
         '''Given a list of image objects, create a html report
         for the images'''
         report_dict = get_report_dict(image_obj_list)

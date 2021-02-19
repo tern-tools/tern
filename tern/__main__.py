@@ -82,7 +82,12 @@ def do_main(args):
             drun.execute_dockerfile(args, True)
         elif args.name == 'report':
             if args.dockerfile:
-                drun.execute_dockerfile(args)
+                if (not args.load_until_layer):
+                    drun.execute_dockerfile(args)
+                else:
+                    logger.critical("Currently --layer/-y can only be used with"
+                                    " --docker-image/-i")
+                    sys.exit(1)
             elif args.docker_image:
                 # Check if the image string is a tarball
                 if general.check_tar(args.docker_image):
@@ -153,6 +158,18 @@ def main():
     parser_report.add_argument('-w', '--raw-image', metavar='FILE',
                                help="Raw container image that exists locally "
                                "in the form of a tar archive.")
+    parser_report.add_argument('-y', '--layer', metavar='LAYER_NUMBER',
+                               const=1, action='store', dest='load_until_layer',
+                               nargs='?', type=int, default=0,
+                               help="Layer number of the image to analyze."
+                               " Base OS layer is 1. Can only be used with"
+                               " --docker-image/-i analysis. No argument"
+                               " will scan Base OS layer only.")
+    parser_report.add_argument('-li', '--layer-inclusive',
+                               action='store_true', dest='print_inclusive',
+                               help="Usable only with --layer/-y parameter."
+                               " When used, report will include all"
+                               " preceding layers info.")
     parser_report.add_argument('-x', '--extend', metavar='EXTENSION',
                                help="Use an extension to analyze a container "
                                "image. Available extensions:\n cve-bin-tool\n"
