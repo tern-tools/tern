@@ -53,6 +53,17 @@ def check_file_existence(path):
     return path
 
 
+def check_image_input(image_string):
+    # Check if the image string is a tarball
+    if general.check_tar(image_string):
+        logger.critical(errors.incorrect_raw_option)
+        sys.exit(1)
+    # Check if the image string has the right format
+    if not check_image_string(image_string):
+        logger.critical(errors.incorrect_image_string_format)
+        sys.exit(1)
+
+
 def get_version():
     '''Return the version string for the --version command line option'''
     ver_type, commit_or_ver = general.get_git_rev_or_version()
@@ -77,30 +88,22 @@ def do_main(args):
     if args.clear_cache:
         logger.debug('Clearing cache...')
         cache.clear()
-    if hasattr(args, 'name'):
-        if args.name == 'lock':
-            drun.execute_dockerfile(args, True)
-        elif args.name == 'report':
-            if args.dockerfile:
-                if (not args.load_until_layer):
-                    drun.execute_dockerfile(args)
-                else:
-                    logger.critical("Currently --layer/-y can only be used with"
-                                    " --docker-image/-i")
-                    sys.exit(1)
-            elif args.docker_image:
-                # Check if the image string is a tarball
-                if general.check_tar(args.docker_image):
-                    logger.critical(errors.incorrect_raw_option)
-                    sys.exit(1)
-                # Check if the image string has the right format
-                if not check_image_string(args.docker_image):
-                    logger.critical(errors.incorrect_image_string_format)
-                    sys.exit(1)
-                # If the checks are OK, execute for docker image
-                crun.execute_image(args)
-        elif args.name == 'debug':
-            derun.execute_debug(args)
+    if args.sub == 'lock':
+        drun.execute_dockerfile(args, True)
+    elif args.sub == 'report':
+        if args.dockerfile:
+            if (not args.load_until_layer):
+                drun.execute_dockerfile(args)
+            else:
+                logger.critical("Currently --layer/-y can only be used with"
+                                " --docker-image/-i")
+                sys.exit(1)
+        elif args.docker_image:
+            check_image_input(args.docker_image)
+            # If the checks are OK, execute for docker image
+            crun.execute_image(args)
+    elif args.sub == 'debug':
+        derun.execute_debug(args)
     # Tear down the environment
     prep.teardown(args.keep_wd)
     logger.debug('Finished')
@@ -139,7 +142,7 @@ def main():
     parser.add_argument('-v', '--version', action='version',
                         version="{ver_str}\n   python version = {py_v}".format(
                             ver_str=get_version(), py_v=py_ver))
-    subparsers = parser.add_subparsers(help='Subcommands')
+    subparsers = parser.add_subparsers(help='Subcommands', dest='sub')
 
     # subparser for report
     parser_report = subparsers.add_parser('report',
@@ -159,7 +162,8 @@ def main():
                                help="Raw container image that exists locally "
                                "in the form of a tar archive.")
     parser_report.add_argument('-y', '--layer', metavar='LAYER_NUMBER',
-                               const=1, action='store', dest='load_until_layer',
+                               const=1, action='store',
+                               dest='load_until_layer',
                                nargs='?', type=int, default=0,
                                help="Layer number of the image to analyze."
                                " Base OS layer is 1. Can only be used with"
@@ -184,7 +188,6 @@ def main():
                                help="Write the report to a file. "
                                "If no file is given the report will be "
                                "printed to the console.")
-    parser_report.set_defaults(name='report')
 
     # subparser for dockerfile lock
     parser_lock = subparsers.add_parser('lock',
@@ -204,7 +207,6 @@ def main():
                              help="Use an extension to analyze a container "
                              "image. Available extensions:\n cve-bin-tool\n"
                              "scancode\n")
-    parser_lock.set_defaults(name='lock')
 
     # subparser for container "debug"
     parser_debug = subparsers.add_parser('debug',
@@ -242,7 +244,6 @@ def main():
                               "container image will be mounted upto the given "
                               "layer and provide an environment to explore "
                               "the filesystem at that layer ")
-    parser_debug.set_defaults(name='debug')
 
     args = parser.parse_args()
 
