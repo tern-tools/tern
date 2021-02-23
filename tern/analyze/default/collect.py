@@ -37,6 +37,12 @@ def get_snippet_list(invoke_step, work_dir=None, envs=None):
         if work_dir is not None:
             snippet_list.insert(0, 'cd ' + work_dir)
         return 'container', snippet_list
+    if 'host' in invoke_step.keys():
+        snippet_list = invoke_step.get('host')
+        # If work_dir exist cd into it
+        if work_dir is not None:
+            snippet_list.insert(0, 'cd ' + work_dir)
+        return 'host', snippet_list
     return '', []
 
 
@@ -57,6 +63,45 @@ def invoke_in_rootfs(snippet_list, shell, package=''):
         raise
 
 
+def invoke_on_host(snippet_list, shell, package=""):
+    '''Invoke the commands from the invoke dictionary in an unpacked
+    root filesystem'''
+    # construct the full command
+    full_cmd = command_lib.collate_snippets(snippet_list, package)
+    try:
+        result = rootfs.run_host_command(full_cmd, shell)
+        try:
+            result = result.decode("utf-8")
+        except AttributeError:
+            pass
+        return result
+    except subprocess.CalledProcessError as error:
+        logger.warning("Error executing snippets: %s", error)
+        raise
+
+
+def invoke_in_rootfs_wrapped(snippet_list, shell, package=""):
+    error_msgs = ''
+    result = ''
+    try:
+        result = invoke_in_rootfs(snippet_list, shell, package)
+        result = result[:-1]
+    except subprocess.CalledProcessError as error:
+        error_msgs = error_msgs + error.stderr
+    return result, error_msgs
+
+
+def invoke_on_host_wrapped(snippet_list, shell, package=""):
+    error_msgs = ''
+    result = ''
+    try:
+        result = invoke_on_host(snippet_list, shell, package)
+        result = result[:-1]
+    except subprocess.CalledProcessError as error:
+        error_msgs = error_msgs + error.stderr
+    return result, error_msgs
+
+
 def get_pkg_attrs(attr_dict, shell, work_dir=None, envs=None, package_name=''):
     """Given the dictionary containing the steps to invoke either in
     the container or on the host, invoke the steps and return the results
@@ -73,12 +118,12 @@ def get_pkg_attrs(attr_dict, shell, work_dir=None, envs=None, package_name=''):
                 attr_dict['invoke'][step], work_dir, envs)
             if method == 'container':
                 # invoke the snippet list in a chroot environment
-                try:
-                    result = invoke_in_rootfs(
-                        snippet_list, shell, package=package_name)
-                    result = result[:-1]
-                except subprocess.CalledProcessError as error:
-                    error_msgs = error_msgs + error.stderr
+                result, error_msgs = invoke_in_rootfs_wrapped(
+                    snippet_list, shell, package=package_name)
+            if method == 'host':
+                # invoke the snippet list on the host
+                result, error_msgs = invoke_on_host_wrapped(
+                    snippet_list, shell, package=package_name)
     if 'delimiter' in attr_dict.keys():
         res_list = result.split(attr_dict['delimiter'])
         if res_list[-1] == '':

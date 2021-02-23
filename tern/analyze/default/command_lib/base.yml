@@ -440,3 +440,33 @@ go:
         container:
           - "go list -m all | tail -n +2 | cut -d ' ' -f 1"
     delimiter: "\n"
+# distroless------------------------------------------------------------------
+distroless:
+  pkg_format: 'deb'
+  os_guess:
+    - 'Distroless'
+  path:
+    - 'var/lib/dpkg/status.d/'
+  names:
+    invoke:
+      1:  
+        host:
+          - "files=`ls var/lib/dpkg/status.d`"
+          - "for f in $files; do grep -oP '^Package: \\K.*$' var/lib/dpkg/status.d/$f; done"
+    delimiter: "\n"
+  versions:
+    invoke:
+      1:  
+        host:
+          - "files=`ls var/lib/dpkg/status.d`"
+          - "for f in $files; do grep -oP '^Version: \\K.*$' var/lib/dpkg/status.d/$f; done"
+    delimiter: "\n"
+  copyrights:
+    invoke:
+      1:
+        host:
+          - "files=`ls var/lib/dpkg/status.d`"
+          - "pkgs=`for f in $files; do grep -oP '^Package: \\K.*$' var/lib/dpkg/status.d/$f; done`"
+          - "for p in $pkgs; do /bin/cat /usr/share/doc/$p/copyright; echo LICF; done"
+    delimiter: "LICF"
+  proj_urls: {}

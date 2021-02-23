@@ -244,6 +244,17 @@ def run_chroot_command(command_string, shell):
             1, cmd=command_string, output=None, stderr=e.stderr)
 
 
+def run_host_command(command_string, shell):
+    '''Run the command string on the host'''
+    try:
+        result = root_command([], shell, '-c', command_string)
+        return result
+    except subprocess.CalledProcessError as e:
+        logger.warning("Error executing command in chroot")
+        raise subprocess.CalledProcessError(
+            1, cmd=command_string, output=None, stderr=e.stderr)
+
+
 def undo_mount():
     '''Unmount proc, sys, and dev directories'''
     rootfs_path = os.path.join(get_working_dir(), constants.mergedir)

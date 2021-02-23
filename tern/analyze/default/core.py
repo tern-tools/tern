@@ -15,6 +15,8 @@ from tern.report import content
 from tern.report import formats
 from tern.report import errors
 from tern.utils import constants
+from tern.utils import host
+from tern.utils import rootfs
 from tern.analyze import common as com
 from tern.analyze.default.command_lib import command_lib
 from tern.analyze.default import collect
@@ -86,6 +88,46 @@ def execute_base(layer_obj, prereqs):
         bundle.fill_pkg_results(layer_obj, pkg_dict)
         # remove extra FileData objects from the layer
         com.remove_duplicate_layer_files(layer_obj)
+    # if there is no listing add a notice
+    else:
+        layer_obj.origins.add_notice_to_origins(
+            origin_layer, Notice(errors.no_listing_for_base_key.format(
+                listing_key=prereqs.binary), 'error'))
+
+
+def execute_distroless(layer_obj, prereqs):
+    """Given an ImageLayer object, which is reported as 'Distroless
+    find packagesinstalled in the layer:
+        1. Use command_lib's base to to see if there is a method to
+            retrieve the metadata
+        2. If there is, invoke the scripts on the host and process
+            the results
+        3. Add the results to the ImageLayer object"""
+    # Add notices to this layer object
+    origin_layer = 'Layer {}'.format(layer_obj.layer_index)
+    # find the binary listing
+    listing = command_lib.get_base_listing("distroless")
+    shell = host.check_shell()
+    if listing and shell:
+        pkg_dict, invoke_msg, warnings = collect.collect_list_metadata(
+            shell, listing, rootfs.get_untar_dir(
+                layer_obj.tar_file), prereqs.envs
+        )
+        # distroless images are based on Debian
+        pkg_dict["pkg_licenses"] = com.get_deb_package_licenses(
+            pkg_dict["copyrights"])
+        # add any errors and warnings to the layer's origins object
+        if invoke_msg:
+            logger.error(
+                "Script invocation error. Unable to collect some metadata")
+            layer_obj.origins.add_notice_to_origins(
+                origin_layer, Notice(invoke_msg, 'error'))
+        if warnings:
+            logger.warning("Some metadata may be missing")
+            layer_obj.origins.add_notice_to_origins(
+                origin_layer, Notice(warnings, 'warning'))
+        # bundle the results into Package objects
+        bundle.fill_pkg_results(layer_obj, pkg_dict)
     # if there is no listing add a notice
     else:
         layer_obj.origins.add_notice_to_origins(
