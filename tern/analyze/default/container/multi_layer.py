@@ -68,6 +68,9 @@ def fresh_analysis(image_obj, curr_layer, prereqs, options):
                     image_obj.layers[curr_layer], command, prereqs)
         rootfs.undo_mount()
         rootfs.unmount_rootfs()
+    # distroless images do not have a command list
+    elif image_obj.layers[0].os_guess == 'Distroless':
+        core.execute_distroless(image_obj.layers[curr_layer], prereqs)
 
 
 def analyze_subsequent_layers(image_obj, shell, master_list, options):

@@ -146,6 +146,9 @@ def analyze_first_layer(image_obj, master_list, options):
             # unmount
             rootfs.undo_mount()
             rootfs.unmount_rootfs()
+        # distroless images do not have a shell
+        elif prereqs.binary == 'distroless':
+            core.execute_distroless(image_obj.layers[0], prereqs)
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)
