@@ -34,6 +34,8 @@ class TestUtilGeneral(unittest.TestCase):
         resizer = 'gcr.io/google-containers/addon-resizer:2.3'
         etcd = ('bitnami/etcd@sha256:35862e29b27efd97cdf4a1fc79abc1341feac556'
                 '32e4256b02e6cfee9a4b6455')
+        nexus = ('nexus3.onap.org:10001/onap/so/so-oof-adapter@sha256:d7e1f739ba732c'
+                 '853a638f9c90becd5e0f8d313c8d506567b0b83ac38a1d53cb')
         self.assertEqual(general.parse_image_string(hello),
                          {'name': 'hello-world',
                           'tag': '',
@@ -60,6 +62,12 @@ class TestUtilGeneral(unittest.TestCase):
                           'digest_type': 'sha256',
                           'digest': ('35862e29b27efd97cdf4a1fc79abc1341fe'
                                      'ac55632e4256b02e6cfee9a4b6455')})
+        self.assertEqual(general.parse_image_string(nexus),
+                         {'name': 'nexus3.onap.org:10001/onap/so/so-oof-adapter',
+                          'tag': '',
+                          'digest_type': 'sha256',
+                          'digest': ('d7e1f739ba732c853a638f9c90becd5e0f8'
+                                     'd313c8d506567b0b83ac38a1d53cb')})
 
 
 if __name__ == '__main__':
