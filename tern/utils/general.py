@@ -306,4 +306,9 @@ def parse_image_string(image_string):
                 'tag': '',
                 'digest_type': tokens[1],
                 'digest': tokens[2]}
+    if len(tokens) == 4:
+        return {'name': tokens[0] + ":" + tokens[1],
+                'tag': '',
+                'digest_type': tokens[2],
+                'digest': tokens[3]}
     return None
