@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -25,31 +25,48 @@ from tern.analyze.default import default_common as dcom
 logger = logging.getLogger(constants.logger_name)
 
 
-def execute_base(layer_obj, shell, binary, envs=None):
-    """Given an ImageLayer object, shell to use and binary, find packages
-    installed in the layer using the default method:
+class Prereqs:
+    """Set these values after instantiating an object, then pass it to the
+    functions below"""
+    def __init__(self):
+        self.shell = ''
+        self.binary = ''
+        self.envs = None
+        self.listing = None
+
+
+def execute_base(layer_obj, prereqs):
+    """Given an ImageLayer object, find packages installed in the layer
+    using the default method. The prereqisites required for this to work:
+        prereqs.shell: the shell to use
+        prereqs.binary: the binary to look up in the command library
+        optional prerequisites:
+        prereqs.envs: any environment variables to set before execution
+
         1. Use command_lib's base to look up the binary to see if there
            is a method to retrieve the metadata
         2. If there is, invoke the scripts in a chroot environment and
            process the results
         3. Add the results to the ImageLayer object
+
     It is assumed that the filesystem is prepped for execution by mounting
     the filesystem in the working directory and /proc, /sys and /dev device
     nodes are mounted"""
     # Add notices to this layer object
     origin_layer = 'Layer {}'.format(layer_obj.layer_index)
     # find the binary listing
-    listing = command_lib.get_base_listing(binary)
+    listing = command_lib.get_base_listing(prereqs.binary)
     if listing:
         # put info notice about what is going to be invoked
         snippet_msg = (formats.invoke_for_base + '\n' +
-                       content.print_base_invoke(binary))
+                       content.print_base_invoke(prereqs.binary))
         layer_obj.origins.add_notice_to_origins(
             origin_layer, Notice(snippet_msg, 'info'))
         # get list of metadata by invoking scripts in chroot
         logger.debug("Collecting metadata for image layer...")
         pkg_dict, invoke_msg, warnings = collect.collect_list_metadata(
-            shell, listing, layer_obj.get_layer_workdir(), envs)
+            prereqs.shell, listing, layer_obj.get_layer_workdir(),
+            prereqs.envs)
         # more processing for debian copyrights to get licenses
         if listing.get("pkg_format") == "deb":
             logger.debug("Processing Debian copyrights...")
@@ -73,10 +90,10 @@ def execute_base(layer_obj, shell, binary, envs=None):
     else:
         layer_obj.origins.add_notice_to_origins(
             origin_layer, Notice(errors.no_listing_for_base_key.format(
-                listing_key=binary), 'error'))
+                listing_key=prereqs.binary), 'error'))
 
 
-def execute_snippets(layer_obj, command_obj, pkg_listing, shell, envs=None):
+def execute_snippets(layer_obj, command_obj, prereqs):
     """Given in ImageLayer object, shell and binary to look up, find packages
     installed in the layer using the default method:
         For snippets, we will get the packages installed by the command"""
@@ -92,9 +109,9 @@ def execute_snippets(layer_obj, command_obj, pkg_listing, shell, envs=None):
     all_pkgs = []
     for pkg_name in pkg_list:
         pkg_invoke = command_lib.check_for_unique_package(
-            pkg_listing, pkg_name)
+            prereqs.listing, pkg_name)
         deps, deps_msg = com.get_package_dependencies(
-            pkg_invoke, pkg_name, shell)
+            pkg_invoke, pkg_name, prereqs.shell)
         if deps_msg:
             logger.warning(deps_msg)
             layer_obj.origins.add_notice_to_origins(
@@ -105,6 +122,6 @@ def execute_snippets(layer_obj, command_obj, pkg_listing, shell, envs=None):
     # get package metadata for each package name
     for pkg_name in unique_pkgs:
         pkg = Package(pkg_name)
-        dcom.fill_package_metadata(pkg, pkg_invoke, shell,
-                                   layer_obj.get_layer_workdir(), envs)
+        dcom.fill_package_metadata(pkg, pkg_invoke, prereqs.shell,
+                                   layer_obj.get_layer_workdir(), prereqs.envs)
         layer_obj.add_package(pkg)

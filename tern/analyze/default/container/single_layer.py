@@ -100,7 +100,7 @@ def mount_first_layer(layer_obj):
         dcom.abort_analysis()
 
 
-def analyze_first_layer(image_obj, master_list, redo):
+def analyze_first_layer(image_obj, master_list, options):
     """Analyze the first layer of an image. Return the installed shell.
     If there is no installed shell, return None
     1. Check if the layer is empty. If it is then we can't find a shell
@@ -119,32 +119,34 @@ def analyze_first_layer(image_obj, master_list, redo):
         image_obj.layers[0].origins.add_notice_to_origins(
             origin_first_layer, Notice(errors.empty_layer, 'warning'))
         return None
+    # create a Prereqs object
+    prereqs = core.Prereqs()
     # find the shell from the first layer
-    shell = dcom.get_shell(image_obj.layers[0])
-    if not shell:
+    prereqs.shell = dcom.get_shell(image_obj.layers[0])
+    if not prereqs.shell:
         logger.warning(errors.no_shell)
         image_obj.layers[0].origins.add_notice_to_origins(
             origin_first_layer, Notice(errors.no_shell, 'warning'))
     # find the binary from the first layer
-    binary = dcom.get_base_bin(image_obj.layers[0])
-    if not binary:
+    prereqs.binary = dcom.get_base_bin(image_obj.layers[0])
+    if not prereqs.binary:
         logger.warning(errors.no_package_manager)
         image_obj.layers[0].origins.add_notice_to_origins(
             origin_first_layer, Notice(errors.no_package_manager, 'warning'))
     # try to load packages from cache
-    if not com.load_from_cache(image_obj.layers[0], redo):
+    if not com.load_from_cache(image_obj.layers[0], options.redo):
         # set a possible OS
-        get_os_style(image_obj.layers[0], binary)
+        get_os_style(image_obj.layers[0], prereqs.binary)
         # if there is a binary, extract packages
-        if shell and binary:
+        if prereqs.shell and prereqs.binary:
             # mount the first layer
             mount_first_layer(image_obj.layers[0])
             # core default execution on the first layer
-            core.execute_base(image_obj.layers[0], shell, binary)
+            core.execute_base(image_obj.layers[0], prereqs)
             # unmount
             rootfs.undo_mount()
             rootfs.unmount_rootfs()
     # populate the master list with all packages found in the first layer
     for p in image_obj.layers[0].packages:
         master_list.append(p)
-    return shell
+    return prereqs.shell

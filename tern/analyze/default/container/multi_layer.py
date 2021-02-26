@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -34,7 +34,7 @@ def mount_overlay_fs(image_obj, top_layer, driver=None):
     return target
 
 
-def fresh_analysis(image_obj, curr_layer, shell, driver, envs):
+def fresh_analysis(image_obj, curr_layer, prereqs, options):
     """This is a subroutine that is run if there is no chached results or if
     the user wants to redo the analysis
     1 Check if we have a shell, if not then see if we can find a shell
@@ -44,33 +44,33 @@ def fresh_analysis(image_obj, curr_layer, shell, driver, envs):
     4 Use the prescribed methods for the package managers to retrieve
     """
     # if there is no shell, try to see if it exists in the current layer
-    if not shell:
-        shell = dcom.get_shell(image_obj.layers[curr_layer])
+    if not prereqs.shell:
+        prereqs.shell = dcom.get_shell(image_obj.layers[curr_layer])
     # get commands that created the layer
     # for docker images this is retrieved from the image history
     command_list = dcom.get_commands_from_metadata(
         image_obj.layers[curr_layer])
     if command_list:
         # mount diff layers from 0 till the current layer
-        target = mount_overlay_fs(image_obj, curr_layer, driver)
+        target = mount_overlay_fs(image_obj, curr_layer, options.driver)
         # mount dev, sys and proc after mounting diff layers
         rootfs.prep_rootfs(target)
         # for each command look up the snippet library
         for command in command_list:
             pkg_listing = command_lib.get_package_listing(command.name)
             if isinstance(pkg_listing, str):
+                prereqs.binary = pkg_listing
                 core.execute_base(
-                    image_obj.layers[curr_layer], shell, pkg_listing, envs)
+                    image_obj.layers[curr_layer], prereqs)
             else:
+                prereqs.listing = pkg_listing
                 core.execute_snippets(
-                    image_obj.layers[curr_layer], command, pkg_listing, shell,
-                    envs)
+                    image_obj.layers[curr_layer], command, prereqs)
         rootfs.undo_mount()
         rootfs.unmount_rootfs()
 
 
-def analyze_subsequent_layers(image_obj, shell, master_list, redo,
-                              driver=None):
+def analyze_subsequent_layers(image_obj, shell, master_list, options):
     """Assuming that we have a shell and have completed analyzing the first
     layer of the given image object, we now analyze the remaining layers.
     While we have layers:
@@ -81,8 +81,11 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo,
         package information and bundle it into the image object
         3. Update the master list"""
     curr_layer = 1
+    # make a Prereqs object
+    prereqs = core.Prereqs()
+    prereqs.shell = shell
     # get list of environment variables
-    envs = lock.get_env_vars(image_obj)
+    prereqs.envs = lock.get_env_vars(image_obj)
     while curr_layer < len(image_obj.layers):
         # make a notice for each layer
         origin_next_layer = 'Layer {}'.format(
@@ -95,8 +98,9 @@ def analyze_subsequent_layers(image_obj, shell, master_list, redo,
                 origin_next_layer, Notice(errors.empty_layer, 'warning'))
             curr_layer = curr_layer + 1
             continue
-        if not common.load_from_cache(image_obj.layers[curr_layer], redo):
-            fresh_analysis(image_obj, curr_layer, shell, driver, envs)
+        if not common.load_from_cache(image_obj.layers[curr_layer],
+                                      options.redo):
+            fresh_analysis(image_obj, curr_layer, prereqs, options)
         # update the master list
         dcom.update_master_list(master_list, image_obj.layers[curr_layer])
         curr_layer = curr_layer + 1

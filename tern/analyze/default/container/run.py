@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -75,7 +75,8 @@ def execute_image(args):
     image_string = extract_image(args)
     # If the image has been extracted, load the metadata
     if image_string:
-        full_image = cimage.load_full_image(image_string, args.load_until_layer)
+        full_image = cimage.load_full_image(
+            image_string, args.load_until_layer)
         # check if the image was loaded successfully
         if full_image.origins.is_empty():
             # Add an image origin here
@@ -84,7 +85,7 @@ def execute_image(args):
             # Set up for analysis
             setup(full_image)
             # analyze image
-            cimage.analyze(full_image, args.redo, args.driver, args.extend)
+            cimage.analyze(full_image, args)
             # report out
             report.report_out(args, full_image)
             # clean up

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -43,7 +43,7 @@ def load_full_image(image_tag_string, load_until_layer=0):
     return test_image
 
 
-def default_analyze(image_obj, redo=False, driver=None):
+def default_analyze(image_obj, options):
     """ Steps to analyze a container image (we assume it is a DockerImage
     object for now)
     1. Analyze the first layer to get a baseline list of packages
@@ -58,18 +58,18 @@ def default_analyze(image_obj, redo=False, driver=None):
     # set up empty master list of packages
     master_list = []
     # Analyze the first layer and get the shell
-    shell = single_layer.analyze_first_layer(image_obj, master_list, redo)
+    shell = single_layer.analyze_first_layer(image_obj, master_list, options)
     # Analyze the remaining layers if there are more
     if len(image_obj.layers) > 1:
         multi_layer.analyze_subsequent_layers(
-            image_obj, shell, master_list, redo, driver)
+            image_obj, shell, master_list, options)
     return image_obj
 
 
-def analyze(image_obj, redo=False, driver=None, extension=None):
+def analyze(image_obj, options):
     """Either analyze a container image using the default method or pass
     analysis to an external tool"""
-    if extension:
-        passthrough.run_extension(image_obj, extension, redo)
+    if options.extend:
+        passthrough.run_extension(image_obj, options.extend, options.redo)
     else:
-        default_analyze(image_obj, redo, driver)
+        default_analyze(image_obj, options)

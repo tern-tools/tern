@@ -65,13 +65,13 @@ def get_dockerfile_packages():
     return stub_image
 
 
-def analyze_full_image(full_image, redo, driver, extension):
+def analyze_full_image(full_image, options):
     """If we are able to load a full image after a build, we can run an
     analysis on it"""
     # set up for analysis
     crun.setup(full_image)
     # analyze image
-    cimage.analyze(full_image, redo, driver, extension)
+    cimage.analyze(full_image, options)
     # clean up after analysis
     rootfs.clean_up()
     # we should now be able to set imported layers
@@ -102,13 +102,13 @@ def load_base_image():
     return None
 
 
-def analyze_base_image(base_image, redo, driver, extension):
+def analyze_base_image(base_image, options):
     """If we are unable to load the full image, we will try to analyze
     the base image and try to extrapolate"""
     # set up for analysis
     crun.setup(base_image)
     # analyze image
-    cimage.analyze(base_image, redo, driver, extension)
+    cimage.analyze(base_image, options)
     # clean up
     rootfs.clean_up()
     # save the base image to cache
@@ -119,7 +119,7 @@ def analyze_base_image(base_image, redo, driver, extension):
     return [base_image, stub_image]
 
 
-def full_image_analysis(dfile, redo, driver, keep, extension):
+def full_image_analysis(dfile, options):
     """This subroutine is executed when a Dockerfile is successfully built"""
     image_list = []
     # attempt to load the built image metadata
@@ -128,18 +128,18 @@ def full_image_analysis(dfile, redo, driver, keep, extension):
         # Add an image origin here
         full_image.origins.add_notice_origin(
             formats.dockerfile_image.format(dockerfile=dfile))
-        image_list = analyze_full_image(full_image, redo, driver, extension)
+        image_list = analyze_full_image(full_image, options)
     else:
         # we cannot analyze the full image, but maybe we can
         # analyze the base image
         logger.error('Cannot retrieve full image metadata')
     # cleanup for full images
-    if not keep:
+    if not options.keep_wd:
         prep.clean_image_tars(full_image)
     return image_list
 
 
-def base_and_run_analysis(dfile, redo, driver, keep, extension):
+def base_and_run_analysis(dfile, options):
     """This subroutine is executed when a Dockerfile fails build. It returns
     a base image and any RUN commands in the Dockerfile."""
     image_list = []
@@ -152,20 +152,19 @@ def base_and_run_analysis(dfile, redo, driver, keep, extension):
             # add a notice stating failure to build image
             base_image.origins.add_notice_to_origins(dfile, Notice(
                 formats.image_build_failure, 'warning'))
-            image_list = analyze_base_image(
-                base_image, redo, driver, extension)
+            image_list = analyze_base_image(base_image, options)
         else:
             # we cannot load the base image
             logger.warning('Cannot retrieve base image metadata')
         # cleanup for base images
-        if not keep:
+        if not options.keep_wd:
             prep.clean_image_tars(base_image)
     else:
         logger.error('Cannot analyze base image')
     return image_list
 
 
-def analyze_single_dockerfile(dockerfile, redo, driver, keep_wd, extend):
+def analyze_single_dockerfile(dockerfile, options):
     """Run image analysis for a single Dockerfile. Return a list of images.
     Inputs are:
         dockerfile: the Dockerfile file
@@ -180,14 +179,12 @@ def analyze_single_dockerfile(dockerfile, redo, driver, keep_wd, extend):
     if image_info:
         logger.debug('Docker image successfully built. Analyzing...')
         # analyze the full image
-        image_list = full_image_analysis(
-            dockerfile, redo, driver, keep_wd, extend)
+        image_list = full_image_analysis(dockerfile, options)
     else:
         # cannot build the image
         logger.warning('Cannot build image')
         # analyze the base image and any RUN lines in the Dockerfile
-        image_list = base_and_run_analysis(
-            dockerfile, redo, driver, keep_wd, extend)
+        image_list = base_and_run_analysis(dockerfile, options)
     return image_list
 
 
@@ -207,11 +204,9 @@ def execute_dockerfile(args, locking=False):
     # Store dockerfile path and commands so we can access it during execution
     lock.load_docker_commands(dfobj)
     if dfobj.is_multistage:
-        image_list = analyze_multistage_dockerfile(
-            dfobj, args.redo, args.driver, args.keep_wd, args.extend)
+        image_list = analyze_multistage_dockerfile(dfobj, args)
     else:
-        image_list = analyze_single_dockerfile(
-            dfile, args.redo, args.driver, args.keep_wd, args.extend)
+        image_list = analyze_single_dockerfile(dfile, args)
     # generate report based on what images were created
     if image_list:
         if not locking:
@@ -245,7 +240,7 @@ def clean_dockerfile_stages(dockerfiles):
         os.remove(dockerfile)
 
 
-def analyze_multistage_dockerfile(dfobj, redo, driver, keep_wd, extend):
+def analyze_multistage_dockerfile(dfobj, options):
     """Split the multistage dockerfile, and then analyze on each stage.
     Inputs:
         dfobj: the Dockerfile object
@@ -257,12 +252,10 @@ def analyze_multistage_dockerfile(dfobj, redo, driver, keep_wd, extend):
     dockerfiles = write_dockerfile_stages(dfobj)
     image_list = []
     for dfile in dockerfiles:
-        imlist = analyze_single_dockerfile(
-            dfile, redo, driver, keep_wd, extend)
+        imlist = analyze_single_dockerfile(dfile, options)
         image_list.extend(imlist)
     clean_dockerfile_stages(dockerfiles)
     # finally build the existing Dockerfile
-    finallist = analyze_single_dockerfile(
-        dfobj.filepath, redo, driver, keep_wd, extend)
+    finallist = analyze_single_dockerfile(dfobj.filepath, options)
     image_list.extend(finallist)
     return image_list
