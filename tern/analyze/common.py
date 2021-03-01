@@ -238,7 +238,7 @@ def get_git_sha(path_to_toplevel):
     try:
         repo = git.Repo(path_to_toplevel)
         sha_info = str(repo.rev_parse(str(repo.head)))
-    except git.BadObject or ValueError or IndexError or Exception:
+    except (git.InvalidGitRepositoryError, git.NoSuchPathError, git.BadObject):
         logger.debug("Cannot find git repo sha, toplevel path is %s",
                      path_to_toplevel)
     return sha_info
@@ -252,8 +252,8 @@ def get_git_url(dockerfile_path):
     url_list = set([])
     try:
         repo = git.Repo(dockerfile_folder_path, search_parent_directories=True)
-        url_list = set([i.url for i in repo.remotes])
-    except git.BadObject or ValueError or IndexError or Exception:
+        url_list = {i.url for i in repo.remotes}
+    except (git.InvalidGitRepositoryError, git.NoSuchPathError):
         logger.debug("Cannot find git repo url, path is %s",
                      dockerfile_folder_path)
     return url_list
@@ -287,6 +287,6 @@ def get_git_toplevel(path):
     try:
         repo = git.Repo(path, search_parent_directories=True)
         path_to_toplevel = repo.git.rev_parse("--show-toplevel")
-    except git.BadObject or ValueError or IndexError or Exception:
+    except (git.InvalidGitRepositoryError, git.NoSuchPathError, git.BadObject):
         logger.debug("Cannot find git repo toplevel, path is %s", path)
     return path_to_toplevel
