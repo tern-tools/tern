@@ -11,7 +11,6 @@ import logging
 
 from tern.utils import constants
 from tern.utils import rootfs
-from tern.report import report
 from tern.report import formats
 from tern import prep
 from tern.load import docker_api
@@ -83,13 +82,7 @@ def execute_image(args):
             full_image.origins.add_notice_origin(
                 formats.docker_image.format(imagetag=image_string))
             # Set up for analysis
-            setup(full_image)
-            # analyze image
-            cimage.analyze(full_image, args)
-            # report out
-            report.report_out(args, full_image)
-            # clean up
-            teardown(full_image)
+            cimage.common_container_procedure(full_image, args)
         else:
             # we cannot load the full image
             logger.error('Cannot retrieve full image metadata')

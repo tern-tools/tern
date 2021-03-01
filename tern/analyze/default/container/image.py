@@ -14,9 +14,13 @@ import subprocess  # nosec
 from tern.classes.notice import Notice
 from tern.classes.docker_image import DockerImage
 from tern.utils import constants
+from tern.utils import rootfs
+from tern.report import report
 from tern.analyze import passthrough
+from tern.analyze import common
 from tern.analyze.default.container import single_layer
 from tern.analyze.default.container import multi_layer
+from tern.analyze.default.dockerfile import lock
 from tern.report import formats
 
 # global logger
@@ -73,3 +77,23 @@ def analyze(image_obj, options):
         passthrough.run_extension(image_obj, options.extend, options.redo)
     else:
         default_analyze(image_obj, options)
+
+
+def common_container_procedure(image, options, image_file=None):
+    """Setup the image object and anything else for analysis"""
+    # Add a Notice object for each layer
+    for layer in image.layers:
+        origin_str = 'Layer {}'.format(layer.layer_index)
+        layer.origins.add_notice_origin(origin_str)
+    # Set up working directories and mount points
+    rootfs.set_up()
+    # analyze the image
+    analyze(image, options)
+    if image_file == "Full_Image":
+        lock.set_imported_layers(image)
+    elif image_file is None:
+        report.report_out(options, image)
+    # Add the image layers to the cache
+    common.save_to_cache(image)
+    # Clean up working directories and mount points
+    rootfs.clean_up()

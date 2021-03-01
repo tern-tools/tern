@@ -13,18 +13,15 @@ import os
 import subprocess  # nosec
 
 from tern.utils import constants
-from tern.utils import rootfs
 from tern.classes.notice import Notice
 from tern.classes.image_layer import ImageLayer
 from tern.classes.image import Image
 from tern.classes.package import Package
 from tern.load import docker_api
 from tern import prep
-from tern.analyze import common
 from tern.analyze.default import filter as fltr
 from tern.analyze.default.dockerfile import parse
 from tern.analyze.default.dockerfile import lock
-from tern.analyze.default.container import run as crun
 from tern.analyze.default.container import image as cimage
 from tern.report import report
 from tern.report import formats
@@ -69,15 +66,7 @@ def analyze_full_image(full_image, options):
     """If we are able to load a full image after a build, we can run an
     analysis on it"""
     # set up for analysis
-    crun.setup(full_image)
-    # analyze image
-    cimage.analyze(full_image, options)
-    # clean up after analysis
-    rootfs.clean_up()
-    # we should now be able to set imported layers
-    lock.set_imported_layers(full_image)
-    # save to the cache
-    common.save_to_cache(full_image)
+    cimage.common_container_procedure(full_image, options, image_file="Full_Image")
     return [full_image]
 
 
@@ -106,15 +95,7 @@ def analyze_base_image(base_image, options):
     """If we are unable to load the full image, we will try to analyze
     the base image and try to extrapolate"""
     # set up for analysis
-    crun.setup(base_image)
-    # analyze image
-    cimage.analyze(base_image, options)
-    # clean up
-    rootfs.clean_up()
-    # save the base image to cache
-    common.save_to_cache(base_image)
-    # let's try to figure out what packages were going to be installed in
-    # the dockerfile anyway
+    cimage.common_container_procedure(base_image, options, image_file="Base_Image")
     stub_image = get_dockerfile_packages()
     return [base_image, stub_image]
 
