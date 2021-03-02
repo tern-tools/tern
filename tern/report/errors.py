@@ -53,8 +53,7 @@ unknown_content = '''Unknown content included in layer {files}. Please ''' \
 keyboard_interrupt = '''Keyboard Interrupt! Aborting analysis...'''
 invalid_raw_image = '''Invalid raw image provided: '{image}' - Check ''' \
     '''that path to raw image is correct and in tar archive format.'''
-incorrect_raw_option = '''Expected docker image but detected file in ''' \
-    '''tar archive format.'''
+incorrect_raw_option = '''Expected path to tar archive.\n'''
 incorrect_image_string_format = '''Unsupported image string format.\n''' \
     '''Please provide string in image:tag or ''' \
     '''image@digest_type:digest format.\n'''
