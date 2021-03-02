@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -53,15 +53,19 @@ def check_file_existence(path):
     return path
 
 
-def check_image_input(image_string):
-    # Check if the image string is a tarball
-    if general.check_tar(image_string):
-        logger.critical(errors.incorrect_raw_option)
-        sys.exit(1)
+def check_image_input(options):
+    """If the option is a raw image tarball then check if it is a tar file.
+    If the option is a image string, check if it is in the right format"""
+    # Check if the option is a tarball
+    if options.raw_image:
+        if not general.check_tar(options.raw_image):
+            logger.critical(errors.incorrect_raw_option)
+            sys.exit(1)
     # Check if the image string has the right format
-    if not check_image_string(image_string):
-        logger.critical(errors.incorrect_image_string_format)
-        sys.exit(1)
+    if options.docker_image:
+        if not check_image_string(options.docker_image):
+            logger.critical(errors.incorrect_image_string_format)
+            sys.exit(1)
 
 
 def get_version():
@@ -98,8 +102,8 @@ def do_main(args):
                 logger.critical("Currently --layer/-y can only be used with"
                                 " --docker-image/-i")
                 sys.exit(1)
-        elif args.docker_image:
-            check_image_input(args.docker_image)
+        elif args.docker_image or args.raw_image:
+            check_image_input(args)
             # If the checks are OK, execute for docker image
             crun.execute_image(args)
     elif args.sub == 'debug':
