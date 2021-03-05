@@ -28,7 +28,7 @@ def check_docker_setup():
     gracefully. The intent is that this function is run before any docker
     operations are invoked"""
     try:
-        client = docker.from_env(timeout=120)
+        client = docker.from_env(timeout=180)
         client.ping()
         return client
     except requests.exceptions.ConnectionError as e:
