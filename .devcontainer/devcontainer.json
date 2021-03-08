@@ -1,0 +1,15 @@
+{
+  "name": "Python 3",
+  "dockerFile": "Dockerfile",
+  "runArgs": ["--privileged"],
+  "mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"],
+  "extensions": ["ms-python.python"],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "python.pythonPath": "/usr/local/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintPath": "/usr/local/py-utils/bin/pylint"
+  },
+  "postCreateCommand": "pip3 install --user -r requirements.txt",
+}

@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Tern",
+      "type": "python",
+      "preLaunchTask": "build",
+      "request": "launch",
+      "program": "tern",
+      "args": [
+        "--driver",
+        "fuse",
+        "--clear-cache",
+        "report",
+        "--docker-image",
+        "ubuntu:latest"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONPATH": "${cwd}" }
+    }
+  ]
+}
