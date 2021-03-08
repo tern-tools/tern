@@ -187,7 +187,7 @@ class TestAnalyzeCommon(unittest.TestCase):
         git_username_reg = r'([a-zA-Z\d_-]{0,38})'
         pattern = re.compile(r'github.com/'+git_username_reg+r'/tern')
         for url in url_list:
-            if pattern.match(url):
+            if pattern.search(url) is not None:
                 pass_num += 1
         self.assertEqual(pass_num, check_num)
 
