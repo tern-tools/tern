@@ -11,3 +11,5 @@ cache.yml
 vagrant/.*
 .tox
 .coverage
+build/
+*.egg-info
