@@ -7,9 +7,9 @@
 Common functions
 '''
 
+import git
 import logging
 import os
-import subprocess  # nosec
 
 from tern.classes.notice import Notice
 from tern.classes.package import Package
@@ -234,14 +234,11 @@ def check_git_src(dockerfile_path):
 
 def get_git_sha(path_to_toplevel):
     '''Given a absolute path to a git repository, return the HEAD sha.'''
-    command = ['git', 'rev-parse', 'HEAD']
     sha_info = '(not found)'
     try:
-        output = subprocess.check_output(  # nosec
-            command, stderr=subprocess.DEVNULL, cwd=path_to_toplevel)
-        if isinstance(output, bytes):
-            sha_info = output.decode('utf-8').split('\n').pop(0)
-    except subprocess.CalledProcessError:
+        repo = git.Repo(path_to_toplevel)
+        sha_info = str(repo.rev_parse(str(repo.head)))
+    except (git.InvalidGitRepositoryError, git.NoSuchPathError, git.BadObject):
         logger.debug("Cannot find git repo sha, toplevel path is %s",
                      path_to_toplevel)
     return sha_info
@@ -252,20 +249,12 @@ def get_git_url(dockerfile_path):
     the dockerfile in a form of list.'''
     # get the path of the folder containing the dockerfile
     dockerfile_folder_path = os.path.dirname(os.path.abspath(dockerfile_path))
-    command = ['git', 'remote', '-v']
+    url_list = set({})
     try:
-        output = subprocess.check_output(  # nosec
-            command, stderr=subprocess.DEVNULL, cwd=dockerfile_folder_path)
-        if isinstance(output, bytes):
-            lines = output.decode('utf-8').split('\n')
-            # pop the last line which is an empty line
-            lines.pop()
-            url_list = set()
-            for line in lines:
-                extract_url = extract_git_url_from_line(line)
-                if extract_url:
-                    url_list.add(extract_url)
-    except (subprocess.CalledProcessError, FileNotFoundError):
+        repo = git.Repo(dockerfile_folder_path, search_parent_directories=True)
+        for remote in repo.remotes:
+            url_list.add(remote.url)
+    except (git.InvalidGitRepositoryError, git.NoSuchPathError):
         logger.debug("Cannot find git repo url, path is %s",
                      dockerfile_folder_path)
     return url_list
@@ -295,13 +284,10 @@ def get_git_toplevel(path):
     '''Given a path, return the absolute path to the top level directory if it
     is in a git repository. Empty string will be returned if not.
     Path should be a path to a directory not to a file.'''
-    command = ['git', 'rev-parse', '--show-toplevel']
     path_to_toplevel = ''
     try:
-        output = subprocess.check_output(  # nosec
-            command, stderr=subprocess.DEVNULL, cwd=path)
-        if isinstance(output, bytes):
-            path_to_toplevel = output.decode('utf-8').split('\n').pop(0)
-    except (subprocess.CalledProcessError, FileNotFoundError):
+        repo = git.Repo(path, search_parent_directories=True)
+        path_to_toplevel = repo.git.rev_parse("--show-toplevel")
+    except (git.InvalidGitRepositoryError, git.NoSuchPathError, git.BadObject):
         logger.debug("Cannot find git repo toplevel, path is %s", path)
     return path_to_toplevel
