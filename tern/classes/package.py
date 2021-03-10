@@ -212,6 +212,11 @@ class Package:
         dictionaries.'''
         other_pkg_dict = other.to_dict()
         for key, value in self.to_dict().items():
+            if key == 'pkg_licenses':
+                # There may be more than one package license. Therefore,
+                # we must sort pkg_licenses before comparison
+                value.sort()
+                other_pkg_dict[key].sort()
             if value != other_pkg_dict[key]:
                 return False
         return True
