@@ -11,6 +11,7 @@ import logging
 import subprocess  # nosec
 
 from tern.analyze.default.command_lib import command_lib
+from tern.analyze.default.live import collect as lcol
 from tern.report import errors
 from tern.utils import constants
 from tern.utils import rootfs
@@ -133,7 +134,7 @@ def get_pkg_attrs(attr_dict, prereqs, package_name=''):
     return result, error_msgs
 
 
-def collect_list_metadata(listing, prereqs):
+def collect_list_metadata(listing, prereqs, mount=None):
     """Given the listing for the package manager, collect
     metadata that gets returned as a list
     The Prereqs object contains the state of the container filesystem and
@@ -145,7 +146,10 @@ def collect_list_metadata(listing, prereqs):
     for item in command_lib.base_keys:
         # check if the supported items exist in the given listing
         if item in listing.keys():
-            items, msg = get_pkg_attrs(listing[item], prereqs)
+            if mount:
+                items, msg = lcol.get_attr_list(listing[item], prereqs)
+            else:
+                items, msg = get_pkg_attrs(listing[item], prereqs)
             msgs = msgs + msg
             if item == 'files':
                 # convert this data into a list before adding it to the
