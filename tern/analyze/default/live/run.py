@@ -21,6 +21,7 @@ from tern.analyze.default import default_common as dcom
 from tern.analyze.default import collect
 from tern.analyze.default import bundle
 from tern.analyze.default.command_lib import command_lib
+from tern.report import report
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -69,5 +70,6 @@ def execute_live(args):
         # collect metadata into the layer object
         fill_packages(layer, mnt_path, shell)
         # report out the packages
+        report.report_layer(layer, args)
     else:
         logger.critical("No shell found. Cannot run default analysis")
