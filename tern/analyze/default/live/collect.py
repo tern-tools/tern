@@ -9,12 +9,16 @@ Functions to collect package metadata from a live container filesystem.
 These functions are similar to the default collect.py functions except
 the invoking of the scripts occurs in a different environment.
 """
+import logging
 import os
 import re
 
 from tern.utils import rootfs
 from tern.utils import constants
 from tern.analyze.default import collect as dcol
+
+# global logger
+logger = logging.getLogger(constants.logger_name)
 
 
 def create_script(command, shell, mount):
@@ -50,6 +54,7 @@ def invoke_live(snippet_list, shell, mount):
     commands, and the mount point, invoke the commands and return the result"""
     # we first create a single command from the snippet list
     command = snippets_to_script(snippet_list)
+    logger.debug("Invoking command: %s", command)
     # we then insert this command into our unshare script
     script_path = create_script(command, shell, mount)
     full_cmd = ['unshare', '-mpf', '-r', script_path]
@@ -72,11 +77,13 @@ def get_attr_list(attr_dict, shell, mount, work_dir=None, envs=None):
                 # invoke inventory script against the mount directory
                 result, error = invoke_live(snippet_list, shell, mount)
                 if error:
+                    logger.warning("Error invoking command: %s", error.decode(
+                        'utf-8'))
                     error_msgs = error_msgs + error.decode('utf-8')
     if 'delimiter' in attr_dict.keys():
         res_list = result.decode('utf-8').split(attr_dict['delimiter'])
-        if res_list[-1] == '':
+        if res_list[-1] == '' or res_list[-1] == '\n':
             res_list.pop()
             return res_list, error_msgs
         return res_list, error_msgs
-    return result.decode('utf-8'), error_msgs
+    return result, error_msgs

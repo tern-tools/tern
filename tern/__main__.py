@@ -21,6 +21,7 @@ from tern import prep
 from tern.analyze.default.container import run as crun
 from tern.analyze.default.dockerfile import run as drun
 from tern.analyze.default.debug import run as derun
+from tern.analyze.default.live import run as lrun
 from tern.report import errors
 
 
@@ -48,6 +49,13 @@ logger.addHandler(log_handler)
 
 def check_file_existence(path):
     if not os.path.isfile(path):
+        msg = "{}: does not exist".format(path)
+        raise argparse.ArgumentTypeError(msg)
+    return path
+
+
+def check_dir_existence(path):
+    if not os.path.isdir(path):
         msg = "{}: does not exist".format(path)
         raise argparse.ArgumentTypeError(msg)
     return path
@@ -106,6 +114,8 @@ def do_main(args):
             check_image_input(args)
             # If the checks are OK, execute for docker image
             crun.execute_image(args)
+        elif args.live:
+            lrun.execute_live(args)
     elif args.sub == 'debug':
         derun.execute_debug(args)
     # Tear down the environment
@@ -192,9 +202,12 @@ def main():
                                help="Write the report to a file. "
                                "If no file is given the report will be "
                                "printed to the console.")
-    parser_report.add_argument('-l', '--live', action='store_true',
-                               help="Generate a report for the current state of the filesystem. "
-                               "This is useful when running Tern in a new namespace or VM.")
+    parser_report.add_argument('-l', '--live', default=None,
+                               type=check_dir_existence,
+                               metavar='PATH',
+                               help="Generate a report for the current state "
+                               "of the filesystem. This is useful when "
+                               "running Tern in a new namespace or VM.")
 
     # subparser for dockerfile lock
     parser_lock = subparsers.add_parser('lock',
