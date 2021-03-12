@@ -28,3 +28,7 @@ class YAML(generator.Generate):
         for image in image_obj_list:
             report = report + print_yaml_report(image)
         return report
+
+    def generate_layer(self, layer):
+        """Generate a yaml report for the given layer object"""
+        return yaml.dump(layer.to_dict(), default_flow_style=False)
