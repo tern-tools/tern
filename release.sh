@@ -119,8 +119,8 @@ echo "2. Enter the path to the release notes file"
 echo "Your choice [1/2]:- "
 l=1
 while [ $l -eq 1 ]; do
-  read -r release_notes_path
-  case $manualWork2 in
+  read -r choice
+  case $choice in
     1)
       touch "v$release_version.md"
       echo "Press any key (or y) when you are done writing the release notes and want to continue; press n otherwise."
@@ -135,6 +135,8 @@ while [ $l -eq 1 ]; do
       esac
       ;;
     2)
+      echo "Enter the path to the release notes file: "
+      read -r release_notes_path
       mv "$release_notes_path" ./"v$release_version.md"
       ;;
     *)
