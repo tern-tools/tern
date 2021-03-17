@@ -325,7 +325,7 @@ Next, take a look at the [contributing guide](/CONTRIBUTING.md) to find out how 
 
 ## Community Meetings<a name="community-meetings"/>
 
-We host community meetings via Zoom every other Tuesday at 7am Pacific Time (GMT-8:00). The meeting is an opportunity to discuss project direction, collaboration work, feature requests or any other Tern related topic. Meeting minutes are recorded live [here](https://drive.google.com/drive/u/0/folders/1u5KghB5UIfc6zCv7T9QKd4OxO4arFm__) and copied later to [GitHub](https://github.com/tern-tools/meetings). 
+We host community meetings via Zoom every other Tuesday at 3:00 PM UTC. The meeting is an opportunity to discuss project direction, collaboration work, feature requests or any other Tern related topic. Meeting minutes are recorded live [here](https://drive.google.com/drive/u/0/folders/1u5KghB5UIfc6zCv7T9QKd4OxO4arFm__) and copied later to [GitHub](https://github.com/tern-tools/meetings). 
 
 To receive meeting-related correspondence subscribe to the [mailing list](https://groups.linuxfoundation.org/g/tern). You can also join the call directly via Zoom. Click [here](https://VMware.zoom.us/j/97596075735?pwd=UzYzQVl6ZVBMVStneUVOTW0vcEhoUT09) to join the call, or you can dial in. Meeting ID: 975 9607 5735 Password: 186677
 
