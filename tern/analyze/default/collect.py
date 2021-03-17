@@ -8,6 +8,7 @@ Functions to process data returned from invoking retrieval commands
 """
 
 import logging
+import os
 import subprocess  # nosec
 
 from tern.analyze.default.command_lib import command_lib
@@ -40,7 +41,10 @@ def get_snippet_list(invoke_step, work_dir=None, envs=None):
     if 'host' in invoke_step.keys():
         snippet_list = invoke_step.get('host')
         # If work_dir exist cd into it
-        if work_dir is not None:
+        if work_dir is None:
+            snippet_list.insert(
+                0, 'cd ' + os.path.join(rootfs.get_working_dir(), constants.mergedir))
+        else:
             snippet_list.insert(0, 'cd ' + work_dir)
         return 'host', snippet_list
     return '', []

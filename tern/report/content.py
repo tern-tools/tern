@@ -84,7 +84,7 @@ def print_invoke_list(info_dict, info):
                     report = report + '\t' + snippet + '\n'
             elif 'host' in info_dict[info]['invoke'][step]:
                 report = report + formats.invoke_on_host
-                for snippet in info_dict[info]['invoke'][step]['container']:
+                for snippet in info_dict[info]['invoke'][step]['host']:
                     report = report + '\t' + snippet + '\n'
     else:
         for value in info_dict[info]:
