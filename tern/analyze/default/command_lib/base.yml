@@ -385,28 +385,37 @@ npm:
     invoke:
       1:
         container:
-          - "npm list -g | sed 's/\\(^[^a-z]*\\)\\([_.a-z0-9-]*\\)\\(@.*\\)/\\2/g' | grep -v '/usr*' | uniq"
+          - "npm list -g --json --long --depth=1000 > npm-global.json"
+      2:
+        host:
+          - "jq -r '.. | objects | select(has(\"name\") and has(\"version\")) | .name' npm-global.json"
     delimiter: "\n"
   versions:
     invoke:
       1:
         container:
-          - "pkgs=`npm list -g | sed 's/\\(^[^a-z]*\\)\\([_.a-z0-9-]*\\)\\(@.*\\)/\\2/g' | grep -v '/usr*' | uniq`"
-          - "for p in $pkgs; do npm show $p version; done"
+          - "npm list -g --json --long --depth=1000 > npm-global.json"
+      2:
+        host:
+          - "jq -r '.. | objects | select(has(\"name\") and has(\"version\")) | .version' npm-global.json"
     delimiter: "\n"
   licenses:
     invoke:
       1:
         container:
-          - "pkgs=`npm list -g | sed 's/\\(^[^a-z]*\\)\\([_.a-z0-9-]*\\)\\(@.*\\)/\\2/g' | grep -v '/usr*' | uniq`"
-          - "for p in $pkgs; do lic=`npm show $p license`; if [ -z \"$lic\" ]; then echo 'Unknown'; else echo $lic; fi; done"
+          - "npm list -g --json --long --depth=1000 > npm-global.json"
+      2:
+        host:
+          - "jq -r '.. | objects | select(has(\"name\") and has(\"version\")) | .license // \"Unknown\"' npm-global.json"
     delimiter: "\n"
   proj_urls:
     invoke:
       1:
         container:
-          - "pkgs=`npm list -g | sed 's/\\(^[^a-z]*\\)\\([_.a-z0-9-]*\\)\\(@.*\\)/\\2/g' | grep -v '/usr*' | uniq`"
-          - "for p in $pkgs; do npm view $p repository.url; done"
+          - "npm list -g --json --long --depth=1000 > npm-global.json"
+      2:
+        host:
+          - "jq -r '.. | objects | select(has(\"name\") and has(\"version\")) | .repository | if type == \"string\" then . else .url end | . // \"Unknown\"' npm-global.json"
     delimiter: "\n"
 # golang----------------------------------------------------------------------
 go:
