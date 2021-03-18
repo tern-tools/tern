@@ -13,7 +13,6 @@ jobs:
         run: |
           sudo apt-get install -y attr
           pip install --upgrade pip
-          pip install GitPython~=2.1
           pip install .
       - name: Prospector Linting
         run: |
@@ -30,7 +29,6 @@ jobs:
         run: |
           sudo apt-get install -y attr
           pip install --upgrade pip
-          pip install GitPython~=2.1
           pip install .
       - name: Commit Message Linting
         run: python ci/test_commit_message.py
@@ -45,7 +43,6 @@ jobs:
         run: |
           sudo apt-get install -y attr
           pip install --upgrade pip
-          pip install GitPython~=2.1
           pip install .
       - name: Security Linting
         run: |
@@ -62,7 +59,6 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y attr openjdk-8-jdk-headless maven
           pip install --upgrade pip
-          pip install GitPython~=2.1
           pip install .
           docker pull photon:3.0 && docker save photon:3.0 > photon.tar
           # build SPDX validation tool from source
@@ -82,7 +78,6 @@ jobs:
         run: |
           sudo apt-get install -y attr
           pip install --upgrade pip
-          pip install GitPython~=2.1
           pip install .
       - name: Test Coverage
         run: |
