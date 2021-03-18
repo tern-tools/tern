@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -8,7 +8,6 @@ Functions to process data returned from invoking retrieval commands
 """
 
 import logging
-import os
 import subprocess  # nosec
 
 from tern.analyze.default.command_lib import command_lib
@@ -20,7 +19,7 @@ from tern.utils import rootfs
 logger = logging.getLogger(constants.logger_name)
 
 
-def get_snippet_list(invoke_step, work_dir=None, envs=None):
+def get_snippet_list(invoke_step, prereqs):
     """Given the invoke step dictionary i.e. steps of commands to run either
     in the chroot or on the host environment, get a list of command snippets
         invoke_dict: the value from the 'invoke' key
@@ -30,22 +29,18 @@ def get_snippet_list(invoke_step, work_dir=None, envs=None):
     if 'container' in invoke_step.keys():
         snippet_list = invoke_step.get('container')
         # If environment variables exist, set them
-        if envs:
-            for var in envs:
+        if prereqs.envs:
+            for var in prereqs.envs:
                 snippet_list.insert(
                     0, 'export ' + var.split('=')[0] + '=' + var.split('=')[1])
         # If work_dir exist cd into it
-        if work_dir is not None:
-            snippet_list.insert(0, 'cd ' + work_dir)
+        if prereqs.layer_workdir:
+            snippet_list.insert(0, 'cd ' + prereqs.layer_workdir)
         return 'container', snippet_list
     if 'host' in invoke_step.keys():
         snippet_list = invoke_step.get('host')
-        # If work_dir exist cd into it
-        if work_dir is None:
-            snippet_list.insert(
-                0, 'cd ' + os.path.join(rootfs.get_working_dir(), constants.mergedir))
-        else:
-            snippet_list.insert(0, 'cd ' + work_dir)
+        # we would expect to cd into the layer's host path
+        snippet_list.insert(0, 'cd ' + prereqs.host_path)
         return 'host', snippet_list
     return '', []
 
@@ -106,7 +101,7 @@ def invoke_on_host_wrapped(snippet_list, shell, package=""):
     return result, error_msgs
 
 
-def get_pkg_attrs(attr_dict, shell, work_dir=None, envs=None, package_name=''):
+def get_pkg_attrs(attr_dict, prereqs, package_name=''):
     """Given the dictionary containing the steps to invoke either in
     the container or on the host, invoke the steps and return the results
     either in list form or in raw form"""
@@ -119,15 +114,15 @@ def get_pkg_attrs(attr_dict, shell, work_dir=None, envs=None, package_name=''):
     if 'invoke' in attr_dict.keys():
         for step in range(1, len(attr_dict['invoke'].keys()) + 1):
             method, snippet_list = get_snippet_list(
-                attr_dict['invoke'][step], work_dir, envs)
+                attr_dict['invoke'][step], prereqs)
             if method == 'container':
                 # invoke the snippet list in a chroot environment
                 result, error_msgs = invoke_in_rootfs_wrapped(
-                    snippet_list, shell, package=package_name)
+                    snippet_list, prereqs.fs_shell, package=package_name)
             if method == 'host':
                 # invoke the snippet list on the host
                 result, error_msgs = invoke_on_host_wrapped(
-                    snippet_list, shell, package=package_name)
+                    snippet_list, prereqs.host_shell, package=package_name)
     if 'delimiter' in attr_dict.keys():
         res_list = result.split(attr_dict['delimiter'])
         if res_list[-1] == '':
@@ -138,9 +133,11 @@ def get_pkg_attrs(attr_dict, shell, work_dir=None, envs=None, package_name=''):
     return result, error_msgs
 
 
-def collect_list_metadata(shell, listing, work_dir=None, envs=None):
-    '''Given the shell and the listing for the package manager, collect
-    metadata that gets returned as a list'''
+def collect_list_metadata(listing, prereqs):
+    """Given the listing for the package manager, collect
+    metadata that gets returned as a list
+    The Prereqs object contains the state of the container filesystem and
+    the host."""
     pkg_dict = {}
     msgs = ''
     warnings = ''
@@ -148,7 +145,7 @@ def collect_list_metadata(shell, listing, work_dir=None, envs=None):
     for item in command_lib.base_keys:
         # check if the supported items exist in the given listing
         if item in listing.keys():
-            items, msg = get_pkg_attrs(listing[item], shell, work_dir, envs)
+            items, msg = get_pkg_attrs(listing[item], prereqs)
             msgs = msgs + msg
             if item == 'files':
                 # convert this data into a list before adding it to the

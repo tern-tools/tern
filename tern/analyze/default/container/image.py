@@ -57,12 +57,12 @@ def default_analyze(image_obj, options):
                 kernel version 4.0 or later)"""
     # set up empty master list of packages
     master_list = []
-    # Analyze the first layer and get the shell
-    shell = single_layer.analyze_first_layer(image_obj, master_list, options)
+    # Analyze the first layer and get prerequisites for the next layer
+    prereqs = single_layer.analyze_first_layer(image_obj, master_list, options)
     # Analyze the remaining layers if there are more
-    if len(image_obj.layers) > 1:
+    if prereqs and len(image_obj.layers) > 1:
         multi_layer.analyze_subsequent_layers(
-            image_obj, shell, master_list, options)
+            image_obj, prereqs, master_list, options)
     return image_obj
 
 
