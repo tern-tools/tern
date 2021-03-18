@@ -7,7 +7,6 @@
 Invoking commands in the command library
 """
 
-import copy
 import logging
 import os
 import yaml
@@ -58,7 +57,7 @@ def get_base_listing(key):
     '''Given the key listing in base.yml, return the dictionary'''
     listing = {}
     if key in command_lib['base'].keys():
-        listing = copy.deepcopy(command_lib['base'][key])
+        listing = command_lib['base'][key]
     else:
         logger.warning("%s", errors.no_listing_for_base_key.format(
             listing_key=key))

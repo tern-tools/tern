@@ -15,8 +15,6 @@ from tern.report import content
 from tern.report import formats
 from tern.report import errors
 from tern.utils import constants
-from tern.utils import host
-from tern.utils import rootfs
 from tern.analyze import common as com
 from tern.analyze.default.command_lib import command_lib
 from tern.analyze.default import collect
@@ -31,19 +29,18 @@ class Prereqs:
     """Set these values after instantiating an object, then pass it to the
     functions below"""
     def __init__(self):
-        self.shell = ''
-        self.binary = ''
-        self.envs = None
-        self.listing = None
+        self.fs_shell = ''  # container filesystem shell
+        self.host_shell = ''  # host shell
+        self.binary = ''  # container filesystem indicator file
+        self.layer_workdir = ''  # WORKDIR path
+        self.host_path = ''  # layer rootfs path on host
+        self.envs = None  # environment variables to set
+        self.listing = None  # current listing
 
 
 def execute_base(layer_obj, prereqs):
     """Given an ImageLayer object, find packages installed in the layer
-    using the default method. The prereqisites required for this to work:
-        prereqs.shell: the shell to use
-        prereqs.binary: the binary to look up in the command library
-        optional prerequisites:
-        prereqs.envs: any environment variables to set before execution
+    using the default method.
 
         1. Use command_lib's base to look up the binary to see if there
            is a method to retrieve the metadata
@@ -67,8 +64,7 @@ def execute_base(layer_obj, prereqs):
         # get list of metadata by invoking scripts in chroot
         logger.debug("Collecting metadata for image layer...")
         pkg_dict, invoke_msg, warnings = collect.collect_list_metadata(
-            prereqs.shell, listing, layer_obj.get_layer_workdir(),
-            prereqs.envs)
+            listing, prereqs)
         # more processing for debian copyrights to get licenses
         if listing.get("pkg_format") == "deb":
             logger.debug("Processing Debian copyrights...")
@@ -88,46 +84,6 @@ def execute_base(layer_obj, prereqs):
         bundle.fill_pkg_results(layer_obj, pkg_dict)
         # remove extra FileData objects from the layer
         com.remove_duplicate_layer_files(layer_obj)
-    # if there is no listing add a notice
-    else:
-        layer_obj.origins.add_notice_to_origins(
-            origin_layer, Notice(errors.no_listing_for_base_key.format(
-                listing_key=prereqs.binary), 'error'))
-
-
-def execute_distroless(layer_obj, prereqs):
-    """Given an ImageLayer object, which is reported as 'Distroless
-    find packagesinstalled in the layer:
-        1. Use command_lib's base to to see if there is a method to
-            retrieve the metadata
-        2. If there is, invoke the scripts on the host and process
-            the results
-        3. Add the results to the ImageLayer object"""
-    # Add notices to this layer object
-    origin_layer = 'Layer {}'.format(layer_obj.layer_index)
-    # find the binary listing
-    listing = command_lib.get_base_listing("distroless")
-    shell = host.check_shell()
-    if listing and shell:
-        pkg_dict, invoke_msg, warnings = collect.collect_list_metadata(
-            shell, listing, rootfs.get_untar_dir(
-                layer_obj.tar_file), prereqs.envs
-        )
-        # distroless images are based on Debian
-        pkg_dict["pkg_licenses"] = com.get_deb_package_licenses(
-            pkg_dict["copyrights"])
-        # add any errors and warnings to the layer's origins object
-        if invoke_msg:
-            logger.error(
-                "Script invocation error. Unable to collect some metadata")
-            layer_obj.origins.add_notice_to_origins(
-                origin_layer, Notice(invoke_msg, 'error'))
-        if warnings:
-            logger.warning("Some metadata may be missing")
-            layer_obj.origins.add_notice_to_origins(
-                origin_layer, Notice(warnings, 'warning'))
-        # bundle the results into Package objects
-        bundle.fill_pkg_results(layer_obj, pkg_dict)
     # if there is no listing add a notice
     else:
         layer_obj.origins.add_notice_to_origins(
