@@ -134,7 +134,7 @@ def get_pkg_attrs(attr_dict, prereqs, package_name=''):
     return result, error_msgs
 
 
-def collect_list_metadata(listing, prereqs, mount=None):
+def collect_list_metadata(listing, prereqs, live=False):
     """Given the listing for the package manager, collect
     metadata that gets returned as a list
     The Prereqs object contains the state of the container filesystem and
@@ -146,7 +146,7 @@ def collect_list_metadata(listing, prereqs, mount=None):
     for item in command_lib.base_keys:
         # check if the supported items exist in the given listing
         if item in listing.keys():
-            if mount:
+            if live:
                 items, msg = lcol.get_attr_list(listing[item], prereqs)
             else:
                 items, msg = get_pkg_attrs(listing[item], prereqs)

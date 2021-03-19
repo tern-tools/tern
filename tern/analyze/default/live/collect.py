@@ -21,16 +21,28 @@ from tern.analyze.default import collect as dcol
 logger = logging.getLogger(constants.logger_name)
 
 
-def create_script(command, shell, mount):
+def create_script(command, prereqs, method):
     """Create the script to execute in an unshared environment"""
-    script = """#!/bin/sh
+    chroot_script = """#!{host_shell}
 
 mount -t proc /proc {mnt}/proc
-chroot {mnt} {shell} -c "{snip}"
+chroot {mnt} {fs_shell} -c "{snip}"
 """
+    host_script = """#!{host_shell}
+{host_shell} -c "{snip}"
+"""
+    script = ''
     script_path = os.path.join(rootfs.get_working_dir(), constants.script_file)
+    if method == 'container':
+        script = chroot_script.format(host_shell=prereqs.host_shell,
+                                      mnt=prereqs.host_path,
+                                      fs_shell=prereqs.fs_shell,
+                                      snip=command)
+    if method == 'host':
+        script = host_script.format(host_shell=prereqs.host_shell,
+                                    snip=command)
     with open(script_path, 'w') as f:
-        f.write(script.format(mnt=mount, shell=shell, snip=command))
+        f.write(script)
     os.chmod(script_path, 0o700)
     return script_path
 
@@ -49,22 +61,25 @@ def snippets_to_script(snippet_list):
     return " && ".join(final_list)
 
 
-def invoke_live(snippet_list, shell, mount):
-    """Given a list of commands to run, the shell that is used to run the
-    commands, and the mount point, invoke the commands and return the result"""
+def invoke_live(snippet_list, prereqs, method):
+    """Given a list of commands to run, invoke the commands and return
+    the result. The prereqs object should"""
     # we first create a single command from the snippet list
     command = snippets_to_script(snippet_list)
     logger.debug("Invoking command: %s", command)
     # we then insert this command into our unshare script
-    script_path = create_script(command, shell, mount)
-    full_cmd = ['unshare', '-mpf', '-r', script_path]
+    script_path = create_script(command, prereqs, method)
+    if method == 'container':
+        full_cmd = ['unshare', '-mpf', '-r', script_path]
+    if method == 'host':
+        full_cmd = ['unshare', '-pf', '-r', script_path]
     # invoke the script and remove it
     output, error = rootfs.shell_command(False, full_cmd)
-    # os.remove(script_path)
+    os.remove(script_path)
     return output, error
 
 
-def get_attr_list(attr_dict, shell, mount, work_dir=None, envs=None):
+def get_attr_list(attr_dict, prereqs):
     """Similar to get_pkg_attrs in tern/analyze/default/collect.py but with
     invocation on a live container image"""
     error_msgs = ""
@@ -72,14 +87,13 @@ def get_attr_list(attr_dict, shell, mount, work_dir=None, envs=None):
     if 'invoke' in attr_dict.keys():
         for step in range(1, len(attr_dict['invoke'].keys()) + 1):
             method, snippet_list = dcol.get_snippet_list(
-                attr_dict['invoke'][step], work_dir, envs)
-            if method == 'container':
-                # invoke inventory script against the mount directory
-                result, error = invoke_live(snippet_list, shell, mount)
-                if error:
-                    logger.warning("Error invoking command: %s", error.decode(
-                        'utf-8'))
-                    error_msgs = error_msgs + error.decode('utf-8')
+                attr_dict['invoke'][step], prereqs)
+            # invoke inventory script against the mount directory
+            result, error = invoke_live(snippet_list, prereqs, method)
+            if error:
+                logger.warning(
+                    "Error invoking command: %s", error.decode('utf-8'))
+                error_msgs = error_msgs + error.decode('utf-8')
     if 'delimiter' in attr_dict.keys():
         res_list = result.decode('utf-8').split(attr_dict['delimiter'])
         if res_list[-1] == '' or res_list[-1] == '\n':
