@@ -159,6 +159,10 @@ def set_command_attrs(command_obj):
 def collate_snippets(snippet_list, package=''):
     '''Given a list of snippets, make a concatenated string with all the
     commands'''
+    # Escape any braces that might confuse Python formatting
+    for i, snip in enumerate(snippet_list):
+        if '{}' in snip:
+            snippet_list[i] = snip.replace('{}', '{{}}')
     full_cmd = ''
     last_index = len(snippet_list) - 1
     for index in range(0, last_index):
