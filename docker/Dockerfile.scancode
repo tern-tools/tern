@@ -10,6 +10,7 @@ RUN apt-get update && \
     findutils \
     git \
     gnupg2 \
+    jq \
     python3 \
     python3-pip \
     python3-setuptools \
