@@ -10,6 +10,7 @@ Invoking commands in the command library
 import logging
 import os
 import yaml
+import copy
 import pkg_resources
 
 from tern.utils import constants
@@ -57,7 +58,7 @@ def get_base_listing(key):
     '''Given the key listing in base.yml, return the dictionary'''
     listing = {}
     if key in command_lib['base'].keys():
-        listing = command_lib['base'][key]
+        listing = copy.deepcopy(command_lib['base'][key])
     else:
         logger.warning("%s", errors.no_listing_for_base_key.format(
             listing_key=key))
