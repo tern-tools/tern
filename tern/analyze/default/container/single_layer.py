@@ -114,6 +114,9 @@ def analyze_first_layer(image_obj, master_list, options):
     5. Return a Prereqs object for subsequent layer processing"""
     # set up a notice origin for the first layer
     origin_first_layer = 'Layer {}'.format(image_obj.layers[0].layer_index)
+    image_obj.layers[0].origins.add_notice_to_origins(
+        origin_first_layer, Notice(formats.layer_created_by.format(
+            created_by=image_obj.layers[0].created_by), 'info'))
     # check if the layer is empty
     if com.is_empty_layer(image_obj.layers[0]):
         logger.warning(errors.empty_layer)

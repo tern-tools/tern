@@ -14,6 +14,7 @@ from tern.utils import constants
 from tern.utils import rootfs
 from tern.classes.notice import Notice
 from tern.analyze import common
+from tern.report import formats
 from tern.analyze.default import default_common as dcom
 from tern.analyze.default import core
 from tern.analyze.default.dockerfile import lock
@@ -43,6 +44,12 @@ def fresh_analysis(image_obj, curr_layer, prereqs, options):
       what package managers were used.
     4 Use the prescribed methods for the package managers to retrieve
     """
+    # set up a notice origin for the current layer
+    origin_curr_layer = 'Layer {}'.format(
+        image_obj.layers[curr_layer].layer_index)
+    image_obj.layers[curr_layer].origins.add_notice_to_origins(
+        origin_curr_layer, Notice(formats.layer_created_by.format(
+            created_by=image_obj.layers[curr_layer].created_by), 'info'))
     # if there is no shell, try to see if it exists in the current layer
     if not prereqs.fs_shell:
         prereqs.shell = dcom.get_shell(image_obj.layers[curr_layer])
