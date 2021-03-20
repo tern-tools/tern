@@ -130,8 +130,6 @@ def analyze_first_layer(image_obj, master_list, options):
         logger.warning(errors.no_shell)
         image_obj.layers[0].origins.add_notice_to_origins(
             origin_first_layer, Notice(errors.no_shell, 'warning'))
-    # set working directory for the snippets
-    prereqs.layer_workdir = image_obj.layers[0].get_layer_workdir()
     # find the binary from the first layer
     prereqs.binary = dcom.get_base_bin(image_obj.layers[0])
     # set a possible OS and package format
