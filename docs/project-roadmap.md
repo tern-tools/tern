@@ -1,14 +1,13 @@
 # Project Road Map
 
 ## 2021
-We are getting very close to a beta release. Our beta release is targeted for the March-April timeframe.
+We are getting very close to a beta release. Our beta release is targeted for the summer timeframe.
 
 Our goal is to meet these requirements by the end of the year.
 - We are working towards enabling "live" analysis for a container. The idea is that if Tern could generate an SBoM at build time, the SBoM would then be available to package and distribute with the container image without the need for post scanning.
-- We are very close to enabling inventory for a single container layer which will be available in the next 3.0.0 release.
+- We are very close to enabling inventory for a single container layer which will be available in the next 2.5.0 release.
 - We will continue investigating how we can run Tern without root privileges.
 - We want to enable Tern to pull image digests and images using registry HTTP(s) APIs so that we can pull images from registries other than Dockerhub.
-- Enable analysis for OCI images.
 - Create a database backend with an associated API. We are hoping to have a GSoC intern help us tackle this issue.
 - Enable inventory of a Distroless image using some sort of custom script.
 

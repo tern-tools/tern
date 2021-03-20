@@ -13,5 +13,5 @@ requests~=2.25
 stevedore>=3.3
 pbr>=5.5
 debut>=0.9
-regex>=2020.11
+regex>=2021.3
 GitPython~=3.1
