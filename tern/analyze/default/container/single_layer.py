@@ -132,10 +132,10 @@ def analyze_first_layer(image_obj, master_list, options):
             origin_first_layer, Notice(errors.no_shell, 'warning'))
     # find the binary from the first layer
     prereqs.binary = dcom.get_base_bin(image_obj.layers[0])
-    # set a possible OS and package format
-    get_os_style(image_obj.layers[0], prereqs.binary)
     # try to load packages from cache
     if not com.load_from_cache(image_obj.layers[0], options.redo):
+        # set a possible OS and package format
+        get_os_style(image_obj.layers[0], prereqs.binary)
         # if there is a binary, extract packages
         if prereqs.binary:
             # mount the first layer
