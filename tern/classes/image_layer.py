@@ -333,4 +333,4 @@ class ImageLayer:
         match = re.search(r"\bWORKDIR\ (\/\w+)+\b", self.created_by)
         if match:
             return match.group().split()[1]
-        return None
+        return ''

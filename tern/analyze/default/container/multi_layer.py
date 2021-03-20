@@ -89,6 +89,11 @@ def analyze_subsequent_layers(image_obj, prereqs, master_list, options):
     # get list of environment variables
     prereqs.envs = lock.get_env_vars(image_obj)
     while curr_layer < len(image_obj.layers):
+        # If work_dir changes, update value accordingly
+        # so we can later execute base.yml commands from the work_dir
+        if image_obj.layers[curr_layer].get_layer_workdir():
+            prereqs.layer_workdir = \
+                image_obj.layers[curr_layer].get_layer_workdir()
         # make a notice for each layer
         origin_next_layer = 'Layer {}'.format(
             image_obj.layers[curr_layer].layer_index)
