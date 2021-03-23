@@ -102,7 +102,12 @@ dpkg:
         - "pkgs=`dpkg-query -W -f '${Package}\n'`"
         - "for p in $pkgs; do files=`dpkg-query -L $p`; for file in $files; do if [ -f $file ]; then echo $file; fi; done; echo LICF; done"
     delimiter: "LICF"
-  proj_urls: {}
+  proj_urls:
+    invoke:
+      1:
+        container:
+          - "dpkg-query -W -f '${Homepage}\n' | /bin/sed 's/^$/Unknown/'"
+    delimiter: "\n"
 
 # apk ---------------------------------------------------------------------------------------------------------
 apk:
