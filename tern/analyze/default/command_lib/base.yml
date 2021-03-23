@@ -79,28 +79,27 @@ dpkg:
       1:
         # Currently two types of environments are supported - host or container
         container:
-          - "dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'"
+          - "dpkg-query -W -f '${Package}\n'"
     delimiter: "\n"
   # the length of this list should be the same as the names or else there will be a mismatch
   versions:
     invoke:
       1:
         container:
-          - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
-          - "for p in $pkgs; do dpkg -l $p | awk 'NR>5 {print $3}'; done"
+          - "dpkg-query -W -f '${Version}\n'"
     delimiter: "\n"
   copyrights:
     invoke:
       1:
         container:
-          - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+          - "pkgs=`dpkg-query -W -f '${Package}\n'`"
           - "for p in $pkgs; do /bin/cat /usr/share/doc/$p/copyright; echo LICF; done"
     delimiter: 'LICF'
   files:
     invoke:
       1:
         container:
-        - "pkgs=`dpkg --get-selections | cut -f1 -d':' | awk '{print $1}'`"
+        - "pkgs=`dpkg-query -W -f '${Package}\n'`"
         - "for p in $pkgs; do files=`dpkg-query -L $p`; for file in $files; do if [ -f $file ]; then echo $file; fi; done; echo LICF; done"
     delimiter: "LICF"
   proj_urls: {}
