@@ -27,17 +27,14 @@ from tern.analyze.default import core
 logger = logging.getLogger(constants.logger_name)
 
 
-def get_os_release(base_layer):
-    '''Given the base layer object, determine if an os-release file exists and
-    return the PRETTY_NAME string from it. If no release file exists,
-    return an empty string. Assume that the layer filesystem is mounted'''
+def find_os_release(host_path):
+    """Find the OS PRETTY_NAME in the given path. If no os-release file
+    exists, return an empty string"""
     # os-release may exist under /etc/ or /usr/lib. We should first check
     # for the preferred /etc/os-release and fall back on /usr/lib/os-release
     # if it does not exist under /etc
-    etc_path = os.path.join(
-        rootfs.get_untar_dir(base_layer.tar_file), constants.etc_release_path)
-    lib_path = os.path.join(
-        rootfs.get_untar_dir(base_layer.tar_file), constants.lib_release_path)
+    etc_path = os.path.join(host_path, constants.etc_release_path)
+    lib_path = os.path.join(host_path, constants.lib_release_path)
     if not os.path.exists(etc_path):
         if not os.path.exists(lib_path):
             return ''
@@ -53,6 +50,12 @@ def get_os_release(base_layer):
             pretty_name = val
             break
     return pretty_name.strip('"')
+
+
+def get_os_release(base_layer):
+    """Assuming that the layer tarball is untarred are ready to be inspected,
+    get the OS information from the os-release file"""
+    return find_os_release(rootfs.get_untar_dir(base_layer.tar_file))
 
 
 def get_os_style(image_layer, binary):
