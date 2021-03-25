@@ -9,7 +9,18 @@ import os
 import re
 import sys
 
+
 # This script is written to be used with CI Integration
+
+def has_url(string):
+    # findall() has been used
+    # with valid conditions for urls in string
+    regex = r"((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)" \
+            r"(?:[^\s()<>]+|\((?:[^\s()<>]+|(?:\([^\s()<>]+\)))*\))+" \
+            r"(?:\((?:[^\s()<>]+|(?:\([^\s()<>]+\)))*\)|" \
+            r"[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+    urls = re.findall(regex, string)
+    return bool(len(urls) > 0)
 
 
 def lint_commit(commit_id):
@@ -25,23 +36,33 @@ def lint_commit(commit_id):
 
     # Check 1: Subject, body and DCO exist
     # Note that git does not allow for empty subjects
-    if len(re.split('\n\n|\r', message)) <= 2:
+    msg_list = re.split('\n\n|\r', message)
+    commit_subject = msg_list[0]
+    if len(msg_list) <= 2:
         print("Commit {} does not have a body.".format(sha_short))
         check = False
+    try:
+        # pop the subject and signature
+        msg_list.pop(0)
+        msg_list.pop()
+    except IndexError:
+        pass
 
     # Check 2: Subject length is less than about 50
-    if len(re.split('\n\n', message)[0]) > 54:
+    if len(commit_subject) > 54:
         print(
             "The subject of commit {} should be 50 characters or less.".format(
                 sha_short))
         check = False
 
     # Check 3: Each line of the body is less than 72
-    msg_list = re.split('\n\n|\r', message)
-    msg_list.pop(0)
-    msg_list.pop()
     for msg in msg_list:
         for line in msg.split('\n'):
+            if has_url(line) or line.startswith("[CM]") or line.startswith("[LINK]"):
+                print("Line contains url(s)/compiler messages. Skipping . . .\n"
+                      "Line: {0}\n"
+                      "Commit: {1}\n\n".format(line, sha_short))
+                continue
             if len(line) > 72:
                 print("Line exceeds 72 characters.\n"
                       "Line: {0}\n"
