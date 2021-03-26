@@ -7,8 +7,10 @@
 Common functions that are useful for both JSON and Tag-value document creation
 """
 
+import datetime
 import hashlib
 import logging
+import re
 import uuid
 
 from tern.utils import constants
@@ -25,6 +27,11 @@ logger = logging.getLogger(constants.logger_name)
 def get_uuid():
     """ Return a UUID string"""
     return str(uuid.uuid4())
+
+
+def get_timestamp():
+    """Return a timestamp"""
+    return datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def get_string_id(string):
@@ -77,6 +84,13 @@ def get_layer_spdxref(layer_obj):
     return 'SPDXRef-{}'.format(layer_obj.diff_id[:10])
 
 
+def get_layer_spdxref_snapshot(timestamp):
+    """Given the layer object created at container build time, return an
+    SPDX reference ID. For this case, a layer's diff_id and filesystem hash
+    is not known so we will provide a generic ID"""
+    return 'SPDXRef-snapshot-{}'.format(timestamp)
+
+
 def get_layer_verification_code(layer_obj):
     '''Calculate the verification code from the files in an image layer. This
     assumes that layer_obj.files_analyzed is True. The implementation follows
@@ -110,10 +124,11 @@ def get_layer_checksum(layer_obj):
 
 def get_package_spdxref(package_obj):
     '''Given the package object, return an SPDX reference ID'''
-    return 'SPDXRef-{}'.format(
-        spdx_formats.package_id.format(
-            name=package_obj.name,
-            ver=package_obj.version).replace(':', '-', 1))
+    pkg_ref = spdx_formats.package_id.format(name=package_obj.name,
+                                             ver=package_obj.version)
+    # replace all the strings that SPDX doesn't like
+    clean_pkg_ref = re.sub(r'[:+~]', r'-', pkg_ref)
+    return 'SPDXRef-{}'.format(clean_pkg_ref)
 
 
 #######################

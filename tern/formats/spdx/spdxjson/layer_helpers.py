@@ -20,6 +20,31 @@ from tern.report import content
 logger = logging.getLogger(constants.logger_name)
 
 
+def get_layer_extracted_licenses(layer_obj):
+    '''Given an image_obj, return a unique list of extractedText dictionaries
+    that contain all the file and package license key-value pairs for a
+    LicenseRef and its corresponding plain text. The dictionaries will
+    contain the following information:
+        {
+            "extractedText": "Plain text of license",
+            "licenseId": "Corresponding LicenseRef"
+        }'''
+
+    unique_licenses = set()
+    # Get all of the unique file licenses, if they exist
+    unique_licenses.update(spdx_common.get_layer_licenses(layer_obj))
+    # Next, collect any package licenses not already accounted for
+    for package in layer_obj.packages:
+        if package.pkg_license:
+            unique_licenses.add(package.pkg_license)
+    extracted_texts = []
+    for lic in list(unique_licenses):
+        extracted_texts.append(json_formats.get_extracted_text_dict(
+            extracted_text=lic, license_ref=spdx_common.get_license_ref(
+                lic)))
+    return extracted_texts
+
+
 def get_image_layer_relationships(image_obj):
     '''Given an image object, return a list of dictionaries describing the
     relationship between each layer "package" and the image and packages
@@ -57,6 +82,23 @@ def get_image_layer_relationships(image_obj):
                     layer_ref, pkg_ref, 'CONTAINS'))
 
     return layer_relationships
+
+
+def get_layer_snapshot_relationships(layer_obj, docref):
+    """Given a layer object, and the SPDX ref of the document, return a list
+    of dictionaries describing the relationship between the snapshot document
+    and the packages listed therein"""
+    relationships = []
+
+    # document level DESCRIBES
+    relationships.append(json_formats.get_relationship_dict(
+        json_formats.spdx_id, docref, 'DESCRIBES'))
+    # package relationships
+    for package in layer_obj.packages:
+        pkg_ref = spdx_common.get_package_spdxref(package)
+        relationships.append(json_formats.get_relationship_dict(
+            docref, pkg_ref, 'CONTAINS'))
+    return relationships
 
 
 def get_layer_package_comment(layer_obj):

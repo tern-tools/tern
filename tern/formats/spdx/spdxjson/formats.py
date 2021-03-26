@@ -21,6 +21,10 @@ license_list_version = '3.8'
 creator = 'Tool: tern-{version}'
 created = '{timestamp}'
 
+document_name_snapshot = 'Tern SPDX JSON SBoM'
+document_namespace_snapshot = 'https://spdx.org/spdxdocs/tern-report-' \
+    '{timestamp}-{uuid}'
+
 
 # Dictionary Formatting
 def get_relationship_dict(element_id, related_element_id, relationship_type):

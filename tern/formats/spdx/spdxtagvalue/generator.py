@@ -141,3 +141,8 @@ class SpdxTagValue(generator.Generate):
         report += mhelpers.get_image_block(image_obj, template) + '\n'
 
         return report
+
+    def generate_layer(self, layer_obj):
+        """Currently Unsupported. Provide debug statement"""
+        logger.critical("Generating SPDX tag-value documents at container "
+                        "build time is currently unsupported")

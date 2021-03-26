@@ -8,7 +8,6 @@ SPDX JSON document generator
 """
 
 import json
-import datetime
 import logging
 
 from tern.formats.spdx.spdx import SPDX
@@ -36,16 +35,21 @@ def get_document_namespace(image_obj):
         uuid=spdx_common.get_uuid())
 
 
+def get_document_namespace_snapshot(timestamp):
+    """Get the document namespace for the container image snapshot. We pass
+    the timestamp so we have a common timestamp across the whole document"""
+    return json_formats.document_namespace_snapshot.format(
+        timestamp=timestamp, uuid=spdx_common.get_uuid())
+
+
 def get_document_dict(image_obj, template):
     '''Return document info as a dictionary'''
-    # docu_dict = {"Document": {}}
     docu_dict = {
         'SPDXID': json_formats.spdx_id,
         'spdxVersion': json_formats.spdx_version,
         'creationInfo': {
             'created': json_formats.created.format(
-                timestamp=datetime.datetime.utcnow().strftime(
-                    "%Y-%m-%dT%H:%M:%SZ")),
+                timestamp=spdx_common.get_timestamp()),
             'creators': json_formats.creator.format(
                 version=get_git_rev_or_version()[1]),
             'licenseListVersion': json_formats.license_list_version,
@@ -83,6 +87,59 @@ def get_document_dict(image_obj, template):
     return docu_dict
 
 
+def get_document_dict_snapshot(layer_obj, template):
+    """This is the SPDX document containing just the packages found at
+    container build time"""
+    timestamp = spdx_common.get_timestamp()
+    docu_dict = {
+        'SPDXID': json_formats.spdx_id,
+        'spdxVersion': json_formats.spdx_version,
+        'creationInfo': {
+            'created': json_formats.created.format(
+                timestamp=timestamp),
+            'creators': json_formats.creator.format(
+                version=get_git_rev_or_version()[1]),
+            'licenseListVersion': json_formats.license_list_version,
+        },
+        'name': json_formats.document_name_snapshot,
+        'dataLicense': json_formats.data_license,
+        'comment': json_formats.document_comment,
+        'documentNamespace': get_document_namespace_snapshot(
+            layer_obj, timestamp),
+        # we will list all the unique package SPDXRefs here later
+        'documentDescribes': [],
+        # these will contain just the packages as there is no layer
+        # package at the time of this document's generation
+        'packages': [],
+        # we will fill in document to package ref relationships later
+        'relationships': []
+    }
+
+    # Add list of package dictionaries to packages list, if they exist
+    pkgs_dict_list, package_refs = phelpers.get_layer_packages_list(
+        layer_obj, template)
+    if pkgs_dict_list:
+        docu_dict['packages'] = pkgs_dict_list
+        docu_dict['documentDescribes'] = package_refs
+
+    # add the package relationships to the document
+    for ref in package_refs:
+        docu_dict['relationships'].append(json_formats.get_relationship_dict(
+            json_formats.spdx_id, ref, 'DESCRIBES'))
+
+    # Add list of file dictionaries, if they exist
+    files = fhelpers.get_layer_files_list(layer_obj, template, timestamp)
+    if files:
+        docu_dict['files'] = files
+
+    # Add package and file extracted license texts, if they exist
+    extracted_texts = lhelpers.get_layer_extracted_licenses(layer_obj)
+    if extracted_texts:
+        docu_dict['hasExtractedLicensingInfos'] = extracted_texts
+
+    return docu_dict
+
+
 class SpdxJSON(generator.Generate):
     def generate(self, image_obj_list, print_inclusive=False):
         '''Generate an SPDX document
@@ -105,4 +162,12 @@ class SpdxJSON(generator.Generate):
         template = SPDX()
         report = get_document_dict(image_obj, template)
 
+        return json.dumps(report)
+
+    def generate_layer(self, layer):
+        """Generate an SPDX document containing package and file information
+        at container build time"""
+        logger.debug("Generating SPDX JSON document...")
+        template = SPDX()
+        report = get_document_dict_snapshot(layer, template)
         return json.dumps(report)
