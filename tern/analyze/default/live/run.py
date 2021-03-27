@@ -40,29 +40,37 @@ def setup():
         os.mkdir(op_dir)
 
 
+def set_layer_os(layer, origin_str, binary):
+    """Set layer's guessed operating system if it was not set by the
+    filesystem's os-release files.
+    origin_str: the string used to add notices
+    binary: the listing key to look for a corresponding OS"""
+    # check if the layer already has an os-release set and if not,
+    # guess based on the binary
+    if layer.os_guess:
+        layer.origins.add_notice_to_origins(origin_str, Notice(
+            formats.os_release.format(os_style=layer.os_guess), 'info'))
+    else:
+        layer.os_guess = command_lib.check_os_guess(binary)
+        if layer.os_guess:
+            layer.origins.add_notice_to_origins(origin_str, Notice(
+                formats.os_style_guess.format(
+                    package_manager=bin, os_list=layer.os_guess), 'info'))
+        else:
+            layer.origins.add_notice_to_origins(origin_str, Notice(
+                errors.no_etc_release, 'warning'))
+
+
 def fill_packages(layer, prereqs):
     """Collect package metadata and fill in the packages for the given layer
     object"""
     # Create an origin string to record notices
     origin_str = "Inventory Results"
     # For every indicator that exists on the filesystem, inventory the packages
-    for bin in dcom.get_existing_bins(prereqs.host_path):
-        # check if the layer already has an os-release set and if not,
-        # guess based on the binary
-        if layer.os_guess:
-            layer.origins.add_notice_to_origins(origin_str, Notice(
-                formats.os_release.format(os_style=layer.os_guess), 'info'))
-        else:
-            layer.os_guess = command_lib.check_os_guess(bin)
-            if layer.os_guess:
-                layer.origins.add_notice_to_origins(origin_str, Notice(
-                    formats.os_style_guess.format(
-                        package_manager=bin, os_list=layer.os_guess), 'info'))
-            else:
-                layer.origins.add_notice_to_origins(origin_str, Notice(
-                    errors.no_etc_release, 'warning'))
-        prereqs.binary = bin
-        listing = command_lib.get_base_listing(bin)
+    for binary in dcom.get_existing_bins(prereqs.host_path):
+        set_layer_os(layer, origin_str, binary)
+        prereqs.binary = binary
+        listing = command_lib.get_base_listing(binary)
         pkg_dict, invoke_msg, warnings = collect.collect_list_metadata(
             listing, prereqs, True)
         # processing for debian copyrights

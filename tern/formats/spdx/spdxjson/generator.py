@@ -104,8 +104,7 @@ def get_document_dict_snapshot(layer_obj, template):
         'name': json_formats.document_name_snapshot,
         'dataLicense': json_formats.data_license,
         'comment': json_formats.document_comment,
-        'documentNamespace': get_document_namespace_snapshot(
-            layer_obj, timestamp),
+        'documentNamespace': get_document_namespace_snapshot(timestamp),
         # we will list all the unique package SPDXRefs here later
         'documentDescribes': [],
         # these will contain just the packages as there is no layer

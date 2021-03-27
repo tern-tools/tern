@@ -142,7 +142,7 @@ class SpdxTagValue(generator.Generate):
 
         return report
 
-    def generate_layer(self, layer_obj):
+    def generate_layer(self, layer_obj):  # pylint: disable=unused-argument
         """Currently Unsupported. Provide debug statement"""
         logger.critical("Generating SPDX tag-value documents at container "
                         "build time is currently unsupported")
