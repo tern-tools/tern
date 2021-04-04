@@ -81,6 +81,7 @@ cannot_find_image = '''Cannot find image {imagetag} locally or from remote '''\
     '''registry.\n'''
 empty_layer = '''Empty layer. Nothing to do.\n'''
 no_layer_created_by = "No created_by information for layer."
+no_able_to_analyze = "Unknown {entity}. Please analyze separately."
 
 # not error messages but stuff for the logger
 no_base_image = '''Base image is FROM scratch. Skipping to build'''

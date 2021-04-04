@@ -14,7 +14,10 @@ import re
 from tern.analyze.default.command_lib import command_lib
 from tern.analyze import common
 from tern.report import formats
+from tern.report import errors
 from tern.utils import constants
+
+CMDS_NEEDS_ANALYSIS = ['ADD', 'COPY']
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -105,7 +108,13 @@ def filter_install_commands(shell_command_line):
     if ignore_msgs:
         report = report + formats.ignored + ignore_msgs
     if unrec_msgs:
-        report = report + formats.unrecognized + unrec_msgs
+        cmd_check = list(filter(
+            lambda word: word in CMDS_NEEDS_ANALYSIS, unrec_msgs.split(' ')))
+        if cmd_check:
+            msg = errors.no_able_to_analyze.format(entity='file')
+            report += msg + unrec_msgs
+        else:
+            report += formats.unrecognized + unrec_msgs
     if branch_report:
         report = report + branch_report
     return consolidate_commands(filter2), report
