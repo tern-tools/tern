@@ -293,7 +293,7 @@ def find_git_info(line, dockerfile_path):
 def expand_add_command(dfobj):
     dockerfile_path = dfobj.filepath
     for i, command_dict in enumerate(dfobj.structure):
-        if command_dict['instruction'] == 'ADD':
+        if command_dict['instruction'] in ['ADD', 'COPY']:
             comment_line = find_git_info(command_dict['content'],
                                          dockerfile_path)
             dfobj.structure[i]['content'] = \
