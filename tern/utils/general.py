@@ -135,7 +135,8 @@ def parse_shell_variables_and_command(concatenated_command):
         last_idx = 0
         # extract assignments
         for m in match_assignment:
-            # variable assignment should be continous and start at the beginning
+            # variable assignment should be continous and start at the
+            # beginning
             if len(concatenated_command[last_idx: m.span(0)[0]].strip()) > 0:
                 continue
             variable_list.append({'name': m.group(1), 'value': m.group(2)})
@@ -244,12 +245,14 @@ def get_git_rev_or_version():
 def prop_names(obj):
     '''Given an object, return a generator that will produce the object's
     property key in its __dict__ representation and it's name'''
-    prop_decorators = r'^__|^_'
-    for key in obj.__dict__.keys():
+    for key in obj.__dict__:
         # remove private and protected decorator characters if any
-        priv_name = '_' + obj.__class__.__name__
-        prop_name = re.sub(priv_name, '', key)
-        prop_name = re.sub(prop_decorators, '', prop_name, 1)
+        # first split on the dunder to get the class properties
+        # then split on the first underscore to get the super class's
+        # properties
+        prop_name = key.split('__')[-1]
+        if prop_name.startswith('_'):
+            prop_name = prop_name[1:]
         yield key, prop_name
 
 
