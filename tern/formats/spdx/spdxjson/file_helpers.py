@@ -91,3 +91,17 @@ def get_files_list(image_obj, template):
                         filedata, template, layer_checksum))
                     file_refs.add(file_ref)
     return file_dicts
+
+
+def get_layer_files_list(layer_obj, template, timestamp):
+    """Given a layer object and the SPDX template mapping, return a list
+    of SPDX dictionary representations for each file in the layer"""
+    file_dicts = []
+    file_refs = set()
+    for filedata in layer_obj.files:
+        # we do not know the layer's id so we will use the timestamp instead
+        file_ref = spdx_common.get_file_spdxref(filedata, timestamp)
+        if file_ref not in file_refs:
+            file_dicts.append(get_file_dict(filedata, template, timestamp))
+            file_refs.add(file_ref)
+    return file_dicts

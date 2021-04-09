@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 '''
@@ -49,3 +49,5 @@ mergedir = 'mergedir'
 locked_dockerfile = 'Dockerfile.lock'
 # temporary directory for multistage Dockerfile analysis
 multistage_dir = 'dftemp'
+# temporary file name for unshared script
+script_file = 'invoke.sh'

@@ -19,3 +19,7 @@ class JSON(generator.Generate):
             image_list.append({'image': image.to_dict()})
         image_dict = {'images': image_list}
         return json.dumps(image_dict)
+
+    def generate_layer(self, layer):
+        """Create a json object for one layer"""
+        return json.dumps(layer.to_dict())

@@ -66,3 +66,19 @@ def get_packages_list(image_obj, template):
                 package_dicts.append(get_package_dict(package, template))
                 package_refs.add(pkg_ref)
     return package_dicts
+
+
+def get_layer_packages_list(layer, template):
+    """Given a layer object and a SPDX template object, return a list
+    of SPDX dictionary representations for each of the packages in the layer
+    and their package references"""
+    package_dicts = []
+    package_refs = set()
+    for package in layer.packages:
+        # Create a list of dictionaries. Each dictionary represents
+        # one package object in the image
+        pkg_ref = spdx_common.get_package_spdxref(package)
+        if pkg_ref not in package_refs:
+            package_dicts.append(get_package_dict(package, template))
+            package_refs.add(pkg_ref)
+    return package_dicts, list(package_refs)

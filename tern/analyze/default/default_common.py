@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -24,23 +24,28 @@ from tern.analyze.default import filter as fltr
 logger = logging.getLogger(constants.logger_name)
 
 
-def get_shell(layer):
-    '''Find the shell if any on the layer filesystem. Assume that the layer
-    has already been unpacked. If there is no shell, return an empty string'''
-    shell = ''
-    cwd = rootfs.get_untar_dir(layer.tar_file)
+def find_shell(fspath):
+    """Given the path to the filesystem where a shell may exist, find the
+    first available shell"""
     for sh in command_lib.command_lib['common']['shells']:
-        realpath = os.path.realpath(os.path.join(cwd, sh[1:]))
+        realpath = os.path.realpath(os.path.join(fspath, sh[1:]))
         # If realpath is a symlink and points to the root of the container,
         # check for existence of the linked binary in current working dir
-        if realpath[0] == '/' and os.path.exists(os.path.join(cwd,
+        if realpath[0] == '/' and os.path.exists(os.path.join(fspath,
                                                               realpath[1:])):
             return sh
         # otherwise, just follow symlink in same folder and
         # remove leading forwardslash before joining paths
-        if os.path.exists(os.path.join(cwd, sh[1:])):
+        if os.path.exists(os.path.join(fspath, sh[1:])):
             return sh
-    return shell
+    return ''
+
+
+def get_shell(layer):
+    '''Find the shell if any on the layer filesystem. Assume that the layer
+    has already been unpacked. If there is no shell, return an empty string'''
+    cwd = rootfs.get_untar_dir(layer.tar_file)
+    return find_shell(cwd)
 
 
 def get_base_bin(first_layer):
@@ -56,6 +61,16 @@ def get_base_bin(first_layer):
                 binary = key
                 break
     return binary
+
+
+def get_existing_bins(fspath):
+    """Return a list of all the binaries existing on the given filesystem"""
+    bin_list = []
+    for key, value in command_lib.command_lib['base'].items():
+        for path in value['path']:
+            if os.path.exists(os.path.join(fspath, path)):
+                bin_list.append(key)
+    return bin_list
 
 
 def fill_package_metadata(pkg_obj, pkg_listing, shell, work_dir, envs):

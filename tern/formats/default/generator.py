@@ -42,7 +42,8 @@ def print_full_report(image, print_inclusive):
            print_inclusive is False:
             continue
         if layer.import_image:
-            notes = notes + print_full_report(layer.import_image, print_inclusive)
+            notes = notes + print_full_report(
+                layer.import_image, print_inclusive)
         else:
             notes = notes + get_layer_notices(layer)
             (layer_pkg_list, layer_license_list,
@@ -55,6 +56,19 @@ def print_full_report(image, print_inclusive):
             notes += formats.layer_licenses_list.format(list=", ".join(
                 layer_license_list) if layer_license_list else 'None')
             notes = notes + formats.package_demarkation
+    return notes
+
+
+def print_layer_report(layer):
+    """Generate a report for a given layer"""
+    notes = get_layer_notices(layer)
+    pkgs, licenses, filelicenses = get_layer_info_list(layer)
+    notes += formats.layer_file_licenses_list.format(
+        list=filelicenses)
+    notes += formats.layer_packages_list.format(
+        list=", ".join(pkgs) if pkgs else 'None')
+    notes += formats.layer_licenses_list.format(list=", ".join(
+        licenses) if licenses else 'None')
     return notes
 
 
@@ -138,3 +152,10 @@ class Default(generator.Generate):
         if report_only:
             return report
         return report + print_licenses_only(image_obj_list)
+
+    def generate_layer(self, layer):
+        """Generate a default report for one layer object"""
+        report = formats.disclaimer.format(
+            version_info=content.get_tool_version())
+        logger.debug("Generating summary report for layer...")
+        return report + print_layer_report(layer)

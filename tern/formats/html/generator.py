@@ -103,6 +103,28 @@ The following report was generated for "%s" image.
 """
 
 
+head_layer = """
+<!DOCTYPE html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300&family=Oswald&display=swap"
+rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@1,300&display=swap"
+rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet">
+%s \n
+</head>
+<body>
+<div class="header">
+<img src="https://raw.githubusercontent.com/tern-tools/tern/master/docs/img/tern_logo.png" height="60px">\n
+<br>
+</div>\n
+<div style="font-family: \'Inconsolata\', monospace;">
+<p>
+Tern at %s
+</div>
+"""
+
+
 def image_handler(list_obj, indent):
     '''Write html code for the images list in the report with
     image name as title'''
@@ -297,4 +319,14 @@ class HTML(generator.Generate):
         for the images'''
         report_dict = get_report_dict(image_obj_list)
         report = create_html_report(report_dict, image_obj_list)
+        return report
+
+    def generate_layer(self, layer):
+        """Given a layer object, create a html report for the layer"""
+        logger.debug("Creating HTML report...")
+        report = ""
+        report = report + '\n' + head_layer % (css, get_tool_version())
+        report = report + '\n' + report_dict_to_html(layer.to_dict())
+        report = report + '\n' + js
+        report = report + '\n' + '</body>\n</html>\n'
         return report

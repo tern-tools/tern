@@ -11,6 +11,7 @@ import logging
 import subprocess  # nosec
 
 from tern.analyze.default.command_lib import command_lib
+from tern.analyze.default.live import collect as lcol
 from tern.report import errors
 from tern.utils import constants
 from tern.utils import rootfs
@@ -133,7 +134,46 @@ def get_pkg_attrs(attr_dict, prereqs, package_name=''):
     return result, error_msgs
 
 
-def collect_list_metadata(listing, prereqs):
+def get_live_attr_list(attr_dict, prereqs):
+    """Similar to get_pkg_attrs in tern/analyze/default/collect.py but with
+    invocation on a live container image"""
+    error_msgs = ""
+    result = ""
+    if 'invoke' in attr_dict.keys():
+        for step in range(1, len(attr_dict['invoke'].keys()) + 1):
+            method, snippet_list = get_snippet_list(
+                attr_dict['invoke'][step], prereqs)
+            # invoke inventory script against the mount directory
+            result, error = lcol.invoke_live(snippet_list, prereqs, method)
+            if error:
+                logger.warning(
+                    "Error invoking command: %s", error.decode('utf-8'))
+                error_msgs = error_msgs + error.decode('utf-8')
+    if 'delimiter' in attr_dict.keys():
+        res_list = result.decode('utf-8').split(attr_dict['delimiter'])
+        if res_list[-1] == '' or res_list[-1] == '\n':
+            res_list.pop()
+            return res_list, error_msgs
+        return res_list, error_msgs
+    return result, error_msgs
+
+
+def collect_file_metadata(items):
+    """Collect file metadata from the items returned by collecting package
+    and file attributes"""
+    # convert this data into a list before adding it to the
+    # package dictionary
+    file_list = []
+    for files_str in items:
+        # convert the string into a list
+        files = []
+        for filepath in filter(bool, files_str.split('\n')):
+            files.append(filepath.lstrip('/'))
+        file_list.append(files)
+    return file_list
+
+
+def collect_list_metadata(listing, prereqs, live=False):
     """Given the listing for the package manager, collect
     metadata that gets returned as a list
     The Prereqs object contains the state of the container filesystem and
@@ -145,19 +185,13 @@ def collect_list_metadata(listing, prereqs):
     for item in command_lib.base_keys:
         # check if the supported items exist in the given listing
         if item in listing.keys():
-            items, msg = get_pkg_attrs(listing[item], prereqs)
+            if live:
+                items, msg = get_live_attr_list(listing[item], prereqs)
+            else:
+                items, msg = get_pkg_attrs(listing[item], prereqs)
             msgs = msgs + msg
             if item == 'files':
-                # convert this data into a list before adding it to the
-                # package dictionary
-                file_list = []
-                for files_str in items:
-                    # convert the string into a list
-                    files = []
-                    for filepath in filter(bool, files_str.split('\n')):
-                        files.append(filepath.lstrip('/'))
-                    file_list.append(files)
-                pkg_dict.update({item: file_list})
+                pkg_dict.update({item: collect_file_metadata(items)})
             else:
                 pkg_dict.update({item: items})
         else:
