@@ -44,7 +44,7 @@ package_version = '''Version: {package_version}\n'''
 package_url = '''Project URL: {package_url}\n'''
 package_license = '''License: {package_license}\n'''
 package_copyright = '''Copyright Text: {package_copyright}\n'''
-layer_packages_list = '''\tPackages found in Layer:  {list}\n'''
+layer_packages_header = '''\tPackages found in Layer: {}'''
 layer_licenses_list = '''\tLicenses found in Layer:  {list}\n'''
 layer_file_licenses_list = '''\tFile licenses found in Layer:  {list}\n'''
 full_licenses_list = '''###########################################\n'''\
@@ -55,8 +55,8 @@ full_licenses_list = '''###########################################\n'''\
 package_notes = '''Errors: {package_info_retrieval_errors}\n''' \
     '''Improvements: {package_info_reporting_improvements}\n'''
 # demarkation
-package_demarkation = '''------------------------------------------------''' \
-    '''\n\n'''
+package_demarkation = '''================================================='''\
+    '''======================================\n\n'''
 
 # informational
 loading_from_cache = '''Loading packages from cache for layer {layer_id}'''
