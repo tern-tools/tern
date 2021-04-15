@@ -15,3 +15,4 @@ pbr>=5.5
 debut>=0.9
 regex>=2021.3
 GitPython~=3.1
+prettytable~=2.1
