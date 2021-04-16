@@ -93,18 +93,6 @@ def print_invoke_list(info_dict, info):
     return report
 
 
-def print_base_invoke(key):
-    '''Given the key in the base library, return a string containing
-    the command_lib/base.yml'''
-    info = command_lib.get_base_listing(key)
-    report = ''
-    for item in command_lib.base_keys:
-        if item in info.keys():
-            report = report + print_invoke_list(info, item)
-    report = report + '\n'
-    return report
-
-
 def print_package_invoke(command_name):
     '''Given the command name to look up in the snippet library and the
     package name, return a string with the list of commands that will be

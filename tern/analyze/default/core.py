@@ -56,9 +56,8 @@ def execute_base(layer_obj, prereqs):
     # find the binary listing
     listing = command_lib.get_base_listing(prereqs.binary)
     if listing:
-        # put info notice about what is going to be invoked
-        snippet_msg = (formats.invoke_for_base + '\n' +
-                       content.print_base_invoke(prereqs.binary))
+        # put generic notice about how package metadata is collected
+        snippet_msg = formats.invoke_for_base.format(binary=prereqs.binary)
         layer_obj.origins.add_notice_to_origins(
             origin_layer, Notice(snippet_msg, 'info'))
         # get list of metadata by invoking scripts in chroot
@@ -78,8 +77,6 @@ def execute_base(layer_obj, prereqs):
                 origin_layer, Notice(invoke_msg, 'error'))
         if warnings:
             logger.warning("Some metadata may be missing")
-            layer_obj.origins.add_notice_to_origins(
-                origin_layer, Notice(warnings, 'warning'))
         # bundle the results into Package objects
         bundle.fill_pkg_results(layer_obj, pkg_dict)
         # remove extra FileData objects from the layer
