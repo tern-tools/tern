@@ -67,7 +67,7 @@ test_suite = {
     re.compile('tern/classes/template.py'):
     ['python tests/test_class_template.py',
      'tern report -f spdxtagvalue -i photon:3.0',
-     'tern lock docker/Dockerfile'],
+     'tern lock samples/single_stage_tern/Dockerfile'],
     # tern/command_lib
     re.compile('tern/analyze/default/command_lib'): [
         'tern report -i photon:3.0',
@@ -83,7 +83,7 @@ test_suite = {
         'tern report -i golang:alpine',
         'tern report -d samples/alpine_python/Dockerfile',
         'tern report -w photon.tar',
-        'tern lock docker/Dockerfile'],
+        'tern lock samples/single_stage_tern/Dockerfile'],
     # tern/load
     re.compile('tern/load'): [
         'python tests/test_load_docker_api.py'],
