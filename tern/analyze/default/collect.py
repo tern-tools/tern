@@ -33,7 +33,7 @@ def get_snippet_list(invoke_step, prereqs):
         if prereqs.envs:
             for var in prereqs.envs:
                 snippet_list.insert(
-                    0, 'export ' + var.split('=')[0] + '=' + var.split('=')[1])
+                    0, 'export ' + var.split('=')[0] + '=\"' + var.split('=')[1] + '\"')
         # If work_dir exist cd into it
         if prereqs.layer_workdir:
             snippet_list.insert(0, 'cd ' + prereqs.layer_workdir)
