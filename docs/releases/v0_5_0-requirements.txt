@@ -8,7 +8,7 @@ certifi==2019.6.16        # via requests
 chardet==3.0.4            # via requests
 docker==4.0.2
 idna==2.8                 # via requests
-pyyaml==5.1.2
+pyyaml==5.4
 requests==2.22.0
 six==1.12.0               # via docker, websocket-client
 urllib3==1.25.3           # via requests
