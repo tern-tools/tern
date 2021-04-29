@@ -218,24 +218,24 @@ def lock_dockerfile(dfobj, image_obj):
     the content to pin packages to their versions"""
     # get all the RUN commands in the dockerfile
     run_list = parse.get_run_layers(dfobj)
-    # go through the image layers to find the corresponding to the Dockerfile
-    # RUN lines
+    # go through the image layers to find the ones corresponding to the
+    # run commands
     for layer in image_obj.layers:
         if not layer.import_str:
             # this layer is not from a FROM line
             # we get the layer instruction
-            command = fltr.get_run_command(layer.created_by)
-            # check which run command has this instruction
-            for run_dict in run_list:
-                if run_dict['value'] == command:
-                    # this is the run instruction that created this layer
-                    # get the list of install commands
-                    command_list, _ = fltr.filter_install_commands(
-                        general.clean_command(run_dict['value']))
-                    # pin packages installed by each command
-                    run_index = dfobj.structure.index(run_dict)
-                    dfobj = lock_layer_instruction(
-                        dfobj, run_index, command_list, layer)
+            cmd, instr = fltr.get_run_command(layer.created_by)
+            if instr == 'RUN':
+                # find the line in the Dockerfile that matches this command
+                for run_dict in run_list:
+                    if run_dict['value'] == cmd:
+                        # get the list of install commands
+                        command_list, _ = fltr.filter_install_commands(
+                            general.clean_command(run_dict['value']))
+                        # pin packages installed by each command
+                        run_index = dfobj.structure.index(run_dict)
+                        dfobj = lock_layer_instruction(
+                            dfobj, run_index, command_list, layer)
     return dfobj
 
 

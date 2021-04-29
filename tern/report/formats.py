@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -83,7 +83,6 @@ dockerfile_line = '''Instruction Line: {dockerfile_instruction}'''
 image_build_failure = '''Failed to build image from Dockerfile'''
 image_load_failure = '''Failed to load metadata for built image {testimage}'''
 layer_created_by = '''Layer created by commands: {created_by}'''
-no_created_by = '''No information about filesystem creation'''
 
 # docker image report
 docker_image = '''Docker image: {imagetag}'''

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -9,15 +9,12 @@ Functions to categorize commands into install, remove and ignore commands
 
 
 import logging
-import re
 
 from tern.analyze.default.command_lib import command_lib
+from tern.analyze.default.dockerfile import parse
 from tern.analyze import common
 from tern.report import formats
-from tern.report import errors
 from tern.utils import constants
-
-CMDS_NEEDS_ANALYSIS = ['ADD', 'COPY']
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -108,13 +105,7 @@ def filter_install_commands(shell_command_line):
     if ignore_msgs:
         report = report + formats.ignored + ignore_msgs
     if unrec_msgs:
-        cmd_check = list(filter(
-            lambda word: word in CMDS_NEEDS_ANALYSIS, unrec_msgs.split(' ')))
-        if cmd_check:
-            msg = errors.no_able_to_analyze.format(entity='file')
-            report += msg + unrec_msgs
-        else:
-            report += formats.unrecognized + unrec_msgs
+        report += formats.unrecognized + unrec_msgs
     if branch_report:
         report = report + branch_report
     return consolidate_commands(filter2), report
@@ -122,8 +113,23 @@ def filter_install_commands(shell_command_line):
 
 def get_run_command(value):
     """A general function to return the command line that created a layer
-    given the value of some metadata key from the container image"""
-    # we check for '/bin/sh -c' in the value
-    if '/bin/sh -c' in value:
-        return re.sub('/bin/sh -c ', '', value).strip()
-    return ''
+    given the value of some metadata key from the container image.
+    Input: typically we have no-op commands that do not need to be invoked
+    and RUN commands of the form "/bin/sh -c".
+    Output: a tuple of the shell command and the type of instruction"""
+    cmd = ""
+    instr = ""
+    # we split out the command and the no-op
+    sh_com = value.split('#(nop)')
+    # clean out the actual command
+    cmd = sh_com[0].replace("RUN", "").replace("/bin/sh -c", "").strip()
+    # if there is a command then the instruction is "RUN"
+    # else we check for the other instructions
+    if cmd:
+        instr = 'RUN'
+    else:
+        for directive in parse.directives:
+            if len(sh_com) == 2 and directive in sh_com[1]:
+                instr = directive
+                break
+    return cmd, instr

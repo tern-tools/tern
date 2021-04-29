@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -80,8 +80,8 @@ no_running_docker_container = '''Cannot invoke commands in a container '''\
 cannot_find_image = '''Cannot find image {imagetag} locally or from remote '''\
     '''registry.\n'''
 empty_layer = '''Empty layer. Nothing to do.\n'''
-no_layer_created_by = "No created_by information for layer."
-no_able_to_analyze = "Unknown {entity}. Please analyze separately."
+no_created_by = '''No information about filesystem creation'''
+no_able_to_analyze = "Unknown content. Additional analysis may be required."
 
 # not error messages but stuff for the logger
 no_base_image = '''Base image is FROM scratch. Skipping to build'''
