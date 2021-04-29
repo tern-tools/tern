@@ -121,16 +121,22 @@ def get_commands_from_metadata(image_layer):
     origin_layer = 'Layer {}'.format(image_layer.layer_index)
     # check if there is a key containing the script that created the layer
     if image_layer.created_by:
-        command_line = fltr.get_run_command(image_layer.created_by)
-        if command_line:
+        cmd, instr = fltr.get_run_command(image_layer.created_by)
+        if image_layer.layer_index != 1 and instr in ['ADD', 'COPY']:
+            # add a notice saying we cannot analyze files
+            # imported from the host during container build
+            image_layer.origins.add_notice_to_origins(
+                origin_layer, Notice(errors.no_able_to_analyze, 'warning'))
+            return []
+        if cmd:
             command_list, msg = fltr.filter_install_commands(
-                general.clean_command(command_line))
+                general.clean_command(cmd))
             if msg:
                 image_layer.origins.add_notice_to_origins(
                     origin_layer, Notice(msg, 'warning'))
             return command_list
     image_layer.origins.add_notice_to_origins(
-        origin_layer, Notice(errors.no_layer_created_by, 'warning'))
+        origin_layer, Notice(errors.no_created_by, 'warning'))
     return []
 
 
