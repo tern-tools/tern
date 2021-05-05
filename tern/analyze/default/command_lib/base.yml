@@ -421,6 +421,17 @@ npm:
         host:
           - "jq -r '.. | objects | select(has(\"name\") and has(\"version\")) | .repository | if type == \"string\" then . else .url end | . // \"Unknown\"' npm-global.json"
     delimiter: "\n"
+  copyrights:
+    invoke:
+      1:
+        container:
+          - "npm list -g --json --long --depth=1000 > npm-global.json"
+      2:
+        host:
+          - "paths=`jq -r '.. | objects | select(has(\"name\") and has(\"version\")) | .path // \"Unknown\" | ltrimstr(\"/\")' npm-global.json`"
+          - "files=\"license license.md LICENSE LICENSE.md copying copying.md COPYING COPYING.md\""
+          - "for p in $paths; do for f in $files; do if [ -f $p/$f ]; then cat $p/$f; break; fi done; echo \"LICF\"; done"
+    delimiter: "LICF"
 # golang----------------------------------------------------------------------
 go:
   pkg_format: ''
