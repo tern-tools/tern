@@ -12,7 +12,7 @@ requests
 stevedore
 pbr
 dockerfile-parse
-debut
+debian-inspector
 regex
 GitPython
 prettytable

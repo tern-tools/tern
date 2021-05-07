@@ -19,8 +19,8 @@ from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
 from tern.utils import rootfs
-from debut import debcon
-from debut import copyright as debut_copyright
+from debian_inspector import debcon
+from debian_inspector import copyright as debut_copyright
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
