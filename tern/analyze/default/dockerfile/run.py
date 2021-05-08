@@ -180,6 +180,10 @@ def analyze_single_dockerfile(dockerfile, options):
         logger.debug('Docker image successfully built. Analyzing...')
         # analyze the full image
         image_list = full_image_analysis(dockerfile, options)
+        base_import_str = image_list[0].layers[0].import_str
+        if not base_import_str and image_info.get('RepoDigests'):
+            image_string = image_info.get('RepoDigests')[0]
+            image_list[0].layers[0].import_str = image_string
     else:
         # cannot build the image
         logger.warning('Cannot build image')
@@ -213,6 +217,7 @@ def execute_dockerfile(args, locking=False):
             report.report_out(args, *image_list)
         else:
             logger.debug('Generating locked Dockerfile...')
+            parse.expand_from_images(dfobj, image_list)
             # we can only lock one image for now
             locked_dfobj = lock.lock_dockerfile(dfobj, image_list[0])
             output = lock.create_locked_dockerfile(locked_dfobj)
