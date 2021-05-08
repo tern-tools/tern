@@ -101,8 +101,8 @@ def get_base_image_tag(dockerfile_lines):
                                          flags=re.IGNORECASE)[0]
             from_line = 'FROM' + base_image_string
             # Check that potential ARG values has default
-            if i != 0 and dockerfile_lines[i-1]['instruction'] == 'ARG':
-                if len(dockerfile_lines[i-1]['value'].split('=')) == 1:
+            if i != 0 and dockerfile_lines[i - 1]['instruction'] == 'ARG':
+                if len(dockerfile_lines[i - 1]['value'].split('=')) == 1:
                     raise ValueError('No ARG default value to pass to '
                                      'FROM command in Dockerfile.')
             break
@@ -181,7 +181,7 @@ def set_imported_layers(docker_image):
             break
     if index != -1:
         # index was set so all layers before this index has been imported
-        for i in range(0, index-1):
+        for i in range(0, index - 1):
             docker_image.layers[i].import_str = from_line
 
 
@@ -243,7 +243,6 @@ def create_locked_dockerfile(dfobj):
     '''Given a dockerfile object, the information in a new Dockerfile object
     Copy the dfobj info to the destination output Dockerfile location'''
     # packages in RUN lines, ENV, and ARG values are already expanded
-    parse.expand_from_images(dfobj)
     parse.expand_add_command(dfobj)
     # create the output file
     dfile = ''

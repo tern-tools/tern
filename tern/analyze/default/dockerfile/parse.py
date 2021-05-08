@@ -13,7 +13,6 @@ import logging
 
 from tern.utils import general
 from tern.utils import constants
-from tern.load import docker_api
 from tern.analyze import common
 from tern.analyze.default.command_lib import command_lib
 
@@ -160,33 +159,30 @@ def parse_from_image(dfobj):
     return image_list
 
 
-def expand_from_images(dfobj):
-    '''Replace all parent_image values with their full image@digest_type:digest
-    value. Update the structure dictionary with the same information.
-    dfobj: the Dockerfile object created using get_dockerfile_obj'''
-    # update parent_images
-    images = parse_from_image(dfobj)
-    for i, img in enumerate(images):
-        # don't re-pull digest if already available
-        if not img['digest_type'] and not img['digest']:
-            if not img['tag']:
-                img['tag'] = 'latest'
-            digest = docker_api.get_docker_image_digest(
-                img['name'] + tag_separator + img['tag'])
-            if digest:
-                dfobj.parent_images[i] = digest
-            else:
-                logger.error("Error pinning digest to '%s'. Image not found.",
-                             dfobj.parent_images[i])
-    # update structure
-    counter = 0
-    for i, command_dict in enumerate(dfobj.structure):
+def expand_from_images(dfobj, image_list):
+    '''Update the structure dictionary with the 'import_str'
+    value of images.
+
+    dfobj: the Dockerfile object created using get_dockerfile_obj
+    '''
+    if not dfobj.is_multistage:
+        return
+
+    image_count = 0
+    # keep import_str of first image as a default value
+    import_str = image_list[0].layers[0].import_str
+    for index, command_dict in enumerate(dfobj.structure):
         if command_dict['instruction'] == 'FROM':
-            # Pull digest in order of parent_images
-            dfobj.structure[i]['content'] = command_dict['instruction'] + \
-                ' ' + dfobj.parent_images[counter] + '\n'
-            dfobj.structure[i]['value'] = dfobj.parent_images[counter]
-            counter = counter + 1
+            # if import_str is not set for the image then take a default value
+            if len(image_list[image_count].layers) > 0 and \
+                    image_list[image_count].layers[0].import_str:
+                import_str = image_list[image_count].layers[0].import_str
+            if command_dict['instruction'] in import_str:
+                dfobj.structure[index]['content'] = import_str + '\n'
+            else:
+                dfobj.structure[index]['content'] = command_dict['instruction'] + \
+                    ' ' + import_str + '\n'
+            image_count += 1
 
 
 def should_pin(run_line, package, index):
@@ -309,6 +305,7 @@ def get_from_indices(dfobj):
     for idx, st in enumerate(dfobj.structure):
         if st['instruction'] == 'FROM':
             from_lines.append(idx)
+    from_lines.append(len(dfobj.structure))
     return from_lines
 
 
@@ -321,9 +318,10 @@ def get_dockerfile_stages(dfobj_multi):
     start_line = from_lines.pop(0)
     while len(from_lines) >= 1:
         stage = ""
-        end_line = from_lines.pop(0)
+        end_line = from_lines[0]
         for idx in range(start_line, end_line):
             if dfobj_multi.structure[idx]['instruction'] != 'COMMENT':
                 stage = stage + dfobj_multi.structure[idx]['content']
         stages.append(stage)
+        start_line = from_lines.pop(0)
     return stages
