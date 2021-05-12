@@ -75,12 +75,29 @@ def get_scancode_file(file_dict):
     return fd
 
 
+def filter_pkg_license(declared_license):
+    '''When scancode detects python package licenses, it attaches classifiers
+    to the declared_license field as a dictionary object, otherwise
+    it will represent the license as a string. Given a scancode
+    declared_license field, extract and return a license string'''
+    if isinstance(declared_license, dict):
+        try:
+            return declared_license['license']
+        except KeyError:
+            # parse classifiers for PyPI licenses
+            # According to https://pypi.org/pypi?%3Aaction=list_classifiers
+            # we can always take the value after the last '::'
+            return declared_license['classifiers'][0].split('::')[-1].strip()
+
+    return declared_license
+
+
 def get_scancode_package(package_dict):
     '''Given a package dictionary from the scancode results, return a Package
     object with the results'''
     package = Package(package_dict['name'])
     package.version = package_dict['version']
-    package.pkg_license = package_dict['declared_license']
+    package.pkg_license = filter_pkg_license(package_dict['declared_license'])
     package.copyright = package_dict['copyright']
     package.proj_url = package_dict['repository_homepage_url']
     package.download_url = package_dict['download_url']
