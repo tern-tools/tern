@@ -25,6 +25,7 @@ Tern is a software package inspection tool for containers. It's written in Pytho
   - [Generating an SBoM report from a Dockerfile](#sbom-for-dockerfile)
   - [Generating a locked Dockerfile](#dockerfile-lock)
 - [Report Formats](#report-formats)
+  - [Understanding the Reports](#understanding-the-reports)
   - [Human Readable Format](#report-human-readable)
   - [JSON Format](#report-json)
   - [HTML Format](#report-html)
@@ -207,26 +208,37 @@ If the packages are not pinned in the resulting `Dockerfile.lock` or output file
 # Report Formats<a name="report-formats">
 Tern creates BoM reports suitable to read over or to provide to another tool for consumption.
 
+## Understanding the Reports<a name="understanding-the-reports">
+Tern provides a handful of different reporting styles that may work better for different applications of distribution, interoperability and comprehension. Understanding these reports will vary slightly between formats, but the information in the different report formats will generally be the same with varying degrees of package metadata detail. In all report formats, information about the version of Tern that generated the report and any applicable extension information will be at the top of the report followed by information about the metadata found in the container, organized sequentially by layer. 
+
+The base layer (Layer 1) will provide operating system information on which the container is based, the Dockerfile command that created the layer, the package retrieval method and any packages found in the layer. Note that the operating system information may be different than the container that Tern is generating an SBoM for. For example, the `golang` container's base OS is actually `Debian GNU/Linux 10 (buster)`. For each subsequent layer in the container, information about the Dockerfile command that created the container layer, any warnings about unrecognized Dockerfile commands, the package retrieval method and package information is provided. If Tern doesn't find any package information in a layer, it will report packages found in the layer as "None". File licenses may also be available in the reports if Tern is run using scancode.
+
+More information about specific reporting formats can be found below and in the `tern/classes` directory where the properties being reported on are explained in the .py files -- specifically, `image_layer.py`, `package.py`, and `file_data.py`.
+
 ## Human Readable Format<a name="report-human-readable">
-The default report Tern produces is a human readable report. The object of this report is to give the container developer a deeper understanding of what is installed in a container image during development. This allows a developer to glean basic information about the container such as what the true base operating system is, what the app dependencies are, if the container is using an official or personal repository for sources or binaries, whether the dependencies are at the correct versions, etc.
+The default report Tern produces is a human readable, high-level overview. The object of this report is to give the container developer a deeper understanding of what is installed in a container image during development. This allows a developer to glean basic information about the container such as what the true base operating system is, what the app dependencies are, if the container is using an official or personal repository for sources or binaries, whether the dependencies are at the correct versions, etc. 
+
+While the packages found in each layer and their associated version and license are listed on a per layer basis, there is also a summary of licenses found in the container printed at the bottom of the report which is unique to the default human readable format.
 ```
 $ tern report -i golang:1.12-alpine -o output.txt
 ```
 
 ## JSON Format<a name="report-json">
-You can get the results in a JSON file to pass around in a network.
+You can get the results in a JSON file to pass around in a network. The JSON report contains the most amount of container metadata compared to the default report and because of this, is often a very large file. If you are planning to look for information in this file manually, we recommend using the `jq` utility to better display and understand the information in the report.
+
+In terms of general container information, the JSON report provides detailed "created by" information including docker container config information, layer `created_by` information and layer creation time stamps. It also provides the `diff_id` and tar file information for each layer, including each layer's unique package set and the packages metadata. The JSON report will also provide more detailed package metadata (if found) including the project URL information, files found in each package when run with scancode and package licenses (`pkg_licenses`) for containers based on Debian OSes where license information is parsed from Copyright text instead of declared by the package manager (`pkg_license`).
 ```
 $ tern report -f json -i golang:1.12-alpine
 ```
 
 ## HTML Format<a name="report-html">
-You can get an html rendering of the JSON results. An output file with `.html` suffix should be provided in order to properly view the report in your browser.
+You can get an html rendering of the JSON results. An output file with `.html` suffix should be provided in order to properly view the report in your browser. The HTML report will include all of the same information found in a JSON report. See above for details about the JSON report.
 ```
 $ tern report -f html -i golang:1.12-alpine -o report.html
 ```
 
 ## YAML Format<a name="report-yaml">
-You can get the results in a YAML file to be consumed by a downstream tool or script.
+You can get the results in a YAML file to be consumed by a downstream tool or script. The YAML information will be the same information found in the JSON report. See above for details about the JSON report.
 ```
 $ tern report -f yaml -i golang:1.12-alpine -o output.yaml
 ```
