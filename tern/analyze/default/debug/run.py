@@ -19,6 +19,7 @@ from tern.utils import rootfs
 from tern.utils import constants
 from tern.analyze.default.command_lib import command_lib
 from tern.analyze.default import collect
+from tern.analyze.default import core
 from tern.analyze.default.container import run
 from tern.analyze.default.container import image as cimage
 from tern.analyze.default.container import single_layer
@@ -60,6 +61,9 @@ def look_up_lib(keys):
 def invoke_script(args):
     """Assuming we have a mounted filesystem, invoke the script in the
     command library"""
+    # make a Prereqs object
+    prereqs = core.Prereqs()
+    prereqs.shell = args.shell
     # if we're looking up the snippets library
     # we should see 'snippets' in the keys
     if 'snippets' in args.keys and 'packages' in args.keys:
@@ -72,7 +76,7 @@ def invoke_script(args):
     else:
         info_dict = look_up_lib(args.keys)
     result = collect.get_pkg_attrs(
-        info_dict, args.shell, package_name=args.package)
+        info_dict, prereqs, package_name=args.package)
     print()
     print("*************************************************************")
     print("          Command Library Script Verification mode           ")
