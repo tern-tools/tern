@@ -6,7 +6,7 @@
 
 # Welcome to the Tern Project
 
-Tern is a software package inspection tool for containers. It's written in Python3 with a smattering of shell scripts.
+Tern is a software package inspection tool that can create a Software Bill of Materials (SBoM) for containers. It's written in Python3 with a smattering of shell scripts.
 
 # Table of Contents
 - [Introduction](#what-is-tern)
@@ -178,7 +178,7 @@ $ tern report -i debian:buster -o output.txt
 
 *WARNING*: The CLI has changed since the last release. Visit [Tern's PyPI project page](https://pypi.org/project/tern/) to find the correct CLI options or just run `tern -h`.
 
-Tern creates a report containing the Bill of Materials (BoM) of a container image, including notes about how it collects this information, and files for which it has no information about. Currently, Tern supports containers only built using Docker using image manifest version 2, schema 2. Docker image manifest version 2, schema 1 has been [deprecated](https://docs.docker.com/registry/spec/deprecated-schema-v1/) by Docker. Tern will support container images created using Docker version 19.03.0 or later. Docker is the most ubiquitous type of container image that exists so the project started with a focus on those. However, it is architected to support other images that closely follow the [OCI image spec](https://github.com/opencontainers/image-spec/blob/master/spec.md).
+Tern creates a report containing the Software Bill of Materials (SBoM) of a container image, including notes about how it collects this information, and files for which it has no information about. Currently, Tern supports containers only built using Docker using image manifest version 2, schema 2. Docker image manifest version 2, schema 1 has been [deprecated](https://docs.docker.com/registry/spec/deprecated-schema-v1/) by Docker. Tern will support container images created using Docker version 19.03.0 or later. Docker is the most ubiquitous type of container image that exists so the project started with a focus on those. However, it is architected to support other images that closely follow the [OCI image spec](https://github.com/opencontainers/image-spec/blob/master/spec.md).
 
 ## Generating an SBoM report for a Docker image<a name="sbom-for-docker-image">
 If you have a Docker image pulled locally and want to inspect it
@@ -244,7 +244,9 @@ $ tern report -f yaml -i golang:1.12-alpine -o output.yaml
 ```
 
 ## SPDX tag-value Format<a name="report-spdxtagvalue">
-[SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. Many compliance tools are compatible with SPDX. Tern follows the [SPDX specifications](https://spdx.org/specifications). The tag-value format is most compatible with the toolkit the organization provides. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](./docs/spdx-tag-value-overview) and about how Tern maps its properties to the keys mandated by the spec [here](./docs/spdx-tag-value-mapping.md).
+[SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. The National Telecommunications and Information Administration (NTIA) [recognizes SPDX](https://www.ntia.gov/files/ntia/publications/sbom_options_and_decision_points_20210427-1.pdf) as one of three valid SBoM formats that satisfies the minimum viable requirements for an SBoM in accordance with President Biden's [Executive Order on Improving the Nation's Cybersecurity](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/).
+
+Many compliance tools are compatible with SPDX. Tern follows the [SPDX specifications](https://spdx.org/specifications). The tag-value format is most compatible with the toolkit the organization provides. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](./docs/spdx-tag-value-overview) and about how Tern maps its properties to the keys mandated by the spec [here](./docs/spdx-tag-value-mapping.md).
 ```
 $ tern report -f spdxtagvalue -i golang:1.12-alpine -o spdx.txt
 ```
