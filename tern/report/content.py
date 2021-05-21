@@ -26,9 +26,9 @@ def get_layer_files_licenses(layer):
     '''Given a image layer collect complete list of file licenses'''
     file_level_licenses = set()
     for f in layer.files:
-        for license_expression in f.license_expressions:
-            if license_expression:
-                file_level_licenses.add(license_expression)
+        for lic in f.licenses:
+            if lic:
+                file_level_licenses.add(lic)
     return list(file_level_licenses)
 
 
