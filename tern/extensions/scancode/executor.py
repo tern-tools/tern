@@ -160,7 +160,10 @@ def add_file_data(layer_obj, collected_files):
         checkfile = collected_files.pop()
         for f in layer_obj.files:
             if f.merge(checkfile):
+                # file already exists and has now been updated
                 break
+        # file didn't previously exist in layer so add it now
+        layer_obj.files.append(checkfile)
 
 
 def add_package_data(layer_obj, collected_packages):

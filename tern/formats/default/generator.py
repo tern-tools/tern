@@ -106,7 +106,7 @@ def get_layer_info_list(layer):
     package_list.print_empty = False
 
     for f in layer.files:
-        layer_file_licenses_list.extend(f.license_expressions)
+        layer_file_licenses_list.extend(f.licenses)
 
     layer_file_licenses_list = list(set(layer_file_licenses_list))
     if layer_file_licenses_list:
