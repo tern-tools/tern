@@ -311,7 +311,7 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Release 2.6.0 is out! See the [release notes](docs/releases/v2_6_0.md) for more information.
+Release 2.6.1 is out! See the [release notes](docs/releases/v2_6_1.md) for more information.
 
 We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 2.7.0.
 
