@@ -4,12 +4,10 @@
 We are getting very close to a beta release. Our beta release is targeted for the summer timeframe.
 
 Our goal is to meet these requirements by the end of the year.
-- We are working towards enabling "live" analysis for a container. The idea is that if Tern could generate an SBoM at build time, the SBoM would then be available to package and distribute with the container image without the need for post scanning.
-- We are very close to enabling inventory for a single container layer which will be available in the next 2.5.0 release.
 - We will continue investigating how we can run Tern without root privileges.
-- We want to enable Tern to pull image digests and images using registry HTTP(s) APIs so that we can pull images from registries other than Dockerhub.
-- Create a database backend with an associated API. We are hoping to have a GSoC intern help us tackle this issue.
-- Enable inventory of a Distroless image using some sort of custom script.
+- We want to transition away from using the Docker Python library to pull container images from Dockerhub. For motivation and context, see the Kubernetes [announcement](https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/) and past [discussion](https://github.com/tern-tools/meetings/blob/main/minutes/04-13-2021.md) on the topic from Tern's community meeting. 
+- Create a database backend with an associated API.
+- Improve coverage of Tern's CI/CD pipeline. 
 
 
 We will also continue to work on the following:

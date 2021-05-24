@@ -311,12 +311,13 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Release 2.5.0 is out! See the [release notes](docs/releases/v2_5_0.md) for more information.
+Release 2.6.0 is out! See the [release notes](docs/releases/v2_6_0.md) for more information.
 
-We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 3.0.0.
+We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 2.7.0.
 
 ## Previous Releases
-Be advised: version 2.4.0 and below contain a high-severity security vulnerability (CVE-2021-28363). Please update to version 2.5.0
+Be advised: version 2.4.0 and below contain a high-severity security vulnerability (CVE-2021-28363). Please update to version 2.5.0 or later.
+* [v2.5.0](docs/releases/v2_5_0.md)
 * [v2.4.0](docs/releases/v2_4_0.md)
 * [v2.3.0](docs/releases/v2_3_0.md)
 * [v2.2.0](docs/releases/v2_2_0.md)
