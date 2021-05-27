@@ -10,8 +10,8 @@ from abc import abstractmethod
 class Consume(metaclass=ABCMeta):
     """Base class for report consuming plugins"""
     @abstractmethod
-    def consume(self, reports):
-        """Ingest the contents of the list of files into an Image object or
-        ImageLayer object according to the plugin type. Each plugin is
+    def consume_layer(self, reports):
+        """Ingest the contents of the list of files into a list of ImageLayer
+        objects according to the plugin type. Each plugin is
         responsible for implementing the reading and and assimilation of the
         report metadata"""

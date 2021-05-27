@@ -70,5 +70,5 @@ class JSON(consumer.Consume):
             layer = create_image_layer(report)
             layer.layer_index = layer_count
             layer_list.append(layer)
-            layer += 1
+            layer_count += 1
         return layer_list

@@ -12,6 +12,8 @@ package information.
 """
 import logging
 import os
+from stevedore import driver
+from stevedore.exception import NoMatches
 
 from tern.utils import constants
 from tern.utils import rootfs
@@ -86,6 +88,27 @@ def fill_packages(layer, prereqs):
         com.remove_duplicate_layer_files(layer)
 
 
+def get_context_layers(reports, format_string):
+    """Given a list of reports and the format string, get corresponding layer
+    objects for each of the reports. We will load the required module and
+    run the consume_layer function to return the list of layers"""
+    # we want to maintain consistency between the input report formats and
+    # the output formats by redirecting the command line argument to the
+    # correct consumer entrypoint. Hence we maintain a known pattern for
+    # entrypoint strings which is simply that the corresponding consumer for
+    # a given generator is the generator's entrypoint string + 'c'
+    consumer_format_string = format_string + 'c'
+    try:
+        mgr = driver.DriverManager(
+            namespace='tern.formats',
+            name=consumer_format_string,
+            invoke_on_load=True,
+        )
+        return mgr.driver.consume_layer(reports)
+    except NoMatches:
+        pass
+
+
 def execute_live(args):
     """Execute inventory at container build time
     We assume a mounted working directory is ready to inventory"""
@@ -105,5 +128,15 @@ def execute_live(args):
     prereqs.host_shell = host.check_shell()
     # collect metadata into the layer object
     fill_packages(layer, prereqs)
+    # resolve unique packages for this run with reports from previous runs
+    if args.with_context:
+        # get a list of previous layers based on plugin type
+        context_layers = get_context_layers(
+            args.with_context, args.report_format)
+        # resolve the packages for each of the layers
+        context_layers.append(layer)
+        master_list = []
+        for l in context_layers:
+            dcom.update_master_list(master_list, l)
     # report out the packages
     report.report_layer(layer, args)
