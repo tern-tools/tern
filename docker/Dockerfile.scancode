@@ -14,8 +14,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-warn-script-location --prefix=/install \
-    tern \
-    scancode-toolkit[full]
+    tern
+
+COPY docker/requirements.scancode.txt /install/requirements.scancode.txt
+RUN pip install -r /install/requirements.scancode.txt
 
 FROM base
 
