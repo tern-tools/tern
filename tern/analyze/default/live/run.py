@@ -12,6 +12,8 @@ package information.
 """
 import logging
 import os
+from stevedore import driver
+from stevedore.exception import NoMatches
 
 from tern.utils import constants
 from tern.utils import rootfs
@@ -86,6 +88,46 @@ def fill_packages(layer, prereqs):
         com.remove_duplicate_layer_files(layer)
 
 
+def get_context_layers(reports, format_string):
+    """Given a list of reports and the format string, get corresponding layer
+    objects for each of the reports. We will load the required module and
+    run the consume_layer function to return the list of layers"""
+    # we want to maintain consistency between the input report formats and
+    # the output formats by redirecting the command line argument to the
+    # correct consumer entrypoint. Hence we maintain a known pattern for
+    # entrypoint strings which is simply that the corresponding consumer for
+    # a given generator is the generator's entrypoint string + 'c'
+    consumer_format_string = format_string + 'c'
+    try:
+        mgr = driver.DriverManager(
+            namespace='tern.formats',
+            name=consumer_format_string,
+            invoke_on_load=True,
+        )
+        return mgr.driver.consume_layer(reports)
+    except NoMatches:
+        pass
+
+
+def resolve_context_packages(layers):
+    """We loop through the packages in the layers and remove any packages
+    in the final layer that are already present in the previous layer"""
+    seen = {}
+    for layer in layers:
+        keep_pkgs = []
+        while layer.packages:
+            pkg = layer.packages.pop(0)
+            # we will make a string with the package name, version, and
+            # checksum as a unique identifier
+            pkg_str = pkg.name + pkg.version + pkg.checksum
+            if pkg_str not in seen:
+                # record the package string
+                seen[pkg_str] = True
+                keep_pkgs.append(pkg)
+        for pkg in keep_pkgs:
+            layer.add_package(pkg)
+
+
 def execute_live(args):
     """Execute inventory at container build time
     We assume a mounted working directory is ready to inventory"""
@@ -105,5 +147,15 @@ def execute_live(args):
     prereqs.host_shell = host.check_shell()
     # collect metadata into the layer object
     fill_packages(layer, prereqs)
+    # resolve unique packages for this run with reports from previous runs
+    if args.with_context:
+        # get a list of previous layers based on plugin type
+        context_layers = get_context_layers(
+            args.with_context, args.report_format)
+        # resolve the packages for each of the layers
+        context_layers.append(layer)
+        resolve_context_packages(context_layers)
     # report out the packages
-    report.report_layer(layer, args)
+    final_layer = context_layers.pop()
+    logger.debug("Preparing report")
+    report.report_layer(final_layer, args)
