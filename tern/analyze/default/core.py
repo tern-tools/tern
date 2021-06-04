@@ -106,7 +106,7 @@ def execute_snippets(layer_obj, command_obj, prereqs):
         pkg_invoke = command_lib.check_for_unique_package(
             prereqs.listing, pkg_name)
         deps, deps_msg = com.get_package_dependencies(
-            pkg_invoke, pkg_name, prereqs.shell)
+            pkg_invoke, pkg_name, prereqs.fs_shell)
         if deps_msg:
             logger.warning(deps_msg)
             layer_obj.origins.add_notice_to_origins(
@@ -117,6 +117,6 @@ def execute_snippets(layer_obj, command_obj, prereqs):
     # get package metadata for each package name
     for pkg_name in unique_pkgs:
         pkg = Package(pkg_name)
-        dcom.fill_package_metadata(pkg, pkg_invoke, prereqs.shell,
+        dcom.fill_package_metadata(pkg, pkg_invoke, prereqs.fs_shell,
                                    layer_obj.get_layer_workdir(), prereqs.envs)
         layer_obj.add_package(pkg)
