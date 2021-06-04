@@ -52,7 +52,7 @@ def fresh_analysis(image_obj, curr_layer, prereqs, options):
             created_by=image_obj.layers[curr_layer].created_by), 'info'))
     # if there is no shell, try to see if it exists in the current layer
     if not prereqs.fs_shell:
-        prereqs.shell = dcom.get_shell(image_obj.layers[curr_layer])
+        prereqs.fs_shell = dcom.get_shell(image_obj.layers[curr_layer])
     # mount diff layers from 0 till the current layer
     target = mount_overlay_fs(image_obj, curr_layer, options.driver)
     # set this layer's host path

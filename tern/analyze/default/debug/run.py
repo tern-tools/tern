@@ -63,7 +63,7 @@ def invoke_script(args):
     command library"""
     # make a Prereqs object
     prereqs = core.Prereqs()
-    prereqs.shell = args.shell
+    prereqs.fs_shell = args.shell
     # if we're looking up the snippets library
     # we should see 'snippets' in the keys
     if 'snippets' in args.keys and 'packages' in args.keys:
