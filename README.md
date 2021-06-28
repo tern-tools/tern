@@ -49,7 +49,7 @@ Tern is an inspection tool to find the metadata of the packages installed in a c
 1. It uses overlayfs to mount the first filesystem layer (also known as the BaseOS) used to build the container image
 2. It then executes scripts from the "command library" in a chroot environment to collect information about packages installed in that layer
 3. With that information as a starting point, it continues to iterate over steps 1 and 2 for the rest of the layers in the container image
-4. Once done, it generates a report, various format options are available. The report, in its default format, provides a verbose, layer by layer, explanation of the various software components imported. If a Dockerfile is provided, the report indicates the Dockerfile lines corresponding to each of the file system layers.
+4. Once done, it generates a report, various format options are available. The report, in its default format, provides a verbose, layer-by-layer, explanation of the various software components imported. If a Dockerfile is provided, the report indicates the Dockerfile lines corresponding to each of the file system layers.
 
 Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies. It's also a good tool if you are curious about the contents of the container images you have built.
 
