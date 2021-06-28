@@ -101,7 +101,7 @@ def get_layer_info_list(layer):
     layer_file_licenses_list = []
     file_level_licenses = None
     package_list = PrettyTable()
-    package_list.field_names = ["Package", "Version", "License"]
+    package_list.field_names = ["Package", "Version", "License", "Pkg Format"]
     package_list.align = "l"
     package_list.print_empty = False
 
@@ -114,7 +114,7 @@ def get_layer_info_list(layer):
 
     for package in layer.packages:
         package_list.add_row([package.name, package.version,
-                              package.pkg_license])
+                              package.pkg_license, package.pkg_format])
 
     return file_level_licenses, package_list.get_string()
 

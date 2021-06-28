@@ -78,7 +78,7 @@ def execute_base(layer_obj, prereqs):
         if warnings:
             logger.warning("Some metadata may be missing")
         # bundle the results into Package objects
-        bundle.fill_pkg_results(layer_obj, pkg_dict)
+        bundle.fill_pkg_results(layer_obj, pkg_dict, listing.get("pkg_format"))
         # remove extra FileData objects from the layer
         com.remove_duplicate_layer_files(layer_obj)
     # if there is no listing add a notice

@@ -160,7 +160,8 @@ class TestClassPackage(unittest.TestCase):
                   'checksum': 'abcxyz',
                   'pkg_licenses': ['MIT', 'GPL'],
                   'files': [{'name': 'a.txt', 'path': '/usr/a.txt'},
-                            {'name': 'b.txt', 'path': '/lib/b.txt'}]}
+                            {'name': 'b.txt', 'path': '/lib/b.txt'}],
+                  'pkg_format': 'rpm'}
         p = Package('p1')
         p.fill(p_dict)
         self.assertEqual(p.name, 'p1')
