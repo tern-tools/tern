@@ -42,6 +42,7 @@ class Package:
         self.__origins = Origins()
         self.__files = []
         self.__pkg_licenses = []
+        self.__pkg_format = ''
 
     @property
     def name(self):
@@ -114,6 +115,14 @@ class Package:
     @checksum.setter
     def checksum(self, checksum):
         self.__checksum = checksum
+
+    @property
+    def pkg_format(self):
+        return self.__pkg_format
+
+    @pkg_format.setter
+    def pkg_format(self, pkg_format):
+        self.__pkg_format = pkg_format
 
     def get_file_paths(self):
         """Return a list of paths of all the files in a package"""

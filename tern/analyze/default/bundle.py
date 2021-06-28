@@ -67,7 +67,7 @@ def convert_to_pkg_dicts(attr_lists):
     return pkg_list
 
 
-def fill_pkg_results(image_layer, pkg_list_dict):
+def fill_pkg_results(image_layer, pkg_list_dict, pkg_format):
     """Fill results from collecting package information into the image layer
     object"""
     if 'names' in pkg_list_dict and len(pkg_list_dict['names']) > 1:
@@ -75,4 +75,5 @@ def fill_pkg_results(image_layer, pkg_list_dict):
         for pkg_dict in pkg_list:
             pkg = Package(pkg_dict['name'])
             pkg.fill(pkg_dict)
+            pkg.pkg_format = pkg_format
             image_layer.add_package(pkg)
