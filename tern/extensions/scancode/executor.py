@@ -78,8 +78,9 @@ def get_scancode_file(file_dict):
 def filter_pkg_license(declared_license):
     '''When scancode detects python package licenses, it attaches classifiers
     to the declared_license field as a dictionary object, otherwise
-    it will represent the license as a string. Given a scancode
-    declared_license field, extract and return a license string'''
+    it will represent the license as a string or list of strings.
+    Given a scancode declared_license field, extract and return a
+    license string'''
     if isinstance(declared_license, dict):
         try:
             return declared_license['license']
@@ -88,7 +89,15 @@ def filter_pkg_license(declared_license):
             # According to https://pypi.org/pypi?%3Aaction=list_classifiers
             # we can always take the value after the last '::'
             return declared_license['classifiers'][0].split('::')[-1].strip()
-
+    if isinstance(declared_license, list):
+        for i, lic in enumerate(declared_license):
+            # Some license lists from Scancode have dictionary entries
+            # Extract license 'types' from license dictionaries
+            if isinstance(lic, dict):
+                declared_license[i] = lic["type"]
+        # Get rid of duplicate licenses
+        dec_lic = set(declared_license)
+        return ', '.join(list(dec_lic))
     return declared_license
 
 
