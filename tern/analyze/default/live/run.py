@@ -155,7 +155,9 @@ def execute_live(args):
         # resolve the packages for each of the layers
         context_layers.append(layer)
         resolve_context_packages(context_layers)
+        final_layer = context_layers.pop()
+    else:
+        final_layer = layer
     # report out the packages
-    final_layer = context_layers.pop()
     logger.debug("Preparing report")
     report.report_layer(final_layer, args)
