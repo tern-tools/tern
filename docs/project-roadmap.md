@@ -1,13 +1,13 @@
 # Project Road Map
 
 ## 2021
-We are getting very close to a beta release. Our beta release is targeted for the summer timeframe.
+We are getting very close to a beta release. Our beta release is targeted for the second half of the year.
 
 Our goal is to meet these requirements by the end of the year.
 - We will continue investigating how we can run Tern without root privileges.
 - We want to transition away from using the Docker Python library to pull container images from Dockerhub. For motivation and context, see the Kubernetes [announcement](https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/) and past [discussion](https://github.com/tern-tools/meetings/blob/main/minutes/04-13-2021.md) on the topic from Tern's community meeting. 
 - Create a database backend with an associated API.
-- Improve coverage of Tern's CI/CD pipeline. 
+- Automate aspects of Tern's release process. 
 
 
 We will also continue to work on the following:
