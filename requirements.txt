@@ -16,3 +16,4 @@ debian-inspector>=21.5
 regex>=2021.7
 GitPython~=3.1
 prettytable~=2.1
+packageurl-python>=0.9.4
