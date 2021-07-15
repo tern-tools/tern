@@ -244,7 +244,7 @@ rpm:
     delimiter: "\n"
 # pip ----------------------------------------------------------------------
 pip:
-  pkg_format: ''
+  pkg_format: 'pip'
   os_guess:
     - 'None'
   path:
@@ -287,7 +287,7 @@ pip:
     delimiter: "\n"
 # pip3 ----------------------------------------------------------------------
 pip3:
-  pkg_format: ''
+  pkg_format: 'pip'
   os_guess:
     - 'None'
   path:
@@ -329,7 +329,7 @@ pip3:
           - "for p in $pkgs; do pip3 show $p 2> /dev/null | head -7 | tail -1 | cut -f2 -d' '; done" 
     delimiter: "\n"
 gem:
-  pkg_format: ''
+  pkg_format: 'gem'
   os_guess:
     - 'None'
   path:
@@ -375,7 +375,7 @@ gem:
     delimiter: "\n"
 # npm----------------------------------------------------------------------
 npm:
-  pkg_format: ''
+  pkg_format: 'npm'
   os_guess:
     - 'None'
   path:
@@ -434,7 +434,7 @@ npm:
     delimiter: "LICF"
 # golang----------------------------------------------------------------------
 go:
-  pkg_format: ''
+  pkg_format: 'go.mod'
   os_guess:
     - 'None'
   path:
