@@ -22,6 +22,7 @@ class TestClassPackage(unittest.TestCase):
         self.p1.download_url = 'https://github.com'
         self.p1.checksum = '123abc456'
         self.p1.pkg_licenses = ['MIT', 'GPL']
+        self.p1.pkg_format = 'deb'
 
         self.p2 = Package('p2')
 
@@ -53,6 +54,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p2.download_url, 'https://github.com')
         self.p2.checksum = '123abc456'
         self.assertEqual(self.p2.checksum, '123abc456')
+        self.p2.pkg_format ='deb'
         self.p2.pkg_licenses = ['license1', 'license2']
         self.assertEqual(self.p2.pkg_licenses, ['license1', 'license2'])
         self.p2.files = [FileData('a', '/usr/abc/a'),
@@ -71,6 +73,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p1.download_url, 'https://github.com')
         self.assertEqual(self.p1.checksum, '123abc456')
         self.assertEqual(self.p1.pkg_licenses, ['MIT', 'GPL'])
+        self.assertEqual(self.p1.pkg_format, 'deb')
 
     def testAddFile(self):
         p1 = Package('package')
@@ -120,6 +123,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(a_dict['files'][0]['name'], 'test.java')
         self.assertEqual(a_dict['files'][0]['path'], 'abc/pqr/test.java')
         self.assertEqual(a_dict['pkg_licenses'], ['MIT', 'GPL'])
+        self.assertEqual(a_dict['pkg_format'], 'deb')
 
     def testToDictTemplate(self):
         template1 = TestTemplate1()
@@ -143,10 +147,12 @@ class TestClassPackage(unittest.TestCase):
         p = Package('p2')
         p.pkg_license = 'Testpkg_license'
         p.version = '1.0'
+        p.pkg_format = 'rpm'
         p.proj_url = 'TestUrl'
         p.checksum = 'abcdef'
         self.p2.pkg_license = 'Testpkg_license'
         self.p2.version = '2.0'
+        self.p2.pkg_format = 'rpm'
         self.p2.proj_url = 'TestUrl'
         self.p2.checksum = 'abcdef'
         self.assertFalse(self.p2.is_equal(p))
