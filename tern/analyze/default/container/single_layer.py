@@ -42,13 +42,18 @@ def find_os_release(host_path):
     # file exists at this point, try to read it
     with open(etc_path, 'r') as f:
         lines = f.readlines()
-    pretty_name = ''
-    # iterate through os-release file to find OS
+    # Create dictionary from os-release values
+    os_release_dict = {}
     for line in lines:
         key, val = line.rstrip().split('=', 1)
-        if key == "PRETTY_NAME":
-            pretty_name = val
-            break
+        os_release_dict[key] = val.strip('"')
+    pretty_name = ''
+    if "PRETTY_NAME" in os_release_dict.keys():
+        if os_release_dict["PRETTY_NAME"] == "Distroless":
+            pretty_name = "{0} - {1}".format(os_release_dict["PRETTY_NAME"],
+                                             os_release_dict['VERSION'])
+        else:
+            pretty_name = os_release_dict["PRETTY_NAME"]
     return pretty_name.strip('"')
 
 
