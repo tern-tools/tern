@@ -88,33 +88,6 @@ def execute_and_pass(layer_obj, command, is_sudo=False):
         'utf-8') + '\n\n' + result.decode('utf-8')
 
 
-def run_on_image(image_obj, command, is_sudo=False, redo=False):
-    '''Given an Image object, for each layer, run the given command on the
-    layer filesystem.
-    The layer tarballs should already be extracted (taken care of when
-    the Image object is created). The command should already be a completely
-    formed string without the target directory.'''
-
-    # check if the command is empty
-    if not command:
-        logger.error("No command to execute. No report will be generated")
-        return False
-    # execute for each layer object
-    for layer in image_obj.layers:
-        # run the command at each layer if we are redoing or if there
-        # is nothing in the analyzed output
-        if redo or not layer.files_analyzed:
-            # set that we're analyzing at the file level
-            layer.files_analyzed = True
-            # get the actual command
-            full_cmd = get_filesystem_command(layer, command)
-            if not execute_external_command(layer, full_cmd, is_sudo):
-                logger.error(
-                    "Error in executing given external command: %s", command)
-                return False
-    return True
-
-
 def run_extension(image_obj, ext_string, redo=False):
     '''Depending on what tool the user has chosen to extend with, load that
     extension and run it'''
