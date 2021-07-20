@@ -219,6 +219,15 @@ The commit message of your PR should be able to communicate what problem/opportu
 - Wrap the body at 72 characters
 - Use the body to explain what and why vs. how
 
+The commit message should be done with git and for that run the following command in your terminal:
+
+```sh
+$ git commit
+```
+
+Once this command is executed, you will be able to add the commit message (follow the guidelines given below for this). 
+When you are done, save the message and push the changes.
+
 In addition to this, we would like you to sign off on your commit. You can configure git to automatically do this for you when you run 'git commit -s'.
 
 ```sh
@@ -267,6 +276,15 @@ See also: #456, #789
 
 Signed-off-by: Some Dev <somedev@example.com>
 ```
+
+To make any changes to your existing git commit message, make sure you are on your development branch and run the following command in your terminal:
+
+```sh
+$ git commit --amend
+```
+
+Once you are done editing your commit message, save it like you did previously.
+
 
 ## Learn about Tern
 
