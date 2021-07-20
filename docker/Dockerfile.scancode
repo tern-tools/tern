@@ -14,12 +14,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-warn-script-location --prefix=/install \
-    tern
-
-RUN pip install --no-warn-script-location --prefix=/install \
     tern \
     scancode-toolkit[full]
-
 
 FROM base
 
