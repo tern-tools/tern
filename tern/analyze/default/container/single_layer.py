@@ -45,8 +45,10 @@ def find_os_release(host_path):
     # Create dictionary from os-release values
     os_release_dict = {}
     for line in lines:
-        key, val = line.rstrip().split('=', 1)
-        os_release_dict[key] = val.strip('"')
+        line = line.strip()
+        if line:
+            key, val = line.split('=', 1)
+            os_release_dict[key] = val.strip('"')
     pretty_name = ''
     if "PRETTY_NAME" in os_release_dict.keys():
         if os_release_dict["PRETTY_NAME"] == "Distroless":
