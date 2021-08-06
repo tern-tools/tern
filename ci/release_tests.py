@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-                                                         
-# SPDX-License-Identifier: BSD-2-Clause
+import subprocess
 
 tests = [
     'tern report -i photon:3.0',
@@ -44,4 +43,6 @@ tests = [
     'python tests/test_class_command.py',
     'python tests/test_class_docker_image.py'
 ]
-            
+
+for t in tests:
+    subprocess.check_output(t, shell=True)         
