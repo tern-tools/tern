@@ -1,3 +1,5 @@
+import subprocess
+
 # -*- coding: utf-8 -*-                                                         
 # SPDX-License-Identifier: BSD-2-Clause
 
@@ -44,4 +46,6 @@ tests = [
     'python tests/test_class_command.py',
     'python tests/test_class_docker_image.py'
 ]
-            
+
+for t in tests:
+    subprocess.check_output(t, shell=True)         
