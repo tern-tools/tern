@@ -9,6 +9,7 @@ default report generator
 
 import logging
 
+from textwrap import wrap
 from tern.report import formats
 from tern.formats import generator
 from tern.report import content
@@ -101,7 +102,8 @@ def get_layer_info_list(layer):
     layer_file_licenses_list = []
     file_level_licenses = None
     package_list = PrettyTable()
-    package_list.field_names = ["Package", "Version", "License", "Pkg Format"]
+    package_list.field_names = ["Package", "Version", "License(s)",
+                                "Pkg Format"]
     package_list.align = "l"
     package_list.print_empty = False
 
@@ -113,8 +115,17 @@ def get_layer_info_list(layer):
         file_level_licenses = ", ".join(layer_file_licenses_list)
 
     for package in layer.packages:
+        pkg_licenses = [package.pkg_license]
+        if package.pkg_format == 'deb':
+            # If many pkg_licenses, wrap the line for the table at 45 chars
+            pkg_licenses = wrap(", ".join(package.pkg_licenses),
+                                width=45) or ['']
         package_list.add_row([package.name, package.version,
-                              package.pkg_license, package.pkg_format])
+                              pkg_licenses[0], package.pkg_format])
+
+        # Each wrapped line must be added as a new row under the same package
+        for pkg_license in pkg_licenses[1:]:
+            package_list.add_row(['', '', pkg_license, ''])
 
     return file_level_licenses, package_list.get_string()
 
