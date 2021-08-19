@@ -1,0 +1,62 @@
+name: Prepare Release
+    
+on:
+    workflow_dispatch:
+      inputs:
+        last_release:
+            description: "The release number of the most recent release"
+            required: true
+            default: "2.7.0"
+
+jobs:
+    prepare_release:
+        
+        runs-on: ubuntu-latest
+        
+        steps:
+        
+        - name: Setup Enviroment
+          run: |
+              sudo apt-get install attr
+              sudo apt-get install jq
+              python3 -m venv ternenv
+              cd ternenv
+              source bin/activate
+              
+        - uses: actions/checkout@v2
+        
+        - name: Install PyPi Packages
+          run: pip install pydriller pip-tools
+          
+        - name: Install Tern
+          run: pip install .
+          
+        - name: Run Tests
+          run: python ci/release_tests.py
+
+        - name: Create upgrade.txt
+          run: pip-compile --upgrade --output-file upgrade.txt
+          
+        - name: Generate Release Summary
+          env:
+            last_release: ${{ github.event.inputs.last_release }} 
+          run: python ci/prepare_release.py $last_release
+        
+        - name: Generate Release Requirements
+          run: pip-compile --generate-hashes --output-file=- > new-requirements.txt
+            
+        - name: Remove Temp Files
+          run: | 
+            rm upgrade.txt
+            rm dist/tern-0.0.0.tar.gz
+            rm AUTHORS
+            rm ChangeLog
+            rm Dockerfile.lock
+          
+        - name: Create Pull Request
+          uses: peter-evans/create-pull-request@v3
+          with:
+            branch: new-release
+            delete-branch: true
+            title: New release
+            commit-message: Automatically generated pull request for an upcoming release

@@ -1,0 +1,61 @@
+name: Upload Release
+
+on:
+    workflow_dispatch:
+      inputs:
+        release:
+            description: "The release number in the format <major.minor.patch>"
+            required: true
+            default: "2.8.0"
+
+jobs:
+    upload_release:
+  
+        runs-on: ubuntu-latest
+
+        steps:
+        - uses: actions/checkout@v2
+        
+        - name: Install PyPi Packages
+          run: pip install wheel pip-tools twine
+          
+        - name: Install Tern
+          run: pip install .
+          
+        - name: Determine File Path
+          run: echo "releaseDocument=$(echo "${{ github.workspace }}/docs/releases/v$(echo ${{ github.event.inputs.release }} | sed -e 's:\.:_:g').md")" >> $GITHUB_ENV
+        
+        - name: Move Release Documents
+          env:
+            next_release: ${{ github.event.inputs.release }}
+          run:  |
+            next_release=$(echo "$next_release" |tr . _)
+            requirements_path=$(echo "docs/releases/v"$next_release"-requirements.txt")
+            mv next-release.md ${{ env.releaseDocument }}
+            mv new-requirements.txt $requirements_path
+        
+        - name: Create Pull Request
+          uses: peter-evans/create-pull-request@v3
+          with:
+            branch: new-release
+            delete-branch: true
+            title: Release ${{ github.event.inputs.release }}
+            commit-message: Automatically generated pull request for release ${{ github.event.inputs.release }}
+        
+        - name: Create Github Release
+          uses: softprops/action-gh-release@v1
+          with:
+            name: Release ${{ github.event.inputs.release }}
+            tag_name: v${{ github.event.inputs.release }}
+            body_path: ${{ env.releaseDocument }}
+            prerelease: false
+            draft: false
+            
+        - name: Upload to PyPi
+          run: |
+            git fetch --tags
+            git checkout -b release v${{ github.event.inputs.release }}
+            pip-compile
+            python setup.py sdist bdist_wheel
+            twine check dist/*
+
