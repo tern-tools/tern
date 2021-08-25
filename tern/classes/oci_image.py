@@ -110,7 +110,7 @@ class OCIImage(Image):
                     self._layers[index].created_by = ''
                 index = index + 1
 
-    def load_image(self):
+    def load_image(self, load_until_layer=0):
         try:
             self._manifest = self.get_image_manifest()
             self._image_id = self.get_image_id(self._manifest)
@@ -132,4 +132,3 @@ class OCIImage(Image):
             raise
         except IOError:  # pylint: disable=try-except-raise
             raise
-{"mode":"full","isActive":false}

@@ -10,7 +10,7 @@ Analyze the container image in default mode
 import docker
 import logging
 import subprocess  # nosec
-
+from tern.utils import general, rootfs
 from tern.classes.notice import Notice
 from tern.classes.docker_image import DockerImage
 from tern.utils import constants
@@ -24,15 +24,26 @@ logger = logging.getLogger(constants.logger_name)
 
 
 def download_container_image(image_tag_string):
-    '''Download the docker image and convert it into
-    oci format'''
-    pass
+    '''Download the docker image and convert it into oci format'''
+    try:
+        # extract the docker image
+        docker_image = image_tag_string
+        if 'docker://' in image_tag_string:
+            docker_image = image_tag_string.split('docker://')[1]
+        image_attr = general.parse_image_string(docker_image)
+        oci_image = 'oci://{0}/{1}'.format(rootfs.working_dir, image_attr.get('name'))
+        docker_image = 'docker://{0}'.format(docker_image)
+        process = subprocess.Popen(['skopeo', 'copy', docker_image, oci_image])
+        process.wait()
+        return oci_image
+    except Exception:
+        logger.critical("Cannot extract Docker image")
+        raise
 
 
 def load_full_image(image_tag_string, load_until_layer=0):
     '''Create image object from image name and tag and return the object.
     Loads only as many layers as needed.'''
-    download_container_image(image_tag_string)
     test_image = DockerImage(image_tag_string)
     failure_origin = formats.image_load_failure.format(
         testimage=test_image.repotag)
