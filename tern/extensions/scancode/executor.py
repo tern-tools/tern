@@ -194,7 +194,7 @@ class Scancode(Executor):
         '''
         for layer in image_obj.layers:
             # load the layers from cache
-            common.load_from_cache(layer)
+            common.load_from_cache(layer, redo)
             if redo or not layer.files_analyzed:
                 # the layer doesn't have analyzed files, so run analysis
                 file_list, package_list = collect_layer_data(layer)
