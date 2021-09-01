@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -38,7 +38,8 @@ def load():
     if not os.path.exists(os.path.join(rootfs.working_dir, cache_file)):
         return
 
-    with open(os.path.join(rootfs.working_dir, cache_file)) as f:
+    with open(os.path.join(rootfs.working_dir, cache_file),
+              encoding='utf-8') as f:
         cache = json.load(f)
 
 
@@ -83,7 +84,8 @@ def add_layer(layer_obj):
 
 def save():
     '''Save the cache to the cache file'''
-    with open(os.path.join(rootfs.working_dir, cache_file), 'w') as f:
+    with open(os.path.join(rootfs.working_dir, cache_file),
+              'w', encoding='utf-8') as f:
         json.dump(cache, f)
 
 
@@ -100,5 +102,6 @@ def clear():
     '''Empty the cache - don't use unless you really have to'''
     global cache
     cache = {}
-    with open(os.path.join(rootfs.working_dir, cache_file), 'w') as f:
+    with open(os.path.join(rootfs.working_dir, cache_file),
+              'w', encoding='utf-8') as f:
         json.dump(cache, f)

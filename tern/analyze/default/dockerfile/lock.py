@@ -264,5 +264,5 @@ def write_locked_dockerfile(dfile, destination=None):
         file_name = destination
     else:
         file_name = constants.locked_dockerfile
-    with open(file_name, 'w') as f:
+    with open(file_name, 'w', encoding='utf-8') as f:
         f.write(dfile)

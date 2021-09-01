@@ -68,9 +68,9 @@ def root_command(command, *extra):
         full_cmd.append(arg)
     # invoke
     logger.debug("Running command: %s", ' '.join(full_cmd))
-    pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,  # nosec
-                             stderr=subprocess.PIPE)
-    result, error = pipes.communicate()  # nosec
+    with subprocess.Popen(full_cmd, stdout=subprocess.PIPE,  # nosec
+                          stderr=subprocess.PIPE) as pipes:
+        result, error = pipes.communicate()  # nosec
     if error:
         logger.error("Command failed. %s", error.decode())
         raise subprocess.CalledProcessError(  # nosec
@@ -91,9 +91,9 @@ def shell_command(is_sudo, command, *extra):
         full_cmd.append(arg)
     # invoke
     logger.debug("Running command: %s", ' '.join(full_cmd))
-    pipes = subprocess.Popen(full_cmd, stdout=subprocess.PIPE,  # nosec
-                             stderr=subprocess.PIPE)
-    return pipes.communicate()  # nosec
+    with subprocess.Popen(full_cmd, stdout=subprocess.PIPE,  # nosec
+                          stderr=subprocess.PIPE) as pipes:
+        return pipes.communicate()  # nosec
 
 
 def check_tar_permissions(tar_file, directory_path):
@@ -309,7 +309,7 @@ def calc_fs_hash(fs_path):
         file_name = hashlib.sha256(hash_contents).hexdigest()
         # write file to an appropriate location
         hash_file = os.path.join(os.path.dirname(fs_path), file_name) + '.txt'
-        with open(hash_file, 'w') as f:
+        with open(hash_file, 'w', encoding='utf-8') as f:
             f.write(hash_contents.decode('utf-8'))
         return file_name
     except subprocess.CalledProcessError as e:

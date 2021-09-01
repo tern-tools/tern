@@ -72,7 +72,7 @@ def get_dockerfile_obj(dockerfile_name, prev_env=None):
     previous stages in a multistage docker build. Should be a python dictionary
     of the form {'ENV': 'value',...}'''
     dfobj = Dockerfile()
-    with open(dockerfile_name) as f:
+    with open(dockerfile_name, encoding='utf-8') as f:
         parser = DockerfileParser(parent_env=prev_env, fileobj=f)
         dfobj.filepath = dockerfile_name
         dfobj.structure = parser.structure
@@ -180,8 +180,8 @@ def expand_from_images(dfobj, image_list):
             if command_dict['instruction'] in import_str:
                 dfobj.structure[index]['content'] = import_str + '\n'
             else:
-                dfobj.structure[index]['content'] = command_dict['instruction'] + \
-                    ' ' + import_str + '\n'
+                dfobj.structure[index]['content'] = \
+                    command_dict['instruction'] + ' ' + import_str + '\n'
             image_count += 1
 
 

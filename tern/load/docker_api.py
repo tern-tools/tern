@@ -58,7 +58,7 @@ def build_image(dfile, client):
     dfcontents = ''
     dfcontext = os.path.dirname(df_path)
     try:
-        with open(df_path) as f:
+        with open(df_path, encoding='utf-8') as f:
             dfcontents = f.read()
         # terrible bypass of the API
         docker.api.build.process_dockerfile = lambda dockerfile, path: (

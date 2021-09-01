@@ -166,7 +166,7 @@ def get_licenses_from_deb_copyright(deb_copyright):
     3. returns a list of unique licenses found inside
     the copyright text
     '''
-    collected_paragraphs = list()
+    collected_paragraphs = []
     pkg_licenses = set()
     for paragraph in iter(debcon.get_paragraphs_data(deb_copyright)):
         if 'license' in paragraph:
@@ -190,7 +190,7 @@ def get_deb_package_licenses(deb_copyrights):
     Given a list of debian copyrights for the same number of packages,
     returns a list package licenses for each of the packages
     '''
-    deb_licenses = list()
+    deb_licenses = []
     for deb_copyright in deb_copyrights:
         deb_licenses.append(get_licenses_from_deb_copyright(deb_copyright))
     return deb_licenses
