@@ -29,11 +29,11 @@ common_file = pkg_resources.resource_filename(
 
 # command library
 command_lib = {'common': {}, 'base': {}, 'snippets': {}}
-with open(os.path.abspath(common_file)) as f:
+with open(os.path.abspath(common_file), encoding='utf-8') as f:
     command_lib['common'] = yaml.safe_load(f)
-with open(os.path.abspath(base_file)) as f:
+with open(os.path.abspath(base_file), encoding='utf-8') as f:
     command_lib['base'] = yaml.safe_load(f)
-with open(os.path.abspath(snippet_file)) as f:
+with open(os.path.abspath(snippet_file), encoding='utf-8') as f:
     command_lib['snippets'] = yaml.safe_load(f)
 # list of package information keys that the command library can accomodate
 base_keys = {'names', 'versions', 'licenses', 'copyrights', 'proj_urls',

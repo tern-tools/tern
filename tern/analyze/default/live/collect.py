@@ -40,7 +40,7 @@ chroot {mnt} {fs_shell} -c "{snip}"
     if method == 'host':
         script = host_script.format(host_shell=prereqs.host_shell,
                                     snip=command)
-    with open(script_path, 'w') as f:
+    with open(script_path, 'w', encoding='utf-8') as f:
         f.write(script)
     os.chmod(script_path, 0o700)
     return script_path
@@ -54,8 +54,8 @@ def snippets_to_script(snippet_list):
     final_list = []
     for snippet in snippet_list:
         # replace the escaped characters
-        for key in replace_dict:
-            snippet = re.sub(key, replace_dict[key], snippet)
+        for key, val in replace_dict.items():
+            snippet = re.sub(key, val, snippet)
         final_list.append(snippet)
     return " && ".join(final_list)
 

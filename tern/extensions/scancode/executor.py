@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -119,7 +119,7 @@ def add_scancode_headers(layer_obj, headers):
     '''Given a list of headers from scancode data, add unique headers to
     the list of existing headers in the layer object'''
     unique_notices = {header.get("notice") for header in headers}
-    layer_headers = layer_obj.extension_info.get("headers", list())
+    layer_headers = layer_obj.extension_info.get("headers", [])
     for lh in layer_headers:
         unique_notices.add(lh)
     layer_obj.extension_info["headers"] = list(unique_notices)

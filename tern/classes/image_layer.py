@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 import os
 import re
@@ -241,7 +241,7 @@ class ImageLayer:
         in the layer'''
         rem_index = 0
         success = False
-        for index in range(0, len(self.__files)):
+        for index, _ in enumerate(self.__files):
             if self.__files[index].path == file_path:
                 rem_index = index
                 success = True
@@ -313,7 +313,7 @@ class ImageLayer:
         hash_file = os.path.join(os.path.dirname(fs_path),
                                  self.__fs_hash) + '.txt'
         pattern = re.compile(r'([\w\-|]+)\s+(.+)')
-        with open(hash_file) as f:
+        with open(hash_file, encoding='utf-8') as f:
             content = f.readlines()
         for line in content:
             m = pattern.search(line)

@@ -152,7 +152,7 @@ def main():
                         "default option.")
 
     # sys.version gives more information than we care to print
-    py_ver = sys.version.replace('\n', '').split('[')[0]
+    py_ver = sys.version.replace('\n', '').split('[', maxsplit=1)[0]
     parser.add_argument('-v', '--version', action='version',
                         version="{ver_str}\n   python version = {py_v}".format(
                             ver_str=get_version(), py_v=py_ver))

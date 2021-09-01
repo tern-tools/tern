@@ -31,7 +31,8 @@ def get_file_dict(filedata, template, layer_id):
         'SPDXID': spdx_common.get_file_spdxref(filedata, layer_id),
         'checksums': [{
             'algorithm':
-                spdx_common.get_file_checksum(filedata).split(': ')[0],
+                spdx_common.get_file_checksum(filedata).split(
+                    ': ', maxsplit=1)[0],
             'checksumValue':
                 spdx_common.get_file_checksum(filedata).split(': ')[1]
         }],

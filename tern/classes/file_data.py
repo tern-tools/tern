@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2020-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 import datetime
@@ -98,8 +98,9 @@ class FileData:
         if date:
             try:
                 datetime.datetime.strptime(date, '%Y-%m-%d')
-            except ValueError:
-                raise ValueError("Incorrect date format, should be YYYY-MM-DD")
+            except ValueError as vr:
+                raise ValueError(
+                    "Incorrect date format, should be YYYY-MM-DD") from vr
         self.__date = date
 
     @property

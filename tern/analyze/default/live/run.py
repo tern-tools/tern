@@ -106,7 +106,7 @@ def get_context_layers(reports, format_string):
         )
         return mgr.driver.consume_layer(reports)
     except NoMatches:
-        pass
+        return None
 
 
 def resolve_context_packages(layers):

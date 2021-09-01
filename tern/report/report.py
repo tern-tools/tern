@@ -24,7 +24,7 @@ def write_report(report, args):
     '''Write the report to a file'''
     if args.output_file:
         file_name = args.output_file
-    with open(file_name, 'w') as f:
+    with open(file_name, 'w', encoding='utf-8') as f:
         f.write(report)
 
 
@@ -64,7 +64,7 @@ def generate_format(images, format_string, print_inclusive):
         )
         return mgr.driver.generate(images, print_inclusive)
     except NoMatches:
-        pass
+        return None
 
 
 def generate_format_layer(layer, format_string):
@@ -78,7 +78,7 @@ def generate_format_layer(layer, format_string):
         )
         return mgr.driver.generate_layer(layer)
     except NoMatches:
-        pass
+        return None
 
 
 def report_out(args, *images):

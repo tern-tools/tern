@@ -99,7 +99,7 @@ def run_extension(image_obj, ext_string, redo=False):
         )
         return mgr.driver.execute(image_obj, redo)
     except NoMatches:
-        pass
+        return None
 
 
 def run_extension_layer(image_layer, ext_string, redo=False):
@@ -113,4 +113,4 @@ def run_extension_layer(image_layer, ext_string, redo=False):
         )
         return mgr.driver.execute_layer(image_layer, redo)
     except NoMatches:
-        pass
+        return None

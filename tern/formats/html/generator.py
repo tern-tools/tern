@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2020-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -215,8 +215,7 @@ def list_handler(list_obj, indent):
     return html_string
 
 
-# pylint: disable=too-many-branches
-def dict_handler(dict_obj, indent):
+def dict_handler(dict_obj, indent):  # pylint: disable=too-many-branches, useless-suppression
     '''Writes html code for dictionary in report dictionary'''
     html_string = ''
     html_string = html_string + '  '*indent + '<ul class ="nested"> \n'
