@@ -108,29 +108,63 @@ For hassle-free code contribution, follow the steps below. NOTE: I mostly work i
 
 ### Visual Studio Code Development Container
 
-Developing using Visual Studio Code development container lets you use a Docker container as a development environment. The Tern repository contains a definition for a pre-configured Docker container to simplify the setup process. To use it you need:
+Developing using Visual Studio Code development container lets you use a Docker container as a development environment. The Tern repository contains a definition for a pre-configured Docker container to simplify the setup process. To use it you need to download the following software on your host machine:
 
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [Docker](https://www.docker.com/get-started)
 - [The Visual Studio Code Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
-Once you have all that installed you can:
+Once you have all that installed you can setup your dev enviornment:
 
-1. Open the tern folder in Visual Studio Code
-1. Click the "Open a Remote Window" button in the bottom left corner (>< icon)
-1. Select "Remote Containers: Reopen in container" from the dropdown
+1. Fork the main Tern repository using your GitHub account. Once forked, clone *your* fork (not the main Tern repo) on your local desktop.
+2. Using the terminal, `cd` into the forked Tern directory on your local desktop and setup your git credentials:
+```
+    git config --global user.name "Your Name"
+    git config --global user.email "your.email@address.com"
+```
+3. Open Visual Studio Code. Click the `><` icon in the lower lefthand corner. A search bar will come up at the top of the window. Type "Remote-Containers: Open Folder in Container" and click on it. In the window that pops up, navigate to the cloned `tern` folder on you desktop and click "Open". If you do not see the "Remote-Containers: Open Folder in Container" in your search bar, try clicking the `gear` icon in the lower lefthand corner and select "Command Palette", or use the `F1` key on your keyboard to go directly to it and search this way.
+4. On the left-most side panel, click on the icon that looks like four squares with one detaching. This is the "Extensions" menu. A search bar will appear. Use this to install the Docker Extension. It might be suggested, but if not, you can type "Docker" to search for it.
+5. If you are working on a Mac, there is a reported [bug](https://github.com/microsoft/vscode-remote-release/issues/3149) and [workaround](https://github.com/microsoft/vscode-remote-release/issues/3149#issuecomment-646588532) when using the Docker extension with a remote container. To change the Docker path once the Docker extension is installed, click on the `><` icon, type "Settings", click on "Remote-Containers: Settings" and update the `Remote > Containers: Docker Path` section to be `/usr/local/bin/docker`.
+6. In the top menu bar, click on "Terminal" --> "New Terminal". You should see a terminal open at the bottom and if you type `ls` you should see the files in the Tern repository.
+7. Run `pip3 install tern -e .[dev]` to install Tern and its dependencies.
+8. Test that you can run Tern in your dev container by running: `tern report -i debian:buster`. You should see an SBOM printed to the console for the `debian:buster` container image.
+9. To setup your branch for long-term contributions, follow the commands in step five under the "Setting up a Long Term Development Environment" section.
+10. Create a new branch by running `git checkout -b <newbranch-name>`. You're now ready to start making changes to Tern, which you can do via the Terminal or using GUI editor provided by VS Code. Note that you will need to commit your changes with git using the Terminal command line.
 
-### Before you clone the project
+
+### Setting up a Long Term Development Environment
 
 You may have already cloned the project and started working on it. If you're reading this after the fact, I would highly recommend you save your work and set up a new development environment in this way.
 
 1. Set up a Python virtual environment that has either the Python 3.6 or Python 3.7 executable. See [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments) for instructions on how to set this up using your host machine's Python3. There are also a guide to [managing virtual environments using pipenv](https://docs.python-guide.org/dev/virtualenvs/) but I haven't used it. Once done, you should have a folder created. Change to that folder.
 2. Clone *your fork* of Tern in the virtual environment folder.
-3. Activate your virtual environment `source bin/activate`. NOTE: This specific activate script only works for Bash shells. If you need to activate a Fish Shell or C Shell you should use `source/bin/activate.fish` or `source/bin/activate.csh`, respectively.
-4. Change directory into the clone.
-5. Run `pip install wheel`. This is needed because some dependencies for development fail to build python wheels.
-6. Run `pip install -e.[dev]`. This will install tern in development mode. This will install the project dependencies and [Prospector](https://github.com/PyCQA/prospector) which is a tool to check for style and linting errors.
-7. Highly recommended: If you want to set up your project for long-term open source contribution, I highly suggest following [this setup](https://github.com/nishakm/puns).
+3. Activate your virtual environment `source bin/activate`. NOTE: This specific activate script only works for Bash and Mac ZSH shells. If you need to activate a Fish Shell or C Shell you should use `source/bin/activate.fish` or `source/bin/activate.csh`, respectively.
+4. Change directory into the Tern clone.
+5. Next, set up your project for long-term open source contribution, run these commands:
+
+    **Note**: the following command will only work if you have a functioning ssh-key setup with GitHub
+    ```
+    $ git remote add upstream git@github.com:tern-tools/tern.git
+    ```
+
+    If you are not working with ssh keys, use the HTTPS link instead of running the above command:
+    ```
+    $ git remote add upstream https://github.com/tern-tools/tern.git
+    ```
+
+    In either case, continue with the following commands:
+    ```
+    $ git fetch upstream
+    $ git checkout -b up upstream/main
+    $ git push origin up:refs/heads/main
+    ```
+
+    Your `up` branch can now be used to keep track of changes on Tern's `main` branch and your other dev branches can stay separate.
+
+6. Create a development branch. Assuming you are still on the `up` branch we just created (to verify, run `git branch` and make sure the `*` is next to `up`), run: `git checkout -b <new-dev-branch-name>`. If you are not currently on the `up` branch, first run `git checkout up` before creating your new dev branch.
+7. Run `pip install wheel`. This is needed because some dependencies for development fail to build python wheels.
+8. Run `pip install -e.[dev]`. This will install tern in development mode. This will install the project dependencies and [Prospector](https://github.com/PyCQA/prospector) which is a tool to check for style and linting errors. Every time you make functional changes to Tern, re-run this command to pick up the changes for local testing.
+9. For more git tutorials, follow [these examples](https://github.com/nishakm/puns) or ask one of the maintainers for help :) 
 
 ### Setting up a development environment on Mac and Windows
 
