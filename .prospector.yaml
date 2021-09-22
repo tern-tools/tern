@@ -12,3 +12,9 @@ pep8:
 
 pep257:
   run: false
+
+pylint:
+  disable:
+    - consider-using-f-string
+    - global-variable-not-assigned
+    - consider-iterating-dictionary
