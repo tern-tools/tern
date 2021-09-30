@@ -32,6 +32,7 @@ Tern is a software package inspection tool that can create a Software Bill of Ma
   - [YAML Format](#report-yaml)
   - [SPDX tag-value Format](#report-spdxtagvalue)
   - [SPDX JSON Format](#report-spdxjson)
+  - [CycloneDX JSON Format](#report-cyclonedxjson)
 - [Extensions](#extensions)
   - [Scancode](#scancode)
   - [cve-bin-tool](#cve-bin-tool)
@@ -257,6 +258,14 @@ The SPDX JSON format contains the same information that an SPDX Tag-value docume
 $ tern report -f spdxjson -i golang:1.12-alpine -o spdx.json
 ```
 
+## CycloneDX JSON Format<a name="report-cyclonedxjson">
+[OWASP CycloneDX](https://cyclonedx.org/) is a lightweight software bill of materials standard designed for use in application security contexts and supply chain component analysis. The National Telecommunications and Information Administration (NTIA) [recognizes CycloneDX](https://www.ntia.gov/files/ntia/publications/sbom_options_and_decision_points_20210427-1.pdf) as one of three valid SBoM formats that satisfies the minimum viable requirements for an SBoM in accordance with President Biden's [Executive Order on Improving the Nation's Cybersecurity](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/).
+
+Many tools for producing and consuming CycloneDX SBoMs are listed in the [CycloneDX Tool Center](https://cyclonedx.org/tool-center/).
+```
+$ tern report -f cyclonedxjson -i golang:1.12-alpine -o bom.json
+```
+
 # Extensions<a name="extensions">
 Tern does not have its own file level license scanner. In order to fill in the gap, Tern allows you to extend container image analysis with an external file analysis CLI tool or Python3 module. In order to take advantage of the extensions, both the extention tool and Tern need to be installed.
 
@@ -311,25 +320,17 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Release 2.7.0 is out! See the [release notes](docs/releases/v2_7_0.md) for more information.
+Release 2.8.0 is out! See the [release notes](docs/releases/v2_8_0.md) for more information.
 
-We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 2.8.0.
+We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 2.9.0.
 
-## Previous Releases
+## Recent Past Releases
 Be advised: version 2.4.0 and below contain a high-severity security vulnerability (CVE-2021-28363). Please update to version 2.5.0 or later.
+* [v2.7.0](docs/releases/v2_7_0.md)
 * [v2.6.1](docs/releases/v2_6_1.md)
 * [v2.5.0](docs/releases/v2_5_0.md)
 * [v2.4.0](docs/releases/v2_4_0.md)
 * [v2.3.0](docs/releases/v2_3_0.md)
-* [v2.2.0](docs/releases/v2_2_0.md)
-* [v2.1.0](docs/releases/v2_1_0.md)
-* [v2.0.0](docs/releases/v2_0_0.md)
-* [v1.0.1](docs/releases/v1_0_1.md)
-* [v0.5.4](docs/releases/v0_5_4.md)
-* [v0.4.0](docs/releases/v0_4_0.md)
-* [v0.3.0](docs/releases/v0_3_0.md)
-* [v0.2.0](docs/releases/v0_2_0.md)
-* [v0.1.0](docs/releases/v0_1_0.md)
 
 ## Documentation
 Architecture, function blocks, code descriptions and the project roadmap are located in the docs folder. Contributions to the documentation are welcome! See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.

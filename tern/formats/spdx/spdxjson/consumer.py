@@ -54,14 +54,14 @@ def create_image_layer(report):
     # expect a json input, raise an error if it is not
     content = {}
     try:
-        f = open(os.path.abspath(report))
-        content = json.load(f)
+        with open(os.path.abspath(report), encoding='utf-8') as f:
+            content = json.load(f)
     except OSError as err:
         logger.critical("Cannot access file %s: %s", report, err)
-        raise ConsumerError(f"Error with given report file: {report}")
+        raise ConsumerError(f"Error with given report file: {report}") from err
     except json.JSONDecodeError as err:
         logger.critical("Cannot parse JSON in file %s: %s", report, err)
-        raise ConsumerError(f"Error with given report file: {report}")
+        raise ConsumerError(f"Error with given report file: {report}") from err
     # we should have some content but it may be empty
     if not content:
         raise ConsumerError("No content consumed from given report file")

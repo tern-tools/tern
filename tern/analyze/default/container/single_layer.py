@@ -40,13 +40,15 @@ def find_os_release(host_path):
             return ''
         etc_path = lib_path
     # file exists at this point, try to read it
-    with open(etc_path, 'r') as f:
+    with open(etc_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
     # Create dictionary from os-release values
     os_release_dict = {}
     for line in lines:
-        key, val = line.rstrip().split('=', 1)
-        os_release_dict[key] = val.strip('"')
+        line = line.strip()
+        if line:
+            key, val = line.split('=', 1)
+            os_release_dict[key] = val.strip('"')
     pretty_name = ''
     if "PRETTY_NAME" in os_release_dict.keys():
         if os_release_dict["PRETTY_NAME"] == "Distroless":
@@ -104,9 +106,11 @@ def mount_first_layer(layer_obj):
     except subprocess.CalledProcessError as e:  # nosec
         logger.critical("Cannot mount filesystem and/or device nodes: %s", e)
         dcom.abort_analysis()
+        return None
     except KeyboardInterrupt:
         logger.critical(errors.keyboard_interrupt)
         dcom.abort_analysis()
+        return None
 
 
 def analyze_first_layer(image_obj, master_list, options):
@@ -153,7 +157,8 @@ def analyze_first_layer(image_obj, master_list, options):
             # mount the first layer
             target_dir = mount_first_layer(image_obj.layers[0])
             # set the host path to the mount point
-            prereqs.host_path = target_dir
+            if target_dir:
+                prereqs.host_path = target_dir
             # core default execution on the first layer
             core.execute_base(image_obj.layers[0], prereqs)
             # unmount

@@ -16,3 +16,4 @@ debian-inspector
 regex
 GitPython
 prettytable
+packageurl-python

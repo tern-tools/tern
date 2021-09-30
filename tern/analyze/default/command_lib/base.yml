@@ -434,7 +434,7 @@ npm:
     delimiter: "LICF"
 # golang----------------------------------------------------------------------
 go:
-  pkg_format: 'go.mod'
+  pkg_format: 'go'
   os_guess:
     - 'None'
   path:

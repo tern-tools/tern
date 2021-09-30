@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 import json
@@ -62,7 +62,7 @@ class DockerImage(Image):
         an image inside, get a dict of the manifest.json file'''
         temp_path = rootfs.get_working_dir()
         with general.pushd(temp_path):
-            with open(manifest_file) as f:
+            with open(manifest_file, encoding='utf-8') as f:
                 json_obj = json.loads(f.read())
         return json_obj
 
@@ -94,7 +94,7 @@ class DockerImage(Image):
         # manifest file
         temp_path = rootfs.get_working_dir()
         with general.pushd(temp_path):
-            with open(config_file) as f:
+            with open(config_file, encoding='utf-8') as f:
                 json_obj = json.loads(f.read())
         return json_obj
 
@@ -151,9 +151,11 @@ class DockerImage(Image):
             layer_count = 1
             while layer_diffs and layer_paths:
                 layer = ImageLayer(layer_diffs.pop(0), layer_paths.pop(0))
-                # Only load metadata for the layers we need to report on according to the --layers command line option
+                # Only load metadata for the layers we need to report on
+                # according to the --layers command line option
                 # If  --layers option is not present, load all the layers
-                if self.load_until_layer >= layer_count or self.load_until_layer == 0:
+                if (self.load_until_layer >= layer_count
+                        or self.load_until_layer == 0):
                     layer.set_checksum(checksum_type, layer.diff_id)
                     layer.gen_fs_hash()
                     layer.layer_index = layer_count
@@ -166,9 +168,9 @@ class DockerImage(Image):
                 self._load_until_layer = 0
             self.set_layer_created_by()
         except NameError as e:
-            raise NameError(e)
+            raise NameError(e) from e
         except subprocess.CalledProcessError as e:
             raise subprocess.CalledProcessError(
                 e.returncode, cmd=e.cmd, output=e.output, stderr=e.stderr)
         except IOError as e:
-            raise IOError(e)
+            raise IOError(e) from e

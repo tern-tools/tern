@@ -184,6 +184,9 @@ class Image:
         and this is currently not supported by any image tool. So using
         a combination of name and tag or name and checksum instead'''
         name = self.name
+        # SPDX does not allow '/' character to be used in SPDX ID References
+        if "/" in self.name:
+            name = name.replace("/", "-")
         if self.tag:
             name = name + '-{}'.format(self.tag)
         elif self.checksum:

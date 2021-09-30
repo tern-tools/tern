@@ -149,7 +149,8 @@ def get_layer_dict(layer_obj):
         'filesAnalyzed': 'true' if layer_obj.files_analyzed else 'false',
         'checksums': [{
             'algorithm':
-                spdx_common.get_layer_checksum(layer_obj).split(': ')[0],
+                spdx_common.get_layer_checksum(layer_obj).split(
+                    ': ', maxsplit=1)[0],
             'checksumValue':
                 spdx_common.get_layer_checksum(layer_obj).split(': ')[1]
         }],
