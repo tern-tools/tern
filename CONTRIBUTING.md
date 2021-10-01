@@ -126,8 +126,8 @@ Once you have all that installed you can setup your dev enviornment:
 4. On the left-most side panel, click on the icon that looks like four squares with one detaching. This is the "Extensions" menu. A search bar will appear. Use this to install the Docker Extension. It might be suggested, but if not, you can type "Docker" to search for it.
 5. If you are working on a Mac, there is a reported [bug](https://github.com/microsoft/vscode-remote-release/issues/3149) and [workaround](https://github.com/microsoft/vscode-remote-release/issues/3149#issuecomment-646588532) when using the Docker extension with a remote container. To change the Docker path once the Docker extension is installed, click on the `><` icon, type "Settings", click on "Remote-Containers: Settings" and update the `Remote > Containers: Docker Path` section to be `/usr/local/bin/docker`.
 6. In the top menu bar, click on "Terminal" --> "New Terminal". You should see a terminal open at the bottom and if you type `ls` you should see the files in the Tern repository.
-7. Run `pip3 install tern -e .[dev]` to install Tern and its dependencies.
-8. Test that you can run Tern in your dev container by running: `tern report -i debian:buster`. You should see an SBOM printed to the console for the `debian:buster` container image.
+7. Run `pip3 install -e .[dev]` to install Tern and its dependencies.
+8. If you are running on Mac or Windows, test that you can run Tern in your dev container by running: `python -m tern --driver fuse report -i ubuntu:latest`. You should see an SBOM report printed to the console for the `debian:buster` container image.
 9. To setup your branch for long-term contributions, follow the commands in step five under the "Setting up a Long Term Development Environment" section.
 10. Create a new branch by running `git checkout -b <newbranch-name>`. You're now ready to start making changes to Tern, which you can do via the Terminal or using GUI editor provided by VS Code. Note that you will need to commit your changes with git using the Terminal command line.
 
