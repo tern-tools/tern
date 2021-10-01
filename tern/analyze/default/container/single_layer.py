@@ -50,7 +50,7 @@ def find_os_release(host_path):
             key, val = line.split('=', 1)
             os_release_dict[key] = val.strip('"')
     pretty_name = ''
-    if "PRETTY_NAME" in os_release_dict.keys():
+    if "PRETTY_NAME" in os_release_dict:
         if os_release_dict["PRETTY_NAME"] == "Distroless":
             pretty_name = "{0} - {1}".format(os_release_dict["PRETTY_NAME"],
                                              os_release_dict['VERSION'])
