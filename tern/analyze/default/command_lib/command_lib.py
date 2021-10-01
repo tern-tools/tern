@@ -57,7 +57,7 @@ class FormatAwk(dict):
 def get_base_listing(key):
     '''Given the key listing in base.yml, return the dictionary'''
     listing = {}
-    if key in command_lib['base'].keys():
+    if key in command_lib['base']:
         listing = copy.deepcopy(command_lib['base'][key])
     else:
         logger.warning("%s", errors.no_listing_for_base_key.format(
