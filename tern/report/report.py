@@ -27,15 +27,7 @@ def write_report(report, args):
     with open(file_name, 'w', encoding='utf-8') as f:
         f.write(report)
 
-
-def clean_image_tars(image_obj):
-    '''Clean up untar directories'''
-    for layer in image_obj.layers:
-        fspath = rootfs.get_untar_dir(layer.tar_file)
-        if os.path.exists(fspath):
-            rootfs.root_command(rootfs.remove, fspath)
-
-
+        
 def clean_working_dir():
     '''Clean up the working directory
     If bind_mount is true then leave the upper level directory'''
