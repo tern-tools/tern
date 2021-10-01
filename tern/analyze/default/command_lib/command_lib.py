@@ -179,12 +179,12 @@ def check_sourcable(command, package_name):
     If the package has a url or source retrieval steps associated with it
     then we return True. If not then we return false'''
     sourcable = False
-    if command in command_lib['snippets'].keys():
+    if command in command_lib['snippets']:
         for package in command_lib['snippets'][command]['packages']:
             if package['name'] == package_name or \
                     package['name'] == 'default':
-                if 'url' in package.keys() or \
-                        'src' in package.keys():
+                if 'url' in package or \
+                        'src' in package:
                     sourcable = True
     return sourcable
 
