@@ -17,7 +17,6 @@ from tern.classes.notice import Notice
 from tern.utils import constants
 from tern.utils import general
 from tern.report import errors
-from tern.report import formats
 from tern.analyze.default import filter as fltr
 from tern.analyze.default.command_lib import command_lib
 from tern.analyze.default.dockerfile import parse
@@ -109,13 +108,6 @@ def get_base_image_tag(dockerfile_lines):
     return base_image_string, from_line
 
 
-def get_dockerfile_image_tag():
-    '''Return the image and tag used to build an image from the dockerfile'''
-    image_tag_string = constants.image + parse.tag_separator + \
-        constants.tag
-    return image_tag_string
-
-
 def created_to_instruction(created_by):
     '''The 'created_by' key in a Docker image config gives the shell
     command that was executed unless it is a #(nop) instruction which is
@@ -128,38 +120,6 @@ def created_to_instruction(created_by):
             'RUN' not in instruction:
         instruction = 'RUN ' + instruction
     return instruction
-
-
-def get_commands_from_history(image_layer):
-    '''Given the image layer object and the shell, get the list of command
-    objects that created the layer'''
-    # set up notice origin for the layer
-    origin_layer = 'Layer {}'.format(image_layer.layer_index)
-    if image_layer.created_by:
-        instruction = created_to_instruction(image_layer.created_by)
-        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
-            formats.dockerfile_line.format(dockerfile_instruction=instruction),
-            'info'))
-        command_line = instruction.split(' ', 1)[1]
-    else:
-        instruction = ''
-        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
-            formats.no_created_by, 'warning'))
-        command_line = instruction
-    # Image layers are created with the directives RUN, ADD and COPY
-    # For ADD and COPY instructions, there is no information about the
-    # packages added
-    if 'ADD' in instruction or 'COPY' in instruction:
-        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
-            errors.unknown_content.format(files=command_line), 'warning'))
-        # return an empty list as we cannot find any commands
-        return []
-    # for RUN instructions we can return a list of commands
-    command_list, msg = fltr.filter_install_commands(command_line)
-    if msg:
-        image_layer.origins.add_notice_to_origins(origin_layer, Notice(
-            msg, 'warning'))
-    return command_list
 
 
 def set_imported_layers(docker_image):
