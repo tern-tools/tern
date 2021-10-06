@@ -57,7 +57,7 @@ class FormatAwk(dict):
 def get_base_listing(key):
     '''Given the key listing in base.yml, return the dictionary'''
     listing = {}
-    if key in command_lib['base'].keys():
+    if key in command_lib['base']:
         listing = copy.deepcopy(command_lib['base'][key])
     else:
         logger.warning("%s", errors.no_listing_for_base_key.format(
@@ -68,7 +68,7 @@ def get_base_listing(key):
 def get_command_listing(command_name):
     '''Given a command name retrieve the listing if it exists'''
     listing = {}
-    if command_name in command_lib['snippets'].keys():
+    if command_name in command_lib['snippets']:
         listing = command_lib['snippets'][command_name]
     else:
         logger.warning("%s", errors.no_listing_for_snippet_key.format(
