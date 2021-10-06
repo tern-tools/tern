@@ -47,7 +47,7 @@ def get_package_block(package_obj, template):
         block += 'PackageDownloadLoaction: {}\n'.format(
             mapping['PackageDownloadLocation'])
     else:
-        block += 'PackageDownloadLocation: NONE\n'
+        block += 'PackageDownloadLocation: NOASSERTION\n'
     # Files Analyzed (always false for packages)
     block += 'FilesAnalyzed: false\n'
     # Package License Concluded (always NOASSERTION)

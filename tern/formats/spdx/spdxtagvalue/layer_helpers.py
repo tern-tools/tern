@@ -113,7 +113,7 @@ def get_layer_block(layer_obj, template):
     # Package File Name
     block += 'PackageFileName: {}\n'.format(layer_obj.tar_file)
     # Package Download Location (always NONE for layers)
-    block += 'PackageDownloadLocation: NONE\n'
+    block += 'PackageDownloadLocation: NOASSERTION\n'
     # Files Analyzed
     if layer_obj.files_analyzed:
         # we need a package verification code
