@@ -33,7 +33,7 @@ def get_package_dict(package, template):
         'versionInfo': mapping['PackageVersion'] if mapping['PackageVersion']
         else 'NOASSERTION',
         'downloadLocation': mapping['PackageDownloadLocation'] if
-        mapping['PackageDownloadLocation'] else 'NONE',
+        mapping['PackageDownloadLocation'] else 'NOASSERTION',
         'filesAnalyzed': 'false',  # always false for packages
         'licenseConcluded': 'NOASSERTION',  # always NOASSERTION
         'licenseDeclared': spdx_common.get_license_ref(
