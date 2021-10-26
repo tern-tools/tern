@@ -34,7 +34,7 @@ def get_package_dict(package, template):
         else 'NOASSERTION',
         'downloadLocation': mapping['PackageDownloadLocation'] if
         mapping['PackageDownloadLocation'] else 'NOASSERTION',
-        'filesAnalyzed': 'false',  # always false for packages
+        'filesAnalyzed': False,  # always false for packages
         'licenseConcluded': 'NOASSERTION',  # always NOASSERTION
         'licenseDeclared': spdx_common.get_license_ref(
             mapping['PackageLicenseDeclared']) if
@@ -62,7 +62,7 @@ def get_packages_list(image_obj, template):
             # Create a list of dictionaries. Each dictionary represents
             # one package object in the image
             pkg_ref = spdx_common.get_package_spdxref(package)
-            if pkg_ref not in package_refs:
+            if pkg_ref not in package_refs and package.name:
                 package_dicts.append(get_package_dict(package, template))
                 package_refs.add(pkg_ref)
     return package_dicts

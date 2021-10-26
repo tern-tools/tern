@@ -81,7 +81,7 @@ def get_image_dict(image_obj, template):
         'SPDXID': spdx_common.get_image_spdxref(image_obj),
         'versionInfo': mapping['PackageVersion'],
         'downloadLocation': 'NOASSERTION',  # always NOASSERTION
-        'filesAnalyzed': 'false',  # always false
+        'filesAnalyzed': False,  # always false
         'licenseConcluded': 'NOASSERTION',  # always NOASSERTION
         'licenseDeclared': 'NOASSERTION',  # always NOASSERTION
         'copyrightText': 'NOASSERTION'  # always NOASSERTION

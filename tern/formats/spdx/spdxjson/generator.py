@@ -50,8 +50,8 @@ def get_document_dict(image_obj, template):
         'creationInfo': {
             'created': json_formats.created.format(
                 timestamp=spdx_common.get_timestamp()),
-            'creators': json_formats.creator.format(
-                version=get_git_rev_or_version()[1]),
+            'creators': [json_formats.creator.format(
+                version=get_git_rev_or_version()[1])],
             'licenseListVersion': json_formats.license_list_version,
         },
         'name': json_formats.document_name.format(image_name=image_obj.name),
