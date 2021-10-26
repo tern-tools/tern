@@ -9,7 +9,6 @@ Create a report
 
 import logging
 import os
-import shutil
 from stevedore import driver
 from stevedore.exception import NoMatches
 
@@ -34,14 +33,6 @@ def clean_image_tars(image_obj):
         fspath = rootfs.get_untar_dir(layer.tar_file)
         if os.path.exists(fspath):
             rootfs.root_command(rootfs.remove, fspath)
-
-
-def clean_working_dir():
-    '''Clean up the working directory
-    If bind_mount is true then leave the upper level directory'''
-    path = rootfs.get_working_dir()
-    if os.path.exists(path):
-        shutil.rmtree(path)
 
 
 def generate_report(args, *images):
