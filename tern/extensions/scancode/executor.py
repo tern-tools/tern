@@ -136,7 +136,7 @@ def collect_layer_data(layer_obj):
     # run scancode against a directory
     try:
         processes = len(os.sched_getaffinity(0))
-        command = "scancode -ilpcu --quiet --timeout 300 -n {} --json -".format(processes)
+        command = "scancode -ilpcu --quiet --timeout 300 -n {} --json -".format(processes - 1)
     except (AttributeError, NotImplementedError):
         command = "scancode -ilpcu --quiet --timeout 300 --json -"
     full_cmd = get_filesystem_command(layer_obj, command)
