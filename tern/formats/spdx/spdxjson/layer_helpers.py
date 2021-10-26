@@ -144,9 +144,9 @@ def get_layer_dict(layer_obj):
     layer_dict = {
         'name': os.path.basename(layer_obj.tar_file),
         'SPDXID': spdx_common.get_layer_spdxref(layer_obj),
-        'fileName': layer_obj.tar_file,
+        'packageFileName': layer_obj.tar_file,
         'downloadLocation': 'NONE',
-        'filesAnalyzed': 'true' if layer_obj.files_analyzed else 'false',
+        'filesAnalyzed': bool(layer_obj.files_analyzed),
         'checksums': [{
             'algorithm':
                 spdx_common.get_layer_checksum(layer_obj).split(

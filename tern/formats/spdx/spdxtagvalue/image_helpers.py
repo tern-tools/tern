@@ -92,7 +92,7 @@ def get_image_block(image_obj, template):
     # Package Download Location (always NOASSERTION)
     block += 'PackageDownloadLocation: NOASSERTION\n'
     # Files Analyzed (always false)
-    block += 'FilesAnalyzed: false\n'
+    block += 'FilesAnalyzed: {}\n'.format(False)
     # Concluded Package License (always NOASSERTION)
     block += 'PackageLicenseConcluded: NOASSERTION\n'
     # Declared Package License (always NOASSERTION)
