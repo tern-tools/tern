@@ -39,6 +39,7 @@ class FileData:
         urls: a list of urls from where this file could come from
         checksums: a dictionary of the form {<checksum_type>: <checksum>,...}
         checksum types and checksums are stored in lower case
+        source: tool or utility that collected package metadata
 
     methods:
         to_dict: returns a dictionary representation of the instance
@@ -71,6 +72,7 @@ class FileData:
         self.urls = []
         self.__checksums = {}
         self.__origins = Origins()
+        self.__source = ''
 
     @property
     def name(self):
@@ -149,6 +151,14 @@ class FileData:
     @property
     def origins(self):
         return self.__origins
+
+    @property
+    def source(self):
+        return self.__source
+
+    @source.setter
+    def source(self, source):
+        self.__source = source
 
     def set_checksum(self, checksum_type='', checksum=''):
         '''Set the checksum type and checksum of the file'''

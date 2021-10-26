@@ -84,7 +84,8 @@ def fill_packages(layer, prereqs):
                          "metadata.")
         if warnings:
             logger.warning("Some metadata may be missing.")
-        bundle.fill_pkg_results(layer, pkg_dict, listing.get("pkg_format"))
+        bundle.fill_pkg_results(layer, pkg_dict, listing.get("pkg_format"),
+                                prereqs.binary)
         com.remove_duplicate_layer_files(layer)
 
 

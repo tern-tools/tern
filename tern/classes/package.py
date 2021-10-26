@@ -22,6 +22,7 @@ class Package:
         checksum: checksum as package property
         files: list of files in a package
         pkg_licenses: all licenses found within a package
+        source: tool or utility that collected package metadata
 
     methods:
         to_dict: returns a dict representation of the instance
@@ -43,6 +44,7 @@ class Package:
         self.__files = []
         self.__pkg_licenses = []
         self.__pkg_format = ''
+        self.__source = ''
 
     @property
     def name(self):
@@ -123,6 +125,14 @@ class Package:
     @pkg_format.setter
     def pkg_format(self, pkg_format):
         self.__pkg_format = pkg_format
+
+    @property
+    def source(self):
+        return self.__source
+
+    @source.setter
+    def source(self, source):
+        self.__source = source
 
     def get_file_paths(self):
         """Return a list of paths of all the files in a package"""

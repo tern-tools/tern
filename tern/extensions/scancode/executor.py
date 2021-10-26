@@ -67,6 +67,7 @@ def get_scancode_file(file_dict):
         fd.urls = [u['url'] for u in file_dict['urls']]
     fd.packages = file_dict['packages']
     fd.authors = [a['value'] for a in file_dict['authors']]
+    fd.source = "Scancode"
     if file_dict['scan_errors']:
         # for each scan error make a notice
         for err in file_dict['scan_errors']:
@@ -112,6 +113,7 @@ def get_scancode_package(package_dict):
     package.download_url = package_dict['download_url']
     package.licenses = [package_dict['declared_license'],
                         package_dict['license_expression']]
+    package.source = "Scancode"
     return package
 
 
