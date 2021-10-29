@@ -31,9 +31,9 @@ def check_docker_setup():
         client = docker.from_env(timeout=180)
         client.ping()
         return client
-    except requests.exceptions.ConnectionError as e:
+    except (requests.exceptions.ConnectionError, docker.errors.DockerException) as e:
         logger.critical('Critical Docker error: %s', str(e))
-        if 'FileNotFoundError' in str(e):
+        if 'FileNotFoundError' in str(e) or 'ConnectionRefusedError' in str(e):
             logger.critical('Docker is not installed or the daemon is not '
                             'running.')
         if 'PermissionError' in str(e):
