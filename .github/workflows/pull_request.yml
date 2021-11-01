@@ -1,5 +1,7 @@
 name: Pull Request Lint and Test
-on: pull_request
+on:
+  pull_request:
+    types: [ labeled ]
 
 jobs:
   Prospector_Linting:
