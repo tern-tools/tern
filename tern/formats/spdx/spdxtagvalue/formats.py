@@ -31,6 +31,7 @@ package_id = '{name}-{ver}'
 # Relationship strings
 contains = 'Relationship: {outer} CONTAINS {inner}'
 prereq = 'Relationship: {after} HAS_PREREQUISITE {before}'
+describes = 'Relationship: {doc} DESCRIBES {image}'
 
 # License Reference Information
 license_id = 'LicenseID: {license_ref}'
