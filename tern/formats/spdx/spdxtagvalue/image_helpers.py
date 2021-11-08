@@ -102,6 +102,9 @@ def get_image_block(image_obj, template):
     # blank line
     block += '\n'
     # Since files are not analyzed within the image we move to relationships
+    block += spdx_formats.describes.format(doc="SPDXRef-DOCUMENT",
+                                           image=spdx_common.get_image_spdxref(
+                                               image_obj)) + '\n'
     block += get_image_layer_relationships(image_obj) + '\n'
     # blank line
     block += '\n'
