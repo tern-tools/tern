@@ -195,6 +195,13 @@ class TestClassFileData(unittest.TestCase):
         self.assertEqual(
             file1.origins.origins[0].notices[0].message, 'something happened')
 
+    def testSetWhiteout(self):
+        whiteout = FileData('.wh.os-release', 'usr/lib/.wh.os-release')
+        whiteout.set_whiteout()
+        self.assertTrue(whiteout.is_whiteout)
+        self.afile.set_whiteout()
+        self.assertFalse(self.afile.is_whiteout)
+
 
 if __name__ == '__main__':
     unittest.main()
