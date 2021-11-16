@@ -312,21 +312,17 @@ class ImageLayer:
         fs_path = rootfs.get_untar_dir(self.__tar_file)
         hash_file = os.path.join(os.path.dirname(fs_path),
                                  self.__fs_hash) + '.txt'
-        pattern = re.compile(r'([\w\-|]+)\s+(.+)')
         with open(hash_file, encoding='utf-8') as f:
             content = f.readlines()
         for line in content:
-            m = pattern.search(line)
-            if m:
-                # m.group(2) contains the file path
-                # m.group(1) contains the extattrs and checksum
-                file_data = FileData(os.path.basename(m.group(2)),
-                                     os.path.relpath(m.group(2), '.'))
-                # attrs_tuple contains (extattrs, '|', checksum)
-                attrs_tuple = m.group(1).rpartition('|')
-                file_data.set_checksum('sha256', attrs_tuple[2])
-                file_data.extattrs = attrs_tuple[0]
-                self.add_file(file_data)
+            # lines are of the form:
+            # permissions|uid|gid|size|hard links|  sha256sum  filepath
+            file_info = line[:-1].split('  ')
+            file_data = FileData(os.path.basename(file_info[2]),
+                                 os.path.relpath(file_info[2], '.'))
+            file_data.set_checksum('sha256', file_info[1])
+            file_data.extattrs = file_info[0]
+            self.add_file(file_data)
 
     def get_layer_workdir(self):
         # If the layer is created by a WORKDIR command then return the workdir

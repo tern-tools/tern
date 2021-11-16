@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -21,7 +21,7 @@ remove = ['rm', '-rf']
 
 # tar commands
 check_tar = ['tar', '-tf']
-extract_tar = ['tar', '-x', '--exclude=.wh.*', '-f']
+extract_tar = ['tar', '-x', '-f']
 
 # mount commands
 mount = ['mount', '-o', 'bind']
@@ -302,8 +302,6 @@ def calc_fs_hash(fs_path):
     try:
         fs_hash_path = pkg_resources.resource_filename(
             "tern", "tools/fs_hash.sh")
-        # required to run in a container natively on Windows
-        root_command(["chmod", "+x", fs_hash_path])
         hash_contents = root_command(
             [fs_hash_path], os.path.abspath(fs_path))
         file_name = hashlib.sha256(hash_contents).hexdigest()
