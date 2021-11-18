@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -41,7 +41,7 @@ def check_image_obj(image_string):
 def mount_container_image(image_obj, driver=None):
     """Mount the container image to make it ready to invoke scripts"""
     if len(image_obj.layers) > 1:
-        target = multi_layer.mount_overlay_fs(
+        target = multi_layer.prep_layers(
             image_obj, len(image_obj.layers) - 1, driver)
         rootfs.prep_rootfs(target)
     else:
@@ -106,11 +106,10 @@ def drop_into_layer(image_obj, layer_index):
     upto the specified layer index and drop into a shell session"""
     rootfs.set_up()
     if layer_index == 0:
-        # mount only one layer
         target = rootfs.prep_base_layer(image_obj.layers[layer_index].tar_file)
     else:
         # mount all layers uptil the provided layer index
-        target = multi_layer.mount_overlay_fs(image_obj, layer_index)
+        target = multi_layer.prep_layers(image_obj, layer_index)
     mount_path = get_mount_path()
     print("\nWorking directory is: {}\n".format(mount_path))
     # check if there is a shell

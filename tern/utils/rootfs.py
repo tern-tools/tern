@@ -204,7 +204,7 @@ def prep_base_layer(base_layer_tar):
     return target_dir_path
 
 
-def mount_diff_layers(diff_layers_tar, driver=None):
+def mount_diff_layers(diff_layers_tar, driver='overlay2'):
     '''Using overlayfs, mount all the layer tarballs'''
     # make a list of directory paths to give to lowerdir
     lower_dir_paths = []
@@ -218,7 +218,7 @@ def mount_diff_layers(diff_layers_tar, driver=None):
            ',workdir=' + workdir_path
     if driver == 'fuse':
         root_command(fuse_mount, args, merge_dir_path)
-    else:
+    if driver == 'overlay2':
         root_command(union_mount, args, merge_dir_path)
     return merge_dir_path
 

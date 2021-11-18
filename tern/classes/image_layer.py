@@ -322,6 +322,7 @@ class ImageLayer:
                                  os.path.relpath(file_info[2], '.'))
             file_data.set_checksum('sha256', file_info[1])
             file_data.extattrs = file_info[0]
+            file_data.set_whiteout()
             self.add_file(file_data)
 
     def get_layer_workdir(self):
