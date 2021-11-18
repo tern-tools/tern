@@ -23,23 +23,18 @@ remove = ['rm', '-rf']
 check_tar = ['tar', '-tf']
 extract_tar = ['tar', '-x', '-f']
 
-# mount commands
-mount = ['mount', '-o', 'bind']
-mount_proc = ['mount', '-t', 'proc', '/proc']
-mount_sys = ['mount', '-o', 'bind', '/sys']
-mount_dev = ['mount', '-o', 'bind', '/dev']
-unmount = ['umount']
-
 working_dir = None
 
 # enable host DNS settings
 host_dns = ['cp', constants.resolv_path]
 
-# unshare PID within rootfs
-unshare_pid = ['unshare', '-pf']
+# chroot command
+chroot = ['chroot']
 
 # union mount
 union_mount = ['mount', '-t', 'overlay', 'overlay', '-o']
+# unmount union mounts
+unmount = ['umount']
 
 # fuse-overlayfs mount
 fuse_mount = ['fuse-overlayfs', '-o']
@@ -178,21 +173,19 @@ def extract_tarfile(tar_path, directory_path):
 
 
 def prep_rootfs(rootfs_dir):
-    '''Mount required filesystems in the rootfs directory'''
+    """Prepare the rootfs for chroot operation"""
+    # rpm style OSs require a /dev/urandom inode
+    # rpm also requires a pre-configured resolv.conf - which we will
+    # copy from the host
     rootfs_path = os.path.abspath(rootfs_dir)
-    proc_path = os.path.join(rootfs_path, 'proc')
-    sys_path = os.path.join(rootfs_path, 'sys')
     dev_path = os.path.join(rootfs_path, 'dev')
-    if not os.path.exists(proc_path):
-        os.mkdir(proc_path)
-    if not os.path.exists(sys_path):
-        os.mkdir(sys_path)
     if not os.path.exists(dev_path):
         os.mkdir(dev_path)
+    urandom = os.path.join(dev_path, 'urandom')
     try:
-        root_command(mount_proc, os.path.join(rootfs_path, 'proc'))
-        root_command(mount_sys, os.path.join(rootfs_path, 'sys'))
-        root_command(mount_dev, os.path.join(rootfs_path, 'dev'))
+        if not os.path.exists(urandom):
+            root_command(
+                ['mknod', os.path.join(dev_path, 'urandom'), 'c', '1', '9'])
         root_command(host_dns, os.path.join(
             rootfs_path, constants.resolv_path[1:]))
     except subprocess.CalledProcessError as error:
@@ -200,13 +193,14 @@ def prep_rootfs(rootfs_dir):
         raise
 
 
-def mount_base_layer(base_layer_tar):
-    '''To mount to base layer:
-        1. Untar the base layer tar file
-        2. Mount into mergedir'''
-    base_rootfs_path = get_untar_dir(base_layer_tar)
+def prep_base_layer(base_layer_tar):
+    """Given the name of an image's base layer's tar file, prepare the
+    merge directory with the tar file's contents:
+        1. Untar the base layer contents into the merge directory
+        2. Prepare it for chroot operation"""
+    tar_path = os.path.join(get_working_dir(), base_layer_tar)
     target_dir_path = os.path.join(get_working_dir(), constants.mergedir)
-    root_command(mount, base_rootfs_path, target_dir_path)
+    extract_tarfile(tar_path, target_dir_path)
     return target_dir_path
 
 
@@ -232,11 +226,8 @@ def mount_diff_layers(diff_layers_tar, driver=None):
 def run_chroot_command(command_string, shell):
     '''Run the command string in a chroot jail within the rootfs namespace'''
     target_dir = os.path.join(get_working_dir(), constants.mergedir)
-    mount_proc = '--mount-proc=' + os.path.join(
-        os.path.abspath(target_dir), 'proc')
     try:
-        result = root_command(unshare_pid, mount_proc, 'chroot', target_dir,
-                              shell, '-c', command_string)
+        result = root_command(chroot, target_dir, shell, '-c', command_string)
         return result
     except subprocess.CalledProcessError as e:
         logger.warning("Error executing command in chroot")
@@ -253,14 +244,6 @@ def run_host_command(command_string, shell):
         logger.warning("Error executing command in chroot")
         raise subprocess.CalledProcessError(
             1, cmd=command_string, output=None, stderr=e.stderr)
-
-
-def undo_mount():
-    '''Unmount proc, sys, and dev directories'''
-    rootfs_path = os.path.join(get_working_dir(), constants.mergedir)
-    root_command(unmount, os.path.join(rootfs_path, 'proc'))
-    root_command(unmount, os.path.join(rootfs_path, 'sys'))
-    root_command(unmount, os.path.join(rootfs_path, 'dev'))
 
 
 def unmount_rootfs():
@@ -280,10 +263,6 @@ def clean_up():
 def recover():
     '''Recover after some external error'''
     # try to unmount proc, sys and dev first
-    try:
-        undo_mount()
-    except subprocess.CalledProcessError:
-        pass
     try:
         unmount_rootfs()
     except subprocess.CalledProcessError:

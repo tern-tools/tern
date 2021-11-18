@@ -45,7 +45,7 @@ def mount_container_image(image_obj, driver=None):
             image_obj, len(image_obj.layers) - 1, driver)
         rootfs.prep_rootfs(target)
     else:
-        single_layer.mount_first_layer(image_obj.layers[0])
+        single_layer.prep_first_layer(image_obj.layers[0])
 
 
 def look_up_lib(keys):
@@ -107,8 +107,7 @@ def drop_into_layer(image_obj, layer_index):
     rootfs.set_up()
     if layer_index == 0:
         # mount only one layer
-        target = rootfs.mount_base_layer(
-            image_obj.layers[layer_index].tar_file)
+        target = rootfs.prep_base_layer(image_obj.layers[layer_index].tar_file)
     else:
         # mount all layers uptil the provided layer index
         target = multi_layer.mount_overlay_fs(image_obj, layer_index)
@@ -138,7 +137,6 @@ def execute_invoke(image_obj, args):
     # invoke commands in chroot
     invoke_script(args)
     # undo the mounts
-    rootfs.undo_mount()
     rootfs.unmount_rootfs()
     # cleanup
     rootfs.clean_up()
@@ -179,10 +177,6 @@ def execute_step(image_obj, args):
 
 def recover():
     """Undo all the mounts and clean up directories"""
-    try:
-        rootfs.undo_mount()
-    except subprocess.CalledProcessError:
-        pass
     try:
         rootfs.unmount_rootfs()
     except subprocess.CalledProcessError:

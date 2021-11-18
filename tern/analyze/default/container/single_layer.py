@@ -98,13 +98,13 @@ def get_os_style(image_layer, binary):
     image_layer.pkg_format = command_lib.check_pkg_format(binary)
 
 
-def mount_first_layer(layer_obj):
+def prep_first_layer(layer_obj):
     try:
-        target = rootfs.mount_base_layer(layer_obj.tar_file)
+        target = rootfs.prep_base_layer(layer_obj.tar_file)
         rootfs.prep_rootfs(target)
         return target
     except subprocess.CalledProcessError as e:  # nosec
-        logger.critical("Cannot mount filesystem and/or device nodes: %s", e)
+        logger.critical("Cannot create device nodes: %s", e)
         dcom.abort_analysis()
         return None
     except KeyboardInterrupt:
@@ -155,15 +155,12 @@ def analyze_first_layer(image_obj, master_list, options):
         # if there is a binary, extract packages
         if prereqs.binary:
             # mount the first layer
-            target_dir = mount_first_layer(image_obj.layers[0])
+            target_dir = prep_first_layer(image_obj.layers[0])
             # set the host path to the mount point
             if target_dir:
                 prereqs.host_path = target_dir
             # core default execution on the first layer
             core.execute_base(image_obj.layers[0], prereqs)
-            # unmount
-            rootfs.undo_mount()
-            rootfs.unmount_rootfs()
         else:
             logger.warning(errors.no_package_manager)
             image_obj.layers[0].origins.add_notice_to_origins(

@@ -78,7 +78,6 @@ def fresh_analysis(image_obj, curr_layer, prereqs, options):
     else:
         # fall back to executing what we know
         core.execute_base(image_obj.layers[curr_layer], prereqs)
-    rootfs.undo_mount()
     rootfs.unmount_rootfs()
 
 
