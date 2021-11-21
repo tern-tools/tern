@@ -10,7 +10,6 @@ Functions to analyze the subsequent layers in default mode
 import glob
 import logging
 import os
-import shutil
 
 from tern.report import errors
 from tern.utils import constants
@@ -53,9 +52,9 @@ def apply_layers(image_obj, top_layer):
             delpath = os.path.join(target, os.path.dirname(fd.path), deleted)
             if os.path.exists(delpath):
                 if os.path.isfile(delpath):
-                    os.remove(delpath)
+                    rootfs.root_command(['rm'], delpath)
                 else:
-                    shutil.rmtree(delpath)
+                    rootfs.root_command(rootfs.remove, delpath)
                 os.remove(os.path.join(layer_dir, fd.path))
     # Finally, bulk copy the layer contents into the target directory
     # if there are any files to move
@@ -128,6 +127,10 @@ def analyze_subsequent_layers(image_obj, prereqs, master_list, options):
         fresh analysis
         package information and bundle it into the image object
         3. Update the master list"""
+    # if the driver is 'default' then the first layer needs to be extracted
+    mergepath = os.path.join(rootfs.get_working_dir(), constants.mergedir)
+    if not os.listdir(mergepath):
+        prep_layers(image_obj, 0, 'default')
     curr_layer = 1
     # get list of environment variables
     prereqs.envs = lock.get_env_vars(image_obj)
@@ -151,6 +154,9 @@ def analyze_subsequent_layers(image_obj, prereqs, master_list, options):
         if not common.load_from_cache(image_obj.layers[curr_layer],
                                       options.redo):
             fresh_analysis(image_obj, curr_layer, prereqs, options)
+        # If the driver is 'default' apply the current layer anyway
+        if options.driver == 'default':
+            apply_layers(image_obj, curr_layer)
         # update the master list
         dcom.update_master_list(master_list, image_obj.layers[curr_layer])
         curr_layer = curr_layer + 1
