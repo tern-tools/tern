@@ -31,7 +31,6 @@ class ImageLayer:
         import_str: The string from a build tool (like a Dockerfile) that
         layer_index: The index position of the layer in relationship to the
         other layers in the image. The base OS would be layer 1.
-        created this layer by importing it from another image
         files_analyzed: whether the files in this layer are analyzed or not
         analyzed_output: the result of the file analysis
         files: a list of files included in the image layer
