@@ -47,10 +47,10 @@ Tern is a software package inspection tool that can create a Software Bill of Ma
 
 # What is Tern?<a name="what-is-tern">
 Tern is an inspection tool to find the metadata of the packages installed in a container image. The overall operation looks like this:
-1. It uses overlayfs to mount the first filesystem layer (also known as the BaseOS) used to build the container image
-2. It then executes scripts from the "command library" in a chroot environment to collect information about packages installed in that layer
-3. With that information as a starting point, it continues to iterate over steps 1 and 2 for the rest of the layers in the container image
-4. Once done, it generates a report, various format options are available. The report, in its default format, provides a verbose, layer by layer, explanation of the various software components imported. If a Dockerfile is provided, the report indicates the Dockerfile lines corresponding to each of the file system layers.
+1. It analyzes the first layer of the container image to collect information like distro type, package format, and package managers.
+2. It then executes scripts from the "command library" in a chroot environment to collect information about packages installed in that layer.
+3. With that information as a starting point, it continues to analyze the subsequent layers in the container image.
+4. Once done, it generates a report of packages with their metadata. Several formats are available. The report, in its default format, provides a layer by layer, explanation of the various software components imported. If a Dockerfile is provided, the report indicates the Dockerfile lines corresponding to each of the file system layers.
 
 Tern gives you a deeper understanding of your container's bill of materials so you can make better decisions about your container based infrastructure, integration and deployment strategies. It's also a good tool if you are curious about the contents of the container images you have built.
 
@@ -115,13 +115,21 @@ Build the Docker image (called `ternd` here). You may need to use sudo:
 $ docker build -f docker/Dockerfile -t ternd .
 ```
 
+This will install the latest release of tern using pip.
+
+If you want to build a Docker image containing the latest changes to tern, run:
+```
+$ python setup.py sdist
+$ docker build -f ci/Dockerfile -t ternd .
+```
+
 **NOTE**: By default, Tern will run with logging turned on. If you would like to silent the terminal output when running the ternd container, make the following change to the Dockerfile ENTRYPOINT before building:
 
 ```
 --- a/Dockerfile
 +++ b/Dockerfile
--ENTRYPOINT ["tern", "--driver", "fuse"]
-+ENTRYPOINT ["tern", "-q", "--driver", "fuse"]
+-ENTRYPOINT ["tern"]
++ENTRYPOINT ["tern", "-q"]
 ```
 
 Run the script `docker_run.sh`. You may need to use sudo. In the below command `debian` is the docker hub container image name  and `buster` is the tag that identifies the version we are interested in analyzing.
@@ -135,11 +143,14 @@ To produce a json report run
 $ ./docker_run.sh ternd "report -f json -i debian:buster"
 ```
 
-What the `docker_run.sh` script does is run the built container as privileged.
-
-*WARNING:* privileged Docker containers are not secure. DO NOT run this container in production unless you have secured the node (VM or bare metal machine) that the docker daemon is running on.
+What the `docker_run.sh` script does is run the built container.
 
 Tern is not distributed as Docker images yet. This is coming soon. Watch the [Project Status](#project-status) for updates.
+
+**WARNING**: If using the `--driver fuse` or `--driver overlay2` storage driver options, then the docker image needs to run as privileged.
+```
+docker run --privileged -v /var/run/docker.sock:/var/run/docker.sock ternd "--driver fuse report -i debian:buster"
+```
 
 ## Getting Started with Vagrant<a name="getting-started-with-vagrant">
 Vagrant is a tool to setup an isolated virtual software development environment. If you are using Windows or Mac OSes and want to run Tern from the command line (not in a Docker container) this is the best way to get started as Tern does not run natively in a Mac OS or Windows environment at this time.
