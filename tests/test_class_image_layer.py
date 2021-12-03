@@ -4,10 +4,12 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import unittest
+import os
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.package import Package
 from tern.classes.file_data import FileData
+from tern.utils import rootfs
 from test_fixtures import TestTemplate1
 from test_fixtures import TestTemplate2
 
@@ -16,6 +18,7 @@ class TestClassImageLayer(unittest.TestCase):
 
     def setUp(self):
         self.layer = ImageLayer('123abc', 'path/to/tar')
+        rootfs.set_working_dir()
 
     def tearDown(self):
         del self.layer
@@ -145,6 +148,23 @@ class TestClassImageLayer(unittest.TestCase):
             self.layer.extension_info.get("header", None), set)
         header = self.layer.extension_info.get("header").pop()
         self.assertEqual(header, "Test Header")
+
+    def testGetUntarDir(self):
+        self.layer.image_layout = "oci"
+        self.assertEqual(self.layer.image_layout, "oci")
+        self.layer.image_layout = "docker"
+        self.assertEqual(self.layer.image_layout, "docker")
+        self.layer.image_layout = ""
+        self.assertEqual(self.layer.image_layout, "oci")
+        self.layer.layer_index = 1
+        self.assertEqual(self.layer.layer_index, "1")
+        expected_path = os.path.join(rootfs.get_working_dir(),
+                                     '1/contents')
+        self.assertEqual(self.layer.get_untar_dir(), expected_path)
+        self.layer.image_layout = "docker"
+        expected_path = os.path.join(rootfs.get_working_dir(),
+                                     'path/to/contents')
+        self.assertEqual(self.layer.get_untar_dir(), expected_path)
 
 
 if __name__ == '__main__':

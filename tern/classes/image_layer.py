@@ -9,6 +9,7 @@ from tern.classes.package import Package
 from tern.classes.file_data import FileData
 from tern.classes.origins import Origins
 from tern.utils import rootfs
+from tern.utils import constants
 from tern.utils.general import prop_names
 
 
@@ -32,6 +33,8 @@ class ImageLayer:
         layer_index: The index position of the layer in relationship to the
         other layers in the image. The base OS would be layer 1.
         created this layer by importing it from another image
+        image_layout: Indicates the image layout on disk in order to read
+        the layer filesystem. This is either "oci" or "docker".
         files_analyzed: whether the files in this layer are analyzed or not
         analyzed_output: the result of the file analysis
         files: a list of files included in the image layer
@@ -46,6 +49,8 @@ class ImageLayer:
         remove_package: removes a package from the layer
         to_dict: returns a dict representation of the instance
         get_package_names: returns a list of package names
+        get_untar_dir: returns the path where the contents of the layer are
+        untarred.
         gen_fs_hash: calculate the filesystem hash
         add_file: adds a file to the layer
         remove_file: given the file path, remove a file object from the
@@ -67,6 +72,7 @@ class ImageLayer:
         self.__import_image = None
         self.__import_str = ''
         self.__layer_index = ''
+        self.__image_layout = 'oci'
         self.__pkg_format = ''
         self.__os_guess = ''
         self.__files_analyzed = False
@@ -150,7 +156,18 @@ class ImageLayer:
 
     @layer_index.setter
     def layer_index(self, layer_index):
-        self.__layer_index = layer_index
+        self.__layer_index = str(layer_index)
+
+    @property
+    def image_layout(self):
+        return self.__image_layout
+
+    @image_layout.setter
+    def image_layout(self, image_layout):
+        if image_layout in ('oci', 'docker'):
+            self.__image_layout = image_layout
+        else:
+            self.__image_layout = 'oci'
 
     @property
     def pkg_format(self):
@@ -297,19 +314,34 @@ class ImageLayer:
             pkg_list.append(pkg.name)
         return pkg_list
 
+    def get_untar_dir(self):
+        """Get the directory where contents of the image layer are untarred"""
+        # the untar directory is based on the image layout
+        if self.image_layout == 'docker':
+            return os.path.join(rootfs.get_working_dir(),
+                                os.path.dirname(self.tar_file),
+                                constants.untar_dir)
+        # For OCI layouts, the tar file may be at the root of the directory
+        # So we will return a path one level deeper
+        return os.path.join(
+            rootfs.get_working_dir(), self.layer_index, constants.untar_dir)
+
     def gen_fs_hash(self):
         '''Get the filesystem hash if the image class was created with a
         tar_file'''
-        if self.__tar_file:
-            fs_dir = rootfs.get_untar_dir(self.__tar_file)
-            tar_file = rootfs.get_layer_tar_path(self.__tar_file)
+        if self.tar_file:
+            fs_dir = self.get_untar_dir()
+            # make directory structure if it doesn't exist
+            if not os.path.exists(fs_dir):
+                os.makedirs(fs_dir)
+            tar_file = os.path.join(rootfs.get_working_dir(), self.tar_file)
             rootfs.extract_tarfile(tar_file, fs_dir)
             self.__fs_hash = rootfs.calc_fs_hash(fs_dir)
 
     def add_files(self):
         '''Get all the files present in a layer and store
         them as a list of FileData objects'''
-        fs_path = rootfs.get_untar_dir(self.__tar_file)
+        fs_path = self.get_untar_dir()
         hash_file = os.path.join(os.path.dirname(fs_path),
                                  self.__fs_hash) + '.txt'
         with open(hash_file, encoding='utf-8') as f:
