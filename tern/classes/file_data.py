@@ -39,6 +39,7 @@ class FileData:
         urls: a list of urls from where this file could come from
         checksums: a dictionary of the form {<checksum_type>: <checksum>,...}
         checksum types and checksums are stored in lower case
+        is_whiteout: True if the file is a whiteout file
 
     methods:
         to_dict: returns a dictionary representation of the instance
@@ -71,6 +72,7 @@ class FileData:
         self.urls = []
         self.__checksums = {}
         self.__origins = Origins()
+        self.__is_whiteout = False
 
     @property
     def name(self):
@@ -149,6 +151,10 @@ class FileData:
     @property
     def origins(self):
         return self.__origins
+
+    @property
+    def is_whiteout(self):
+        return self.__is_whiteout
 
     def set_checksum(self, checksum_type='', checksum=''):
         '''Set the checksum type and checksum of the file'''
@@ -271,3 +277,9 @@ class FileData:
             return False
         return (self.name == other.name and self.path == other.path and
                 self.checksum == other.checksum)
+
+    def set_whiteout(self):
+        """Based on the file prefix, set whether the file is
+        a whiteout file"""
+        if '.wh.' in self.name:
+            self.__is_whiteout = True

@@ -145,11 +145,12 @@ def main():
                         help="Change default working directory to specified"
                         " absolute path.")
     parser.add_argument('-dr', '--driver', metavar="DRIVER_OPTION",
-                        help="Required when running Tern in a container."
-                        "Using 'fuse' will enable the fuse-overlayfs driver "
-                        "to mount the diff layers of the container. If no "
-                        "input is provided, 'fuse' will be used as the "
-                        "default option.")
+                        default='default',
+                        help="Choose from the following storage drivers: \n"
+                        "overlay2: Use the kernel's overlay2 storage driver\n"
+                        "fuse: Use the fuse-overlayfs system tool\n"
+                        "If no option is given, the default method of "
+                        "applying container layers in userspace will be used.")
 
     # sys.version gives more information than we care to print
     py_ver = sys.version.replace('\n', '').split('[', maxsplit=1)[0]

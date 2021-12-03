@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -9,6 +9,7 @@ Environment prep before analysis and cleanup after
 
 import logging
 import os
+import pkg_resources
 import shutil
 
 from tern.utils import constants
@@ -32,6 +33,9 @@ def setup(working_dir=None):
     rootfs.set_working_dir(working_dir)
     # load the cache
     cache.load()
+    # required to run in a container natively on Windows
+    fs_hash_path = pkg_resources.resource_filename("tern", "tools/fs_hash.sh")
+    rootfs.root_command(["chmod", "+x", fs_hash_path])
 
 
 def teardown(keep=False):
