@@ -62,7 +62,7 @@ def find_os_release(host_path):
 def get_os_release(base_layer):
     """Assuming that the layer tarball is untarred are ready to be inspected,
     get the OS information from the os-release file"""
-    return find_os_release(rootfs.get_untar_dir(base_layer.tar_file))
+    return find_os_release(base_layer.get_untar_dir())
 
 
 def get_os_style(image_layer, binary):

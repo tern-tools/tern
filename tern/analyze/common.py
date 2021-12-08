@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 '''
@@ -18,7 +18,6 @@ from tern.classes.command import Command
 from tern.utils import cache
 from tern.utils import constants
 from tern.utils import general
-from tern.utils import rootfs
 from debian_inspector import debcon
 from debian_inspector import copyright as debut_copyright
 
@@ -152,7 +151,7 @@ def save_to_cache(image):
 
 def is_empty_layer(layer):
     '''Return True if the given image layer is empty'''
-    cwd = rootfs.get_untar_dir(layer.tar_file)
+    cwd = layer.get_untar_dir()
     if len(os.listdir(cwd)) == 0:
         return True
     return False

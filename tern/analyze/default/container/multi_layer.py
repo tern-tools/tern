@@ -41,7 +41,7 @@ def apply_layers(image_obj, top_layer):
     """Apply image diff layers without using a kernel snapshot driver"""
     # All merging happens in the merge directory
     target = os.path.join(rootfs.get_working_dir(), constants.mergedir)
-    layer_dir = rootfs.get_untar_dir(image_obj.layers[top_layer].tar_file)
+    layer_dir = image_obj.layers[top_layer].get_untar_dir()
     layer_contents = layer_dir + '/*'
     # Account for whiteout files
     for fd in image_obj.layers[top_layer].files:

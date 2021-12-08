@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -9,7 +9,6 @@ Use an external tool to analyze a container image
 
 
 import logging
-import os
 import shutil
 from stevedore import driver
 from stevedore.exception import NoMatches
@@ -46,18 +45,7 @@ def get_filesystem_command(layer_obj, command):
     # is the last token in the command. So the most straightforward way
     # to perform this operation is to append the target directory
     cmd_list = get_exec_command(command)
-    cmd_list.append(rootfs.get_untar_dir(layer_obj.tar_file))
-    return cmd_list
-
-
-def get_file_command(layer_tar_file, layer_file, command):
-    '''Given an ImageLayer object's tar_file property and a FileData object
-    from that layer, along with the command, return the command in list form
-    with the target file appended at the end'''
-    cmd_list = get_exec_command(command)
-    file_path = os.path.join(
-        rootfs.get_untar_dir(layer_tar_file), layer_file.path)
-    cmd_list.append(file_path)
+    cmd_list.append(layer_obj.get_untar_dir())
     return cmd_list
 
 

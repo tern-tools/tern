@@ -44,7 +44,7 @@ def find_shell(fspath):
 def get_shell(layer):
     '''Find the shell if any on the layer filesystem. Assume that the layer
     has already been unpacked. If there is no shell, return an empty string'''
-    cwd = rootfs.get_untar_dir(layer.tar_file)
+    cwd = layer.get_untar_dir()
     return find_shell(cwd)
 
 
@@ -54,7 +54,7 @@ def get_base_bin(first_layer):
     image and looking for known binaries there. Assume that the layer has
     already been unpacked with the filesystem'''
     binary = ''
-    cwd = rootfs.get_untar_dir(first_layer.tar_file)
+    cwd = first_layer.get_untar_dir()
     for key, value in command_lib.command_lib['base'].items():
         for path in value['path']:
             if os.path.exists(os.path.join(cwd, path)):
