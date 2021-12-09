@@ -24,6 +24,7 @@ RUN echo "deb http://deb.debian.org/debian bullseye main" > /etc/apt/sources.lis
     fuse3/bullseye \
     git \
     jq \
+    skopeo \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /install /usr/local
