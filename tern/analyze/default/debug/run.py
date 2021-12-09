@@ -136,7 +136,8 @@ def execute_invoke(image_obj, args):
     # invoke commands in chroot
     invoke_script(args)
     # undo the mounts
-    rootfs.unmount_rootfs()
+    if args.driver in ('fuse', 'overlay2'):
+        rootfs.unmount_rootfs()
     # cleanup
     rootfs.clean_up()
     if not args.keep_wd:
