@@ -26,10 +26,10 @@ from tern.analyze.default.container import single_layer
 from tern.analyze.default.container import multi_layer
 
 
-def check_image_obj(image_string):
+def check_image_obj(image_string, image_type):
     """Return the image object and if it was loaded successfully"""
     if image_string:
-        full_image = cimage.load_full_image(image_string)
+        full_image = cimage.load_full_image(image_string, image_type)
         if full_image.origins.is_empty():
             return full_image, True
         print("Something went wrong in loading the image")
@@ -190,9 +190,9 @@ def recover():
 
 def execute_debug(args):
     """Debug container images"""
-    if args.docker_image:
-        image_string = run.extract_image(args)
-        full_image, success = check_image_obj(image_string)
+    if args.image:
+        image_type, image_string = run.extract_image(args)
+        full_image, success = check_image_obj(image_string, image_type)
         if success:
             if args.keys:
                 # we have an image to mount and some scripts to invoke

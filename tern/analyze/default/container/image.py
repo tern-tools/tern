@@ -13,6 +13,7 @@ import subprocess  # nosec
 
 from tern.classes.notice import Notice
 from tern.classes.docker_image import DockerImage
+from tern.classes.oci_image import OCIImage
 from tern.utils import constants
 from tern.analyze import passthrough
 from tern.analyze.default.container import single_layer
@@ -23,14 +24,19 @@ from tern.report import formats
 logger = logging.getLogger(constants.logger_name)
 
 
-def load_full_image(image_tag_string, load_until_layer=0):
-    '''Create image object from image name and tag and return the object.
-    Loads only as many layers as needed.'''
-    test_image = DockerImage(image_tag_string)
+def load_full_image(image_tag_string, image_type='oci', load_until_layer=0):
+    """Create image object from image name and tag and return the object.
+    The kind of image object is created based on the image_type.
+    image_type = oci OR docker
+    Loads only as many layers as needed."""
+    if image_type == 'oci':
+        image = OCIImage(image_tag_string)
+    elif image_type == 'docker':
+        image = DockerImage(image_tag_string)
     failure_origin = formats.image_load_failure.format(
-        testimage=test_image.repotag)
+        testimage=image.repotag)
     try:
-        test_image.load_image(load_until_layer)
+        image.load_image(load_until_layer)
     except (NameError,
             subprocess.CalledProcessError,
             IOError,
@@ -38,9 +44,9 @@ def load_full_image(image_tag_string, load_until_layer=0):
             ValueError,
             EOFError) as error:
         logger.warning('Error in loading image: %s', str(error))
-        test_image.origins.add_notice_to_origins(
+        image.origins.add_notice_to_origins(
             failure_origin, Notice(str(error), 'error'))
-    return test_image
+    return image
 
 
 def default_analyze(image_obj, options):
