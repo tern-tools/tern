@@ -88,6 +88,20 @@ dpkg:
         container:
           - "dpkg-query -W -f '${Version}\n'"
     delimiter: "\n"
+  source_names:
+    invoke:
+      1:
+        container:
+          - "pkgs=`dpkg-query -W -f '${Package}\n'`"
+          - "for p in $pkgs; do dpkg-query -f '${{source:Package}}\n' -W $p; done"
+    delimiter: "\n"
+  source_versions:
+    invoke:
+      1:
+        container:
+          - "pkgs=`dpkg-query -W -f '${Package}\n'`"
+          - "for p in $pkgs; do dpkg-query -f '${{source:Version}}\n' -W $p; done"
+    delimiter: "\n"
   copyrights:
     invoke:
       1:
@@ -228,6 +242,22 @@ rpm:
       1:
         container:
           - 'rpm --query --all --queryformat "%{license}\n" 2>/dev/null'
+    delimiter: "\n"
+  source_names:
+    invoke:
+      1:
+        container:
+          - "pkgs=`rpm --query --all --queryformat \"%{name}\n\" 2>/dev/null`"
+          - |
+            for p in $pkgs; do rpm -q --qf "%{SOURCERPM}\n" "$p" | sed 's/-[0-9].*\.src\.rpm$//'; done
+    delimiter: "\n"
+  source_versions:
+    invoke:
+      1:
+        container:
+          - "pkgs=`rpm --query --all --queryformat \"%{name}\n\" 2>/dev/null`"
+          - |
+            for p in $pkgs; do srcrpm="$(rpm -q --qf "%{SOURCERPM}\n" "$p")"; name="$( echo "${srcrpm}" | sed 's/-[0-9].*\.src\.rpm$//' )";version="$( echo "${srcrpm}" | sed "s/^${name}-\(.*\)\..*\.src\.rpm\$/\1/" )";echo "${version}"; done
     delimiter: "\n"
   files:
     invoke:
