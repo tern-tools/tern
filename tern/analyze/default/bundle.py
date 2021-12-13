@@ -50,7 +50,9 @@ def convert_to_pkg_dicts(attr_lists):
                'copyright': 'copyrights',
                'proj_url': 'proj_urls',
                'pkg_licenses': 'pkg_licenses',
-               'files': 'files'}
+               'files': 'files',
+               'src_name': 'source_names',
+               'src_version': 'source_versions'}
     pkg_list = []
     len_names = len(attr_lists['names'])
     # make a list of keys that correspond with package property names

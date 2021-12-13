@@ -23,6 +23,8 @@ class TestClassPackage(unittest.TestCase):
         self.p1.checksum = '123abc456'
         self.p1.pkg_licenses = ['MIT', 'GPL']
         self.p1.pkg_format = 'deb'
+        self.p1.src_name = 'p1src'
+        self.p1.src_version = '1.0'
 
         self.p2 = Package('p2')
 
@@ -74,6 +76,8 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p1.checksum, '123abc456')
         self.assertEqual(self.p1.pkg_licenses, ['MIT', 'GPL'])
         self.assertEqual(self.p1.pkg_format, 'deb')
+        self.assertEqual(self.p1.src_name, 'p1src')
+        self.assertEqual(self.p1.src_version, '1.0')
 
     def testAddFile(self):
         p1 = Package('package')
@@ -124,6 +128,8 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(a_dict['files'][0]['path'], 'abc/pqr/test.java')
         self.assertEqual(a_dict['pkg_licenses'], ['MIT', 'GPL'])
         self.assertEqual(a_dict['pkg_format'], 'deb')
+        self.assertEqual(a_dict['src_name'], 'p1src')
+        self.assertEqual(a_dict['src_version'], '1.0')
 
     def testToDictTemplate(self):
         template1 = TestTemplate1()
@@ -167,7 +173,10 @@ class TestClassPackage(unittest.TestCase):
                   'pkg_licenses': ['MIT', 'GPL'],
                   'files': [{'name': 'a.txt', 'path': '/usr/a.txt'},
                             {'name': 'b.txt', 'path': '/lib/b.txt'}],
-                  'pkg_format': 'rpm'}
+                  'pkg_format': 'rpm',
+                  'src_name': 'p1src',
+                  'src_version': '1.0'
+                  }
         p = Package('p1')
         p.fill(p_dict)
         self.assertEqual(p.name, 'p1')

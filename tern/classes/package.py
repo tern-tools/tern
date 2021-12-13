@@ -22,6 +22,8 @@ class Package:
         checksum: checksum as package property
         files: list of files in a package
         pkg_licenses: all licenses found within a package
+        src_name: the source package associated with the binary package
+        src_version: the source package version
 
     methods:
         to_dict: returns a dict representation of the instance
@@ -43,6 +45,8 @@ class Package:
         self.__files = []
         self.__pkg_licenses = []
         self.__pkg_format = ''
+        self.__src_name = ''
+        self.__src_version = ''
 
     @property
     def name(self):
@@ -124,6 +128,22 @@ class Package:
     def pkg_format(self, pkg_format):
         self.__pkg_format = pkg_format
 
+    @property
+    def src_name(self):
+        return self.__src_name
+
+    @src_name.setter
+    def src_name(self, src_name):
+        self.__src_name = src_name
+
+    @property
+    def src_version(self):
+        return self.__src_version
+
+    @src_version.setter
+    def src_version(self, src_version):
+        self.__src_version = src_version
+
     def get_file_paths(self):
         """Return a list of paths of all the files in a package"""
         return [f.path for f in self.__files]
@@ -195,6 +215,8 @@ class Package:
             copyright: <package copyright text>
             proj_url: <project url>
             files: <package files>
+            src_name: <source package>
+            src_ver: <source package version>
         the way to use this method is to instantiate the class with the
         name and then give it a package dictionary to fill in the rest
         return true if package name is the same as the one used to instantiate
