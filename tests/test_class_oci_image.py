@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2021 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 import unittest
 
-from tern.load.docker_api import dump_docker_image
-from tern.classes.docker_image import DockerImage
+from tern.load import skopeo
+from tern.classes.oci_image import OCIImage
 from tern.utils import rootfs
 from test_fixtures import create_working_dir
 from test_fixtures import remove_working_dir
 
 
-class TestClassDockerImage(unittest.TestCase):
+class TestClassOCIImage(unittest.TestCase):
 
     def setUp(self):
         '''Using a specific image here. If this test fails due to the image
@@ -21,10 +21,10 @@ class TestClassDockerImage(unittest.TestCase):
         create_working_dir()
         rootfs.set_working_dir()
         # this should check if the docker image extraction is successful
-        dump_docker_image('vmware/tern@sha256:20b32a9a20752aa1ad7582c667704f'
+        skopeo.pull_image('vmware/tern@sha256:20b32a9a20752aa1ad7582c667704f'
                           'da9f004cc4bfd8601fac7f2656c7567bb4')
-        self.image = DockerImage('vmware/tern@sha256:20b32a9a20752aa1ad7582c6'
-                                 '67704fda9f004cc4bfd8601fac7f2656c7567bb4')
+        self.image = OCIImage('vmware/tern@sha256:20b32a9a20752aa1ad7582c6'
+                              '67704fda9f004cc4bfd8601fac7f2656c7567bb4')
         # constants for this image
         self.layer = ('c1c3a87012e7ff5791b31e94515b661'
                       'cdf06f6d5dc2f9a6245eda8774d257a13')
@@ -67,16 +67,15 @@ class TestClassDockerImage(unittest.TestCase):
                                              '7704fda9f004cc4bfd8601fac7'
                                              'f2656c7567bb4')
         self.assertFalse(self.image.manifest)
-        self.assertFalse(self.image.repotags)
         self.assertFalse(self.image.config)
         self.assertFalse(self.image.layers)
         self.assertFalse(self.image.history)
         # test instantiating with a tag
-        d = DockerImage('vmware/tern:testimage')
-        self.assertEqual(d.name, 'vmware/tern')
-        self.assertEqual(d.tag, 'testimage')
-        self.assertFalse(d.checksum_type)
-        self.assertFalse(d.checksum)
+        o = OCIImage('vmware/tern:testimage')
+        self.assertEqual(o.name, 'vmware/tern')
+        self.assertEqual(o.tag, 'testimage')
+        self.assertFalse(o.checksum_type)
+        self.assertFalse(o.checksum)
 
     def testLoadImage(self):
         self.image.load_image()
@@ -94,7 +93,6 @@ class TestClassDockerImage(unittest.TestCase):
     def testLayerFiles(self):
         self.image.load_image()
         self.assertFalse(self.image.layers[0].files)
-        print(self.image.layers[0].image_layout)
         self.image.layers[0].add_files()
         for file in self.image.layers[0].files:
             self.assertTrue(

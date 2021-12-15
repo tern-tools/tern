@@ -54,7 +54,7 @@ def teardown(keep=False):
 def clean_image_tars(image_obj):
     """Given an image object, clean up all the image layer contents"""
     for layer in image_obj.layers:
-        fspath = rootfs.get_untar_dir(layer.tar_file)
+        fspath = layer.get_untar_dir()
         if os.path.exists(fspath):
             rootfs.root_command(rootfs.remove, fspath)
 

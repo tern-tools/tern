@@ -30,10 +30,10 @@ logger = logging.getLogger(constants.logger_name)
 def mount_overlay_fs(image_obj, top_layer, driver):
     '''Given the image object and the top most layer, mount all the layers
     until the top layer using overlayfs'''
-    tar_layers = []
+    layer_paths = []
     for index in range(0, top_layer + 1):
-        tar_layers.append(image_obj.layers[index].tar_file)
-    target = rootfs.mount_diff_layers(tar_layers, driver)
+        layer_paths.append(image_obj.layers[index].get_untar_dir())
+    target = rootfs.mount_diff_layers(layer_paths, driver)
     return target
 
 
@@ -41,7 +41,7 @@ def apply_layers(image_obj, top_layer):
     """Apply image diff layers without using a kernel snapshot driver"""
     # All merging happens in the merge directory
     target = os.path.join(rootfs.get_working_dir(), constants.mergedir)
-    layer_dir = rootfs.get_untar_dir(image_obj.layers[top_layer].tar_file)
+    layer_dir = image_obj.layers[top_layer].get_untar_dir()
     layer_contents = layer_dir + '/*'
     # Account for whiteout files
     for fd in image_obj.layers[top_layer].files:

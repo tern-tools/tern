@@ -70,8 +70,8 @@ def check_image_input(options):
             logger.critical(errors.incorrect_raw_option)
             sys.exit(1)
     # Check if the image string has the right format
-    if options.docker_image:
-        if not check_image_string(options.docker_image):
+    if options.image:
+        if not check_image_string(options.image):
             logger.critical(errors.incorrect_image_string_format)
             sys.exit(1)
 
@@ -108,9 +108,9 @@ def do_main(args):
                 drun.execute_dockerfile(args)
             else:
                 logger.critical("Currently --layer/-y can only be used with"
-                                " --docker-image/-i")
+                                " --image/-i")
                 sys.exit(1)
-        elif args.docker_image or args.raw_image:
+        elif args.image or args.raw_image:
             check_image_input(args)
             # If the checks are OK, execute for docker image
             crun.execute_image(args)
@@ -167,15 +167,13 @@ def main():
     parser_report.add_argument('-d', '--dockerfile', type=check_file_existence,
                                help="Dockerfile used to build the Docker"
                                " image")
-    parser_report.add_argument('-i', '--docker-image',
-                               help="Docker image that exists locally -"
-                               " image:tag"
-                               " The option can be used to pull docker"
-                               " images by digest as well -"
-                               " <repo>@<digest-type>:<digest>")
+    parser_report.add_argument('-i', '--image',
+                               help="A container image referred either by "
+                               " repo:tag or repo@digest-type:digest")
     parser_report.add_argument('-w', '--raw-image', metavar='FILE',
                                help="Raw container image that exists locally "
-                               "in the form of a tar archive.")
+                               "in the form of a tar archive. Only the output"
+                               "of 'docker save' is supported")
     parser_report.add_argument('-y', '--layer', metavar='LAYER_NUMBER',
                                const=1, action='store',
                                dest='load_until_layer',

@@ -148,12 +148,20 @@ def manifest_handler(list_obj, indent):
 
 
 def layers_handler(list_obj, indent):
-    '''Write html code for the origins list in the report
+    '''Write html code for the layers list in the report
     with tar_file hash as title'''
     html_string = '  '*indent + '<ul class ="nested"> \n'
     for lo in list_obj:
+        # check whether the item is a dictionary that contains the "tar_file"
+        # property or not
+        if "tar_file" in lo:
+            title = str(lo["tar_file"][:10])
+        elif "digest" in lo:
+            title = str(lo["digest"][:10])
+        else:
+            title = list_obj.index(lo)
         html_string = html_string + '  '*indent + '<li><span class="caret">' \
-            + str(lo["tar_file"][:10]) + ' : ' + '</span> \n '
+            + title + ' : ' + '</span> \n '
         html_string = html_string + dict_handler(lo, indent+1)
         html_string = html_string + '  '*indent + '</li> \n'
     html_string = html_string + '  '*indent + '</ul> \n'

@@ -56,7 +56,6 @@ Tern gives you a deeper understanding of your container's bill of materials so y
 
 ![Tern quick demo](/docs/img/tern_demo_fast.gif)
 
-
 # Getting Started<a name="getting-started"/>
 
 ## GitHub Action<a name="github-action"/>
@@ -70,13 +69,16 @@ If you have a Linux OS you will need a distro with a kernel version >= 4.0 (Ubun
 - Python 3.6 or newer (sudo apt-get install python3.6(3.7) or sudo dnf install python36(37))
 - Pip (sudo apt-get install python3-pip).
 - jq (sudo apt-get install jq or sudo dnf install jq)
+- skopeo (See [here](https://github.com/containers/skopeo/blob/main/install.md) for installation instructions or building from source)
 
-Some distro versions have all of these except `attr` and/or `jq` preinstalled but both are common utilities and are available via the package manager.
+Some distro versions have all of these except `attr`, `jq`, and/or `skopeo` preinstalled. `attr` and `jq` are common utilities and are available via the package manager. `skopeo` has only recently been packaged for common Linux distros. If you don't see your distro in the list, your best bet is building from source, which is reasonably straightforward if you have Go installed.
 
-For Docker containers
+For analyzing Dockerfiles and to use the "lock" function
 - Docker CE (Installation instructions can be found here: https://docs.docker.com/engine/installation/#server)
 
-Make sure the docker daemon is running.
+*NOTE:* We do not provide advice on the usage of [Docker Desktop](https://www.docker.com/blog/updating-product-subscriptions/)
+
+Once installed, make sure the docker daemon is running.
 
 Create a python3 virtual environment:
 ```
@@ -103,7 +105,7 @@ $ tern report -o output.txt -i debian:buster
 ```
 
 ## Getting Started with Docker<a name="getting-started-with-docker">
-Docker is the most widely used tool to build and run containers. If you already have Docker installed, you can run Tern by building a container with the Dockerfile provided and the `docker_run.sh` script:
+Docker is the most widely used tool to build and run containers. If you already have Docker installed, you can run Tern by building a container with the Dockerfile provided.
 
 Clone this repository:
 ```
@@ -132,7 +134,13 @@ $ docker build -f ci/Dockerfile -t ternd .
 +ENTRYPOINT ["tern", "-q"]
 ```
 
-Run the script `docker_run.sh`. You may need to use sudo. In the below command `debian` is the docker hub container image name  and `buster` is the tag that identifies the version we are interested in analyzing.
+Run the ternd container image
+
+```
+$ docker run --rm ternd report -i debian:buster
+```
+
+If you are using this container to analyze Dockerfiles and to use the "lock" feature, then you must volume mount the docker socket. We have a convenience script which will do that for you. 
 
 ```
 $ ./docker_run.sh ternd "report -i debian:buster" > output.txt
@@ -143,14 +151,15 @@ To produce a json report run
 $ ./docker_run.sh ternd "report -f json -i debian:buster"
 ```
 
-What the `docker_run.sh` script does is run the built container.
-
 Tern is not distributed as Docker images yet. This is coming soon. Watch the [Project Status](#project-status) for updates.
 
 **WARNING**: If using the `--driver fuse` or `--driver overlay2` storage driver options, then the docker image needs to run as privileged.
+
 ```
-docker run --privileged -v /var/run/docker.sock:/var/run/docker.sock ternd "--driver fuse report -i debian:buster"
+docker run --privileged -v /var/run/docker.sock:/var/run/docker.sock ternd --driver fuse report -i debian:buster
 ```
+
+You can make this change to the `docker_run.sh` script to make it easier.
 
 ## Getting Started with Vagrant<a name="getting-started-with-vagrant">
 Vagrant is a tool to setup an isolated virtual software development environment. If you are using Windows or Mac OSes and want to run Tern from the command line (not in a Docker container) this is the best way to get started as Tern does not run natively in a Mac OS or Windows environment at this time.

@@ -121,17 +121,6 @@ def get_working_dir():
     return os.path.join(working_dir, constants.temp_folder)
 
 
-def get_untar_dir(layer_tarfile):
-    '''get the directory to untar the layer tar file'''
-    return os.path.join(get_working_dir(), os.path.dirname(
-        layer_tarfile), constants.untar_dir)
-
-
-def get_layer_tar_path(layer_tarfile):
-    '''get the full path of the layer tar file'''
-    return os.path.join(get_working_dir(), layer_tarfile)
-
-
 def set_up():
     '''Create required directories'''
     op_dir = get_working_dir()
@@ -204,14 +193,12 @@ def prep_base_layer(base_layer_tar):
     return target_dir_path
 
 
-def mount_diff_layers(diff_layers_tar, driver='overlay2'):
-    '''Using overlayfs, mount all the layer tarballs'''
+def mount_diff_layers(diff_layer_paths, driver='overlay2'):
+    """Given a list of diff filesystem layer paths, mount all the layers
+    using an overlay driver. Supported drivers are 'fuse' and 'overlay2'"""
     # make a list of directory paths to give to lowerdir
-    lower_dir_paths = []
-    for layer_tar in diff_layers_tar:
-        lower_dir_paths.append(get_untar_dir(layer_tar))
-    upper_dir = lower_dir_paths.pop()
-    lower_dir = ':'.join(list(reversed(lower_dir_paths)))
+    upper_dir = diff_layer_paths.pop()
+    lower_dir = ':'.join(list(reversed(diff_layer_paths)))
     merge_dir_path = os.path.join(get_working_dir(), constants.mergedir)
     workdir_path = os.path.join(get_working_dir(), constants.workdir)
     args = 'lowerdir=' + lower_dir + ',upperdir=' + upper_dir + \
