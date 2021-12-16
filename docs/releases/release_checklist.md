@@ -34,8 +34,8 @@ This is a checklist for cutting a release
       - Future Work
       - Changelog     
         * "Note: This changelog will not include these release notes"
-        * "Changelog produced by command: `git log --pretty=format:"%h %s" v<tag>..main`"
-      - Contributors (look at Authors in the changelog `git log --pretty=format:"%an %ae" v<tag>..main | sort | uniq`). Remove the maintainers name from the contributor list.
+        * "Changelog produced by command: `git log --pretty=format:"%h %s" v<tag>..HEAD`"
+      - Contributors (look at Authors in the changelog `git log --pretty=format:"%an %ae" v<tag>..HEAD | sort | uniq`). Remove the maintainers name from the contributor list.
       - Contact the Maintainers
 
     * Update the Project Status part of the README.md to reflect this release and add it to the list of releases.
