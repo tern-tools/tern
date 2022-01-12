@@ -30,6 +30,7 @@ RUN echo "deb http://deb.debian.org/debian bullseye main" > /etc/apt/sources.lis
     git \
     jq \
     libgomp1 \
+    skopeo \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /install /usr/local
