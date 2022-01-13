@@ -10,6 +10,8 @@ Helper functions for image level JSON CycloneDX document dictionaries
 
 from tern.formats.cyclonedx import cyclonedx_common
 from packageurl import PackageURL
+from tern.classes.oci_image import OCIImage
+from tern.classes.docker_image import DockerImage
 
 
 def get_image_dict(image_obj):
@@ -28,9 +30,11 @@ def get_image_dict(image_obj):
     purl = PackageURL('docker', None, image_dict['name'], image_dict['version'])
     image_dict['purl'] = str(purl)
 
-    if image_obj.repotags:
+    if isinstance(image_obj, DockerImage):
         for repotag in image_obj.repotags:
             image_dict['properties'].append(cyclonedx_common.get_property('tern:repotag', repotag))
+    elif isinstance(image_obj, OCIImage):
+        image_dict['properties'].append(cyclonedx_common.get_property('tern:repotag', image_obj.repotag))
 
     os_guess = cyclonedx_common.get_os_guess(image_obj)
     if os_guess:

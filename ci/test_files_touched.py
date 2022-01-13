@@ -99,7 +99,8 @@ test_suite = {
         'tern report -f spdxtagvalue -i photon:3.0',
         'tern report -f spdxjson -i photon:3.0',
         'tern report -d samples/alpine_python/Dockerfile',
-        'tern report -f html -i photon:3.0'],
+        'tern report -f html -i photon:3.0',
+        'tern report -f cyclonedxjson -i photon:3.0'],
     # tern/formats/spdx
     re.compile('tern/formats/spdx'): [
         'tern report -f spdxtagvalue -i photon:3.0 -o spdx.spdx && ' \
