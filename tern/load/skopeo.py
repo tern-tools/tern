@@ -7,6 +7,7 @@
 Interactions with remote container images using skopeo
 """
 
+import json
 import logging
 import sys
 import shutil
@@ -40,3 +41,23 @@ def pull_image(image_tag_string):
         logger.error("Error when downloading image: \"%s\"", error)
         return None
     return result
+
+
+def get_image_digest(image_tag_string):
+    """Use skopeo to get the remote image's digest"""
+    # check if skopeo is set up
+    check_skopeo_setup()
+    remote = f'docker://{image_tag_string}'
+    logger.debug("Inspecting remote image \"%s\"", image_tag_string)
+    result, error = rootfs.shell_command(
+        False, ['skopeo', 'inspect', remote])
+    if error or not result:
+        logger.error("Unable to retrieve image digest")
+        return None, None
+    result_string = json.loads(result)
+    digest_string = result_string.get("Digest")
+    if not digest_string:
+        logger.error("No image digest available")
+        return None, None
+    digest_list = digest_string.split(":")
+    return digest_list[0], digest_list[1]
