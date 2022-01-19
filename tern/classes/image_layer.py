@@ -338,6 +338,45 @@ class ImageLayer:
             rootfs.extract_tarfile(tar_file, fs_dir)
             self.__fs_hash = rootfs.calc_fs_hash(fs_dir)
 
+    def _parse_hash_content(self, content):
+        """This is an internal function to parse the content of the hash
+        and return a list of FileData objects
+        The content consists of lines of the form:
+        permissions|uid|gid|size|hard links|  sha256sum  filepath xattrs
+        where xattrs is the list of extended attributes for the file
+        The extended attributes start with a '# file' indicator, followed
+        by a list of key-value pairs separated by newlines. For now, we will
+        conserve the key-value pair list as they appear and separate
+        each one by a comma"""
+        file_list = []
+        # keep track of where we are on the list of files
+        index = 0
+        # loop through the content
+        while content:
+            line = content.pop(0)
+            if "# file" in line:
+                # collect the extended attributes
+                xattrlist = []
+                xattrline = content.pop(0)
+                while xattrline != '\n':
+                    xattrlist.append(xattrline.strip())
+                    xattrline = content.pop(0)
+                # when we break out of the extended attributes loop
+                # we combine the results and update the FileData object
+                # existing in the previous index
+                file_list[index-1].extattrs = file_list[index-1].extattrs + \
+                    "  " + ','.join(xattrlist)
+            else:
+                # collect the regular attributes
+                file_info = line[:-1].split('  ')
+                file_data = FileData(os.path.basename(file_info[2]),
+                                     os.path.relpath(file_info[2], '.'))
+                file_data.set_checksum('sha256', file_info[1])
+                file_data.set_whiteout()
+                file_list.append(file_data)
+                index = index + 1
+        return file_list
+
     def add_files(self):
         '''Get all the files present in a layer and store
         them as a list of FileData objects'''
@@ -346,15 +385,8 @@ class ImageLayer:
                                  self.__fs_hash) + '.txt'
         with open(hash_file, encoding='utf-8') as f:
             content = f.readlines()
-        for line in content:
-            # lines are of the form:
-            # permissions|uid|gid|size|hard links|  sha256sum  filepath
-            file_info = line[:-1].split('  ')
-            file_data = FileData(os.path.basename(file_info[2]),
-                                 os.path.relpath(file_info[2], '.'))
-            file_data.set_checksum('sha256', file_info[1])
-            file_data.extattrs = file_info[0]
-            file_data.set_whiteout()
+        file_list = self._parse_hash_content(content)
+        for file_data in file_list:
             self.add_file(file_data)
 
     def get_layer_workdir(self):
