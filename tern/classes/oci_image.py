@@ -11,6 +11,7 @@ from tern.utils import general
 from tern.classes.image import Image
 from tern.utils.constants import manifest_file
 from tern.classes.image_layer import ImageLayer
+from tern.load import skopeo
 
 
 class OCIImage(Image):
@@ -100,12 +101,11 @@ class OCIImage(Image):
             self.__history = self.get_image_history(self._config)
             layer_paths = self.get_image_layers(self._manifest)
             layer_diffs = self.get_diff_ids(self._config)
-            # if the digest isn't in the repotag, get it from the config
+            # if the digest isn't in the repotag, get it using skopeo
             if not self.checksum:
-                repo_dict = general.parse_image_string(
-                    self._config.get("config").get("Image"))
-                self.set_checksum(repo_dict.get("digest_type"),
-                                  repo_dict.get("digest"))
+                digest_type, digest = skopeo.get_image_digest(self.repotag)
+                if digest_type and digest:
+                    self.set_checksum(digest_type, digest)
             layer_checksum_type = self.get_diff_checksum_type(self._config)
             layer_count = 1
             while layer_diffs and layer_paths:
