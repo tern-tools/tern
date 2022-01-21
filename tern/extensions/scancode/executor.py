@@ -81,14 +81,20 @@ def filter_pkg_license(declared_license):
     it will represent the license as a string or list of strings.
     Given a scancode declared_license field, extract and return a
     license string'''
-    if isinstance(declared_license, dict):
+    if isinstance(declared_license, dict) and len(declared_license) != 0:
         try:
             return declared_license['license']
         except KeyError:
-            # parse classifiers for PyPI licenses
-            # According to https://pypi.org/pypi?%3Aaction=list_classifiers
-            # we can always take the value after the last '::'
-            return declared_license['classifiers'][0].split('::')[-1].strip()
+            try:
+                return declared_license['License']
+            except KeyError:
+                try:
+                    # parse classifiers for PyPI licenses
+                    # According to pypi.org/pypi?%3Aaction=list_classifiers
+                    # we can always take the value after the last '::'
+                    return declared_license['classifiers'][0].split('::')[-1].strip()
+                except KeyError:
+                    return None
     if isinstance(declared_license, list):
         for i, lic in enumerate(declared_license):
             # Some license lists from Scancode have dictionary entries
