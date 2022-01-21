@@ -9,11 +9,11 @@
 PyYAML>=6.0
 docker~=5.0
 dockerfile-parse~=1.2
-requests~=2.26
+requests~=2.27
 stevedore>=3.5
 pbr>=5.8
 debian-inspector>=30.0
-regex>=2021.11
+regex>=2022.1
 GitPython~=3.1
-prettytable~=2.4
+prettytable~=3.0
 packageurl-python>=0.9.6
