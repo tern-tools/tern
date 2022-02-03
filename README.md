@@ -19,6 +19,7 @@ Tern is a software package inspection tool that can create a Software Bill of Ma
   - [GitHub Action](#github-action)
   - [Getting Started on Linux](#getting-started-on-linux)
   - [Getting Started with Docker](#getting-started-with-docker)
+  - [Creating a Kubernetes Job](#k8s-job)
   - [Getting Started with Vagrant](#getting-started-with-vagrant)
 - [Using Tern](#using-tern)
   - [Generating an SBoM report for a Docker image](#sbom-for-docker-image)
@@ -160,6 +161,60 @@ docker run --privileged -v /var/run/docker.sock:/var/run/docker.sock ternd --dri
 ```
 
 You can make this change to the `docker_run.sh` script to make it easier.
+
+## Creating a Kubernetes Job<a name="k8s-job">
+A Tern container can be deployed on Kubernetes as a Job. However, a host mount is required to retrieve the reports. We will describe below how to create a Kubernetes Job within minikube.
+
+To install minikube, follow [these instructions](https://minikube.sigs.k8s.io/docs/start/). If using a virtual machine manager, make sure it [supports volume mounts](https://minikube.sigs.k8s.io/docs/handbook/mount/#driver-mounts). We will be using VirtualBox in this example.
+
+Download the existing Tern Dockerfile
+```
+$ wget https://raw.githubusercontent.com/tern-tools/tern/main/docker/Dockerfile
+```
+
+Start minikube
+```
+$ minikube start --driver=virtualbox
+```
+
+Use minikube to build the Tern container image
+```
+$ minikube image build -t tern:test -f Dockerfile .
+```
+
+Once build has completed, you should see the image by running `minikube image ls`. It should look something like `docker.io/library/tern:test`.
+
+We are now ready to create a Job. You can modify the following YAML according to your host's filesystem:
+
+```
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tern
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - image: docker.io/library/tern:test
+	# in order run the job for other containers, replace the "-i" argument here
+        command: ["tern", "report", "-i", "docker.io/library/debian:buster", "-o", "/host/report.txt"]
+        name: tern-example
+        volumeMounts:
+          - name: host-mount
+            mountPath: /host # this path exists in the pod
+      volumes:
+      - name: host-mount # create a corresponding directory on the host
+        hostPath:
+          path: /path/to/tern/reports # this path must exist on the host
+```
+
+We can now deploy Tern on Kubernetes
+```
+$ minikube kubectl -- apply -f tern-example.yaml
+```
+
+To check the status of the Job, you can run `minikube kubectl -- describe job.batch/tern`. You should be able to see `report.txt` in `/path/to/tern/reports/`.
 
 ## Getting Started with Vagrant<a name="getting-started-with-vagrant">
 Vagrant is a tool to setup an isolated virtual software development environment. If you are using Windows or Mac OSes and want to run Tern from the command line (not in a Docker container) this is the best way to get started as Tern does not run natively in a Mac OS or Windows environment at this time.
