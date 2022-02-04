@@ -31,20 +31,8 @@ from tern.utils.general import check_image_string
 logger = logging.getLogger(constants.logger_name)
 logger.setLevel(logging.DEBUG)
 
-# console stream handler
-console = logging.StreamHandler()
-console.setLevel(logging.DEBUG)
-
 formatter = logging.Formatter(
     '%(asctime)s - %(levelname)s - %(module)s - %(message)s')
-
-log_handler = logging.FileHandler(constants.logfile, mode='w')
-log_handler.setLevel(logging.DEBUG)
-log_handler.setFormatter(formatter)
-
-console.setFormatter(formatter)
-
-logger.addHandler(log_handler)
 
 
 def check_file_existence(path):
@@ -59,6 +47,14 @@ def check_dir_existence(path):
         msg = "{}: does not exist".format(path)
         raise argparse.ArgumentTypeError(msg)
     return path
+
+
+def check_file_path_existence(filename):
+    file_path = os.path.dirname(filename)
+    if not os.path.isdir(file_path):
+        msg = "directory path {} does not exist".format(file_path)
+        raise argparse.ArgumentTypeError(msg)
+    return filename
 
 
 def check_image_input(options):
@@ -90,12 +86,23 @@ def get_version():
 def do_main(args):
     """Execute according to subcommands"""
     # Set up environment
+    global logger
+    global formatter
+    # set up file log
+    if args.log_file:
+        log_handler = logging.FileHandler(args.log_file, mode='w')
+    else:
+        log_handler = logging.FileHandler(constants.logfile, mode='w')
+    log_handler.setLevel(logging.DEBUG)
+    log_handler.setFormatter(formatter)
+    logger.addHandler(log_handler)
     if not args.quiet:
         # set up console logs
-        global logger
-        global console
+        console = logging.StreamHandler()
+        console.setLevel(logging.DEBUG)
+        console.setFormatter(formatter)
         logger.addHandler(console)
-        logger.debug("Starting...")
+    logger.debug("Starting...")
     prep.setup(args.working_dir)
     if args.clear_cache:
         logger.debug('Clearing cache...')
@@ -134,6 +141,10 @@ def main():
     parser.add_argument('-q', '--quiet', action='store_true',
                         help="Silences the output to the terminal;"
                         "Useful when logging behaviour unnecessary")
+    parser.add_argument('-l', '--log-file', metavar="FILE",
+                        type=check_file_path_existence,
+                        help="Provide a custom file to write logs to.\n"
+                        "Useful when writing logs to a different location.")
     parser.add_argument('-c', '--clear-cache', action='store_true',
                         help="Clear the cache before running")
     parser.add_argument('-k', '--keep-wd', action='store_true',
