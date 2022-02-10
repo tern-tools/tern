@@ -6,7 +6,7 @@
 
 # Welcome to the Tern Project
 
-Tern is a software package inspection tool that can create a Software Bill of Materials (SBoM) for containers. It's written in Python3 with a smattering of shell scripts.
+Tern is a software package inspection tool that can create a Software Bill of Materials (SBOM) for containers. It's written in Python3 with a smattering of shell scripts.
 
 # Table of Contents
 - [Introduction](#what-is-tern)
@@ -21,8 +21,8 @@ Tern is a software package inspection tool that can create a Software Bill of Ma
   - [Getting Started with Docker](#getting-started-with-docker)
   - [Getting Started with Vagrant](#getting-started-with-vagrant)
 - [Using Tern](#using-tern)
-  - [Generating an SBoM report for a Docker image](#sbom-for-docker-image)
-  - [Generating an SBoM report from a Dockerfile](#sbom-for-dockerfile)
+  - [Generating an SBOM report for a Docker image](#sbom-for-docker-image)
+  - [Generating an SBOM report from a Dockerfile](#sbom-for-dockerfile)
   - [Generating a locked Dockerfile](#dockerfile-lock)
 - [Report Formats](#report-formats)
   - [Understanding the Reports](#understanding-the-reports)
@@ -199,21 +199,21 @@ $ tern report -i debian:buster -o output.txt
 
 *WARNING*: The CLI has changed since the last release. Visit [Tern's PyPI project page](https://pypi.org/project/tern/) to find the correct CLI options or just run `tern -h`.
 
-Tern creates a report containing the Software Bill of Materials (SBoM) of a container image, including notes about how it collects this information, and files for which it has no information about. Currently, Tern supports containers only built using Docker using image manifest version 2, schema 2. Docker image manifest version 2, schema 1 has been [deprecated](https://docs.docker.com/registry/spec/deprecated-schema-v1/) by Docker. Tern will support container images created using Docker version 19.03.0 or later. Docker is the most ubiquitous type of container image that exists so the project started with a focus on those. However, it is architected to support other images that closely follow the [OCI image spec](https://github.com/opencontainers/image-spec/blob/master/spec.md).
+Tern creates a report containing the Software Bill of Materials (SBOM) of a container image, including notes about how it collects this information, and files for which it has no information about. Currently, Tern supports containers only built using Docker using image manifest version 2, schema 2. Docker image manifest version 2, schema 1 has been [deprecated](https://docs.docker.com/registry/spec/deprecated-schema-v1/) by Docker. Tern will support container images created using Docker version 19.03.0 or later. Docker is the most ubiquitous type of container image that exists so the project started with a focus on those. However, it is architected to support other images that closely follow the [OCI image spec](https://github.com/opencontainers/image-spec/blob/master/spec.md).
 
-## Generating an SBoM report for a Docker image<a name="sbom-for-docker-image">
+## Generating an SBOM report for a Docker image<a name="sbom-for-docker-image">
 If you have a Docker image pulled locally and want to inspect it
 ```
 $ tern report -i debian:jessie
 ```
-The SBoM of packages that are installed in the Docker image and how Tern got this information will be printed to the console. To direct this output to a file, use the `-o file_name` command line option. If you encounter any errors, please file an issue.
+The SBOM of packages that are installed in the Docker image and how Tern got this information will be printed to the console. To direct this output to a file, use the `-o file_name` command line option. If you encounter any errors, please file an issue.
 
-## Generating an SBoM report from a Dockerfile<a name="sbom-for-dockerfile">
+## Generating an SBOM report from a Dockerfile<a name="sbom-for-dockerfile">
 You can provide a Dockerfile to Tern to figure out the Software Bill of Materials and other information. Tern will build the image, analyze it with respect to the Dockerfile and discard the image. This is useful to engineers who are developing a Dockerfile for their app or in a container build and release pipeline.
 ```
 $ tern report -d samples/photon_git/Dockerfile
 ```
-The SBoM of packages you would be shipping if you were to use the given Dockerfile will print to the console. To direct the output to a file, use the `-o file_name` command line option. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
+The SBOM of packages you would be shipping if you were to use the given Dockerfile will print to the console. To direct the output to a file, use the `-o file_name` command line option. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
 
 ## Generating a locked Dockerfile<a name="dockerfile-lock">
 Because of the way Docker builds containers, Dockerfiles are generally not declarative or reflective of what ultimately gets included in the container image that gets produced. Pinning information in your Dockerfile (base OS, packages, etc.) can help create more reproducible container images should your Dockerfile be distributed to other parties. If you have a Dockerfile that you would like to lock to a more reproducible version, Tern can help.
@@ -227,12 +227,12 @@ $ tern lock Dockerfile -o output.txt
 If the packages are not pinned in the resulting `Dockerfile.lock` or output file that gets produced, it is because 1) Tern does not know the version of the packages to pin (i.e. unable to get this information from the package manager) or 2) your Dockerfile failed to build. In the case of a failed Dockerfile build, Tern only builds the base image and tries to pin what it can. If you encounter any errors, please file an issue.
 
 # Report Formats<a name="report-formats">
-Tern creates BoM reports suitable to read over or to provide to another tool for consumption.
+Tern creates SBOM reports suitable to read over or to provide to another tool for consumption. A collection of sample reports is available to view [here](./docs/examples/). 
 
 ## Understanding the Reports<a name="understanding-the-reports">
 Tern provides a handful of different reporting styles that may work better for different applications of distribution, interoperability and comprehension. Understanding these reports will vary slightly between formats, but the information in the different report formats will generally be the same with varying degrees of package metadata detail. In all report formats, information about the version of Tern that generated the report and any applicable extension information will be at the top of the report followed by information about the metadata found in the container, organized sequentially by layer. 
 
-The base layer (Layer 1) will provide operating system information on which the container is based, the Dockerfile command that created the layer, the package retrieval method and any packages found in the layer. Note that the operating system information may be different than the container that Tern is generating an SBoM for. For example, the `golang` container's base OS is actually `Debian GNU/Linux 10 (buster)`. For each subsequent layer in the container, information about the Dockerfile command that created the container layer, any warnings about unrecognized Dockerfile commands, the package retrieval method and package information is provided. If Tern doesn't find any package information in a layer, it will report packages found in the layer as "None". File licenses may also be available in the reports if Tern is run using scancode.
+The base layer (Layer 1) will provide operating system information on which the container is based, the Dockerfile command that created the layer, the package retrieval method and any packages found in the layer. Note that the operating system information may be different than the container that Tern is generating an SBOM for. For example, the `golang` container's base OS is actually `Debian GNU/Linux 10 (buster)`. For each subsequent layer in the container, information about the Dockerfile command that created the container layer, any warnings about unrecognized Dockerfile commands, the package retrieval method and package information is provided. If Tern doesn't find any package information in a layer, it will report packages found in the layer as "None". File licenses may also be available in the reports if Tern is run using scancode.
 
 More information about specific reporting formats can be found below and in the `tern/classes` directory where the properties being reported on are explained in the .py files -- specifically, `image_layer.py`, `package.py`, and `file_data.py`.
 
@@ -265,7 +265,7 @@ $ tern report -f yaml -i golang:1.12-alpine -o output.yaml
 ```
 
 ## SPDX tag-value Format<a name="report-spdxtagvalue">
-[SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. The National Telecommunications and Information Administration (NTIA) [recognizes SPDX](https://www.ntia.gov/files/ntia/publications/sbom_options_and_decision_points_20210427-1.pdf) as one of three valid SBoM formats that satisfies the minimum viable requirements for an SBoM in accordance with President Biden's [Executive Order on Improving the Nation's Cybersecurity](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/).
+[SPDX](https://spdx.org/) is a format developed by the Linux Foundation to provide a standard way of reporting license information. The National Telecommunications and Information Administration (NTIA) [recognizes SPDX](https://www.ntia.gov/files/ntia/publications/sbom_options_and_decision_points_20210427-1.pdf) as one of three valid SBOM formats that satisfies the minimum viable requirements for an SBOM in accordance with President Biden's [Executive Order on Improving the Nation's Cybersecurity](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/).
 
 Many compliance tools are compatible with SPDX. Tern follows the [SPDX specifications](https://spdx.org/specifications). The tag-value format is most compatible with the toolkit the organization provides. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](./docs/spdx-tag-value-overview) and about how Tern maps its properties to the keys mandated by the spec [here](./docs/spdx-tag-value-mapping.md).
 ```
@@ -279,9 +279,9 @@ $ tern report -f spdxjson -i golang:1.12-alpine -o spdx.json
 ```
 
 ## CycloneDX JSON Format<a name="report-cyclonedxjson">
-[OWASP CycloneDX](https://cyclonedx.org/) is a lightweight software bill of materials standard designed for use in application security contexts and supply chain component analysis. The National Telecommunications and Information Administration (NTIA) [recognizes CycloneDX](https://www.ntia.gov/files/ntia/publications/sbom_options_and_decision_points_20210427-1.pdf) as one of three valid SBoM formats that satisfies the minimum viable requirements for an SBoM in accordance with President Biden's [Executive Order on Improving the Nation's Cybersecurity](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/).
+[OWASP CycloneDX](https://cyclonedx.org/) is a lightweight software bill of materials standard designed for use in application security contexts and supply chain component analysis. The National Telecommunications and Information Administration (NTIA) [recognizes CycloneDX](https://www.ntia.gov/files/ntia/publications/sbom_options_and_decision_points_20210427-1.pdf) as one of three valid SBOM formats that satisfies the minimum viable requirements for an SBOM in accordance with President Biden's [Executive Order on Improving the Nation's Cybersecurity](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/).
 
-Many tools for producing and consuming CycloneDX SBoMs are listed in the [CycloneDX Tool Center](https://cyclonedx.org/tool-center/).
+Many tools for producing and consuming CycloneDX SBOMs are listed in the [CycloneDX Tool Center](https://cyclonedx.org/tool-center/).
 ```
 $ tern report -f cyclonedxjson -i golang:1.12-alpine -o bom.json
 ```
