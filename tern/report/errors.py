@@ -57,6 +57,7 @@ incorrect_raw_option = '''Expected path to tar archive.\n'''
 incorrect_image_string_format = '''Unsupported image string format.\n''' \
     '''Please provide string in image:tag or ''' \
     '''image@digest_type:digest format.\n'''
+unrecognized_extension = '''Extension "{ext}" not found. Exiting.'''
 
 # Dockerfile specific errors
 dockerfile_no_tag = '''The Dockerfile provided has no tag in the line ''' \
