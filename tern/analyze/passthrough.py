@@ -10,12 +10,14 @@ Use an external tool to analyze a container image
 
 import logging
 import shutil
+import sys
 from stevedore import driver
 from stevedore.exception import NoMatches
 
 from tern.classes.notice import Notice
 from tern.utils import constants
 from tern.utils import rootfs
+from tern.report import errors
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -87,7 +89,9 @@ def run_extension(image_obj, ext_string, redo=False):
         )
         return mgr.driver.execute(image_obj, redo)
     except NoMatches:
-        return None
+        msg = errors.unrecognized_extension.format(ext=ext_string)
+        logger.critical(msg)
+        sys.exit(1)
 
 
 def run_extension_layer(image_layer, ext_string, redo=False):
