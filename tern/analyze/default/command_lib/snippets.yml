@@ -118,6 +118,22 @@ pip3:
     - 'wheel'
   packages: 'pip3'
 
+python3:
+  install:
+    - 'install'
+  remove:
+    - 'uninstall'
+  ignore:
+    - 'freeze'
+    - 'list'
+    - 'download'
+    - 'show'
+    - 'check'
+    - 'config'
+    - 'hash'
+    - 'wheel'
+  packages: 'pip3'
+
 gem:
   install:
     - 'install'
