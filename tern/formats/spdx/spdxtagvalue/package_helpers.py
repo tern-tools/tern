@@ -24,6 +24,53 @@ def get_package_comment(package_obj):
     return comment
 
 
+def get_source_package_block(package_obj, template):
+    '''Given a package object and its SPDX template mapping, return a SPDX
+    document block for the corresponding source package.
+    The mapping should have keys:
+        SourcePackageName
+        SourcePackageVersion
+        PackageLicenseDeclared
+        PackageCopyrightText
+        PackageDownloadLocation'''
+    block = ''
+    mapping = package_obj.to_dict(template)
+    # Source Package Name
+    block += 'PackageName: {}\n'.format(mapping['SourcePackageName'])
+    # Source SPDXID
+    _, spdx_ref_src = spdx_common.get_package_spdxref(package_obj)
+    block += 'SPDXID: {}\n'.format(spdx_ref_src)
+    # Source Package Version
+    if mapping['SourcePackageVersion']:
+        block += 'PackageVersion: {}\n'.format(
+            mapping['SourcePackageVersion'])
+    # Package Download Location (Same as binary)
+    if mapping['PackageDownloadLocation']:
+        block += 'PackageDownloadLoaction: {}\n'.format(
+            mapping['PackageDownloadLocation'])
+    else:
+        block += 'PackageDownloadLocation: NOASSERTION\n'
+    # Files Analyzed (always false for packages)
+    block += 'FilesAnalyzed: false\n'
+    # Package License Concluded (always NOASSERTION)
+    block += 'PackageLicenseConcluded: NOASSERTION\n'
+    # Package License Declared (use the license ref for this)
+    if mapping['PackageLicenseDeclared']:
+        block += 'PackageLicenseDeclared: {}\n'.format(
+            spdx_common.get_license_ref(mapping['PackageLicenseDeclared']))
+    else:
+        block += 'PackageLicenseDeclared: NONE\n'
+    # Package Copyright Text
+    if mapping['PackageCopyrightText']:
+        block += 'PackageCopyrightText:' + spdx_formats.block_text.format(
+            message=mapping['PackageCopyrightText']) + '\n'
+    else:
+        block += 'PackageCopyrightText: NONE\n'
+    # Package Comments
+    block += spdx_formats.source_comment
+    return block
+
+
 def get_package_block(package_obj, template):
     '''Given a package object and its SPDX template mapping, return a SPDX
     document block for the package. The mapping should have keys:
@@ -37,8 +84,8 @@ def get_package_block(package_obj, template):
     # Package Name
     block += 'PackageName: {}\n'.format(mapping['PackageName'])
     # SPDXID
-    block += 'SPDXID: {}\n'.format(
-        spdx_common.get_package_spdxref(package_obj))
+    spdx_ref, _ = spdx_common.get_package_spdxref(package_obj)
+    block += 'SPDXID: {}\n'.format(spdx_ref)
     # Package Version
     if mapping['PackageVersion']:
         block += 'PackageVersion: {}\n'.format(mapping['PackageVersion'])
