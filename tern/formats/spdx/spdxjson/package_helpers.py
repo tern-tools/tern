@@ -9,6 +9,7 @@ Helper functions for packages in SPDX JSON document creation
 
 from tern.report import content
 from tern.formats.spdx import spdx_common
+from tern.formats.spdx.spdxjson import formats as json_formats
 
 
 def get_package_comment(package):
@@ -22,14 +23,42 @@ def get_package_comment(package):
     return comment
 
 
+def get_source_package_dict(package, template):
+    '''''Given a package object and its SPDX template mapping, return a SPDX
+    JSON dictionary representation of the associated source package.
+    The analyzed files will go in a separate dictionary for the
+    JSON document.'''
+    mapping = package.to_dict(template)
+    _, src_ref = spdx_common.get_package_spdxref(package)
+    package_dict = {
+        'name': mapping['SourcePackageName'],
+        'SPDXID': src_ref,
+        'versionInfo': mapping['SourcePackageVersion'] if
+        mapping['SourcePackageVersion'] else 'NOASSERTION',
+        'downloadLocation': mapping['PackageDownloadLocation'] if
+        mapping['PackageDownloadLocation'] else 'NOASSERTION',
+        'filesAnalyzed': False,  # always false for packages
+        'licenseConcluded': 'NOASSERTION',  # always NOASSERTION
+        'licenseDeclared': spdx_common.get_license_ref(
+            mapping['PackageLicenseDeclared']) if
+        mapping['PackageLicenseDeclared'] else 'NONE',
+        'copyrightText': mapping['PackageCopyrightText'] if
+        mapping['PackageCopyrightText'] else'NONE',
+        'comment': json_formats.source_package_comment
+    }
+
+    return package_dict
+
+
 def get_package_dict(package, template):
     '''''Given a package object and its SPDX template mapping, return a SPDX
     JSON dictionary representation of the package. The analyzed files will
     go in a separate dictionary for the JSON document.'''
     mapping = package.to_dict(template)
+    pkg_ref, _ = spdx_common.get_package_spdxref(package)
     package_dict = {
         'name': mapping['PackageName'],
-        'SPDXID': spdx_common.get_package_spdxref(package),
+        'SPDXID': pkg_ref,
         'versionInfo': mapping['PackageVersion'] if mapping['PackageVersion']
         else 'NOASSERTION',
         'downloadLocation': mapping['PackageDownloadLocation'] if
@@ -61,10 +90,14 @@ def get_packages_list(image_obj, template):
         for package in layer.packages:
             # Create a list of dictionaries. Each dictionary represents
             # one package object in the image
-            pkg_ref = spdx_common.get_package_spdxref(package)
+            pkg_ref, src_ref = spdx_common.get_package_spdxref(package)
             if pkg_ref not in package_refs and package.name:
                 package_dicts.append(get_package_dict(package, template))
                 package_refs.add(pkg_ref)
+            if src_ref and src_ref not in package_refs:
+                package_dicts.append(get_source_package_dict(
+                    package, template))
+                package_refs.add(src_ref)
     return package_dicts
 
 

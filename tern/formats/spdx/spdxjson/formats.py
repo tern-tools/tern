@@ -24,6 +24,10 @@ created = '{timestamp}'
 document_name_snapshot = 'Tern SPDX JSON SBoM'
 document_namespace_snapshot = 'https://spdx.org/spdxdocs/tern-report-' \
     '{timestamp}-{uuid}'
+source_package_comment = 'This package refers to a source package associated' \
+    ' with one or more binary packages installed in this container. ' \
+    'This source pacakge is NOT installed in the container but may be useful' \
+    ' for CVE lookups.'
 
 
 # Dictionary Formatting

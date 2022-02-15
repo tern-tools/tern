@@ -77,9 +77,13 @@ def get_image_layer_relationships(image_obj):
         # Finally, add package releationships for the layer
         if layer.packages:
             for package in layer.packages:
-                pkg_ref = spdx_common.get_package_spdxref(package)
+                pkg_ref, src_ref = spdx_common.get_package_spdxref(package)
                 layer_relationships.append(json_formats.get_relationship_dict(
                     layer_ref, pkg_ref, 'CONTAINS'))
+                if src_ref:
+                    layer_relationships.append(
+                        json_formats.get_relationship_dict(
+                            pkg_ref, src_ref, 'GENERATED_FROM'))
 
     return layer_relationships
 
@@ -95,7 +99,7 @@ def get_layer_snapshot_relationships(layer_obj, docref):
         json_formats.spdx_id, docref, 'DESCRIBES'))
     # package relationships
     for package in layer_obj.packages:
-        pkg_ref = spdx_common.get_package_spdxref(package)
+        pkg_ref, _ = spdx_common.get_package_spdxref(package)
         relationships.append(json_formats.get_relationship_dict(
             docref, pkg_ref, 'CONTAINS'))
     return relationships
