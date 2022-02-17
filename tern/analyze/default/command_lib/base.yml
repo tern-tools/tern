@@ -222,6 +222,7 @@ rpm:
     - 'RHEL'
   path:
     - 'usr/bin/rpm'
+    - 'var/lib/rpm'
   pkg_separators:
     - '-'
   pinning_separator: '-'
