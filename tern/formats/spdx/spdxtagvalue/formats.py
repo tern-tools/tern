@@ -26,12 +26,17 @@ created = 'Created: {timestamp}'
 
 # Package level strings
 package_comment = 'PackageComment: <text>\n{comment}\n</text>'
+source_comment = 'PackageComment: <text>\nThis package refers to a source ' \
+    'package associated with one or more binary packages installed in this ' \
+    'container. This source package is NOT installed in the container but ' \
+    'may be useful for CVE lookups.\n</text>'
 package_id = '{name}-{ver}'
 
 # Relationship strings
 contains = 'Relationship: {outer} CONTAINS {inner}'
 prereq = 'Relationship: {after} HAS_PREREQUISITE {before}'
 describes = 'Relationship: {doc} DESCRIBES {image}'
+generates = 'Relationship: {pkg_ref} GENERATED_FROM {src_ref}'
 
 # License Reference Information
 license_id = 'LicenseID: {license_ref}'

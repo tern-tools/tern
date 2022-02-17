@@ -32,10 +32,17 @@ def get_image_packages_block(image_obj, template):
     package_refs = set()
     for layer in image_obj.layers:
         for package in layer.packages:
-            pkg_ref = spdx_common.get_package_spdxref(package)
+            pkg_ref, src_ref = spdx_common.get_package_spdxref(package)
             if pkg_ref not in package_refs:
-                block += phelpers.get_package_block(package, template) + '\n'
+                block += phelpers.get_package_block(package,
+                                                    template) + '\n'
                 package_refs.add(pkg_ref)
+            # Only include src package info if it exists and hasn't already
+            # been reported by another binary package
+            if src_ref and src_ref not in package_refs:
+                block += phelpers.get_source_package_block(package,
+                                                           template) + '\n'
+                package_refs.add(src_ref)
     return block
 
 

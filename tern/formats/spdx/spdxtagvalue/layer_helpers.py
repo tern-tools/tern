@@ -39,13 +39,18 @@ def get_layer_comment(layer_obj):
 def get_layer_package_relationships(layer_obj):
     '''Given a layer object, return the relationships of the layer
     objects to packages. This is usually of the form:
-        layer SPDXIP CONTAINS package SPDXID'''
+        layer SPDXID CONTAINS package SPDXID-binary_pkg.
+    Additionally, this includes:
+        SPDXID-binary_pkg GENERATED_FROM SPDXID-src_pkg'''
     block = ''
     layer_reference = spdx_common.get_layer_spdxref(layer_obj)
     for package in layer_obj.packages:
+        binary_ref, src_ref = spdx_common.get_package_spdxref(package)
         block = block + spdx_formats.contains.format(
-            outer=layer_reference,
-            inner=spdx_common.get_package_spdxref(package)) + '\n'
+            outer=layer_reference, inner=binary_ref) + '\n'
+        if src_ref:
+            block = block + spdx_formats.generates.format(
+                pkg_ref=binary_ref, src_ref=src_ref) + '\n'
     return block
 
 
