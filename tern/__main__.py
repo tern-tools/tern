@@ -263,7 +263,7 @@ def main():
                               "mounting of the filesystem and device nodes, "
                               "recover the filesystem by undoing all the "
                               "mounts.")
-    parser_debug.add_argument('-i', '--docker-image',
+    parser_debug.add_argument('-i', '--image',
                               help="Docker image that exists locally -"
                               " image:tag"
                               " The option can be used to pull docker"
