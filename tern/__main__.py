@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2022 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -181,6 +181,12 @@ def main():
     parser_report.add_argument('-i', '--image',
                                help="A container image referred either by "
                                " repo:tag or repo@digest-type:digest")
+    parser_report.add_argument('--no-tls', default=False,
+                               action='store_true',
+                               help="When fetching an image, DO NOT use HTTPS "
+                               " and DO NOT verify TLS certificates of the "
+                               "registry.\nThis is useful when using a local "
+                               "registry instance for debugging purposes.")
     parser_report.add_argument('-w', '--raw-image', metavar='FILE',
                                help="Raw container image that exists locally "
                                "in the form of a tar archive. Only the output"
@@ -269,6 +275,12 @@ def main():
                               " The option can be used to pull docker"
                               " images by digest as well -"
                               " <repo>@<digest-type>:<digest>")
+    parser_debug.add_argument('--no-tls', default=False,
+                              action='store_true',
+                              help="When fetching an image, DO NOT use HTTPS "
+                              " and DO NOT verify TLS certificates of the "
+                              "registry.\nThis is useful when using a local "
+                              "registry instance for debugging purposes.")
     parser_debug.add_argument('-w', '--raw-image', metavar='FILE',
                               help="Raw container image that exists locally "
                               "in the form of a tar archive.")

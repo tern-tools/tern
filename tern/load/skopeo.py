@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2021-2022 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -27,7 +27,7 @@ def check_skopeo_setup():
         sys.exit(1)
 
 
-def pull_image(image_tag_string):
+def pull_image(image_tag_string, no_tls=False):
     """Use skopeo to pull a remote image into the working directory"""
     # Check if skopeo is set up
     check_skopeo_setup()
@@ -35,8 +35,12 @@ def pull_image(image_tag_string):
     remote = f'docker://{image_tag_string}'
     local = f'dir:{rootfs.get_working_dir()}'
     logger.debug("Attempting to pull image \"%s\"", image_tag_string)
-    result, error = rootfs.shell_command(
-        False, ['skopeo', 'copy', remote, local])
+    if no_tls:
+        result, error = rootfs.shell_command(
+            False, ['skopeo', 'copy', '--src-tls-verify=false', remote, local])
+    else:
+        result, error = rootfs.shell_command(
+            False, ['skopeo', 'copy', remote, local])
     if error:
         logger.error("Error when downloading image: \"%s\"", error)
         return None

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2021 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2022 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -29,7 +29,7 @@ def extract_image(args):
     Return an image name and tag and an image digest if it exists"""
     if args.image:
         # download the image
-        result = skopeo.pull_image(args.image)
+        result = skopeo.pull_image(args.image, args.no_tls)
         if result:
             return 'oci', args.image
         logger.critical("Cannot download Container image: \"%s\"", args.image)
