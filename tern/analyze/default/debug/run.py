@@ -175,17 +175,15 @@ def execute_step(image_obj, args):
         prep.clean_image_tars(image_obj)
 
 
-def recover():
+def recover(driver):
     """Undo all the mounts and clean up directories"""
-    try:
-        rootfs.unmount_rootfs()
-    except subprocess.CalledProcessError:
-        pass
-    # we nuke all the directories after mounting
+    if driver in ('overlay2', 'fuse'):
+        try:
+            rootfs.unmount_rootfs()
+        except subprocess.CalledProcessError:
+            pass
+    # nuking working directories
     rootfs.clean_up()
-    working_dir = rootfs.get_working_dir()
-    if os.path.exists(working_dir):
-        rootfs.root_command(rootfs.remove, working_dir)
 
 
 def execute_debug(args):
@@ -202,6 +200,6 @@ def execute_debug(args):
                 execute_step(full_image, args)
     elif args.recover:
         # we need to recover the filesystem
-        recover()
+        recover(args.driver)
     else:
         print("Debug mode: nothing to do")
