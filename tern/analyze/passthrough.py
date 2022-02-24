@@ -18,6 +18,8 @@ from tern.classes.notice import Notice
 from tern.utils import constants
 from tern.utils import rootfs
 from tern.report import errors
+from tern import prep
+
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -78,22 +80,6 @@ def execute_and_pass(layer_obj, command, is_sudo=False):
         'utf-8') + '\n\n' + result.decode('utf-8')
 
 
-def run_extension(image_obj, ext_string, redo=False):
-    '''Depending on what tool the user has chosen to extend with, load that
-    extension and run it'''
-    try:
-        mgr = driver.DriverManager(
-            namespace='tern.extensions',
-            name=ext_string,
-            invoke_on_load=True,
-        )
-        return mgr.driver.execute(image_obj, redo)
-    except NoMatches:
-        msg = errors.unrecognized_extension.format(ext=ext_string)
-        logger.critical(msg)
-        sys.exit(1)
-
-
 def run_extension_layer(image_layer, ext_string, redo=False):
     '''Depending on what tool the user has chosen to extend with, load that
     extension and run it'''
@@ -105,4 +91,8 @@ def run_extension_layer(image_layer, ext_string, redo=False):
         )
         return mgr.driver.execute_layer(image_layer, redo)
     except NoMatches:
-        return None
+        msg = errors.unrecognized_extension.format(ext=ext_string)
+        logger.critical(msg)
+        rootfs.clean_up()
+        prep.clean_working_dir()
+        sys.exit(1)
