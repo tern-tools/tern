@@ -71,7 +71,7 @@ def analyze_full_image(full_image, options):
     # set up for analysis
     crun.setup(full_image)
     # analyze image
-    cimage.analyze(full_image, options)
+    cimage.default_analyze(full_image, options)
     # clean up after analysis
     rootfs.clean_up()
     # we should now be able to set imported layers
@@ -108,7 +108,7 @@ def analyze_base_image(base_image, options):
     # set up for analysis
     crun.setup(base_image)
     # analyze image
-    cimage.analyze(base_image, options)
+    cimage.default_analyze(base_image, options)
     # clean up
     rootfs.clean_up()
     # save the base image to cache

@@ -65,17 +65,12 @@ def default_analyze(image_obj, options):
     master_list = []
     # Analyze the first layer and get prerequisites for the next layer
     prereqs = single_layer.analyze_first_layer(image_obj, master_list, options)
+    if options.extend:
+        # Run the extension that the user has chosen for the first layer
+        passthrough.run_extension_layer(image_obj.layers[0], options.extend,
+                                        options.redo)
     # Analyze the remaining layers if there are more
     if prereqs and len(image_obj.layers) > 1:
         multi_layer.analyze_subsequent_layers(
             image_obj, prereqs, master_list, options)
     return image_obj
-
-
-def analyze(image_obj, options):
-    """Either analyze a container image using the default method or pass
-    analysis to an external tool"""
-    if options.extend:
-        passthrough.run_extension(image_obj, options.extend, options.redo)
-    else:
-        default_analyze(image_obj, options)

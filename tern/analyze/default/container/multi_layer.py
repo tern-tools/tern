@@ -21,6 +21,7 @@ from tern.analyze.default import default_common as dcom
 from tern.analyze.default import core
 from tern.analyze.default.dockerfile import lock
 from tern.analyze.default.command_lib import command_lib
+from tern.analyze import passthrough
 
 
 # global logger
@@ -93,6 +94,11 @@ def fresh_analysis(image_obj, curr_layer, prereqs, options):
     target = prep_layers(image_obj, curr_layer, options.driver)
     # set this layer's host path
     prereqs.host_path = target
+    # If selected, collect extension metadata for the layer prior to using
+    # Tern's default analysis (order of collection is not important)
+    if options.extend:
+        passthrough.run_extension_layer(image_obj.layers[curr_layer],
+                                        options.extend, options.redo)
     # get commands that created the layer
     # for docker images this is retrieved from the image history
     command_list = dcom.get_commands_from_metadata(
