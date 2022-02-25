@@ -21,6 +21,7 @@ from tern.analyze.default import default_common as dcom
 from tern.analyze.default import core
 from tern.analyze.default.dockerfile import lock
 from tern.analyze.default.command_lib import command_lib
+from tern.analyze import passthrough
 
 
 # global logger
@@ -71,6 +72,25 @@ def prep_layers(image_obj, top_layer, driver='default'):
     return mount_overlay_fs(image_obj, top_layer, driver)
 
 
+def snippet_lookup(command_list, prereqs, image_obj, curr_layer):
+    '''Given a list of commands that created an image layer, look up
+    their corresponding snippets'''
+    if command_list:
+        # for each command look up the snippet library
+        for command in command_list:
+            pkg_listing = command_lib.get_package_listing(command.name)
+            if isinstance(pkg_listing, str):
+                prereqs.binary = pkg_listing
+                core.execute_base(image_obj.layers[curr_layer], prereqs)
+            else:
+                prereqs.listing = pkg_listing
+                core.execute_snippets(image_obj.layers[curr_layer], command,
+                                      prereqs)
+    else:
+        # fall back to executing what we know
+        core.execute_base(image_obj.layers[curr_layer], prereqs)
+
+
 def fresh_analysis(image_obj, curr_layer, prereqs, options):
     """This is a subroutine that is run if there is no chached results or if
     the user wants to redo the analysis
@@ -93,25 +113,17 @@ def fresh_analysis(image_obj, curr_layer, prereqs, options):
     target = prep_layers(image_obj, curr_layer, options.driver)
     # set this layer's host path
     prereqs.host_path = target
+    # If selected, collect extension metadata for the layer prior to using
+    # Tern's default analysis (order of collection is not important)
+    if options.extend:
+        passthrough.run_extension_layer(image_obj.layers[curr_layer],
+                                        options.extend, options.redo)
     # get commands that created the layer
     # for docker images this is retrieved from the image history
     command_list = dcom.get_commands_from_metadata(
         image_obj.layers[curr_layer])
-    if command_list:
-        # for each command look up the snippet library
-        for command in command_list:
-            pkg_listing = command_lib.get_package_listing(command.name)
-            if isinstance(pkg_listing, str):
-                prereqs.binary = pkg_listing
-                core.execute_base(
-                    image_obj.layers[curr_layer], prereqs)
-            else:
-                prereqs.listing = pkg_listing
-                core.execute_snippets(
-                    image_obj.layers[curr_layer], command, prereqs)
-    else:
-        # fall back to executing what we know
-        core.execute_base(image_obj.layers[curr_layer], prereqs)
+    # Look up snippets for found commands
+    snippet_lookup(command_list, prereqs, image_obj, curr_layer)
     # if the driver is using some storage driver, unmount the rootfs
     if options.driver != 'default':
         rootfs.unmount_rootfs()
