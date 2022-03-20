@@ -5,12 +5,12 @@
 strictness: medium
 test-warnings: false
 
-pep8:
+pycodestyle:
   full: true
   disable:
     - N802 # pep8-naming: function name should be lower case
 
-pep257:
+pydocstyle:
   run: false
 
 pylint:
