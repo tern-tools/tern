@@ -359,7 +359,8 @@ class ImageLayer:
                 xattrlist = []
                 xattrline = content.pop(0)
                 while xattrline != '\n':
-                    xattrlist.append(xattrline.strip())
+                    if 'selinux' not in xattrline:
+                        xattrlist.append(xattrline.strip())
                     xattrline = content.pop(0)
                 # when we break out of the extended attributes loop
                 # we combine the results and update the FileData object
