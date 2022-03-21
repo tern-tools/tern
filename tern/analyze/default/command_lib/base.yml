@@ -275,7 +275,7 @@ rpm:
     delimiter: "\n"
 # pip ----------------------------------------------------------------------
 pip:
-  pkg_format: 'pip'
+  pkg_format: 'pypi'
   os_guess:
     - 'None'
   path:
@@ -318,7 +318,7 @@ pip:
     delimiter: "\n"
 # pip3 ----------------------------------------------------------------------
 pip3:
-  pkg_format: 'pip'
+  pkg_format: 'pypi'
   os_guess:
     - 'None'
   path:
