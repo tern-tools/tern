@@ -23,7 +23,10 @@ def get_package_dict(os_guess, package):
     purl_type = package.pkg_format
     purl_namespace = cyclonedx_common.get_purl_namespace(os_guess, package.pkg_format)
     if purl_type:
-        purl = PackageURL(purl_type, purl_namespace, package.name, package.version)
+        if purl_type=="apk":
+            purl = PackageURL(purl_namespace, package.name, package.version)
+        else:
+            purl = PackageURL(purl_type,purl_namespace, package.name, package.version)
         package_dict['purl'] = str(purl)
 
     if package.pkg_license:
