@@ -39,6 +39,13 @@ purl_types_with_namespaces = [
     'apk',
 ]
 
+purl_names_in_lowercase = [
+    'deb',
+    'go',
+    'npm',
+    'pypi',
+    'rpm',
+]
 
 def get_serial_number():
     ''' Return a randomly generated CycloneDX BOM serial number '''
@@ -60,6 +67,10 @@ def get_property(name, value):
     ''' Return a CycloneDX property object '''
     return {'name': name, 'value': value}
 
+def get_purl_name(name, pkg_format):
+    if pkg_format in purl_names_in_lowercase:
+        return name.lower()
+    return name
 
 def get_purl_namespace(os_guess, pkg_format):
     if pkg_format in purl_types_with_namespaces:

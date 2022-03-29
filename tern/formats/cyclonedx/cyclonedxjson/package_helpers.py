@@ -15,7 +15,7 @@ def get_package_dict(os_guess, package):
     ''' Given a package format, namespace and package object return a
     CycloneDX JSON dictionary representation of the package. '''
     package_dict = {
-        'name': package.name,
+        'name': cyclonedx_common.get_purl_name(package.name, package.pkg_format),
         'version': package.version,
         'type': 'application',
     }
