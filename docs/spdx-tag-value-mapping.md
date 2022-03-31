@@ -84,7 +84,7 @@ Include once at the beginning of the SPDX document.
 
  §  | SPDX Field name | Tern data model reference | Comments
 ----|-----------------|---------------------------|---------
-2.1 | SPDX Version    | N/A                       | will always be `SPDXVersion: SPDX-2.1`
+2.1 | SPDX Version    | N/A                       | will always be `SPDXVersion: SPDX-2.2`
 2.2 | Data License    | N/A                       | will always be `DataLicense: CC0-1.0`
 2.3 | SPDX Identifier | N/A                       | will always be `SPDXID: SPDXRef-DOCUMENT`
 2.4 | Document Name   | **TBD**                   | does Tern have a human-readable way to refer to the image or Dockerfile being analyzed?
