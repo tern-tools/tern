@@ -347,7 +347,7 @@ Tern does not have its own file level license scanner. In order to fill in the g
 NOTE: Neither the Docker container nor the Vagrant image has any of the extensions installed. You are welcomed to modify `Dockerfile` and `vagrant/bootstrap.sh` to install the extensions if you wish to use them. Please see the instructions below on how to enable the extension of your choice.
 
 ## Scancode<a name="scancode">
-[scancode-toolkit](https://github.com/nexB/scancode-toolkit) is a license analysis tool that "detects licenses, copyrights, package manifests and direct dependencies and more both in source code and binary files". Note that Scancode currently works on Python 3.5 and 3.6 but not 3.7 onwards. Be sure to check what python version you are using below.
+[scancode-toolkit](https://github.com/nexB/scancode-toolkit) is a license analysis tool that "detects licenses, copyrights, package manifests and direct dependencies and more both in source code and binary files". Note that Scancode currently works on Python 3.6 to 3.9. Be sure to check what python version you are using below.
 
 1. Install system dependencies for Scancode (refer to the [Scancode GitHub repo](https://github.com/nexB/scancode-toolkit) for instructions)
 
