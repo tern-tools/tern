@@ -72,4 +72,4 @@ def get_os_guess(image_obj):
 
 
 def get_license_from_name(name):
-    return {'license': {'name': name}}
+    return {'license': {'id': name}}
