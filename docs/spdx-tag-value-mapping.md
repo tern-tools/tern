@@ -6,7 +6,7 @@ This file describes a potential mapping between Tern's data structures and the r
 
 In particular, it will focus on highlighting any necessary data items that are deemed "mandatory" by the SPDX specification.
 
-Version 2.1 of [the SPDX specification](https://spdx.org/specifications) will be used, since it is the most recent minor release. Relevant details of the SPDX tag-value format can be found in [the overview document](spdx-tag-value-overview.md) in this directory.
+Version 2.2 of [the SPDX specification](https://spdx.org/specifications) will be used, since it is the most recent minor release. Relevant details of the SPDX tag-value format can be found in [the overview document](spdx-tag-value-overview.md) in this directory.
 
 ## Relevant Fields
 
@@ -14,7 +14,7 @@ The following table contains (1) all fields that are designated by the SPDX spec
 
 Thoughts on mapping these fields to Tern's data model are described in the **Mapping** section below.
 
-Section (§) numbers are references to the relevant portions of [the SPDX specification](https://spdx.org/specifications), version 2.1. Examples should be assumed to be on a single line, though a Markdown formatter might split them across lines.
+Section (§) numbers are references to the relevant portions of [the SPDX specification](https://spdx.org/specifications), version 2.2. Examples should be assumed to be on a single line, though a Markdown formatter might split them across lines.
 
 ### Document Creation
 
@@ -22,13 +22,13 @@ The following fields should appear *once*, at the beginning of the SPDX document
 
  §  | SPDX Field name | Mandatory? | Brief description    | Example
 ----|-----------------|------------|----------------------|---------
-2.1 | SPDX Version    |    Yes     | version of SPDX spec | `SPDXVersion: SPDX-2.1`
+2.1 | SPDX Version    |    Yes     | version of SPDX spec | `SPDXVersion: SPDX-2.2`
 2.2 | Data License    |    Yes     | license for SPDX metadata in the document itself; always `CC0-1.0` | `DataLicense: CC0-1.0`
 2.3 | SPDX Identifier |    Yes     | identifier for the SPDX document itself; always `SPDXRef-DOCUMENT` | `SPDXID: SPDXRef-DOCUMENT`
 2.4 | Document Name   |    Yes     | human-readable name for the SPDX document itself | `DocumentName: Tern report for ACME Dockerfile`
 2.5 | SPDX Document Namespace | Yes| unique absolute URI for the SPDX document itself | `DocumentNamespace: https://example.com/spdxdocs/tern-report-ACME-1.0.1-123456`
-2.7 | License List Version    | No | release version of the SPDX License List being used | `LicenseListVersion: 3.4`
-2.8 | Creator         |    Yes     | one or more people, orgs or tools used to create the SPDX document | `Creator: Tool: tern-0.4.0`
+2.7 | License List Version    | No | release version of the SPDX License List being used | `LicenseListVersion: 3.16`
+2.8 | Creator         |    Yes     | one or more people, orgs or tools used to create the SPDX document | `Creator: Tool: tern-2.10`
 2.9 | Created         |    Yes     | the time and date when the SPDX document was created (ISO 8601; UTC) | `Created: 2019-03-15T08:25:00Z`
 
 ### Package
@@ -84,7 +84,7 @@ Include once at the beginning of the SPDX document.
 
  §  | SPDX Field name | Tern data model reference | Comments
 ----|-----------------|---------------------------|---------
-2.1 | SPDX Version    | N/A                       | will always be `SPDXVersion: SPDX-2.1`
+2.1 | SPDX Version    | N/A                       | will always be `SPDXVersion: SPDX-2.2`
 2.2 | Data License    | N/A                       | will always be `DataLicense: CC0-1.0`
 2.3 | SPDX Identifier | N/A                       | will always be `SPDXID: SPDXRef-DOCUMENT`
 2.4 | Document Name   | **TBD**                   | does Tern have a human-readable way to refer to the image or Dockerfile being analyzed?

@@ -94,7 +94,7 @@ def get_layer_spdxref_snapshot(timestamp):
 def get_layer_verification_code(layer_obj):
     '''Calculate the verification code from the files in an image layer. This
     assumes that layer_obj.files_analyzed is True. The implementation follows
-    the algorithm in the SPDX spec v 2.1 which requires SHA1 to be used to
+    the algorithm in the SPDX spec v 2.2 which requires SHA1 to be used to
     calculate the checksums of the file and the final verification code'''
     sha1_list = []
     for filedata in layer_obj.files:
