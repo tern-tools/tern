@@ -134,7 +134,8 @@ def get_package_spdxref(package_obj):
         src_ref = spdx_formats.package_id.format(name=package_obj.src_name,
                                                  ver=src_ver)
     # replace all the strings that SPDX doesn't like
-    clean_pkg_ref = re.sub(r'[:+~]', r'-', pkg_ref)
+    # allowed characters are: letters, numbers, "." and "-"
+    clean_pkg_ref = re.sub(r'[:+~_]', r'-', pkg_ref)
     if src_ref:
         clean_src_ref = re.sub(r'[:+~]', r'-', src_ref)
         return 'SPDXRef-{}'.format(clean_pkg_ref), 'SPDXRef-{}'.format(clean_src_ref)
