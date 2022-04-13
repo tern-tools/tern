@@ -15,7 +15,7 @@ An SPDX document consists of a series of colon-separateed tag/value pairs, one p
 For example, the following tag-value pairs define the version of [the SPDX specification](https://spdx.org/specifications) that is used by the document, and a name for the SPDX document:
 
 ```
-SPDXVersion: SPDX-2.1
+SPDXVersion: SPDX-2.2
 DocumentName: Tern report for Acme Dockerfile
 ```
 
