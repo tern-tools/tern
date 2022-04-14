@@ -1,9 +1,10 @@
 # Project Road Map
 
 ## 2022
-- Create a Kubernetes admission controller for Tern
-- Create a database backend with an associated API.
-- Automate aspects of Tern's release process. 
+- [Create an API to run Tern as a service in Kubernetes](https://github.com/tern-tools/tern/issues/1112)
+- [Report applicable package licenses as SPDX identifiers instead of LicenseRefs](https://github.com/tern-tools/tern/issues/1147)
+- Improve test report validation
+- The usual bug fixing/technical debt cleanup
 
 
 We will also continue to work on the following:
