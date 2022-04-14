@@ -47,11 +47,11 @@ tests = [
 ]
 
 # Run the tests
-print("BEGIN: Running test suite")
+print("START: Running test suite")
 for test in tests:
     # check = True will throw CalledProcessError for non-zero return code,
     # which is the same behavior as the deprecated .check_output
-    print(f"START: Runing test {test}")
+    print(f"START: Running test {test}")
     out = subprocess.run(test, shell=True, check=True, capture_output=True)  # nosec
     print(f"END: {test} passed successfully!")  # error not thrown - test passed
 
