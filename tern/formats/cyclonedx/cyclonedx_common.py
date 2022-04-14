@@ -40,9 +40,28 @@ purl_types_with_namespaces = [
 ]
 
 
+purl_names_in_lowercase = [
+    'deb',
+    'go',
+    'npm',
+    'pypi',
+    'rpm',
+]
+
+
 def get_serial_number():
     ''' Return a randomly generated CycloneDX BOM serial number '''
     return 'urn:uuid:' + str(uuid.uuid4())
+
+
+def get_purl_name(name, pkg_format):
+    '''Some purl types require that package names always be lowercased. Given
+    a package format and a corresponding name for a package of that format,
+    return a lowercased version of the package name if the purl spec requires
+    it. Otherwise, just return the original package name.'''
+    if pkg_format in purl_names_in_lowercase:
+        return name.lower()
+    return name
 
 
 def get_timestamp():
