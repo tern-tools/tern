@@ -26,6 +26,9 @@ def get_package_dict(os_guess, package):
         purl_name = cyclonedx_common.get_purl_name(package.name,
                                                    package.pkg_format)
         purl = PackageURL(purl_type, purl_namespace, purl_name, package.version)
+        if purl_type == "apk":
+            # Update purl to remove "apk" from the string
+            purl = PackageURL(purl_namespace, purl_name, package.version)
         package_dict['purl'] = str(purl)
 
     if package.pkg_license:
