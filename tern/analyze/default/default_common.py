@@ -54,12 +54,16 @@ def get_base_bin(first_layer):
     image and looking for known binaries there. Assume that the layer has
     already been unpacked with the filesystem'''
     binary = ''
+    found = False
     cwd = first_layer.get_untar_dir()
     for key, value in command_lib.command_lib['base'].items():
         for path in value['path']:
             if os.path.exists(os.path.join(cwd, path)):
                 binary = key
+                found = True
                 break
+        if found:
+            break
     return binary
 
 
