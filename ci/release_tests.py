@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-                                                         
 # SPDX-License-Identifier: BSD-2-Clause
+import subprocess  # nosec
 
 tests = [
     'tern report -i photon:3.0',
@@ -35,7 +36,7 @@ tests = [
     'tern report -f html -i photon:3.0',
     'tern report -f spdxtagvalue -i photon:3.0 -o spdx.spdx && '
     'java -jar tools-java/target/tools-java-*-jar-with-dependencies.jar '
-    'Verify spdx.spdx', 
+    'Verify spdx.spdx',
     'tern report -f spdxjson -i photon:3.0 -o spdx.json && '
     'java -jar tools-java/target/tools-java-*-jar-with-dependencies.jar '
     'Verify spdx.json',
@@ -44,4 +45,14 @@ tests = [
     'python tests/test_class_command.py',
     'python tests/test_class_docker_image.py'
 ]
-            
+
+# Run the tests
+print("BEGIN: Running test suite")
+for test in tests:
+    # check = True will throw CalledProcessError for non-zero return code,
+    # which is the same behavior as the deprecated .check_output
+    print(f"START: Runing test {test}")
+    out = subprocess.run(test, shell=True, check=True, capture_output=True)  # nosec
+    print(f"END: {test} passed successfully!")  # error not thrown - test passed
+
+print("END: All tests passed!")
