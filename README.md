@@ -394,17 +394,17 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Release 2.9.0 is out! See the [release notes](docs/releases/v2_9_0.md) for more information.
+Beta Release 2.10.0 is out! See the [release notes](docs/releases/v2_10_0.md) for more information.
 
-We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 2.10.0.
+We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 2.11.0.
 
 ## Recent Past Releases
 Be advised: version 2.4.0 and below contain a high-severity security vulnerability (CVE-2021-28363). Please update to version 2.5.0 or later.
+* [v2.9.1](docs/releases/v2_9_1.md)
 * [v2.8.0](docs/releases/v2_8_0.md)
 * [v2.7.0](docs/releases/v2_7_0.md)
 * [v2.6.1](docs/releases/v2_6_1.md)
 * [v2.5.0](docs/releases/v2_5_0.md)
-* [v2.4.0](docs/releases/v2_4_0.md)
 
 ## Documentation
 Architecture, function blocks, code descriptions and the project roadmap are located in the docs folder. Contributions to the documentation are welcome! See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
