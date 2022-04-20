@@ -7,9 +7,19 @@
 Helper functions for packages in SPDX JSON document creation
 """
 
+from license_expression import get_spdx_licensing
 from tern.report import content
 from tern.formats.spdx import spdx_common
 from tern.formats.spdx.spdxjson import formats as json_formats
+
+
+def is_spdx_license_expression(license_data):
+    '''Return True if the license is a valid SPDX license expression, else
+    return False'''
+    licensing = get_spdx_licensing()
+    if ',' in license_data:
+        license_data = license_data.replace(',', ' ')
+    return licensing.validate(license_data).errors == []
 
 
 def get_package_comment(package):
@@ -21,6 +31,14 @@ def get_package_comment(package):
             comment = comment + content.print_notices(
                 notice_origin, '', '\t')
     return comment
+
+
+def get_package_license_declared(package_license_declared):
+    if package_license_declared:
+        if is_spdx_license_expression(package_license_declared):
+            return package_license_declared
+        return spdx_common.get_license_ref(package_license_declared)
+    return 'NONE'
 
 
 def get_source_package_dict(package, template):
@@ -39,9 +57,8 @@ def get_source_package_dict(package, template):
         mapping['PackageDownloadLocation'] else 'NOASSERTION',
         'filesAnalyzed': False,  # always false for packages
         'licenseConcluded': 'NOASSERTION',  # always NOASSERTION
-        'licenseDeclared': spdx_common.get_license_ref(
-            mapping['PackageLicenseDeclared']) if
-        mapping['PackageLicenseDeclared'] else 'NONE',
+        'licenseDeclared': get_package_license_declared(
+            mapping['PackageLicenseDeclared']),
         'copyrightText': mapping['PackageCopyrightText'] if
         mapping['PackageCopyrightText'] else'NONE',
         'comment': json_formats.source_package_comment
@@ -65,9 +82,8 @@ def get_package_dict(package, template):
         mapping['PackageDownloadLocation'] else 'NOASSERTION',
         'filesAnalyzed': False,  # always false for packages
         'licenseConcluded': 'NOASSERTION',  # always NOASSERTION
-        'licenseDeclared': spdx_common.get_license_ref(
-            mapping['PackageLicenseDeclared']) if
-        mapping['PackageLicenseDeclared'] else 'NONE',
+        'licenseDeclared':  get_package_license_declared(
+            mapping['PackageLicenseDeclared']),
         'copyrightText': mapping['PackageCopyrightText'] if
         mapping['PackageCopyrightText'] else'NONE',
         'comment': get_package_comment(package)
