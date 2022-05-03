@@ -13,6 +13,7 @@ import logging
 import re
 import uuid
 
+from license_expression import get_spdx_licensing
 from tern.utils import constants
 from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
 
@@ -42,6 +43,14 @@ def get_string_id(string):
 def get_license_ref(license_string):
     """ For SPDX tag-value format, return a LicenseRef string """
     return 'LicenseRef-' + get_string_id(license_string)
+
+def is_spdx_license_expression(license_data):
+    '''Return True if the license is a valid SPDX license expression, else
+    return False'''
+    licensing = get_spdx_licensing()
+    if ',' in license_data:
+        license_data = license_data.replace(',', ' ')
+    return licensing.validate(license_data).errors == []
 
 
 ########################
