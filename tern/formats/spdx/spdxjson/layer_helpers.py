@@ -39,9 +39,10 @@ def get_layer_extracted_licenses(layer_obj):
             unique_licenses.add(package.pkg_license)
     extracted_texts = []
     for lic in list(unique_licenses):
-        extracted_texts.append(json_formats.get_extracted_text_dict(
-            extracted_text=lic, license_ref=spdx_common.get_license_ref(
-                lic)))
+        if not spdx_common.is_spdx_license_expression(lic):
+            extracted_texts.append(json_formats.get_extracted_text_dict(
+                extracted_text=lic, license_ref=spdx_common.get_license_ref(
+                    lic)))
     return extracted_texts
 
 
