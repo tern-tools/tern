@@ -165,6 +165,12 @@ class TestClassImageLayer(unittest.TestCase):
         expected_path = os.path.join(rootfs.get_working_dir(),
                                      'path/to/contents')
         self.assertEqual(self.layer.get_untar_dir(), expected_path)
+        # Kaniko image format test
+        self.layer = ImageLayer('123abc', 'some_layer_tar_file.tar.gz')
+        self.layer.image_layout = "docker"
+        expected_path = os.path.join(rootfs.get_working_dir(),
+                                     'some_layer_tar_file/contents')
+        self.assertEqual(self.layer.get_untar_dir(), expected_path)
 
 
 if __name__ == '__main__':
