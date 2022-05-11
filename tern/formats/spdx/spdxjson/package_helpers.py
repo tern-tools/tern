@@ -23,14 +23,6 @@ def get_package_comment(package):
     return comment
 
 
-def get_package_license_declared(package_license_declared):
-    if package_license_declared:
-        if spdx_common.is_spdx_license_expression(package_license_declared):
-            return package_license_declared
-        return spdx_common.get_license_ref(package_license_declared)
-    return 'NONE'
-
-
 def get_source_package_dict(package, template):
     '''''Given a package object and its SPDX template mapping, return a SPDX
     JSON dictionary representation of the associated source package.
@@ -47,7 +39,7 @@ def get_source_package_dict(package, template):
         mapping['PackageDownloadLocation'] else 'NOASSERTION',
         'filesAnalyzed': False,  # always false for packages
         'licenseConcluded': 'NOASSERTION',  # always NOASSERTION
-        'licenseDeclared': get_package_license_declared(
+        'licenseDeclared': spdx_common.get_package_license_declared(
             mapping['PackageLicenseDeclared']),
         'copyrightText': mapping['PackageCopyrightText'] if
         mapping['PackageCopyrightText'] else'NONE',
@@ -72,7 +64,7 @@ def get_package_dict(package, template):
         mapping['PackageDownloadLocation'] else 'NOASSERTION',
         'filesAnalyzed': False,  # always false for packages
         'licenseConcluded': 'NOASSERTION',  # always NOASSERTION
-        'licenseDeclared':  get_package_license_declared(
+        'licenseDeclared':  spdx_common.get_package_license_declared(
             mapping['PackageLicenseDeclared']),
         'copyrightText': mapping['PackageCopyrightText'] if
         mapping['PackageCopyrightText'] else'NONE',

@@ -24,14 +24,6 @@ def get_package_comment(package_obj):
     return comment
 
 
-def get_package_license_declared(package_license_declared):
-    if package_license_declared:
-        if spdx_common.is_spdx_license_expression(package_license_declared):
-            return package_license_declared
-        return spdx_common.get_license_ref(package_license_declared)
-    return 'NONE'
-
-
 def get_source_package_block(package_obj, template):
     '''Given a package object and its SPDX template mapping, return a SPDX
     document block for the corresponding source package.
@@ -63,7 +55,7 @@ def get_source_package_block(package_obj, template):
     # Package License Concluded (always NOASSERTION)
     block += 'PackageLicenseConcluded: NOASSERTION\n'
     # Package License Declared (use the license ref for this)
-    block += 'PackageLicenseDeclared: ' + get_package_license_declared(
+    block += 'PackageLicenseDeclared: ' + spdx_common.get_package_license_declared(
         mapping['PackageLicenseDeclared']) + '\n'
     # Package Copyright Text
     if mapping['PackageCopyrightText']:
@@ -105,7 +97,7 @@ def get_package_block(package_obj, template):
     # Package License Concluded (always NOASSERTION)
     block += 'PackageLicenseConcluded: NOASSERTION\n'
     # Package License Declared (use the license ref for this)
-    block += 'PackageLicenseDeclared: ' + get_package_license_declared(
+    block += 'PackageLicenseDeclared: ' + spdx_common.get_package_license_declared(
         mapping['PackageLicenseDeclared']) + '\n'
     # Package Copyright Text
     if mapping['PackageCopyrightText']:

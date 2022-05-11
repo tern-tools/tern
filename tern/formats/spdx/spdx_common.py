@@ -49,8 +49,16 @@ def is_spdx_license_expression(license_data):
     return False'''
     licensing = get_spdx_licensing()
     if ',' in license_data:
-        license_data = license_data.replace(',', ' ')
+        license_data = license_data.replace(',', ' and ')
     return licensing.validate(license_data).errors == []
+
+# Searches for declared license data using the license_expression library
+def get_package_license_declared(package_license_declared):
+    if package_license_declared:
+        if is_spdx_license_expression(package_license_declared):
+            return package_license_declared
+        return get_license_ref(package_license_declared)
+    return 'NONE'
 
 
 ########################

@@ -35,7 +35,7 @@ def get_license_info_block(filedata):
     else:
         for lic in spdx_common.get_file_licenses(filedata):
             block = block + 'LicenseInfoInFile: {}'.format(
-                spdx_common.get_license_ref(lic)) + '\n'
+                spdx_common.get_package_license_declared(lic)) + '\n'
     return block
 
 
