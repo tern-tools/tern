@@ -318,8 +318,18 @@ class ImageLayer:
         """Get the directory where contents of the image layer are untarred"""
         # the untar directory is based on the image layout
         if self.image_layout == 'docker':
+            # Images built with Kaniko and its tarPath parameter identify
+            # as Docker image based on the metadata format, but keep their
+            # layer tar files in the root of the main tar file.
+            # So we will make sure if there's no subdir for the layer tar
+            # files, we use the first part of the file name as dir name.
+            # This is to prevent overwriting the extracted layers on every
+            # subsequent layer inspection.
+            subdir_name = os.path.dirname(self.tar_file)
+            if not subdir_name:
+                subdir_name = self.tar_file.split('.', 1)[0]
             return os.path.join(rootfs.get_working_dir(),
-                                os.path.dirname(self.tar_file),
+                                subdir_name,
                                 constants.untar_dir)
         # For OCI layouts, the tar file may be at the root of the directory
         # So we will return a path one level deeper
