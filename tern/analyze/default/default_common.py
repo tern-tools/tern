@@ -34,6 +34,13 @@ def find_shell(fspath):
         if realpath[0] == '/' and os.path.exists(os.path.join(fspath,
                                                               realpath[1:])):
             return sh
+        # In some cases, the realpath for a symlink incorrectly resolves to
+        # /usr/<path>. In these cases, ignore the /usr/ prefix and look for
+        # the linked binary in the current working dir.
+        # See issue #1161 for details.
+        if realpath[0] == '/' and os.path.exists(os.path.join(fspath,
+                                                              realpath[5:])):
+            return sh
         # otherwise, just follow symlink in same folder and
         # remove leading forwardslash before joining paths
         if os.path.exists(os.path.join(fspath, sh[1:])):
