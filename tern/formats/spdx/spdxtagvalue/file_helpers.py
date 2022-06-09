@@ -34,6 +34,8 @@ def get_license_info_block(filedata):
         block = 'LicenseInfoInFile: NONE\n'
     else:
         for lic in spdx_common.get_file_licenses(filedata):
+            # Add the license expression to the list if it is a valid SPDX
+            # identifier; otherwise, add the LicenseRef
             block = block + 'LicenseInfoInFile: {}'.format(
                 spdx_common.get_package_license_declared(lic)) + '\n'
     return block
