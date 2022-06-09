@@ -55,11 +55,8 @@ def get_source_package_block(package_obj, template):
     # Package License Concluded (always NOASSERTION)
     block += 'PackageLicenseConcluded: NOASSERTION\n'
     # Package License Declared (use the license ref for this)
-    if mapping['PackageLicenseDeclared']:
-        block += 'PackageLicenseDeclared: {}\n'.format(
-            spdx_common.get_license_ref(mapping['PackageLicenseDeclared']))
-    else:
-        block += 'PackageLicenseDeclared: NONE\n'
+    block += 'PackageLicenseDeclared: ' + spdx_common.get_package_license_declared(
+        mapping['PackageLicenseDeclared']) + '\n'
     # Package Copyright Text
     if mapping['PackageCopyrightText']:
         block += 'PackageCopyrightText:' + spdx_formats.block_text.format(
@@ -100,11 +97,8 @@ def get_package_block(package_obj, template):
     # Package License Concluded (always NOASSERTION)
     block += 'PackageLicenseConcluded: NOASSERTION\n'
     # Package License Declared (use the license ref for this)
-    if mapping['PackageLicenseDeclared']:
-        block += 'PackageLicenseDeclared: {}\n'.format(
-            spdx_common.get_license_ref(mapping['PackageLicenseDeclared']))
-    else:
-        block += 'PackageLicenseDeclared: NONE\n'
+    block += 'PackageLicenseDeclared: ' + spdx_common.get_package_license_declared(
+        mapping['PackageLicenseDeclared']) + '\n'
     # Package Copyright Text
     if mapping['PackageCopyrightText']:
         block += 'PackageCopyrightText:' + spdx_formats.block_text.format(
