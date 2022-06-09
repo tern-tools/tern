@@ -197,28 +197,28 @@ def origins_handler(list_obj, indent):
 def list_handler(list_obj, indent):
     '''Write html code for lists in report dictionary'''
     html_string = ''
-    for i, _ in enumerate(list_obj):
-        if isinstance(list_obj[i], dict):
-            if "name" in list_obj[i].keys():
+    for i, lo in enumerate(list_obj):
+        if isinstance(lo, dict):
+            if "name" in lo.keys():
                 html_string = html_string + '  '*indent + \
-                    '<li><span class="caret">' + str(list_obj[i]["name"]) + \
+                    '<li><span class="caret">' + str(lo["name"]) + \
                     ' : ' + '</span> \n '
             else:
                 html_string = html_string + '  '*indent + \
                     '<li><span class="caret">' + str(i) + ' : ' + '</span> \n '
-            html_string = html_string + dict_handler(list_obj[i], indent+1)
+            html_string = html_string + dict_handler(lo, indent+1)
             html_string = html_string + '  '*indent + '</li> \n '
-        elif isinstance(list_obj[i], list):
+        elif isinstance(lo, list):
             html_string = html_string + '  '*indent + \
                 '<li><span class="caret">' + str(i) + ' : ' + '</span> \n '
             html_string = html_string + '  '*indent + \
                 '<ul class ="nested"> \n '
-            html_string = html_string + list_handler(list_obj[i], indent+1)
+            html_string = html_string + list_handler(lo, indent+1)
             html_string = html_string + '  '*indent + '</ul> \n ' + \
                 '  '*indent + '</li>\n '
         else:
             html_string = html_string + ' '*indent + '<li>' + \
-                '<span class="text-c">' + str(list_obj[i]) + \
+                '<span class="text-c">' + str(lo) + \
                 '</span>\n</li> \n '
     return html_string
 
