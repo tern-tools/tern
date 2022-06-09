@@ -52,8 +52,10 @@ def is_spdx_license_expression(license_data):
         license_data = license_data.replace(',', ' and ')
     return licensing.validate(license_data).errors == []
 
-# Searches for declared license data using the license_expression library
 def get_package_license_declared(package_license_declared):
+    '''Determines if the declared license string for a package or file is a
+    valid SPDX license expression using the license_expression library. If not,
+    returns the SPDX LicenseRef or NONE if the string is blank.'''
     if package_license_declared:
         if is_spdx_license_expression(package_license_declared):
             return package_license_declared
