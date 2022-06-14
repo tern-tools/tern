@@ -394,7 +394,7 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Beta Release 2.10.0 is out! See the [release notes](docs/releases/v2_10_0.md) for more information.
+Release 2.10.1 is out! See the [release notes](docs/releases/v2_10_1.md) for more information.
 
 We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible. We are currently working on Release 2.11.0.
 

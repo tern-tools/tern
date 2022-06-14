@@ -2,7 +2,6 @@
 
 ## 2022
 - [Create an API to run Tern as a service in Kubernetes](https://github.com/tern-tools/tern/issues/1112)
-- [Report applicable package licenses as SPDX identifiers instead of LicenseRefs](https://github.com/tern-tools/tern/issues/1147)
 - Improve test report validation
 - The usual bug fixing/technical debt cleanup
 
