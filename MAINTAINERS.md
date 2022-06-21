@@ -7,5 +7,5 @@ describes governance guidelines and maintainer responsibilities.
 
 | Maintainer | GitHub ID | Affiliation |
 | --------------- | --------- | ----------- |
-| Nisha Kumar | [nishakm](https://github.com/nishakm) | [VMware](https://www.github.com/vmware/) |
+| Nisha Kumar | [nishakm](https://github.com/nishakm) | [Oracle](https://www.github.com/oracle/) |
 | Rose Judge | [rnjudge](https://github.com/rnjudge/) | [VMware](https://www.github.com/vmware/) |
