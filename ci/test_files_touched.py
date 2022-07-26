@@ -151,8 +151,7 @@ test_suite = {
 alltests = []
 for change in changes:
     for check, _ in test_suite.items():
-        if check.match(change):
-            alltests.extend(test_suite[check])
+        alltests.extend(test_suite[check])
 
 # Remove duplicate tests
 tests = list(set(alltests))
