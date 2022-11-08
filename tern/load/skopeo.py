@@ -33,6 +33,9 @@ def pull_image(image_tag_string, no_tls=False):
     check_skopeo_setup()
     # we will assume the docker transport for now
     remote = f'docker://{image_tag_string}'
+    # Unless the user specifies that the image is local
+    if image_tag_string.split(':')[0] == "docker-daemon":
+        remote = image_tag_string
     local = f'dir:{rootfs.get_working_dir()}'
     logger.debug("Attempting to pull image \"%s\"", image_tag_string)
     if no_tls:
@@ -52,6 +55,8 @@ def get_image_digest(image_tag_string):
     # check if skopeo is set up
     check_skopeo_setup()
     remote = f'docker://{image_tag_string}'
+    if image_tag_string.split(':')[0] == "docker-daemon":
+        remote = image_tag_string
     logger.debug("Inspecting remote image \"%s\"", image_tag_string)
     result, error = rootfs.shell_command(
         False, ['skopeo', 'inspect', remote])
