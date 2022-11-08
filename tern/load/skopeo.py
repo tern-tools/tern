@@ -54,6 +54,8 @@ def get_image_digest(image_tag_string):
     # check if skopeo is set up
     check_skopeo_setup()
     remote = f'docker://{image_tag_string}'
+    if len(image_tag_string.split(':')) > 2:
+        remote = image_tag_string
     logger.debug("Inspecting remote image \"%s\"", image_tag_string)
     result, error = rootfs.shell_command(
         False, ['skopeo', 'inspect', remote])
