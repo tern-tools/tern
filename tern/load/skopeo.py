@@ -33,6 +33,8 @@ def pull_image(image_tag_string, no_tls=False):
     check_skopeo_setup()
     # we will assume the docker transport for now
     remote = f'docker://{image_tag_string}'
+    if len(image_tag_string.split(':')) > 2:
+        remote = image_tag_string
     local = f'dir:{rootfs.get_working_dir()}'
     logger.debug("Attempting to pull image \"%s\"", image_tag_string)
     if no_tls:
