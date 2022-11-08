@@ -180,7 +180,9 @@ def main():
                                " image")
     parser_report.add_argument('-i', '--image',
                                help="A container image referred either by "
-                               " repo:tag or repo@digest-type:digest")
+                               " repo:tag or repo@digest-type:digest. To "
+                               "analyze a local image, prefix the container "
+                               "image with 'docker-daemon:'")
     parser_report.add_argument('--no-tls', default=False,
                                action='store_true',
                                help="When fetching an image, DO NOT use HTTPS "
