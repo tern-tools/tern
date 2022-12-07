@@ -27,7 +27,7 @@ The following fields should appear *once*, at the beginning of the SPDX document
 2.3 | SPDX Identifier |    Yes     | identifier for the SPDX document itself; always `SPDXRef-DOCUMENT` | `SPDXID: SPDXRef-DOCUMENT`
 2.4 | Document Name   |    Yes     | human-readable name for the SPDX document itself | `DocumentName: Tern report for ACME Dockerfile`
 2.5 | SPDX Document Namespace | Yes| unique absolute URI for the SPDX document itself | `DocumentNamespace: https://example.com/spdxdocs/tern-report-ACME-1.0.1-123456`
-2.7 | License List Version    | No | release version of the SPDX License List being used | `LicenseListVersion: 3.17`
+2.7 | License List Version    | No | release version of the SPDX License List being used | `LicenseListVersion: 3.19`
 2.8 | Creator         |    Yes     | one or more people, orgs or tools used to create the SPDX document | `Creator: Tool: tern-2.10`
 2.9 | Created         |    Yes     | the time and date when the SPDX document was created (ISO 8601; UTC) | `Created: 2019-03-15T08:25:00Z`
 
