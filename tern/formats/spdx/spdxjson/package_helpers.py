@@ -42,7 +42,7 @@ def get_source_package_dict(package, template):
         'licenseDeclared': spdx_common.get_package_license_declared(
             mapping['PackageLicenseDeclared']),
         'copyrightText': mapping['PackageCopyrightText'] if
-        mapping['PackageCopyrightText'] else'NONE',
+        mapping['PackageCopyrightText'] else 'NONE',
         'comment': json_formats.source_package_comment
     }
 
@@ -67,7 +67,7 @@ def get_package_dict(package, template):
         'licenseDeclared':  spdx_common.get_package_license_declared(
             mapping['PackageLicenseDeclared']),
         'copyrightText': mapping['PackageCopyrightText'] if
-        mapping['PackageCopyrightText'] else'NONE',
+        mapping['PackageCopyrightText'] else 'NONE',
         'comment': get_package_comment(package)
     }
 
