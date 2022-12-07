@@ -92,7 +92,7 @@ class Command:
 
     def is_set(self):
         '''Check if any flags are set'''
-        return not(self.flags == 0b000)
+        return not (self.flags == 0b000)
 
     def set_install(self):
         '''Set install flag'''
