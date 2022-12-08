@@ -56,6 +56,9 @@ def get_image_packages_license_block(image_obj):
         for package in layer.packages:
             if package.pkg_license:
                 licenses.add(package.pkg_license)
+            # Add debian licenses from copyright text as one license
+            if package.pkg_licenses:
+                licenses.add(", ".join(package.pkg_licenses))
     for lic in licenses:
         if not spdx_common.is_spdx_license_expression(lic):
             block += spdx_formats.license_id.format(
