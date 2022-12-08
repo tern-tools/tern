@@ -97,8 +97,13 @@ def get_package_block(package_obj, template):
     # Package License Concluded (always NOASSERTION)
     block += 'PackageLicenseConcluded: NOASSERTION\n'
     # Package License Declared (use the license ref for this)
+    declared_lic = mapping['PackageLicenseDeclared']
+    if package_obj.pkg_format == 'deb':
+        # Define debian licenses from copyright text as one license
+        declared_lic = ', '.join(package_obj.pkg_licenses)
+    # List debian package licenses collected from copyright texts
     block += 'PackageLicenseDeclared: ' + spdx_common.get_package_license_declared(
-        mapping['PackageLicenseDeclared']) + '\n'
+        declared_lic) + '\n'
     # Package Copyright Text
     if mapping['PackageCopyrightText']:
         block += 'PackageCopyrightText:' + spdx_formats.block_text.format(

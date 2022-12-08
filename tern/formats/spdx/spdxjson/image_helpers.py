@@ -29,6 +29,9 @@ def get_image_extracted_licenses(image_obj):
         for package in layer.packages:
             if package.pkg_license:
                 unique_licenses.add(package.pkg_license)
+            # Add debian licenses from copyright text as one license
+            if package.pkg_licenses:
+                unique_licenses.add(", ".join(package.pkg_licenses))
     extracted_texts = []
     for lic in list(unique_licenses):
         if not spdx_common.is_spdx_license_expression(lic):
