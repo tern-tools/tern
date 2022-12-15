@@ -48,8 +48,9 @@ def is_spdx_license_expression(license_data):
     '''Return True if the license is a valid SPDX license expression, else
     return False'''
     licensing = get_spdx_licensing()
-    if ',' in license_data:
+    if ',' in license_data or '/' in license_data:
         license_data = license_data.replace(',', ' and ')
+        license_data = license_data.replace('/', '-')
     return licensing.validate(license_data).errors == []
 
 def get_package_license_declared(package_license_declared):
