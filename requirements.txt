@@ -7,14 +7,14 @@
 # what should be updated.
 
 PyYAML>=6.0
-docker~=5.0
-dockerfile-parse~=1.2
+docker~=6.0
+dockerfile-parse~=2.0
 requests~=2.28
-stevedore>=3.5
-pbr>=5.9
+stevedore>=4.1
+pbr>=5.11
 debian-inspector>=31.0
-regex>=2022.6
+regex>=2022.10
 GitPython~=3.1
-prettytable~=3.3
-packageurl-python>=0.9.9
+prettytable~=3.5
+packageurl-python>=0.10.4
 license-expression>=30.0
