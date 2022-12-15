@@ -1,5 +1,10 @@
+## 2022-12-16
+### 2022
+- [Create an API to run Tern as a service in Kubernetes](https://github.com/tern-tools/tern/issues/1112): This work has been tabled due to lack of maintainer resources.
+- Improve test report validation
+
 ## 2021-12-15
-###2021
+### 2021
 Our goal is to meet these requirements by the end of the year.
 - We will continue investigating how we can run Tern without root privileges.
 - We want to transition away from using the Docker Python library to pull container images from Dockerhub. For motivation and context, see the Kubernetes [announcement](https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/) and past [discussion](https://github.com/tern-tools/meetings/blob/main/minutes/04-13-2021.md) on the topic from Tern's community meeting.
