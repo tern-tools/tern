@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2022 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 import unittest
@@ -175,7 +175,8 @@ class TestClassPackage(unittest.TestCase):
                             {'name': 'b.txt', 'path': '/lib/b.txt'}],
                   'pkg_format': 'rpm',
                   'src_name': 'p1src',
-                  'src_version': '1.0'
+                  'src_version': '1.0',
+                  'external_refs': []
                   }
         p = Package('p1')
         p.fill(p_dict)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2021 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2022 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -26,6 +26,7 @@ from tern.classes.package import Package
 from tern.extensions.executor import Executor
 from tern.utils import constants
 from tern.utils import rootfs
+from tern.utils.externals import add_purl
 
 
 logger = logging.getLogger(constants.logger_name)
@@ -118,6 +119,8 @@ def get_scancode_package(package_dict):
     package.download_url = package_dict['download_url']
     package.licenses = [package_dict['declared_license'],
                         package_dict['license_expression']]
+    purl = add_purl(package_dict['name'], package_dict['version'])
+    package.external_refs.append(purl)
     return package
 
 

@@ -24,6 +24,7 @@ class Package:
         pkg_licenses: all licenses found within a package
         src_name: the source package associated with the binary package
         src_version: the source package version
+        external_refs: a list of external references
 
     methods:
         to_dict: returns a dict representation of the instance
@@ -47,6 +48,7 @@ class Package:
         self.__pkg_format = ''
         self.__src_name = ''
         self.__src_version = ''
+        self.__external_refs = []
 
     @property
     def name(self):
@@ -143,6 +145,14 @@ class Package:
     @src_version.setter
     def src_version(self, src_version):
         self.__src_version = src_version
+
+    @property
+    def external_refs(self):
+        return self.__external_refs
+
+    @external_refs.setter
+    def external_refs(self, external_refs):
+        self.__external_refs = external_refs
 
     def get_file_paths(self):
         """Return a list of paths of all the files in a package"""
