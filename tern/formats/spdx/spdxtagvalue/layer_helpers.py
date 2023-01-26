@@ -115,6 +115,8 @@ def get_layer_block(layer_obj, template):
     block += 'PackageName: {}\n'.format(os.path.basename(layer_obj.tar_file))
     # Package SPDXID
     block += 'SPDXID: {}\n'.format(spdx_common.get_layer_spdxref(layer_obj))
+    # Package Version. For Layer objects, this is just the layer_index
+    block += 'PackageVersion: {}\n'.format(layer_obj.layer_index)
     # Package File Name
     block += 'PackageFileName: {}\n'.format(layer_obj.tar_file)
     # Package Download Location (always NONE for layers)
