@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2021-2023 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -72,6 +72,7 @@ def get_package_dict(package, template):
             mapping['PackageLicenseDeclared']),
         'copyrightText': mapping['PackageCopyrightText'] if
         mapping['PackageCopyrightText'] else 'NONE',
+        'externalRef': mapping['ExternalRef'],
         'comment': get_package_comment(package)
     }
 

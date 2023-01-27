@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2020-2023 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -67,7 +67,6 @@ def get_source_package_block(package_obj, template):
     block += spdx_formats.source_comment
     return block
 
-
 def get_package_block(package_obj, template):
     '''Given a package object and its SPDX template mapping, return a SPDX
     document block for the package. The mapping should have keys:
@@ -110,6 +109,8 @@ def get_package_block(package_obj, template):
             message=mapping['PackageCopyrightText']) + '\n'
     else:
         block += 'PackageCopyrightText: NONE\n'
+    # External References
+    block += 'ExternalRef: {}\n'.format(mapping['ExternalRef'])
     # Package Comments
     block += get_package_comment(package_obj)
     return block

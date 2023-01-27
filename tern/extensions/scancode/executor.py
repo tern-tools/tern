@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2022 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
@@ -119,7 +119,10 @@ def get_scancode_package(package_dict):
     package.download_url = package_dict['download_url']
     package.licenses = [package_dict['declared_license'],
                         package_dict['license_expression']]
-    purl = add_purl(package_dict['name'], package_dict['version'])
+    proj_url = ''
+    if package_dict['proj_url']:
+        proj_url = package_dict['proj_url']
+    purl = add_purl(proj_url, package_dict['name'], package_dict['version'])
     package.external_refs.append(purl)
     return package
 

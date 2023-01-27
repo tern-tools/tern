@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019-2020 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 
 from tern.classes.template import Template
@@ -21,7 +21,8 @@ class SPDX(Template):
                 'copyright': 'PackageCopyrightText',
                 'download_url': 'PackageDownloadLocation',
                 'src_name': 'SourcePackageName',
-                'src_version': 'SourcePackageVersion'}
+                'src_version': 'SourcePackageVersion',
+                'external_refs': 'ExternalRef'}
 
     def image_layer(self):
         return {'tar_file': 'PackageFileName'}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2022 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-2-Clause
 import os
 import re
@@ -222,7 +222,7 @@ class ImageLayer:
     def add_package(self, package):
         if isinstance(package, Package):
             if package.name not in self.get_package_names():
-                purl = add_purl(package.name, package.version)
+                purl = add_purl(package.proj_url, package.name, package.version)
                 package.external_refs.append(purl)
                 self.__packages.append(package)
         else:
