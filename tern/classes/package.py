@@ -24,6 +24,8 @@ class Package:
         pkg_licenses: all licenses found within a package
         src_name: the source package associated with the binary package
         src_version: the source package version
+        pkg_supplier: the package distributor according to SPDX 7.5;
+        required to create NTIA compliant SPDX docs
 
     methods:
         to_dict: returns a dict representation of the instance
@@ -47,6 +49,7 @@ class Package:
         self.__pkg_format = ''
         self.__src_name = ''
         self.__src_version = ''
+        self.__pkg_supplier = ''
 
     @property
     def name(self):
@@ -144,6 +147,14 @@ class Package:
     def src_version(self, src_version):
         self.__src_version = src_version
 
+    @property
+    def pkg_supplier(self):
+        return self.__pkg_supplier
+
+    @pkg_supplier.setter
+    def pkg_supplier(self, pkg_supplier):
+        self.__pkg_supplier = pkg_supplier
+
     def get_file_paths(self):
         """Return a list of paths of all the files in a package"""
         return [f.path for f in self.__files]
@@ -217,6 +228,7 @@ class Package:
             files: <package files>
             src_name: <source package>
             src_ver: <source package version>
+            pkg_supplier: <package distributor/supplier>
         the way to use this method is to instantiate the class with the
         name and then give it a package dictionary to fill in the rest
         return true if package name is the same as the one used to instantiate
