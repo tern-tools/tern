@@ -26,13 +26,14 @@ logger = logging.getLogger(constants.logger_name)
 
 def load_full_image(image_tag_string, image_type='oci', load_until_layer=0):
     """Create image object from image name and tag and return the object.
-    The kind of image object is created based on the image_type.
+    * The kind of image object is created based on the image_type.
     image_type = oci OR docker
-    Loads only as many layers as needed."""
+    * Loads only as many layers as needed.
+    * Remove docker-daemon prefix for local images"""
     if image_type == 'oci':
-        image = OCIImage(image_tag_string)
+        image = OCIImage(image_tag_string.replace('docker-daemon:', ''))
     elif image_type == 'docker':
-        image = DockerImage(image_tag_string)
+        image = DockerImage(image_tag_string.replace('docker-daemon:', ''))
     failure_origin = formats.image_load_failure.format(
         testimage=image.repotag)
     try:
