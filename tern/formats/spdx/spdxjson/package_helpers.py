@@ -58,12 +58,14 @@ def get_package_dict(package, template):
     JSON dictionary representation of the package. The analyzed files will
     go in a separate dictionary for the JSON document.'''
     mapping = package.to_dict(template)
+    supplier_str = 'Organization: ' + mapping['PackageSupplier']
     pkg_ref, _ = spdx_common.get_package_spdxref(package)
     package_dict = {
         'name': mapping['PackageName'],
         'SPDXID': pkg_ref,
         'versionInfo': mapping['PackageVersion'] if mapping['PackageVersion']
         else 'NOASSERTION',
+        'supplier': supplier_str if mapping['PackageSupplier'] else 'NOASSERTION', 
         'downloadLocation': mapping['PackageDownloadLocation'] if
         mapping['PackageDownloadLocation'] else 'NOASSERTION',
         'filesAnalyzed': False,  # always false for packages

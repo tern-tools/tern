@@ -88,6 +88,14 @@ dpkg:
         container:
           - "dpkg-query -W -f '${Version}\n'"
     delimiter: "\n"
+  pkg_suppliers:
+    invoke:
+      1:
+        container:
+          - "distro=`/bin/cat /etc/os-release | grep NAME | sed -n '2p' | cut -f 2 -d '=' | cut -d '\"' -f2`"
+          - "pkgs=`dpkg-query -W -f '${Package}\n'`"
+          - "for p in $pkgs; do echo $distro; done"
+    delimiter: "\n"
   source_names:
     invoke:
       1:
@@ -148,6 +156,13 @@ apk:
           - "pkgs=`apk info 2>/dev/null`"
           - "for p in $pkgs; do lic=`apk info $p 2>/dev/null | head -1 | awk '{print $1}'`; echo $lic | sed -e \"s/^$p-//\"; done"
     delimiter: "\n"
+  pkg_suppliers:
+    invoke:
+      1:
+        container:
+          - "pkgs=`apk info 2>/dev/null`"
+          - "for p in $pkgs; do echo 'Alpine Linux'; done"
+    delimiter: "\n"
   licenses:
     invoke:
       1:
@@ -191,6 +206,13 @@ pacman:
       1:
         container:
           - 'pacman -Q 2>/dev/null | cut -f 2 -d " "'
+    delimiter: "\n"
+  pkg_suppliers:
+    invoke:
+      1:
+        container:
+          - 'pkgs=`pacman -Qq 2>/dev/null`'
+          - 'for p in $pkgs; do echo "Arch Linux"; done'
     delimiter: "\n"
   licenses:
     invoke:
@@ -237,6 +259,14 @@ rpm:
       1:
         container:
           - 'rpm --query --all --queryformat "%{version}\n" 2>/dev/null'
+    delimiter: "\n"
+  pkg_suppliers:
+    invoke:
+      1:
+        container:
+          - "distro=`/bin/cat /etc/os-release | grep NAME | sed -n '1p' | cut -f 2 -d '=' | cut -d '\"' -f2`"
+          - "pkgs=`rpm --query --all --queryformat \"%{name}\n\" 2>/dev/null`"
+          - "for p in $pkgs; do echo $distro; done"
     delimiter: "\n"
   licenses:
     invoke:
@@ -302,6 +332,13 @@ pip:
           - "pkgs=`pip list --format=freeze 2> /dev/null | cut -f1 -d'='`"
           - "for p in $pkgs; do pip show $p 2> /dev/null | head -2 | tail -1 | cut -f2 -d' '; done"
     delimiter: "\n"
+  pkg_suppliers:
+    invoke:
+      1:
+        container:
+          - "pkgs=`pip list --format=freeze 2> /dev/null | cut -f1 -d'='`"
+          - "for p in $pkgs; do echo 'PyPI'; done"
+    delimiter: "\n"
   licenses:
     invoke:
       1:
@@ -344,6 +381,13 @@ pip3:
         container:
           - "pkgs=`pip3 list --format=freeze 2> /dev/null | cut -f1 -d'='`"
           - "for p in $pkgs; do pip3 show $p 2> /dev/null | head -2 | tail -1 | cut -f2 -d' '; done"
+    delimiter: "\n"
+  pkg_suppliers:
+    invoke:
+      1:
+        container:
+          - "pkgs=`pip3 list --format=freeze 2> /dev/null | cut -f1 -d'='`"
+          - "for p in $pkgs; do echo 'PyPI'; done"
     delimiter: "\n"
   licenses:
     invoke:

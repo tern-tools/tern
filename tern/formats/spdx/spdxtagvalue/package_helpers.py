@@ -86,6 +86,11 @@ def get_package_block(package_obj, template):
     # Package Version
     if mapping['PackageVersion']:
         block += 'PackageVersion: {}\n'.format(mapping['PackageVersion'])
+    # Package Supplier
+    if mapping['PackageSupplier']:
+        block += 'PackageSupplier: Organization: {}\n'.format(mapping['PackageSupplier'])
+    else:
+        block += 'PackageSupplier: NOASSERTION\n'
     # Package Download Location
     if mapping['PackageDownloadLocation']:
         block += 'PackageDownloadLoaction: {}\n'.format(

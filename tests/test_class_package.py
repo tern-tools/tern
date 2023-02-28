@@ -25,6 +25,7 @@ class TestClassPackage(unittest.TestCase):
         self.p1.pkg_format = 'deb'
         self.p1.src_name = 'p1src'
         self.p1.src_version = '1.0'
+        self.p1.pkg_supplier = 'VMware'
 
         self.p2 = Package('p2')
 
@@ -65,6 +66,8 @@ class TestClassPackage(unittest.TestCase):
                          ('a', '/usr/abc/a'))
         self.assertEqual((self.p2.files[1].name, self.p2.files[1].path),
                          ('b', '/usr/abc/b'))
+        self.p2.pkg_supplier = 'Linux Foundation'
+        self.assertEqual(self.p2.pkg_supplier, 'Linux Foundation')
 
     def testGetters(self):
         self.assertEqual(self.p1.name, 'p1')
@@ -78,6 +81,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p1.pkg_format, 'deb')
         self.assertEqual(self.p1.src_name, 'p1src')
         self.assertEqual(self.p1.src_version, '1.0')
+        self.assertEqual(self.p1.pkg_supplier, 'VMware')
 
     def testAddFile(self):
         p1 = Package('package')
@@ -130,6 +134,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(a_dict['pkg_format'], 'deb')
         self.assertEqual(a_dict['src_name'], 'p1src')
         self.assertEqual(a_dict['src_version'], '1.0')
+        self.assertEqual(a_dict['pkg_supplier'], 'VMware')
 
     def testToDictTemplate(self):
         template1 = TestTemplate1()
@@ -175,7 +180,8 @@ class TestClassPackage(unittest.TestCase):
                             {'name': 'b.txt', 'path': '/lib/b.txt'}],
                   'pkg_format': 'rpm',
                   'src_name': 'p1src',
-                  'src_version': '1.0'
+                  'src_version': '1.0',
+                  'pkg_supplier': 'VMware'
                   }
         p = Package('p1')
         p.fill(p_dict)
