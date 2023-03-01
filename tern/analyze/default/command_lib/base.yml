@@ -187,7 +187,7 @@ apk:
 
 # pacman ----------------------------------------------------------------------
 pacman:
-  pkg_format: 'pkg.tar.xz'
+  pkg_format: 'alpm'
   os_guess:
     - 'Arch Linux'
   path:
@@ -509,7 +509,7 @@ npm:
     delimiter: "LICF"
 # golang----------------------------------------------------------------------
 go:
-  pkg_format: 'go'
+  pkg_format: 'golang'
   os_guess:
     - 'None'
   path:
