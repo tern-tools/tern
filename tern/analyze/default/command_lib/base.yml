@@ -52,6 +52,13 @@ tdnf:
           - 'pkgs=`tdnf list installed | cut -f1 -d"."`'
           - 'for p in $pkgs; do tdnf info $p | head -10 | tail -1 | cut -f2 -d":" | xargs; done'
     delimiter: "\n"
+  archs:
+    invoke:
+      1:
+        container:
+          - 'tdnf check-update > /dev/null'
+          - 'tdnf list installed | cut -f2 -d"." | cut -f1 -d" "'
+    delimiter: "\n"
   files: {}
   proj_urls:
     invoke:
@@ -87,6 +94,12 @@ dpkg:
       1:
         container:
           - "dpkg-query -W -f '${Version}\n'"
+    delimiter: "\n"
+  archs:
+    invoke:
+      1:
+        container:
+          - "dpkg-query -W -f '${Architecture}\n'"
     delimiter: "\n"
   pkg_suppliers:
     invoke:
@@ -155,6 +168,13 @@ apk:
           # use double quotes when using awk
           - "pkgs=`apk info 2>/dev/null`"
           - "for p in $pkgs; do lic=`apk info $p 2>/dev/null | head -1 | awk '{print $1}'`; echo $lic | sed -e \"s/^$p-//\"; done"
+    delimiter: "\n"
+  archs:
+    invoke:
+      1:
+        container:
+          - "pkgs=`apk info 2>/dev/null`"
+          - "for p in $pkgs; do apk -a info $p --print-arch; done"
     delimiter: "\n"
   pkg_suppliers:
     invoke:
@@ -273,6 +293,12 @@ rpm:
       1:
         container:
           - 'rpm --query --all --queryformat "%{license}\n" 2>/dev/null'
+    delimiter: "\n"
+  archs:
+    invoke:
+      1:
+        container:
+          - 'rpm --query --all --queryformat "%{arch}\n" 2>/dev/null'
     delimiter: "\n"
   source_names:
     invoke:
@@ -559,6 +585,13 @@ distroless:
         host:
           - "files=`ls var/lib/dpkg/status.d`"
           - "for f in $files; do grep -oP '^Version: \\K.*$' var/lib/dpkg/status.d/$f; done"
+    delimiter: "\n"
+  archs:
+    invoke:
+      1:
+        host:
+          - "files=`ls var/lib/dpkg/status.d`"
+          - "for f in $files; do grep -oP '^Architecture: \\K.*$' var/lib/dpkg/status.d/$f; done"
     delimiter: "\n"
   copyrights:
     invoke:

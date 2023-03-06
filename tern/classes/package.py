@@ -25,7 +25,8 @@ class Package:
         src_name: the source package associated with the binary package
         src_version: the source package version
         pkg_supplier: the package distributor according to SPDX 7.5;
-        required to create NTIA compliant SPDX docs
+          required to create NTIA compliant SPDX docs
+        arch: architecture the package was built for
 
     methods:
         to_dict: returns a dict representation of the instance
@@ -50,6 +51,7 @@ class Package:
         self.__src_name = ''
         self.__src_version = ''
         self.__pkg_supplier = ''
+        self.__arch = ''
 
     @property
     def name(self):
@@ -154,6 +156,14 @@ class Package:
     @pkg_supplier.setter
     def pkg_supplier(self, pkg_supplier):
         self.__pkg_supplier = pkg_supplier
+
+    @property
+    def arch(self):
+        return self.__arch
+
+    @arch.setter
+    def arch(self, arch):
+        self.__arch = arch
 
     def get_file_paths(self):
         """Return a list of paths of all the files in a package"""

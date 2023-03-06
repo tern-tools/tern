@@ -37,10 +37,10 @@ with open(os.path.abspath(snippet_file), encoding='utf-8') as f:
     command_lib['snippets'] = yaml.safe_load(f)
 # list of package information keys that the command library can accomodate
 base_keys = {'names', 'versions', 'licenses', 'source_names',
-             'source_versions', 'pkg_suppliers', 'copyrights',
+             'source_versions', 'pkg_suppliers', 'archs', 'copyrights',
              'proj_urls', 'srcs', 'files'}
 package_keys = {'name', 'version', 'license', 'src_name', 'src_version',
-               'pkg_supplier', 'copyright', 'proj_url', 'src', 'files'}
+               'pkg_supplier', 'arch', 'copyright', 'proj_url', 'src', 'files'}
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
