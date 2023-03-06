@@ -26,6 +26,7 @@ class TestClassPackage(unittest.TestCase):
         self.p1.src_name = 'p1src'
         self.p1.src_version = '1.0'
         self.p1.pkg_supplier = 'VMware'
+        self.p1.arch = 'x86_64'
 
         self.p2 = Package('p2')
 
@@ -82,6 +83,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(self.p1.src_name, 'p1src')
         self.assertEqual(self.p1.src_version, '1.0')
         self.assertEqual(self.p1.pkg_supplier, 'VMware')
+        self.assertEqual(self.p1.arch, 'x86_64')
 
     def testAddFile(self):
         p1 = Package('package')
@@ -135,6 +137,7 @@ class TestClassPackage(unittest.TestCase):
         self.assertEqual(a_dict['src_name'], 'p1src')
         self.assertEqual(a_dict['src_version'], '1.0')
         self.assertEqual(a_dict['pkg_supplier'], 'VMware')
+        self.assertEqual(a_dict['arch'], 'x86_64')
 
     def testToDictTemplate(self):
         template1 = TestTemplate1()
@@ -181,7 +184,8 @@ class TestClassPackage(unittest.TestCase):
                   'pkg_format': 'rpm',
                   'src_name': 'p1src',
                   'src_version': '1.0',
-                  'pkg_supplier': 'VMware'
+                  'pkg_supplier': 'VMware',
+                  'arch': 'x86_64'
                   }
         p = Package('p1')
         p.fill(p_dict)
