@@ -59,6 +59,15 @@ tdnf:
           - 'tdnf check-update > /dev/null'
           - 'tdnf list installed | cut -f2 -d"." | cut -f1 -d" "'
     delimiter: "\n"
+  pkg_suppliers:
+    invoke:
+      1:
+        container:
+          - 'tdnf check-update > /dev/null'
+          - "distro=`/bin/cat /etc/os-release | grep NAME | sed -n '1p' | cut -f 2 -d '=' | cut -d '\"' -f2`"
+          - 'pkgs=`tdnf list installed | cut -f1 -d"."`'
+          - "for p in $pkgs; do echo $distro; done"
+    delimiter: "\n"
   files: {}
   proj_urls:
     invoke:
@@ -180,8 +189,9 @@ apk:
     invoke:
       1:
         container:
+          - "distro=`/bin/cat /etc/os-release | grep NAME | sed -n '1p' | cut -f 2 -d '=' | cut -d '\"' -f2`"
           - "pkgs=`apk info 2>/dev/null`"
-          - "for p in $pkgs; do echo 'Alpine Linux'; done"
+          - "for p in $pkgs; do echo $distro; done"
     delimiter: "\n"
   licenses:
     invoke:
@@ -363,7 +373,7 @@ pip:
       1:
         container:
           - "pkgs=`pip list --format=freeze 2> /dev/null | cut -f1 -d'='`"
-          - "for p in $pkgs; do echo 'PyPI'; done"
+          - "for p in $pkgs; do echo 'Python Package Index'; done"
     delimiter: "\n"
   licenses:
     invoke:
@@ -413,7 +423,7 @@ pip3:
       1:
         container:
           - "pkgs=`pip3 list --format=freeze 2> /dev/null | cut -f1 -d'='`"
-          - "for p in $pkgs; do echo 'PyPI'; done"
+          - "for p in $pkgs; do echo 'Python Package Index'; done"
     delimiter: "\n"
   licenses:
     invoke:
