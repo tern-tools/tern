@@ -16,6 +16,7 @@ import uuid
 from license_expression import get_spdx_licensing
 from tern.utils import constants
 from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
+from packageurl import PackageURL
 
 # global logger
 logger = logging.getLogger(constants.logger_name)
@@ -210,3 +211,34 @@ def get_file_comment(filedata):
             comment = comment + \
                 '{}: {}'.format(notice.level, notice.message) + '\n'
     return comment
+
+
+#######################
+# Common PURL Helpers #
+#######################
+
+purl_types_with_namespaces = [
+    'deb',
+    'rpm',
+    'apk',
+    'alpm'
+]
+
+
+def get_purl(package_obj):
+    '''Return a purl string for a given package'''
+    purl_type = package_obj.pkg_format
+    purl_namespace = ''
+    if purl_type in purl_types_with_namespaces and package_obj.pkg_supplier:
+        # https://github.com/package-url/purl-spec/pull/214
+        if package_obj.pkg_supplier.split(' ')[0] == "VMware":
+            purl_namespace = package_obj.pkg_supplier.split(' ')[1].lower()
+        else:
+            purl_namespace = package_obj.pkg_supplier.split(' ')[0].lower()
+            # TODO- this might need adjusting for alpm. Currently can't test on M1 
+    purl = PackageURL(purl_type, purl_namespace, package_obj.name.lower(), package_obj.version,
+                      qualifiers={'arch': package_obj.arch if package_obj.arch else ''})
+    try:
+        return purl.to_string()
+    except ValueError:
+        return ''

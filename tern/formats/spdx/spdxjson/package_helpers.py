@@ -74,9 +74,14 @@ def get_package_dict(package, template):
             mapping['PackageLicenseDeclared']),
         'copyrightText': mapping['PackageCopyrightText'] if
         mapping['PackageCopyrightText'] else 'NONE',
-        'comment': get_package_comment(package)
     }
-
+    # Only add package PURL if it exists
+    if spdx_common.get_purl(package):
+        package_dict['externalRefs'] = [{'referenceCategory': 'PACKAGE-MANAGER',
+                                         'referenceLocator': spdx_common.get_purl(package),
+                                         'referenceType': 'purl'}]
+    # Put package comment after any potential externalRefs
+    package_dict['comment'] = get_package_comment(package)
     return package_dict
 
 

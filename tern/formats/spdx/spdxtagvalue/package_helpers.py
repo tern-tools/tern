@@ -115,6 +115,10 @@ def get_package_block(package_obj, template):
             message=mapping['PackageCopyrightText']) + '\n'
     else:
         block += 'PackageCopyrightText: NONE\n'
+    # Package URL
+    if spdx_common.get_purl(package_obj):
+        block += 'ExternalRef: PACKAGE-MANAGER purl {}\n'.format(
+                spdx_common.get_purl(package_obj))
     # Package Comments
     block += get_package_comment(package_obj)
     return block
