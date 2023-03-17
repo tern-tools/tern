@@ -150,6 +150,7 @@ def get_layer_dict(layer_obj):
         'name': os.path.basename(layer_obj.tar_file),
         'SPDXID': spdx_common.get_layer_spdxref(layer_obj),
         'versionInfo': layer_obj.layer_index,
+        'supplier': 'NOASSERTION', # always NOASSERTION
         'packageFileName': layer_obj.tar_file,
         'downloadLocation': 'NONE',
         'filesAnalyzed': bool(layer_obj.files_analyzed),

@@ -21,7 +21,8 @@ class SPDX(Template):
                 'copyright': 'PackageCopyrightText',
                 'download_url': 'PackageDownloadLocation',
                 'src_name': 'SourcePackageName',
-                'src_version': 'SourcePackageVersion'}
+                'src_version': 'SourcePackageVersion',
+                'pkg_supplier': 'PackageSupplier'}
 
     def image_layer(self):
         return {'tar_file': 'PackageFileName'}

@@ -101,6 +101,8 @@ def get_image_block(image_obj, template):
     block += 'SPDXID: {}\n'.format(spdx_common.get_image_spdxref(image_obj))
     # Package Version
     block += 'PackageVersion: {}\n'.format(mapping['PackageVersion'])
+    # Package Supplier (always NOASSERTION)
+    block += 'PackageSupplier: NOASSERTION\n'
     # Package Download Location (always NOASSERTION)
     block += 'PackageDownloadLocation: NOASSERTION\n'
     # Files Analyzed (always false)
