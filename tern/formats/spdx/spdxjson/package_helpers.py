@@ -49,7 +49,6 @@ def get_source_package_dict(package, template):
         mapping['PackageCopyrightText'] else 'NONE',
         'comment': json_formats.source_package_comment
     }
-
     return package_dict
 
 
@@ -60,6 +59,10 @@ def get_package_dict(package, template):
     mapping = package.to_dict(template)
     supplier_str = 'Organization: ' + mapping['PackageSupplier']
     pkg_ref, _ = spdx_common.get_package_spdxref(package)
+    # Define debian licenses from copyright text as one license
+    declared_lic = mapping['PackageLicenseDeclared']
+    if package.pkg_format == 'deb':
+        declared_lic = ', '.join(package.pkg_licenses)
     package_dict = {
         'name': mapping['PackageName'],
         'SPDXID': pkg_ref,
@@ -71,7 +74,7 @@ def get_package_dict(package, template):
         'filesAnalyzed': False,  # always false for packages
         'licenseConcluded': 'NOASSERTION',  # always NOASSERTION
         'licenseDeclared':  spdx_common.get_package_license_declared(
-            mapping['PackageLicenseDeclared']),
+            declared_lic),
         'copyrightText': mapping['PackageCopyrightText'] if
         mapping['PackageCopyrightText'] else 'NONE',
     }

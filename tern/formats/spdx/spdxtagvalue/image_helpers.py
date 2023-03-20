@@ -60,7 +60,8 @@ def get_image_packages_license_block(image_obj):
             if package.pkg_licenses:
                 licenses.add(", ".join(package.pkg_licenses))
     for lic in licenses:
-        if not spdx_common.is_spdx_license_expression(lic):
+        valid_expression, _ = spdx_common.is_spdx_license_expression(lic)
+        if not valid_expression:
             block += spdx_formats.license_id.format(
                 license_ref=spdx_common.get_license_ref(lic)) + '\n'
             block += spdx_formats.extracted_text.format(orig_license=lic) + '\n'
@@ -78,7 +79,8 @@ def get_image_file_license_block(image_obj):
             for lic in spdx_common.get_layer_licenses(layer):
                 licenses.add(lic)
     for lic in licenses:
-        if not spdx_common.is_spdx_license_expression(lic):
+        valid_expression, _ = spdx_common.is_spdx_license_expression(lic)
+        if not valid_expression:
             block += spdx_formats.license_id.format(
                 license_ref=spdx_common.get_license_ref(lic)) + '\n'
             block += spdx_formats.extracted_text.format(orig_license=lic) + '\n'

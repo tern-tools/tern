@@ -46,8 +46,10 @@ def get_license_ref(license_string):
     return 'LicenseRef-' + get_string_id(license_string)
 
 def is_spdx_license_expression(license_data):
-    '''Return True if the license is a valid SPDX license expression, else
-    return False'''
+    '''Given a license string, replace common invalid SPDX license characters before
+    checking if the string is a valid SPDX license expression. Return True/False 
+    and also return the updated license expression string.
+    If case of error, return False with a blank string.'''
     licensing = get_spdx_licensing()
     not_allowed = [',', ';', '/', '&']
     if any(x in license_data for x in not_allowed):
@@ -57,18 +59,22 @@ def is_spdx_license_expression(license_data):
         license_data = license_data.replace(';', '.')
         license_data = license_data.replace('&', 'and')
     try:
-        return licensing.validate(license_data).errors == []
+        return licensing.validate(license_data).errors == [], license_data
     # Catch any of the other invalid license chars here
     except AttributeError:
-        return False
+        return False, ''
 
 def get_package_license_declared(package_license_declared):
-    '''Determines if the declared license string for a package or file is a
-    valid SPDX license expression using the license_expression library. If not,
-    returns the SPDX LicenseRef or NONE if the string is blank.'''
+    '''After substituting common invalid SPDX license characters using
+    the is_spdx_license_expression() function, determines if the declared
+    license string for a package or file is a valid SPDX license expression.
+    If license expression is valid after substitutions, return the updated string.
+    If not, return the LicenseRef of the original declared license expression
+    passed in to the function. If a blank string is passed in, return `NONE`.'''
     if package_license_declared:
-        if is_spdx_license_expression(package_license_declared):
-            return package_license_declared
+        valid_spdx, license_expression = is_spdx_license_expression(package_license_declared)
+        if valid_spdx:
+            return license_expression
         return get_license_ref(package_license_declared)
     return 'NONE'
 
