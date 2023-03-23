@@ -32,9 +32,9 @@ def get_document_namespace(image_obj):
         uuid=spdx_common.get_uuid())
 
 
-def get_document_block(image_obj):
+def get_document_block(image_obj, spdxv):
     '''Return document related SPDX tag-values'''
-    block = spdx_formats.spdx_version + '\n'
+    block = spdx_formats.spdx_version + spdxv + '\n'
     block = block + spdx_formats.data_license + '\n'
     block = block + spdx_formats.spdx_id + '\n'
     block = block + spdx_formats.document_name.format(
@@ -51,7 +51,7 @@ def get_document_block(image_obj):
 
 
 class SpdxTagValue(generator.Generate):
-    def generate(self, image_obj_list, print_inclusive=False):
+    def generate(self, image_obj_list, print_inclusive=False, spdxv='2.2'):
         '''Generate an SPDX document
         WARNING: This assumes that the list consists of one image or the base
         image and a stub image, in which case, the information in the stub
@@ -134,7 +134,7 @@ class SpdxTagValue(generator.Generate):
 
         # first part is the document tag-value
         # this doesn't change at all
-        report += get_document_block(image_obj) + '\n'
+        report += get_document_block(image_obj, spdxv) + '\n'
 
         # this is the image part
         # this will bring in layer and package information

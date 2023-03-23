@@ -42,11 +42,11 @@ def get_document_namespace_snapshot(timestamp):
         timestamp=timestamp, uuid=spdx_common.get_uuid())
 
 
-def get_document_dict(image_obj, template):
+def get_document_dict(image_obj, template, spdxv):
     '''Return document info as a dictionary'''
     docu_dict = {
         'SPDXID': json_formats.spdx_id,
-        'spdxVersion': json_formats.spdx_version,
+        'spdxVersion': json_formats.spdx_version+spdxv,
         'creationInfo': {
             'created': json_formats.created.format(
                 timestamp=spdx_common.get_timestamp()),
@@ -140,7 +140,7 @@ def get_document_dict_snapshot(layer_obj, template):
 
 
 class SpdxJSON(generator.Generate):
-    def generate(self, image_obj_list, print_inclusive=False):
+    def generate(self, image_obj_list, print_inclusive=False, spdxv='2.2'):
         '''Generate an SPDX document
         WARNING: This assumes that the list consists of one image or the base
         image and a stub image, in which case, the information in the stub
@@ -159,7 +159,7 @@ class SpdxJSON(generator.Generate):
         # input is a list of length 1
         image_obj = image_obj_list[0]
         template = SPDX()
-        report = get_document_dict(image_obj, template)
+        report = get_document_dict(image_obj, template, spdxv)
 
         return json.dumps(report)
 

@@ -12,7 +12,7 @@ tag_value = '{tag}: {value}'
 block_text = '<text>\n{message}\n</text>'
 
 # document level strings
-spdx_version = 'SPDXVersion: SPDX-2.2'
+spdx_version = 'SPDXVersion: SPDX-'
 data_license = 'DataLicense: CC0-1.0'
 spdx_id = 'SPDXID: SPDXRef-DOCUMENT'
 document_name = 'DocumentName: Tern report for {image_name}'

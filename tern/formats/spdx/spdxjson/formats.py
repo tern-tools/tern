@@ -9,7 +9,7 @@ SPDX document formatting
 
 
 # document level strings
-spdx_version = 'SPDX-2.2'
+spdx_version = 'SPDX-'
 data_license = 'CC0-1.0'
 spdx_id = 'SPDXRef-DOCUMENT'
 document_name = 'Tern report for {image_name}'

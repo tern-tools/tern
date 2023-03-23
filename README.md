@@ -325,12 +325,26 @@ Many compliance tools are compatible with SPDX. Tern follows the [SPDX specifica
 ```
 $ tern report -f spdxtagvalue -i golang:1.12-alpine -o spdx.txt
 ```
+By default, the report will be in SPDX version 2.2 (ISO SPDX).
+
+The following syntax will output SPDX 2.3:
+```
+$ tern report -f spdxtagvalue@2.3 -i golang:1.12-alpine -o spdx.txt
+```
+
 
 ## SPDX JSON Format<a name="report-spdxjson">
 The SPDX JSON format contains the same information that an SPDX Tag-value document does. The only difference between these two formats is the way the information is represented. The 'spdxjson' format represents the container information as a collection of key-value pairs. In some cases, the SPDX JSON format may be more interoperable between cloud native compliance tools.
 ```
 $ tern report -f spdxjson -i golang:1.12-alpine -o spdx.json
 ```
+By default, the report will be in SPDX version 2.2 (ISO SPDX).
+
+The following syntax will output SPDX 2.3:
+```
+$ tern report -f spdxjson@2.3 -i golang:1.12-alpine -o spdx.json
+```
+
 
 ## CycloneDX JSON Format<a name="report-cyclonedxjson">
 [OWASP CycloneDX](https://cyclonedx.org/) is a lightweight software bill of materials standard designed for use in application security contexts and supply chain component analysis. The National Telecommunications and Information Administration (NTIA) [recognizes CycloneDX](https://www.ntia.gov/files/ntia/publications/sbom_options_and_decision_points_20210427-1.pdf) as one of three valid SBOM formats that satisfies the minimum viable requirements for an SBOM in accordance with President Biden's [Executive Order on Improving the Nation's Cybersecurity](https://www.whitehouse.gov/briefing-room/presidential-actions/2021/05/12/executive-order-on-improving-the-nations-cybersecurity/).

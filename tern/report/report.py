@@ -37,13 +37,20 @@ def clean_image_tars(image_obj):
 
 def generate_report(args, *images):
     '''Generate a report based on the command line options'''
+    args.spdxv = '2.2'
+    if args.report_format and (args.report_format == 'spdxtagvalue@2.3'):
+        args.report_format = 'spdxtagvalue'
+        args.spdxv = '2.3'
+    if args.report_format and (args.report_format == 'spdxjson@2.3'):
+        args.report_format = 'spdxjson'
+        args.spdxv = '2.3'
     if args.report_format:
         return generate_format(
-            images, args.report_format, args.print_inclusive)
-    return generate_format(images, 'default', args.print_inclusive)
+            images, args.report_format, args.print_inclusive, args.spdxv)
+    return generate_format(images, 'default', args.print_inclusive, args.spdxv)
 
 
-def generate_format(images, format_string, print_inclusive):
+def generate_format(images, format_string, print_inclusive, spdxv):
     '''Generate a report in the format of format_string given one or more
     image objects. Here we will load the required module and run the generate
     function to get back a report'''
@@ -53,7 +60,7 @@ def generate_format(images, format_string, print_inclusive):
             name=format_string,
             invoke_on_load=True,
         )
-        return mgr.driver.generate(images, print_inclusive)
+        return mgr.driver.generate(images, print_inclusive, spdxv)
     except NoMatches:
         return None
 
