@@ -348,6 +348,8 @@ NOTE: Neither the Docker container nor the Vagrant image has any of the extensio
 ## Scancode<a name="scancode">
 [scancode-toolkit](https://github.com/nexB/scancode-toolkit) is a license analysis tool that "detects licenses, copyrights, package manifests and direct dependencies and more both in source code and binary files". Note that Scancode currently works on Python 3.6 to 3.9. Be sure to check what python version you are using below.
 
+**NOTE** Installation issues have been [reported](https://github.com/nexB/scancode-toolkit/issues/3205) on macOS on M1 and Linux on ARM for Scancode>=31.0.0. If you are wanting to run Tern + Scancode in either of these environments, you will need to install `scancode-toolkit-mini`.
+
 1. Install system dependencies for Scancode (refer to the [Scancode GitHub repo](https://github.com/nexB/scancode-toolkit) for instructions)
 
 2. Setup a python virtual environment
@@ -359,6 +361,10 @@ $ source bin/activate
 3. Install tern and scancode
 ```
 $ pip install tern scancode-toolkit
+```
+<br> If you are using macOS on M1 or Linux on ARM, run:</br>
+```
+$ pip install tern scancode-toolkit-mini
 ```
 4. Run tern with scancode
 ```

@@ -241,10 +241,10 @@ def get_purl(package_obj):
             purl_namespace = package_obj.pkg_supplier.split(' ')[1].lower()
         else:
             purl_namespace = package_obj.pkg_supplier.split(' ')[0].lower()
-            # TODO- this might need adjusting for alpm. Currently can't test on M1 
-    purl = PackageURL(purl_type, purl_namespace, package_obj.name.lower(), package_obj.version,
-                      qualifiers={'arch': package_obj.arch if package_obj.arch else ''})
     try:
+        # TODO- this might need adjusting for alpm. Currently can't test on M1
+        purl = PackageURL(purl_type, purl_namespace, package_obj.name.lower(), package_obj.version,
+                          qualifiers={'arch': package_obj.arch if package_obj.arch else ''})
         return purl.to_string()
     except ValueError:
         return ''

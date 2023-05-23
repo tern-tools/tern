@@ -58,15 +58,38 @@ def get_scancode_file(file_dict):
         file_dict['name'], fspath, file_dict['date'], file_dict['file_type'])
     fd.short_file_type = get_file_type(file_dict)
     fd.add_checksums({'sha1': file_dict['sha1'], 'md5': file_dict['md5']})
-    if file_dict['licenses']:
-        fd.licenses = [li['short_name'] for li in file_dict['licenses']]
-    fd.license_expressions = file_dict['license_expressions']
+    try:
+        # For scancode versions <= 32.0.0
+        if file_dict['licenses']:
+            fd.licenses = [li['short_name'] for li in file_dict['licenses']]
+        fd.license_expressions = file_dict['license_expressions']
+    except KeyError:
+        # License detection changed for scancode version >= 32.0
+        ## https://github.com/nexB/scancode-toolkit/blob/e3099637b195daca54942df9f695f58990097896/CHANGELOG.rst#license-detection
+        if file_dict['license_detections']:
+            fd.licenses = [li['license_expression'] for li in file_dict['license_detections']]
+        fd.license_expressions = file_dict['detected_license_expression']
+    ## Several of the scancode attribute names have changed. See:
+    # https://github.com/nexB/scancode-toolkit/blob/e3099637b195daca54942df9f695f58990097896/CHANGELOG.rst#important-api-changes-1
+    # The following try/except statements accomodate metadata from scancode versions
+    # prior to this scancode JSON output change as well as after the change was made.
     if file_dict['copyrights']:
-        fd.copyrights = [c['value'] for c in file_dict['copyrights']]
+        try:
+            # For scancode versions <=30.*
+            fd.copyrights = [c['value'] for c in file_dict['copyrights']]
+        except KeyError:
+            # Data structure fields changed in scancode >= 31.0.0
+            fd.copyrights = [c['copyright'] for c in file_dict['copyrights']]
     if file_dict['urls']:
         fd.urls = [u['url'] for u in file_dict['urls']]
-    fd.packages = file_dict['packages']
-    fd.authors = [a['value'] for a in file_dict['authors']]
+    try:
+        fd.packages = file_dict['packages']
+    except KeyError:
+        fd.packages = file_dict['package_data']
+    try:
+        fd.authors = [a['value'] for a in file_dict['authors']]
+    except KeyError:
+        fd.authors = [a['author'] for a in file_dict['authors']]
     if file_dict['scan_errors']:
         # for each scan error make a notice
         for err in file_dict['scan_errors']:
@@ -112,12 +135,18 @@ def get_scancode_package(package_dict):
     object with the results'''
     package = Package(package_dict['name'])
     package.version = package_dict['version']
-    package.pkg_license = filter_pkg_license(package_dict['declared_license'])
+    try:
+        package.pkg_license = filter_pkg_license(package_dict['declared_license'])
+        package.licenses = [package_dict['declared_license'],
+                            package_dict['license_expression']]
+    except KeyError:
+        ## https://github.com/nexB/scancode-toolkit/blob/e3099637b195daca54942df9f695f58990097896/CHANGELOG.rst#license-detection
+        package.pkg_license = filter_pkg_license(package_dict['extracted_license_statement'])
+        package.licenses = [li['license_expression'] for li in package_dict['license_detections']]
+        package.licenses.append(package_dict['extracted_license_statement'])
     package.copyright = package_dict['copyright']
     package.proj_url = package_dict['repository_homepage_url']
     package.download_url = package_dict['download_url']
-    package.licenses = [package_dict['declared_license'],
-                        package_dict['license_expression']]
     return package
 
 
@@ -160,8 +189,14 @@ def collect_layer_data(layer_obj):
         for f in data['files']:
             if f['type'] == 'file' and f['size'] != 0:
                 files.append(get_scancode_file(f))
-                for package in f['packages']:
-                    packages.append(get_scancode_package(package))
+                try:
+                    for package in f['packages']:
+                        packages.append(get_scancode_package(package))
+                except KeyError:
+                    # See comment in get_scancode_file() above about attribute name changes
+                    # in newer Scancode versions
+                    for package in f['package_data']:
+                        packages.append(get_scancode_package(package))
     return files, packages
 
 
