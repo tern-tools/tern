@@ -109,7 +109,7 @@ def get_layer_dict(layer_obj: ImageLayer) -> Tuple[SpdxPackage, List[Relationshi
      The analyzed files will go in a separate part of the document."""
 
     comment = get_layer_package_comment(layer_obj)
-    verification_code = get_layer_verification_code(layer_obj)
+    verification_code = get_layer_verification_code(layer_obj) if layer_obj.files_analyzed else None
 
     layer_licenses = get_layer_licenses(layer_obj)
     license_info_from_files = []
@@ -128,7 +128,7 @@ def get_layer_dict(layer_obj: ImageLayer) -> Tuple[SpdxPackage, List[Relationshi
         file_name=layer_obj.tar_file,
         download_location=SpdxNone(),
         files_analyzed=bool(layer_obj.files_analyzed),
-        verification_code=verification_code if bool(layer_obj.files_analyzed) else None,
+        verification_code=verification_code,
         checksums=[get_layer_checksum(layer_obj)],
         license_concluded=SpdxNoAssertion(),
         license_declared=SpdxNoAssertion(),

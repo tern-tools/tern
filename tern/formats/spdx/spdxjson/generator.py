@@ -9,6 +9,7 @@ SPDX JSON document generator
 
 import json
 import logging
+import pickle
 
 from tern.formats.spdx.spdx import SPDX
 from tern.formats.spdx import spdx_common
@@ -158,6 +159,7 @@ class SpdxJSON(generator.Generate):
         # images. Hence we will assume only one image is analyzed and the
         # input is a list of length 1
         image_obj = image_obj_list[0]
+
         template = SPDX()
         report = get_document_dict(image_obj, template)
 

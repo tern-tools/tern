@@ -17,7 +17,7 @@ from tern.classes.template import Template
 from tern.formats.spdx_new.constants import DOCUMENT_ID, DOCUMENT_NAME, SPDX_VERSION, DATA_LICENSE, DOCUMENT_COMMENT, \
     LICENSE_LIST_VERSION, CREATOR_NAME, DOCUMENT_NAME_SNAPSHOT, DOCUMENT_NAMESPACE_SNAPSHOT
 from tern.formats.spdx_new.file_helpers import get_layer_files_list
-from tern.formats.spdx_new.general_helpers import get_current_timestamp, get_uuid, get_image_spdxref
+from tern.formats.spdx_new.general_helpers import get_current_timestamp, get_uuid
 from tern.classes.image import Image
 from tern.formats.spdx.spdx import SPDX
 from tern.formats.spdx_new.file_helpers import get_files_list
@@ -51,7 +51,6 @@ def make_spdx_model(image_obj_list: List[Image]) -> Document:
         data_license=DATA_LICENSE,
         document_comment=DOCUMENT_COMMENT,
     )
-    describes_relationship = Relationship(DOCUMENT_ID, RelationshipType.DESCRIBES, get_image_spdxref(image_obj))
     packages = [get_image_dict(image_obj, template)]
     image_layer_relationships = get_image_layer_relationships(image_obj)
 
@@ -69,7 +68,7 @@ def make_spdx_model(image_obj_list: List[Image]) -> Document:
         creation_info=creation_info,
         packages=packages,
         files=files,
-        relationships=[describes_relationship] + image_layer_relationships + layer_file_relationships,
+        relationships=image_layer_relationships + layer_file_relationships,
         extracted_licensing_info=extracted_licensing_info
     )
 
