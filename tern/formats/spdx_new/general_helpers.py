@@ -7,14 +7,13 @@
 General helpers for SPDX document generator
 """
 import hashlib
-import io
 import re
 import uuid
 from datetime import datetime
-from typing import Union, Callable, IO, Tuple
+from typing import Union, Tuple
 
 from license_expression import get_spdx_licensing, LicenseExpression, Licensing
-from spdx_tools.spdx.model import SpdxNone, Document
+from spdx_tools.spdx.model import SpdxNone
 
 from tern.classes.file_data import FileData
 from tern.classes.image import Image
@@ -75,12 +74,6 @@ def get_package_license_declared(package_license_declared: str) -> Union[License
 
         return Licensing().parse(get_license_ref(package_license_declared))
     return SpdxNone()
-
-
-def get_serialized_document_string(spdx_document: Document, writer_function: Callable[[Document, IO[str]], str]) -> str:
-    with io.StringIO() as stream:
-        writer_function(spdx_document, stream, validate=False)
-        return stream.getvalue()
 
 
 ###########################################################################################

@@ -4,17 +4,16 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 """
-Common functions that are useful for all SPDX serialization formats
+Functions to create an SPDX model instance from a list of Images or an ImageLayer
 """
 
-import logging
 from typing import List
 
 from spdx_tools.spdx.model import Document, CreationInfo, Actor, ActorType, Relationship, RelationshipType
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.template import Template
-from tern.formats.spdx_new.constants import DOCUMENT_ID, DOCUMENT_NAME, SPDX_VERSION, DATA_LICENSE, DOCUMENT_COMMENT, \
+from tern.formats.spdx_new.constants import DOCUMENT_ID, DOCUMENT_NAME, DATA_LICENSE, DOCUMENT_COMMENT, \
     LICENSE_LIST_VERSION, CREATOR_NAME, DOCUMENT_NAME_SNAPSHOT, DOCUMENT_NAMESPACE_SNAPSHOT
 from tern.formats.spdx_new.file_helpers import get_layer_files_list
 from tern.formats.spdx_new.general_helpers import get_current_timestamp, get_uuid
@@ -25,15 +24,11 @@ from tern.formats.spdx_new.image_helpers import get_image_extracted_licenses, \
     get_image_dict, get_document_namespace
 from tern.formats.spdx_new.layer_helpers import get_layer_dict, get_image_layer_relationships, get_layer_extracted_licenses
 from tern.formats.spdx_new.package_helpers import get_packages_list, get_layer_packages_list
-from tern.utils import constants
 
 from tern.utils.general import get_git_rev_or_version
 
-# global logger
-logger = logging.getLogger(constants.logger_name)
 
-
-def make_spdx_model(image_obj_list: List[Image]) -> Document:
+def make_spdx_model(image_obj_list: List[Image], spdx_version: str) -> Document:
     template = SPDX()
     # we still don't know how SPDX documents could represent multiple
     # images. Hence, we will assume only one image is analyzed and the
@@ -41,7 +36,7 @@ def make_spdx_model(image_obj_list: List[Image]) -> Document:
     image_obj = image_obj_list[0]
 
     creation_info = CreationInfo(
-        spdx_version=SPDX_VERSION,
+        spdx_version=spdx_version,
         spdx_id=DOCUMENT_ID,
         name=DOCUMENT_NAME.format(image_name=image_obj.name),
         document_namespace=get_document_namespace(image_obj),
@@ -73,13 +68,13 @@ def make_spdx_model(image_obj_list: List[Image]) -> Document:
     )
 
 
-def make_spdx_model_snapshot(layer_obj: ImageLayer, template: Template) -> Document:
+def make_spdx_model_snapshot(layer_obj: ImageLayer, template: Template, spdx_version: str) -> Document:
     """This is the SPDX document containing just the packages found at
     container build time"""
     timestamp = get_current_timestamp()
 
     creation_info = CreationInfo(
-        spdx_version=SPDX_VERSION,
+        spdx_version=spdx_version,
         spdx_id=DOCUMENT_ID,
         name=DOCUMENT_NAME_SNAPSHOT,
         document_namespace=DOCUMENT_NAMESPACE_SNAPSHOT.format(timestamp=timestamp, uuid=get_uuid()),
