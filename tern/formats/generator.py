@@ -10,6 +10,6 @@ from abc import abstractmethod
 class Generate(metaclass=ABCMeta):
     '''Base class for report plugins'''
     @abstractmethod
-    def generate(self, image_obj_list, print_inclusive=False):
+    def generate(self, image_obj_list, format_version, print_inclusive=False):
         '''Format the report according to the plugin style.
         Each subclass is responsible for their own formatting.'''

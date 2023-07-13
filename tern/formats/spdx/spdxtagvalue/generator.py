@@ -51,7 +51,7 @@ def get_document_block(image_obj):
 
 
 class SpdxTagValue(generator.Generate):
-    def generate(self, image_obj_list, print_inclusive=False):
+    def generate(self, image_obj_list, format_version: str, print_inclusive=False):
         '''Generate an SPDX document
         WARNING: This assumes that the list consists of one image or the base
         image and a stub image, in which case, the information in the stub
@@ -142,7 +142,7 @@ class SpdxTagValue(generator.Generate):
 
         return report
 
-    def generate_layer(self, layer_obj):  # pylint: disable=unused-argument
+    def generate_layer(self, layer_obj, format_version: str):  # pylint: disable=unused-argument
         """Currently Unsupported. Provide debug statement"""
         logger.critical("Generating SPDX tag-value documents at container "
                         "build time is currently unsupported")

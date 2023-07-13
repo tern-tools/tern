@@ -9,7 +9,6 @@ SPDX JSON document generator
 
 import json
 import logging
-import pickle
 
 from tern.formats.spdx.spdx import SPDX
 from tern.formats.spdx import spdx_common
@@ -141,7 +140,7 @@ def get_document_dict_snapshot(layer_obj, template):
 
 
 class SpdxJSON(generator.Generate):
-    def generate(self, image_obj_list, print_inclusive=False):
+    def generate(self, image_obj_list, format_version: str, print_inclusive=False):
         '''Generate an SPDX document
         WARNING: This assumes that the list consists of one image or the base
         image and a stub image, in which case, the information in the stub
@@ -165,7 +164,7 @@ class SpdxJSON(generator.Generate):
 
         return json.dumps(report)
 
-    def generate_layer(self, layer):
+    def generate_layer(self, layer, format_version: str):
         """Generate an SPDX document containing package and file information
         at container build time"""
         logger.debug("Generating SPDX JSON document...")

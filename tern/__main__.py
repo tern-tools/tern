@@ -216,6 +216,9 @@ def main():
                                "available formats: "
                                "spdxtagvalue, spdxjson, cyclonedxjson, json, "
                                "yaml, html")
+    parser_report.add_argument('-fv', '--format-version',
+                               metavar='FORMAT_VERSION',
+                               help="Specify the version of the report format.")
     parser_report.add_argument('-o', '--output-file', default=None,
                                metavar='FILE',
                                help="Write the report to a file. "

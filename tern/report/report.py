@@ -39,11 +39,11 @@ def generate_report(args, *images):
     '''Generate a report based on the command line options'''
     if args.report_format:
         return generate_format(
-            images, args.report_format, args.print_inclusive)
-    return generate_format(images, 'default', args.print_inclusive)
+            images, args.report_format, args.format_version, args.print_inclusive)
+    return generate_format(images, 'default', args.format_version, args.print_inclusive)
 
 
-def generate_format(images, format_string, print_inclusive):
+def generate_format(images, format_string, format_version, print_inclusive):
     '''Generate a report in the format of format_string given one or more
     image objects. Here we will load the required module and run the generate
     function to get back a report'''
@@ -53,12 +53,12 @@ def generate_format(images, format_string, print_inclusive):
             name=format_string,
             invoke_on_load=True,
         )
-        return mgr.driver.generate(images, print_inclusive)
+        return mgr.driver.generate(images, format_version, print_inclusive)
     except NoMatches:
         return None
 
 
-def generate_format_layer(layer, format_string):
+def generate_format_layer(layer, format_string, format_version):
     """Generate a report in the format of format_string given one layer
     object. This is similar to the generate_format function"""
     try:
@@ -67,7 +67,7 @@ def generate_format_layer(layer, format_string):
             name=format_string,
             invoke_on_load=True,
         )
-        return mgr.driver.generate_layer(layer)
+        return mgr.driver.generate_layer(layer, format_version)
     except NoMatches:
         return None
 
@@ -96,9 +96,9 @@ def report_layer(layer, args):
     """Generate a report for one layer object"""
     layer_report = ""
     if args.report_format:
-        layer_report = generate_format_layer(layer, args.report_format)
+        layer_report = generate_format_layer(layer, args.report_format, args.format_version)
     else:
-        layer_report = generate_format_layer(layer, 'default')
+        layer_report = generate_format_layer(layer, 'default', args.format_version)
     if not layer_report:
         logger.error(
             "Unable to generate %s report type for layer", args.report_format)

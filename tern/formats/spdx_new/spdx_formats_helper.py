@@ -20,6 +20,11 @@ from tern.utils import constants
 
 logger = logging.getLogger(constants.logger_name)
 
+SPDX_VERSION_MAPPING = {
+    "2.2": "SPDX-2.2",
+    "2.3": "SPDX-2.3",
+}
+
 
 def get_spdx_from_image_list(image_obj_list: List[Image], spdx_format: str, spdx_version: str) -> str:
     """Generate an SPDX document
@@ -32,7 +37,10 @@ def get_spdx_from_image_list(image_obj_list: List[Image], spdx_format: str, spdx
     layer which is also a 'Package' which 'CONTAINS' the real Packages"""
     logger.debug(f"Generating SPDX {spdx_format} document...")
 
-    spdx_document: Document = make_spdx_model(image_obj_list, spdx_version)
+    if spdx_version not in SPDX_VERSION_MAPPING:
+        raise ValueError(f"SPDX version {spdx_version} is not supported by tern.")
+
+    spdx_document: Document = make_spdx_model(image_obj_list, SPDX_VERSION_MAPPING[spdx_version])
 
     return convert_document_to_serialized_string(spdx_document, spdx_format)
 
@@ -42,8 +50,11 @@ def get_spdx_from_layer(layer: ImageLayer, spdx_format: str, spdx_version: str) 
     at container build time"""
     logger.debug(f"Generating SPDX {spdx_format} snapshot document...")
 
+    if spdx_version not in SPDX_VERSION_MAPPING:
+        raise ValueError(f"SPDX version {spdx_version} is not supported by tern.")
+
     template = SPDX()
-    spdx_document: Document = make_spdx_model_snapshot(layer, template, spdx_version)
+    spdx_document: Document = make_spdx_model_snapshot(layer, template, SPDX_VERSION_MAPPING[spdx_version])
 
     return convert_document_to_serialized_string(spdx_document, spdx_format)
 
