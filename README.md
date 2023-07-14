@@ -400,16 +400,15 @@ $ python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
-Release 2.12.0 is out! See the [release notes](docs/releases/v2_12_0.md) for more information. Please note, v2.12.0 includes an important security update for GitPython to address [CVE-2022-24439](https://nvd.nist.gov/vuln/detail/CVE-2022-24439).
-
-We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible.
+Patched release 2.12.1 is out. See the [release notes](docs/releases/v2_12_1.md) for more information. We try to keep the [project roadmap](./docs/project-roadmap.md) as up to date as possible.
 
 ## Recent Past Releases
-* [v2.11.0](docs/releases/v2_10_1.md)
+* [v2.12.0](docs/releases/v2_12_0.md)
+  * Includes an important security update for GitPython to address [CVE-2022-24439](https://nvd.nist.gov/vuln/detail/CVE-2022-24439)
+* [v2.11.0](docs/releases/v2_11_0.md)
 * [v2.10.1](docs/releases/v2_10_1.md)
 * [v2.9.1](docs/releases/v2_9_1.md)
 * [v2.8.0](docs/releases/v2_8_0.md)
-* [v2.7.0](docs/releases/v2_7_0.md)
 
 ## Documentation
 Architecture, function blocks, code descriptions and the project roadmap are located in the docs folder. Contributions to the documentation are welcome! See the [contributing guide](/CONTRIBUTING.md) to find out how to submit changes.
