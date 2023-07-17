@@ -37,7 +37,7 @@ def get_layer_packages_list(layer: ImageLayer, template: Template, spdx_version:
         # one package object in the image
         pkg_ref = get_package_spdxref(package)
         if pkg_ref not in package_refs:
-            package_dicts.append(get_package_dict(package, template, spdx_version))
+            package_dicts.append(get_spdx_package_from_tern_package(package, template, spdx_version))
             package_refs.append(pkg_ref)
     return package_dicts
 
@@ -53,7 +53,7 @@ def get_package_comment(package: Package) -> str:
     return comment
 
 
-def get_source_package_dict(package: Package, template: Template, spdx_version: str) -> SpdxPackage:
+def get_spdx_package_from_source_package(package: Package, template: Template, spdx_version: str) -> SpdxPackage:
     """Given a package object and its SPDX template mapping, return an SPDX Package of the associated source package.
     The analyzed files will go in a separate dictionary for the JSON document."""
     mapping = package.to_dict(template)
@@ -77,7 +77,7 @@ def get_source_package_dict(package: Package, template: Template, spdx_version: 
     )
 
 
-def get_package_dict(package: Package, template: Template, spdx_version: str) -> SpdxPackage:
+def get_spdx_package_from_tern_package(package: Package, template: Template, spdx_version: str) -> SpdxPackage:
     """Given a package object and its SPDX template mapping, return an SPDX Package.
     The analyzed files will go in a separate dictionary for the JSON document."""
     mapping = package.to_dict(template)
@@ -116,7 +116,7 @@ def get_package_dict(package: Package, template: Template, spdx_version: str) ->
     )
 
 
-def get_packages_list(image_obj: Image, template: Template, spdx_version: str) -> List[SpdxPackage]:
+def get_spdx_package_list_from_image(image_obj: Image, template: Template, spdx_version: str) -> List[SpdxPackage]:
     """Given an image object and the template object for SPDX, return a list
     of SPDX dictionary representations for each of the packages in the image.
     The SPDX JSON spec for packages requires:
@@ -132,10 +132,10 @@ def get_packages_list(image_obj: Image, template: Template, spdx_version: str) -
             # one package object in the image
             pkg_ref, src_ref = get_package_spdxref(package)
             if pkg_ref not in package_refs and package.name:
-                packages.append(get_package_dict(package, template, spdx_version))
+                packages.append(get_spdx_package_from_tern_package(package, template, spdx_version))
                 package_refs.add(pkg_ref)
             if src_ref and src_ref not in package_refs:
-                packages.append(get_source_package_dict(
+                packages.append(get_spdx_package_from_source_package(
                     package, template, spdx_version))
                 package_refs.add(src_ref)
     return packages

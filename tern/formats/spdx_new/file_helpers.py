@@ -19,7 +19,7 @@ from tern.formats.spdx_new.layer_helpers import get_layer_checksum
 from tern.formats.spdx_new.general_helpers import get_package_license_declared, get_file_spdxref
 
 
-def get_layer_files_list(layer_obj: ImageLayer, template: Template, timestamp: datetime) -> List[SpdxFile]:
+def get_spdx_file_list_from_layer(layer_obj: ImageLayer, template: Template, timestamp: datetime) -> List[SpdxFile]:
     """Given a layer object and the SPDX template mapping, return a list
     of SPDX Files for each file in the layer"""
     spdx_files: List[SpdxFile] = []
@@ -28,16 +28,16 @@ def get_layer_files_list(layer_obj: ImageLayer, template: Template, timestamp: d
         # we do not know the layer's id, so we will use the timestamp instead
         file_ref = get_file_spdxref(filedata, str(timestamp))
         if file_ref not in file_refs:
-            spdx_files.append(get_file_dict(filedata, template, str(timestamp)))
+            spdx_files.append(get_spdx_file_from_filedata(filedata, template, str(timestamp)))
             file_refs.add(file_ref)
     return spdx_files
 
 
-def get_files_list(image_obj: Image, template: Template) -> List[SpdxFile]:
+def get_spdx_file_list_from_image(image_obj: Image, template: Template) -> List[SpdxFile]:
     '''Given an image_obj object, and the SPDX template mapping, return a list
     of SPDX dictionary representations for each file in each layer of the
     image.'''
-    file_list: List[SpdxFile] = []
+    spdx_files: List[SpdxFile] = []
 
     # use file refs to keep track of duplicate files that may be located
     # in different places in the filesystem
@@ -49,12 +49,12 @@ def get_files_list(image_obj: Image, template: Template) -> List[SpdxFile]:
                 # we use the layer checksum as the layer id
                 file_ref = get_file_spdxref(filedata, layer_checksum_value)
                 if file_ref not in file_refs:
-                    file_list.append(get_file_dict(filedata, template, layer_checksum_value))
+                    spdx_files.append(get_spdx_file_from_filedata(filedata, template, layer_checksum_value))
                     file_refs.add(file_ref)
-    return file_list
+    return spdx_files
 
 
-def get_file_dict(filedata: FileData, template: Template, layer_id: str) -> SpdxFile:
+def get_spdx_file_from_filedata(filedata: FileData, template: Template, layer_id: str) -> SpdxFile:
     """Given a FileData object and its SPDX template mapping, return an
     SPDX representation of the file. A layer_id is used to
     distinguish copies of the same file occurring in different places in the

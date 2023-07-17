@@ -44,7 +44,7 @@ def get_image_extracted_licenses(image_obj: Image) -> List[ExtractedLicensingInf
     return extracted_licensing_info
 
 
-def get_image_dict(image_obj: Image, template: Template, spdx_version: str) -> SpdxPackage:  # TODO: these kind of functions don't produce dicts anymore, rename them
+def get_spdx_package_from_image(image_obj: Image, template: Template, spdx_version: str) -> SpdxPackage:
     """Given an image object and the template object for SPDX, return the
     SPDX Package for the given image."""
     mapping = image_obj.to_dict(template)
