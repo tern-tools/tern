@@ -44,7 +44,7 @@ def get_image_extracted_licenses(image_obj: Image) -> List[ExtractedLicensingInf
     return extracted_licensing_info
 
 
-def get_image_dict(image_obj: Image, template: Template) -> SpdxPackage:  # TODO: these kind of functions don't produce dicts anymore, rename them
+def get_image_dict(image_obj: Image, template: Template, spdx_version: str) -> SpdxPackage:  # TODO: these kind of functions don't produce dicts anymore, rename them
     """Given an image object and the template object for SPDX, return the
     SPDX Package for the given image."""
     mapping = image_obj.to_dict(template)
@@ -55,9 +55,9 @@ def get_image_dict(image_obj: Image, template: Template) -> SpdxPackage:  # TODO
         version=mapping["PackageVersion"],
         supplier=SpdxNoAssertion(),
         files_analyzed=False,
-        license_concluded=SpdxNoAssertion(),
-        license_declared=SpdxNoAssertion(),
-        copyright_text=SpdxNoAssertion(),
+        license_concluded=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,
+        license_declared=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,
+        copyright_text=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,
     )
 
 

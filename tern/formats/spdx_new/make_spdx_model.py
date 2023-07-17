@@ -9,7 +9,8 @@ Functions to create an SPDX model instance from a list of Images or an ImageLaye
 
 from typing import List
 
-from spdx_tools.spdx.model import Document, CreationInfo, Actor, ActorType, Relationship, RelationshipType
+from spdx_tools.spdx.model import Document, CreationInfo, Actor, ActorType, Relationship, RelationshipType, \
+    PackagePurpose
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.template import Template
@@ -46,16 +47,20 @@ def make_spdx_model(image_obj_list: List[Image], spdx_version: str) -> Document:
         data_license=DATA_LICENSE,
         document_comment=DOCUMENT_COMMENT,
     )
-    packages = [get_image_dict(image_obj, template)]
+    container_package = get_image_dict(image_obj, template, spdx_version)
+    if spdx_version == "SPDX-2.3":
+        container_package.primary_package_purpose = PackagePurpose.CONTAINER
+
+    packages = [container_package]
     image_layer_relationships = get_image_layer_relationships(image_obj)
 
     layer_file_relationships = []
     for layer in image_obj.layers:
-        package, relationships = get_layer_dict(layer)
+        package, relationships = get_layer_dict(layer, spdx_version)
         packages.append(package)
         layer_file_relationships.extend(relationships)
 
-    packages.extend(get_packages_list(image_obj, template))
+    packages.extend(get_packages_list(image_obj, template, spdx_version))
     files = get_files_list(image_obj, template)
     extracted_licensing_info = get_image_extracted_licenses(image_obj)
 

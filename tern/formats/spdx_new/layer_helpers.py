@@ -103,7 +103,7 @@ def get_layer_package_comment(layer_obj: ImageLayer) -> str:
     return comment
 
 
-def get_layer_dict(layer_obj: ImageLayer) -> Tuple[SpdxPackage, List[Relationship]]:
+def get_layer_dict(layer_obj: ImageLayer, spdx_version: str) -> Tuple[SpdxPackage, List[Relationship]]:
     """Given a layer object, return an SPDX Package representation
      of the layer and the list of CONTAINS relationships to all files in that layer.
      The analyzed files will go in a separate part of the document."""
@@ -130,9 +130,9 @@ def get_layer_dict(layer_obj: ImageLayer) -> Tuple[SpdxPackage, List[Relationshi
         files_analyzed=bool(layer_obj.files_analyzed),
         verification_code=verification_code,
         checksums=[get_layer_checksum(layer_obj)],
-        license_concluded=SpdxNoAssertion(),
-        license_declared=SpdxNoAssertion(),
-        copyright_text=SpdxNoAssertion(),
+        license_concluded=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,
+        license_declared=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,
+        copyright_text=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,
         comment=comment if comment else None,
         license_info_from_files=license_info_from_files,
     )

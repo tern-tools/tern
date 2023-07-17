@@ -26,7 +26,7 @@ SOURCE_PACKAGE_COMMENT = 'This package refers to a source package associated' \
     ' for CVE lookups.'
 
 
-def get_layer_packages_list(layer: ImageLayer, template: Template) -> List[SpdxPackage]:
+def get_layer_packages_list(layer: ImageLayer, template: Template, spdx_version: str) -> List[SpdxPackage]:
     """Given a layer object and an SPDX template object, return a list
     of SPDX dictionary representations for each of the packages in the layer
     and their package references"""
@@ -37,7 +37,7 @@ def get_layer_packages_list(layer: ImageLayer, template: Template) -> List[SpdxP
         # one package object in the image
         pkg_ref = get_package_spdxref(package)
         if pkg_ref not in package_refs:
-            package_dicts.append(get_package_dict(package, template))
+            package_dicts.append(get_package_dict(package, template, spdx_version))
             package_refs.append(pkg_ref)
     return package_dicts
 
@@ -53,7 +53,7 @@ def get_package_comment(package: Package) -> str:
     return comment
 
 
-def get_source_package_dict(package: Package, template: Template) -> SpdxPackage:
+def get_source_package_dict(package: Package, template: Template, spdx_version: str) -> SpdxPackage:
     """Given a package object and its SPDX template mapping, return an SPDX Package of the associated source package.
     The analyzed files will go in a separate dictionary for the JSON document."""
     mapping = package.to_dict(template)
@@ -70,14 +70,14 @@ def get_source_package_dict(package: Package, template: Template) -> SpdxPackage
         version=mapping['SourcePackageVersion'] if mapping['SourcePackageVersion'] else 'NOASSERTION',
         download_location=mapping['PackageDownloadLocation'] if mapping['PackageDownloadLocation'] else SpdxNoAssertion(),
         files_analyzed=False,
-        license_concluded=SpdxNoAssertion(),
+        license_concluded=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,
         license_declared=get_package_license_declared(declared_lic),
         copyright_text=mapping['PackageCopyrightText'] if mapping['PackageCopyrightText'] else SpdxNone(),
         comment=SOURCE_PACKAGE_COMMENT,
     )
 
 
-def get_package_dict(package: Package, template: Template) -> SpdxPackage:
+def get_package_dict(package: Package, template: Template, spdx_version: str) -> SpdxPackage:
     """Given a package object and its SPDX template mapping, return an SPDX Package.
     The analyzed files will go in a separate dictionary for the JSON document."""
     mapping = package.to_dict(template)
@@ -108,7 +108,7 @@ def get_package_dict(package: Package, template: Template) -> SpdxPackage:
         supplier=supplier,
         download_location=mapping['PackageDownloadLocation'] if mapping['PackageDownloadLocation'] else SpdxNoAssertion(),
         files_analyzed=False,
-        license_concluded=SpdxNoAssertion(),
+        license_concluded=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,
         license_declared=get_package_license_declared(declared_lic),
         copyright_text=mapping['PackageCopyrightText'] if mapping['PackageCopyrightText'] else SpdxNone(),
         external_references=external_ref,
@@ -116,7 +116,7 @@ def get_package_dict(package: Package, template: Template) -> SpdxPackage:
     )
 
 
-def get_packages_list(image_obj: Image, template: Template) -> List[SpdxPackage]:
+def get_packages_list(image_obj: Image, template: Template, spdx_version: str) -> List[SpdxPackage]:
     """Given an image object and the template object for SPDX, return a list
     of SPDX dictionary representations for each of the packages in the image.
     The SPDX JSON spec for packages requires:
@@ -132,11 +132,11 @@ def get_packages_list(image_obj: Image, template: Template) -> List[SpdxPackage]
             # one package object in the image
             pkg_ref, src_ref = get_package_spdxref(package)
             if pkg_ref not in package_refs and package.name:
-                packages.append(get_package_dict(package, template))
+                packages.append(get_package_dict(package, template, spdx_version))
                 package_refs.add(pkg_ref)
             if src_ref and src_ref not in package_refs:
                 packages.append(get_source_package_dict(
-                    package, template))
+                    package, template, spdx_version))
                 package_refs.add(src_ref)
     return packages
 
