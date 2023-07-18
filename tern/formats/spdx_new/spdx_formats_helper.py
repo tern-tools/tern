@@ -27,7 +27,10 @@ SPDX_VERSION_MAPPING = {
 
 
 def get_spdx_from_image_list(image_obj_list: List[Image], spdx_format: str, spdx_version: str) -> str:
-    """Generate an SPDX document
+    """Given a list of image objects and an SPDX format and version,
+    return the serialized string of the SPDX document representation in that format and version
+    generated from the image objects.
+
     WARNING: This assumes that the list consists of one image or the base
     image and a stub image, in which case, the information in the stub
     image is not applicable in the SPDX case as it is an empty image
@@ -46,7 +49,8 @@ def get_spdx_from_image_list(image_obj_list: List[Image], spdx_format: str, spdx
 
 
 def get_spdx_from_layer(layer: ImageLayer, spdx_format: str, spdx_version: str) -> str:
-    """Generate an SPDX document containing package and file information
+    """Given an Image layer and an SPDX format and version,
+    returns the serialized string of the SPDX document containing package and file information
     at container build time"""
     logger.debug("Generating SPDX %s snapshot document..." % spdx_format)
 
@@ -60,6 +64,8 @@ def get_spdx_from_layer(layer: ImageLayer, spdx_format: str, spdx_version: str) 
 
 
 def convert_document_to_serialized_string(spdx_document: Document, spdx_format: str) -> str:
+    """Given an SPDX document and a format, return the serialized string of the
+    representation of that document in the specified format."""
     # pylint: disable=wrong-import-position
     if spdx_format == "JSON":
         from spdx_tools.spdx.writer.json.json_writer import write_document_to_stream

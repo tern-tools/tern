@@ -104,9 +104,10 @@ def get_layer_package_comment(layer_obj: ImageLayer) -> str:
 
 
 def get_spdx_package_from_layer(layer_obj: ImageLayer, spdx_version: str) -> Tuple[SpdxPackage, List[Relationship]]:
-    """Given a layer object, return an SPDX Package representation
+    """Given a layer object and the SPDX version, return an SPDX Package representation
      of the layer and the list of CONTAINS relationships to all files in that layer.
-     The analyzed files will go in a separate part of the document."""
+     The analyzed files will go in a separate part of the document.
+     If the version is not SPDX-2.2, we can omit NoAssertions in most cases."""
 
     comment = get_layer_package_comment(layer_obj)
     verification_code = get_layer_verification_code(layer_obj) if layer_obj.files_analyzed else None

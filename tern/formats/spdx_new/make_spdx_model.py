@@ -30,6 +30,7 @@ from tern.utils.general import get_git_rev_or_version
 
 
 def make_spdx_model(image_obj_list: List[Image], spdx_version: str) -> Document:
+    """Given a list of tern Images, return a complete SPDX document generated from them."""
     template = SPDX()
     # we still don't know how SPDX documents could represent multiple
     # images. Hence, we will assume only one image is analyzed and the
@@ -74,7 +75,7 @@ def make_spdx_model(image_obj_list: List[Image], spdx_version: str) -> Document:
 
 
 def make_spdx_model_snapshot(layer_obj: ImageLayer, template: Template, spdx_version: str) -> Document:
-    """This is the SPDX document containing just the packages found at
+    """This returns the SPDX document containing just the packages found at
     container build time"""
     timestamp = get_current_timestamp()
 

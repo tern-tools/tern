@@ -34,9 +34,8 @@ def get_spdx_file_list_from_layer(layer_obj: ImageLayer, template: Template, tim
 
 
 def get_spdx_file_list_from_image(image_obj: Image, template: Template) -> List[SpdxFile]:
-    '''Given an image_obj object, and the SPDX template mapping, return a list
-    of SPDX dictionary representations for each file in each layer of the
-    image.'''
+    """Given an image_obj object, and the SPDX template mapping, return a list
+    of SPDX Files for each file in each layer of the image."""
     spdx_files: List[SpdxFile] = []
 
     # use file refs to keep track of duplicate files that may be located

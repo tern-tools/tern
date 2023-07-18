@@ -27,8 +27,8 @@ SOURCE_PACKAGE_COMMENT = 'This package refers to a source package associated' \
 
 
 def get_layer_packages_list(layer: ImageLayer, template: Template, spdx_version: str) -> List[SpdxPackage]:
-    """Given a layer object and an SPDX template object, return a list
-    of SPDX dictionary representations for each of the packages in the layer
+    """Given a layer object, an SPDX template object and the SPDX version,
+    return a list of SPDX Packages for each of the packages in the layer
     and their package references"""
     package_dicts = []
     package_refs = []
@@ -54,8 +54,9 @@ def get_package_comment(package: Package) -> str:
 
 
 def get_spdx_package_from_source_package(package: Package, template: Template, spdx_version: str) -> SpdxPackage:
-    """Given a package object and its SPDX template mapping, return an SPDX Package of the associated source package.
-    The analyzed files will go in a separate dictionary for the JSON document."""
+    """Given a package object, its SPDX template mapping and the SPDX version,
+     return an SPDX Package of the associated source package.
+    The analyzed files will go in a separate part of the SPDX document."""
     mapping = package.to_dict(template)
 
     _, src_ref = get_package_spdxref(package)
@@ -78,8 +79,8 @@ def get_spdx_package_from_source_package(package: Package, template: Template, s
 
 
 def get_spdx_package_from_tern_package(package: Package, template: Template, spdx_version: str) -> SpdxPackage:
-    """Given a package object and its SPDX template mapping, return an SPDX Package.
-    The analyzed files will go in a separate dictionary for the JSON document."""
+    """Given a package object, its SPDX template mapping and the SPDX version,
+    return an SPDX Package. The analyzed files will go in a separate part of the SPDX document."""
     mapping = package.to_dict(template)
 
     if mapping['PackageSupplier']:
@@ -118,8 +119,8 @@ def get_spdx_package_from_tern_package(package: Package, template: Template, spd
 
 def get_spdx_package_list_from_image(image_obj: Image, template: Template, spdx_version: str) -> List[SpdxPackage]:
     """Given an image object and the template object for SPDX, return a list
-    of SPDX dictionary representations for each of the packages in the image.
-    The SPDX JSON spec for packages requires:
+    of SPDX Packages for each of the packages in the image.
+    The SPDX spec for packages requires:
         name
         versionInfo
         downloadLocation"""

@@ -58,7 +58,7 @@ class TestSPDXGeneration(unittest.TestCase):
             image = pickle.load(f)
         image_list = [image]
 
-        json_as_string = SpdxJSON().generate(image_list)
+        json_as_string = SpdxJSON().generate(image_list, "SPDX-2.3")
         with open(json_file_path, "w") as f:
             f.write(json_as_string)
 

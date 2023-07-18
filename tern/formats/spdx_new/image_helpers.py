@@ -21,7 +21,7 @@ from tern.utils.general import get_git_rev_or_version
 
 
 def get_image_extracted_licenses(image_obj: Image) -> List[ExtractedLicensingInfo]:
-    """Given an image_obj, return a unique list of extractedLicensingInfo
+    """Given an image_obj, return a unique list of ExtractedLicensingInfo
     that contains all the file and package LicenseRef and their corresponding plain text."""
 
     unique_licenses = set()
@@ -45,8 +45,8 @@ def get_image_extracted_licenses(image_obj: Image) -> List[ExtractedLicensingInf
 
 
 def get_spdx_package_from_image(image_obj: Image, template: Template, spdx_version: str) -> SpdxPackage:
-    """Given an image object and the template object for SPDX, return the
-    SPDX Package for the given image."""
+    """Given an image object, the template object for SPDX and the SPDX version, return the
+    SPDX Package for the given image. If the version is not SPDX-2.2, we can omit NoAssertions in most cases."""
     mapping = image_obj.to_dict(template)
     return SpdxPackage(
         spdx_id=get_image_spdxref(image_obj),

@@ -52,6 +52,8 @@ def replace_invalid_chars_in_license_expression(license_string: str) -> str:
 
 
 def is_valid_license_expression(license_string: str) -> bool:
+    """Given a license string, return True if the license expression is valid,
+    False otherwise."""
     licensing = get_spdx_licensing()
     try:
         return licensing.validate(license_string).errors == []
