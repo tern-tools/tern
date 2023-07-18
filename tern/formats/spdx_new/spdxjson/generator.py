@@ -15,10 +15,10 @@ from tern.formats.spdx_new.spdx_formats_helper import get_spdx_from_image_list, 
 
 
 class SpdxJSON(generator.Generate):
-    def generate(self, image_obj_list: List[Image], format_version: str, print_inclusive=False) -> str:
-        if format_version is None:
-            format_version = "2.2"
-        return get_spdx_from_image_list(image_obj_list, "JSON", format_version)
+    def generate(self, image_obj_list: List[Image], spdx_version: str, print_inclusive=False) -> str:
+        if spdx_version is None:
+            spdx_version = "2.2"
+        return get_spdx_from_image_list(image_obj_list, "JSON", spdx_version)
 
-    def generate_layer(self, layer: ImageLayer, format_version) -> str:
-        return get_spdx_from_layer(layer, "JSON", format_version)
+    def generate_layer(self, layer: ImageLayer, spdx_version) -> str:
+        return get_spdx_from_layer(layer, "JSON", spdx_version)

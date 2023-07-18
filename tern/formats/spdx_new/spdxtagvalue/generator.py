@@ -16,8 +16,8 @@ from tern.formats.spdx_new.spdx_formats_helper import get_spdx_from_image_list, 
 
 
 class SpdxTagValue(generator.Generate):
-    def generate(self, image_obj_list: List[Image], format_version: str, print_inclusive=False) -> str:
-        return get_spdx_from_image_list(image_obj_list, "Tag-Value", format_version)
+    def generate(self, image_obj_list: List[Image], spdx_version: str, print_inclusive=False) -> str:
+        return get_spdx_from_image_list(image_obj_list, "Tag-Value", spdx_version)
 
-    def generate_layer(self, layer: ImageLayer, format_version: str) -> str:
-        return get_spdx_from_layer(layer, "Tag-Value", format_version)
+    def generate_layer(self, layer: ImageLayer, spdx_version: str) -> str:
+        return get_spdx_from_layer(layer, "Tag-Value", spdx_version)

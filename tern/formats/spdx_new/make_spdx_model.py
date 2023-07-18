@@ -91,7 +91,7 @@ def make_spdx_model_snapshot(layer_obj: ImageLayer, template: Template, spdx_ver
     )
 
     # Add list of package dictionaries to packages list, if they exist
-    packages = get_layer_packages_list(layer_obj, template)
+    packages = get_layer_packages_list(layer_obj, template, spdx_version)
     describes_relationships = [
         Relationship(DOCUMENT_ID, RelationshipType.DESCRIBES, package.spdx_id)
         for package in packages

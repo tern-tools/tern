@@ -24,10 +24,10 @@ def print_yaml_report(image):
 
 
 class YAML(generator.Generate):
-    def generate(self, image_obj_list, format_version: str, print_inclusive=False):
+    def generate(self, image_obj_list, spdx_version: str, print_inclusive=False):
         '''Generate a yaml report'''
-        if format_version is not None:
-            logger.warning("The version parameter is not supported for YAML.")
+        if spdx_version is not None:
+            logger.warning("The SPDX version parameter is not supported for YAML.")
 
         report = formats.disclaimer_yaml.format(
             version_info=get_git_rev_or_version())
@@ -35,9 +35,9 @@ class YAML(generator.Generate):
             report = report + print_yaml_report(image)
         return report
 
-    def generate_layer(self, layer, format_version: str):
+    def generate_layer(self, layer, spdx_version: str):
         """Generate a yaml report for the given layer object"""
-        if format_version is not None:
-            logger.warning("The version parameter is not supported for YAML.")
+        if spdx_version is not None:
+            logger.warning("The SPDX version parameter is not supported for YAML.")
 
         return yaml.dump(layer.to_dict(), default_flow_style=False)

@@ -321,11 +321,11 @@ def get_report_dict(image_obj_list):
 
 
 class HTML(generator.Generate):
-    def generate(self, image_obj_list, format_version: str, print_inclusive=False):
+    def generate(self, image_obj_list, spdx_version: str, print_inclusive=False):
         '''Given a list of image objects, create a html report
         for the images'''
-        if format_version is not None:
-            logger.warning("The version parameter is not supported for HTML.")
+        if spdx_version is not None:
+            logger.warning("The SPDX version parameter is not supported for HTML.")
 
         report_dict = get_report_dict(image_obj_list)
         report = create_html_report(report_dict, image_obj_list)
@@ -335,7 +335,7 @@ class HTML(generator.Generate):
         """Given a layer object, create a html report for the layer"""
         logger.debug("Creating HTML report...")
         if version is not None:
-            logger.warning("The version parameter is not supported for HTML.")
+            logger.warning("The SPDX version parameter is not supported for HTML.")
 
         report = ""
         report = report + '\n' + head_layer % (css, get_tool_version())

@@ -51,7 +51,7 @@ def get_document_block(image_obj):
 
 
 class SpdxTagValue(generator.Generate):
-    def generate(self, image_obj_list, format_version: str, print_inclusive=False):
+    def generate(self, image_obj_list, spdx_version: str, print_inclusive=False):
         '''Generate an SPDX document
         WARNING: This assumes that the list consists of one image or the base
         image and a stub image, in which case, the information in the stub
@@ -124,6 +124,9 @@ class SpdxTagValue(generator.Generate):
         For the sake of SPDX, an image is a 'Package' which 'CONTAINS' each
         layer which is also a 'Package' which 'CONTAINS' the real Package'''
         logger.debug("Generating SPDX document...")
+        if spdx_version is not None:
+            logger.warning("The SPDX version parameter is not supported in this implementation."
+                           " Please use the new SPDX implementation.")
         report = ''
 
         # we still don't know how SPDX documents could represent multiple
@@ -142,7 +145,7 @@ class SpdxTagValue(generator.Generate):
 
         return report
 
-    def generate_layer(self, layer_obj, format_version: str):  # pylint: disable=unused-argument
+    def generate_layer(self, layer_obj, spdx_version: str):  # pylint: disable=unused-argument
         """Currently Unsupported. Provide debug statement"""
         logger.critical("Generating SPDX tag-value documents at container "
                         "build time is currently unsupported")
