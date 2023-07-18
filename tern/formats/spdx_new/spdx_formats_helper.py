@@ -35,7 +35,7 @@ def get_spdx_from_image_list(image_obj_list: List[Image], spdx_format: str, spdx
 
     For the sake of SPDX, an image is a 'Package' which 'CONTAINS' each
     layer which is also a 'Package' which 'CONTAINS' the real Packages"""
-    logger.debug(f"Generating SPDX {spdx_format} document...")
+    logger.debug(f"Generating SPDX %s document..." % spdx_format)
 
     if spdx_version not in SPDX_VERSION_MAPPING:
         raise ValueError(f"SPDX version {spdx_version} is not supported by tern.")
@@ -48,7 +48,7 @@ def get_spdx_from_image_list(image_obj_list: List[Image], spdx_format: str, spdx
 def get_spdx_from_layer(layer: ImageLayer, spdx_format: str, spdx_version: str) -> str:
     """Generate an SPDX document containing package and file information
     at container build time"""
-    logger.debug(f"Generating SPDX {spdx_format} snapshot document...")
+    logger.debug("Generating SPDX %s snapshot document..." % spdx_format)
 
     if spdx_version not in SPDX_VERSION_MAPPING:
         raise ValueError(f"SPDX version {spdx_version} is not supported by tern.")
@@ -60,6 +60,7 @@ def get_spdx_from_layer(layer: ImageLayer, spdx_format: str, spdx_version: str) 
 
 
 def convert_document_to_serialized_string(spdx_document: Document, spdx_format: str) -> str:
+    # pylint: disable=wrong-import-position
     if spdx_format == "JSON":
         from spdx_tools.spdx.writer.json.json_writer import write_document_to_stream
         return get_serialized_document_string(spdx_document, write_document_to_stream)
@@ -74,6 +75,7 @@ def convert_document_to_serialized_string(spdx_document: Document, spdx_format: 
     if spdx_format == "Tag-Value":
         from spdx_tools.spdx.writer.tagvalue.tagvalue_writer import write_document_to_stream
         return get_serialized_document_string(spdx_document, write_document_to_stream)
+    # pylint: enable=wrong-import-position
 
 
 def get_serialized_document_string(spdx_document: Document, writer_function: Callable[[Document, IO[str]], str]) -> str:
@@ -83,7 +85,9 @@ def get_serialized_document_string(spdx_document: Document, writer_function: Cal
 
 
 def get_serialized_rdf_document_string(spdx_document: Document) -> str:
+    # pylint: disable=wrong-import-position
     from spdx_tools.spdx.writer.rdf.rdf_writer import write_document_to_stream
+    # pylint: enable=wrong-import-position
     with io.BytesIO() as stream:
         write_document_to_stream(spdx_document, stream, validate=False)
         return stream.getvalue().decode("UTF-8")
