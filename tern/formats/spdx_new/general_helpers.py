@@ -70,11 +70,11 @@ def get_package_license_declared(package_license_declared: str) -> Union[License
     If not, return the LicenseRef of the original declared license expression
     passed in to the function. If a blank string is passed in, return `NONE`."""
     if package_license_declared:
-        package_license_declared = replace_invalid_chars_in_license_expression(package_license_declared)
-        if is_valid_license_expression(package_license_declared):
-            return Licensing().parse(package_license_declared)
+        replaced_license = replace_invalid_chars_in_license_expression(package_license_declared)
+        if is_valid_license_expression(replaced_license):
+            return get_spdx_licensing().parse(replaced_license)
 
-        return Licensing().parse(get_license_ref(package_license_declared))
+        return get_spdx_licensing().parse(get_license_ref(package_license_declared))
     return SpdxNone()
 
 
