@@ -14,8 +14,8 @@ from spdx_tools.spdx.model import Document
 
 from tern.classes.image import Image
 from tern.classes.image_layer import ImageLayer
-from tern.formats.spdx.spdx import SPDX
-from tern.formats.spdx_new.make_spdx_model import make_spdx_model, make_spdx_model_snapshot
+from tern.formats.spdx.spdx_template import SPDX
+from tern.formats.spdx.make_spdx_model import make_spdx_model, make_spdx_model_snapshot
 from tern.utils import constants
 
 logger = logging.getLogger(constants.logger_name)

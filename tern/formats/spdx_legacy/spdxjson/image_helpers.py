@@ -7,8 +7,8 @@
 Helper functions for image level JSON SPDX document dictionaries
 Images for SPDX act like a Package
 """
-from tern.formats.spdx import spdx_common
-from tern.formats.spdx.spdxjson import formats as json_formats
+from tern.formats.spdx_legacy import spdx_common
+from tern.formats.spdx_legacy.spdxjson import formats as json_formats
 
 
 def get_image_extracted_licenses(image_obj):

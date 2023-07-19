@@ -214,13 +214,13 @@ def main():
                                metavar='REPORT_FORMAT',
                                help="Format the report using one of the "
                                "available formats: "
-                               "spdxtagvalue, spdxjson, cyclonedxjson, json, "
-                               "yaml, html")
+                               "spdxtagvalue, spdxjson, spdxyaml, spdxxml, spdxrdf, "
+                               "cyclonedxjson, json, yaml, html")
     parser_report.add_argument('-sv', '--spdx-version',
                                metavar='SPDX_VERSION',
                                help="Specify the version of the SPDX report format."
                                     "This will be ignored for all non-SPDX formats."
-                                    "Possible value are '2.2' (default) or '2.3'.")
+                                    "Possible values are '2.2' (default) or '2.3'.")
     parser_report.add_argument('-o', '--output-file', default=None,
                                metavar='FILE',
                                help="Write the report to a file. "

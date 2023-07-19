@@ -8,8 +8,8 @@ Helper functions for packages in SPDX JSON document creation
 """
 
 from tern.report import content
-from tern.formats.spdx import spdx_common
-from tern.formats.spdx.spdxjson import formats as json_formats
+from tern.formats.spdx_legacy import spdx_common
+from tern.formats.spdx_legacy.spdxjson import formats as json_formats
 
 
 def get_package_comment(package):

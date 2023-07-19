@@ -19,9 +19,9 @@ from spdx_tools.spdx.model import Package as SpdxPackage, SpdxNoAssertion, SpdxN
 
 from tern.classes.image import Image
 from tern.classes.image_layer import ImageLayer
-from tern.formats.spdx_new.general_helpers import get_license_ref, is_valid_license_expression, \
+from tern.formats.spdx.general_helpers import get_license_ref, is_valid_license_expression, \
     get_image_spdxref, get_package_spdxref, get_layer_spdxref, get_file_spdxref
-from tern.formats.spdx_new.constants import DOCUMENT_ID
+from tern.formats.spdx.constants import DOCUMENT_ID
 from tern.utils import constants
 from tern.report import content
 

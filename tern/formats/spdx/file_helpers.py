@@ -15,8 +15,8 @@ from tern.classes.file_data import FileData
 from tern.classes.image import Image
 from tern.classes.image_layer import ImageLayer
 from tern.classes.template import Template
-from tern.formats.spdx_new.layer_helpers import get_layer_checksum
-from tern.formats.spdx_new.general_helpers import get_package_license_declared, get_file_spdxref
+from tern.formats.spdx.layer_helpers import get_layer_checksum
+from tern.formats.spdx.general_helpers import get_package_license_declared, get_file_spdxref
 
 
 def get_spdx_file_list_from_layer(layer_obj: ImageLayer, template: Template, timestamp: datetime) -> List[SpdxFile]:

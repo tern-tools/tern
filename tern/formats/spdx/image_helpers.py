@@ -14,8 +14,8 @@ from spdx_tools.spdx.model import ExtractedLicensingInfo, Package as SpdxPackage
 
 from tern.classes.image import Image
 from tern.classes.template import Template
-from tern.formats.spdx_new.layer_helpers import get_layer_licenses
-from tern.formats.spdx_new.general_helpers import get_license_ref, get_uuid, is_valid_license_expression, \
+from tern.formats.spdx.layer_helpers import get_layer_licenses
+from tern.formats.spdx.general_helpers import get_license_ref, get_uuid, is_valid_license_expression, \
     get_image_spdxref
 from tern.utils.general import get_git_rev_or_version
 

@@ -7,10 +7,10 @@
 Helper functions for image level SPDX document blocks
 Images for SPDX act like a Package
 """
-from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
-from tern.formats.spdx.spdxtagvalue import layer_helpers as lhelpers
-from tern.formats.spdx.spdxtagvalue import package_helpers as phelpers
-from tern.formats.spdx import spdx_common
+from tern.formats.spdx_legacy.spdxtagvalue import formats as spdx_formats
+from tern.formats.spdx_legacy.spdxtagvalue import layer_helpers as lhelpers
+from tern.formats.spdx_legacy.spdxtagvalue import package_helpers as phelpers
+from tern.formats.spdx_legacy import spdx_common
 
 
 def get_image_layer_relationships(image_obj):

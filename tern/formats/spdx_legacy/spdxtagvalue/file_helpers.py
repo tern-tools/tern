@@ -7,7 +7,7 @@
 File level helpers for SPDX tag-value document generator
 """
 
-from tern.formats.spdx import spdx_common
+from tern.formats.spdx_legacy import spdx_common
 
 
 def get_file_comment(filedata):

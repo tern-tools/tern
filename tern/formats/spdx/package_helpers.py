@@ -16,7 +16,7 @@ from tern.classes.image import Image
 from tern.classes.image_layer import ImageLayer
 from tern.classes.package import Package
 from tern.classes.template import Template
-from tern.formats.spdx_new.general_helpers import get_package_license_declared, get_package_spdxref
+from tern.formats.spdx.general_helpers import get_package_license_declared, get_package_spdxref
 from tern.report import content
 
 

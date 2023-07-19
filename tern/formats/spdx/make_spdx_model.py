@@ -14,17 +14,17 @@ from spdx_tools.spdx.model import Document, CreationInfo, Actor, ActorType, Rela
 
 from tern.classes.image_layer import ImageLayer
 from tern.classes.template import Template
-from tern.formats.spdx_new.constants import DOCUMENT_ID, DOCUMENT_NAME, DATA_LICENSE, DOCUMENT_COMMENT, \
+from tern.formats.spdx.constants import DOCUMENT_ID, DOCUMENT_NAME, DATA_LICENSE, DOCUMENT_COMMENT, \
     LICENSE_LIST_VERSION, CREATOR_NAME, DOCUMENT_NAME_SNAPSHOT, DOCUMENT_NAMESPACE_SNAPSHOT
-from tern.formats.spdx_new.file_helpers import get_spdx_file_list_from_layer
-from tern.formats.spdx_new.general_helpers import get_current_timestamp, get_uuid
+from tern.formats.spdx.file_helpers import get_spdx_file_list_from_layer
+from tern.formats.spdx.general_helpers import get_current_timestamp, get_uuid
 from tern.classes.image import Image
-from tern.formats.spdx.spdx import SPDX
-from tern.formats.spdx_new.file_helpers import get_spdx_file_list_from_image
-from tern.formats.spdx_new.image_helpers import get_image_extracted_licenses, \
+from tern.formats.spdx.spdx_template import SPDX
+from tern.formats.spdx.file_helpers import get_spdx_file_list_from_image
+from tern.formats.spdx.image_helpers import get_image_extracted_licenses, \
     get_spdx_package_from_image, get_document_namespace
-from tern.formats.spdx_new.layer_helpers import get_spdx_package_from_layer, get_image_layer_relationships, get_layer_extracted_licenses
-from tern.formats.spdx_new.package_helpers import get_spdx_package_list_from_image, get_layer_packages_list
+from tern.formats.spdx.layer_helpers import get_spdx_package_from_layer, get_image_layer_relationships, get_layer_extracted_licenses
+from tern.formats.spdx.package_helpers import get_spdx_package_list_from_image, get_layer_packages_list
 
 from tern.utils.general import get_git_rev_or_version
 

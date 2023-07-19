@@ -15,7 +15,7 @@ import uuid
 
 from license_expression import get_spdx_licensing
 from tern.utils import constants
-from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
+from tern.formats.spdx_legacy.spdxtagvalue import formats as spdx_formats
 from packageurl import PackageURL
 
 # global logger
