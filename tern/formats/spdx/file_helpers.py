@@ -6,6 +6,7 @@
 """
 File level helpers for SPDX document generator
 """
+import logging
 from datetime import datetime
 from typing import List
 
@@ -17,7 +18,9 @@ from tern.classes.image_layer import ImageLayer
 from tern.classes.template import Template
 from tern.formats.spdx.layer_helpers import get_layer_checksum
 from tern.formats.spdx.general_helpers import get_package_license_declared, get_file_spdxref
+from tern.utils import constants
 
+logger = logging.getLogger(constants.logger_name)
 
 
 def get_spdx_file_list_from_layer(layer_obj: ImageLayer, template: Template, timestamp: datetime, spdx_version: str) -> List[SpdxFile]:
@@ -93,7 +96,11 @@ def get_spdx_file_from_filedata(filedata: FileData, template: Template, layer_id
 def get_file_checksum(filedata: FileData) -> Checksum:
     """Given a FileData object, return the checksum required by SPDX.
     Currently, the spec requires a SHA1 checksum"""
-    return Checksum(ChecksumAlgorithm.SHA1, filedata.get_checksum('sha1'))
+    checksum = filedata.get_checksum('sha1')
+    if not checksum:
+        logger.error("No SHA1 checksum found in file. Resorting to empty file checksum.")
+        checksum = "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    return Checksum(ChecksumAlgorithm.SHA1, checksum)
 
 
 def get_file_notice(filedata: FileData) -> str:
