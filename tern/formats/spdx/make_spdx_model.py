@@ -62,7 +62,7 @@ def make_spdx_model(image_obj_list: List[Image], spdx_version: str) -> Document:
         layer_file_relationships.extend(relationships)
 
     packages.extend(get_spdx_package_list_from_image(image_obj, template, spdx_version))
-    files = get_spdx_file_list_from_image(image_obj, template)
+    files = get_spdx_file_list_from_image(image_obj, template, spdx_version)
     extracted_licensing_info = get_image_extracted_licenses(image_obj)
 
     return Document(
@@ -99,7 +99,7 @@ def make_spdx_model_snapshot(layer_obj: ImageLayer, template: Template, spdx_ver
     ]
 
     # Add list of file dictionaries, if they exist
-    files = get_spdx_file_list_from_layer(layer_obj, template, timestamp)
+    files = get_spdx_file_list_from_layer(layer_obj, template, timestamp, spdx_version)
 
     # Add package and file extracted license texts, if they exist
     extracted_licensing_info = get_layer_extracted_licenses(layer_obj)

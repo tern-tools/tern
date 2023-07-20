@@ -9,7 +9,7 @@ File level helpers for SPDX document generator
 from datetime import datetime
 from typing import List
 
-from spdx_tools.spdx.model import File as SpdxFile, SpdxNone, SpdxNoAssertion, Checksum, ChecksumAlgorithm
+from spdx_tools.spdx.model import File as SpdxFile, SpdxNone, SpdxNoAssertion, Checksum, ChecksumAlgorithm, FileType
 
 from tern.classes.file_data import FileData
 from tern.classes.image import Image
@@ -19,7 +19,8 @@ from tern.formats.spdx.layer_helpers import get_layer_checksum
 from tern.formats.spdx.general_helpers import get_package_license_declared, get_file_spdxref
 
 
-def get_spdx_file_list_from_layer(layer_obj: ImageLayer, template: Template, timestamp: datetime) -> List[SpdxFile]:
+
+def get_spdx_file_list_from_layer(layer_obj: ImageLayer, template: Template, timestamp: datetime, spdx_version: str) -> List[SpdxFile]:
     """Given a layer object and the SPDX template mapping, return a list
     of SPDX Files for each file in the layer"""
     spdx_files: List[SpdxFile] = []
@@ -28,12 +29,12 @@ def get_spdx_file_list_from_layer(layer_obj: ImageLayer, template: Template, tim
         # we do not know the layer's id, so we will use the timestamp instead
         file_ref = get_file_spdxref(filedata, str(timestamp))
         if file_ref not in file_refs:
-            spdx_files.append(get_spdx_file_from_filedata(filedata, template, str(timestamp)))
+            spdx_files.append(get_spdx_file_from_filedata(filedata, template, str(timestamp), spdx_version))
             file_refs.add(file_ref)
     return spdx_files
 
 
-def get_spdx_file_list_from_image(image_obj: Image, template: Template) -> List[SpdxFile]:
+def get_spdx_file_list_from_image(image_obj: Image, template: Template, spdx_version: str) -> List[SpdxFile]:
     """Given an image_obj object, and the SPDX template mapping, return a list
     of SPDX Files for each file in each layer of the image."""
     spdx_files: List[SpdxFile] = []
@@ -48,12 +49,12 @@ def get_spdx_file_list_from_image(image_obj: Image, template: Template) -> List[
                 # we use the layer checksum as the layer id
                 file_ref = get_file_spdxref(filedata, layer_checksum_value)
                 if file_ref not in file_refs:
-                    spdx_files.append(get_spdx_file_from_filedata(filedata, template, layer_checksum_value))
+                    spdx_files.append(get_spdx_file_from_filedata(filedata, template, layer_checksum_value, spdx_version))
                     file_refs.add(file_ref)
     return spdx_files
 
 
-def get_spdx_file_from_filedata(filedata: FileData, template: Template, layer_id: str) -> SpdxFile:
+def get_spdx_file_from_filedata(filedata: FileData, template: Template, layer_id: str, spdx_version: str) -> SpdxFile:
     """Given a FileData object and its SPDX template mapping, return an
     SPDX representation of the file. A layer_id is used to
     distinguish copies of the same file occurring in different places in the
@@ -71,13 +72,17 @@ def get_spdx_file_from_filedata(filedata: FileData, template: Template, layer_id
     file_comment = get_file_comment(filedata)
     file_contributors = get_file_contributors(filedata)
 
+    file_types = None
+    if mapping['FileType']:
+        file_types = [FileType[mapping['FileType'].upper()]]
+
     return SpdxFile(
         spdx_id=get_file_spdxref(filedata, layer_id),
         name=mapping['FileName'],
         checksums=[get_file_checksum(filedata)],
-        license_concluded=SpdxNoAssertion(),  # we don't provide this
-        copyright_text=SpdxNoAssertion(),     # we don't know this
-        file_types=[mapping['FileType']] if mapping['FileType'] else None,
+        license_concluded=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,  # we don't provide this
+        copyright_text=SpdxNoAssertion() if spdx_version == "SPDX-2.2" else None,     # we don't know this
+        file_types=file_types,
         license_info_in_file=license_info_in_file,
         notice=file_notice if file_notice else None,
         comment=file_comment if file_comment else None,
