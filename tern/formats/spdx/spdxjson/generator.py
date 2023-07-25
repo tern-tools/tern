@@ -16,8 +16,6 @@ from tern.formats.spdx.spdx_formats_helper import get_spdx_from_image_list, get_
 
 class SpdxJSON(generator.Generate):
     def generate(self, image_obj_list: List[Image], spdx_version: str, print_inclusive=False) -> str:
-        if spdx_version is None:
-            spdx_version = "2.2"
         return get_spdx_from_image_list(image_obj_list, "JSON", spdx_version)
 
     def generate_layer(self, layer: ImageLayer, spdx_version) -> str:

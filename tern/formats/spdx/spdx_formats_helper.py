@@ -40,6 +40,9 @@ def get_spdx_from_image_list(image_obj_list: List[Image], spdx_format: str, spdx
     layer which is also a 'Package' which 'CONTAINS' the real Packages"""
     logger.debug(f"Generating SPDX %s document..." % spdx_format)
 
+    if spdx_version is None:
+        spdx_version = "2.2"
+
     if spdx_version not in SPDX_VERSION_MAPPING:
         raise ValueError(f"SPDX version {spdx_version} is not supported by tern.")
 
@@ -53,6 +56,9 @@ def get_spdx_from_layer(layer: ImageLayer, spdx_format: str, spdx_version: str) 
     returns the serialized string of the SPDX document containing package and file information
     at container build time"""
     logger.debug("Generating SPDX %s snapshot document..." % spdx_format)
+
+    if spdx_version is None:
+        spdx_version = "2.2"
 
     if spdx_version not in SPDX_VERSION_MAPPING:
         raise ValueError(f"SPDX version {spdx_version} is not supported by tern.")
