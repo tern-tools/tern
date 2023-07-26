@@ -164,7 +164,7 @@ class SpdxJSON(generator.Generate):
 
         return json.dumps(report)
 
-    def generate_layer(self, layer, spdx_version: str):
+    def generate_layer(self, layer, spdx_version: str):  # pylint: disable=unused-argument
         """Generate an SPDX document containing package and file information
         at container build time"""
         logger.debug("Generating SPDX JSON document...")

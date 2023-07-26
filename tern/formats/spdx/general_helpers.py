@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime
 from typing import Union, Tuple
 
-from license_expression import get_spdx_licensing, LicenseExpression, Licensing
+from license_expression import get_spdx_licensing, LicenseExpression
 from spdx_tools.spdx.model import SpdxNone
 
 from tern.classes.file_data import FileData

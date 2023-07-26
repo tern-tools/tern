@@ -11,6 +11,11 @@ import logging
 from typing import Callable, IO, List
 
 from spdx_tools.spdx.model import Document
+from spdx_tools.spdx.writer.json.json_writer import write_document_to_stream as json_writer
+from spdx_tools.spdx.writer.yaml.yaml_writer import write_document_to_stream as yaml_writer
+from spdx_tools.spdx.writer.xml.xml_writer import write_document_to_stream as xml_writer
+from spdx_tools.spdx.writer.tagvalue.tagvalue_writer import write_document_to_stream as tv_writer
+from spdx_tools.spdx.writer.rdf.rdf_writer import write_document_to_stream as rdf_writer
 
 from tern.classes.image import Image
 from tern.classes.image_layer import ImageLayer
@@ -38,7 +43,7 @@ def get_spdx_from_image_list(image_obj_list: List[Image], spdx_format: str, spdx
 
     For the sake of SPDX, an image is a 'Package' which 'CONTAINS' each
     layer which is also a 'Package' which 'CONTAINS' the real Packages"""
-    logger.debug(f"Generating SPDX %s document..." % spdx_format)
+    logger.debug("Generating SPDX %s document...", spdx_format)
 
     if spdx_version is None:
         spdx_version = "2.2"
@@ -55,7 +60,7 @@ def get_spdx_from_layer(layer: ImageLayer, spdx_format: str, spdx_version: str) 
     """Given an Image layer and an SPDX format and version,
     returns the serialized string of the SPDX document containing package and file information
     at container build time"""
-    logger.debug("Generating SPDX %s snapshot document..." % spdx_format)
+    logger.debug("Generating SPDX %s snapshot document...", spdx_format)
 
     if spdx_version is None:
         spdx_version = "2.2"
@@ -72,22 +77,18 @@ def get_spdx_from_layer(layer: ImageLayer, spdx_format: str, spdx_version: str) 
 def convert_document_to_serialized_string(spdx_document: Document, spdx_format: str) -> str:
     """Given an SPDX document and a format, return the serialized string of the
     representation of that document in the specified format."""
-    # pylint: disable=wrong-import-position
     if spdx_format == "JSON":
-        from spdx_tools.spdx.writer.json.json_writer import write_document_to_stream
-        return get_serialized_document_string(spdx_document, write_document_to_stream)
+        return get_serialized_document_string(spdx_document, json_writer)
     if spdx_format == "YAML":
-        from spdx_tools.spdx.writer.yaml.yaml_writer import write_document_to_stream
-        return get_serialized_document_string(spdx_document, write_document_to_stream)
+        return get_serialized_document_string(spdx_document, yaml_writer)
     if spdx_format == "XML":
-        from spdx_tools.spdx.writer.xml.xml_writer import write_document_to_stream
-        return get_serialized_document_string(spdx_document, write_document_to_stream)
+        return get_serialized_document_string(spdx_document, xml_writer)
     if spdx_format == "RDF-XML":
         return get_serialized_rdf_document_string(spdx_document)
     if spdx_format == "Tag-Value":
-        from spdx_tools.spdx.writer.tagvalue.tagvalue_writer import write_document_to_stream
-        return get_serialized_document_string(spdx_document, write_document_to_stream)
-    # pylint: enable=wrong-import-position
+        return get_serialized_document_string(spdx_document, tv_writer)
+
+    raise ValueError(f"{spdx_format} is not a known SPDX format.")
 
 
 def get_serialized_document_string(spdx_document: Document, writer_function: Callable[[Document, IO[str]], str]) -> str:
@@ -97,9 +98,6 @@ def get_serialized_document_string(spdx_document: Document, writer_function: Cal
 
 
 def get_serialized_rdf_document_string(spdx_document: Document) -> str:
-    # pylint: disable=wrong-import-position
-    from spdx_tools.spdx.writer.rdf.rdf_writer import write_document_to_stream
-    # pylint: enable=wrong-import-position
     with io.BytesIO() as stream:
-        write_document_to_stream(spdx_document, stream, validate=False)
+        rdf_writer(spdx_document, stream, validate=False)
         return stream.getvalue().decode("UTF-8")
