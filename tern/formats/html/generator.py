@@ -331,10 +331,10 @@ class HTML(generator.Generate):
         report = create_html_report(report_dict, image_obj_list)
         return report
 
-    def generate_layer(self, layer, version: str):
+    def generate_layer(self, layer, spdx_version: str):
         """Given a layer object, create a html report for the layer"""
         logger.debug("Creating HTML report...")
-        if version is not None:
+        if spdx_version is not None:
             logger.warning("The SPDX version parameter is not supported for HTML.")
 
         report = ""

@@ -157,9 +157,9 @@ class Default(generator.Generate):
             return report
         return report + print_licenses_only(image_obj_list)
 
-    def generate_layer(self, layer, version: str):
+    def generate_layer(self, layer, spdx_version: str):
         """Generate a default report for one layer object"""
-        if version is not None:
+        if spdx_version is not None:
             logger.warning("The SPDX version parameter is not supported for the default format.")
 
         report = formats.disclaimer.format(
