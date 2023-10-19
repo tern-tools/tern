@@ -82,26 +82,26 @@ Once installed, make sure the docker daemon is running.
 
 Create a python3 virtual environment:
 ```
-$ python3 -m venv ternenv
-$ cd ternenv
+python3 -m venv ternenv
+cd ternenv
 ```
 
 *NOTE:* Your OS might distribute each Python version separately. For example, on Ubuntu LTS, Python 2.7 is linked to `python2` and Python 3.6 is linked to `python3`. I develop with Python 3.7 which is installed separately with no symlinks. In this case, I use the binary. The binaries are usually installed in `/usr/bin/python`.
 
 Activate the virtual environment:
 ```
-$ source bin/activate
+source bin/activate
 ```
 NOTE: This specific activate script only works for Bash shells. If you need to activate a Fish Shell or C Shell you should use `source bin/activate.fish` or `source bin/activate.csh`, respectively.
 
 Install tern:
 ```
-$ pip install tern
+pip install tern
 ```
 
 Run Tern:
 ```
-$ tern report -o output.txt -i debian:buster
+tern report -o output.txt -i debian:buster
 ```
 
 ## Getting Started with Docker<a name="getting-started-with-docker">
@@ -109,20 +109,20 @@ Docker is the most widely used tool to build and run containers. If you already 
 
 Clone this repository:
 ```
-$ git clone https://github.com/tern-tools/tern.git
+git clone https://github.com/tern-tools/tern.git
 ```
 
 Build the Docker image (called `ternd` here). You may need to use sudo:
 ```
-$ docker build -f docker/Dockerfile -t ternd .
+docker build -f docker/Dockerfile -t ternd .
 ```
 
 This will install the latest release of tern using pip.
 
 If you want to build a Docker image containing the latest changes to tern, run:
 ```
-$ python setup.py sdist
-$ docker build -f ci/Dockerfile -t ternd .
+python setup.py sdist
+docker build -f ci/Dockerfile -t ternd .
 ```
 
 **NOTE**: By default, Tern will run with logging turned on. If you would like to silent the terminal output when running the ternd container, make the following change to the Dockerfile ENTRYPOINT before building:
@@ -137,18 +137,18 @@ $ docker build -f ci/Dockerfile -t ternd .
 Run the ternd container image
 
 ```
-$ docker run --rm ternd report -i debian:buster
+docker run --rm ternd report -i debian:buster
 ```
 
 If you are using this container to analyze Dockerfiles and to use the "lock" feature, then you must volume mount the docker socket. We have a convenience script which will do that for you. 
 
 ```
-$ ./docker_run.sh ternd "report -i debian:buster" > output.txt
+./docker_run.sh ternd "report -i debian:buster" > output.txt
 ```
 
 To produce a json report run
 ```
-$ ./docker_run.sh ternd "report -f json -i debian:buster"
+./docker_run.sh ternd "report -f json -i debian:buster"
 ```
 
 Tern is not distributed as Docker images yet. This is coming soon. Watch the [Project Status](#project-status) for updates.
@@ -168,17 +168,17 @@ To install minikube, follow [these instructions](https://minikube.sigs.k8s.io/do
 
 Download the existing Tern Dockerfile
 ```
-$ wget https://raw.githubusercontent.com/tern-tools/tern/main/docker/Dockerfile
+wget https://raw.githubusercontent.com/tern-tools/tern/main/docker/Dockerfile
 ```
 
 Start minikube
 ```
-$ minikube start --driver=virtualbox
+minikube start --driver=virtualbox
 ```
 
 Use minikube to build the Tern container image
 ```
-$ minikube image build -t tern:test -f Dockerfile .
+minikube image build -t tern:test -f Dockerfile .
 ```
 
 Once build has completed, you should see the image by running `minikube image ls`. It should look something like `docker.io/library/tern:test`.
@@ -210,7 +210,7 @@ spec:
 
 We can now deploy Tern on Kubernetes
 ```
-$ minikube kubectl -- apply -f tern-example.yaml
+minikube kubectl -- apply -f tern-example.yaml
 ```
 
 To check the status of the Job, you can run `minikube kubectl -- describe job.batch/tern`. You should be able to see `report.txt` in `/path/to/tern/reports/`.
@@ -230,23 +230,23 @@ In your terminal app, run the following commands.
 
 Clone this repository:
 ```
-$ git clone https://github.com/tern-tools/tern.git
+git clone https://github.com/tern-tools/tern.git
 ```
 
 Bring up the Vagrant box: 
 ```
-$ cd tern/vagrant
-$ vagrant up
+cd tern/vagrant
+vagrant up
 ```
 
 SSH into the created VM: 
 ```
-$ vagrant ssh
+vagrant ssh
 ```
 
 Run:
 ```
-$ tern report -i debian:buster -o output.txt
+tern report -i debian:buster -o output.txt
 ```
 
 # Using Tern<a name="using-tern">
@@ -258,25 +258,25 @@ Tern creates a report containing the Software Bill of Materials (SBOM) of a cont
 ## Generating an SBOM report for a Docker image<a name="sbom-for-docker-image">
 If you have a Docker image pulled locally and want to inspect it
 ```
-$ tern report -i debian:jessie
+tern report -i debian:jessie
 ```
 The SBOM of packages that are installed in the Docker image and how Tern got this information will be printed to the console. To direct this output to a file, use the `-o file_name` command line option. If you encounter any errors, please file an issue.
 
 ## Generating an SBOM report from a Dockerfile<a name="sbom-for-dockerfile">
 You can provide a Dockerfile to Tern to figure out the Software Bill of Materials and other information. Tern will build the image, analyze it with respect to the Dockerfile and discard the image. This is useful to engineers who are developing a Dockerfile for their app or in a container build and release pipeline.
 ```
-$ tern report -d samples/photon_git/Dockerfile
+tern report -d samples/photon_git/Dockerfile
 ```
 The SBOM of packages you would be shipping if you were to use the given Dockerfile will print to the console. To direct the output to a file, use the `-o file_name` command line option. Feel free to try this out on the other sample Dockerfiles in the samples directory or on Dockerfiles you may be working with. If it doesn't work for you, please file an issue.
 
 ## Generating a locked Dockerfile<a name="dockerfile-lock">
 Because of the way Docker builds containers, Dockerfiles are generally not declarative or reflective of what ultimately gets included in the container image that gets produced. Pinning information in your Dockerfile (base OS, packages, etc.) can help create more reproducible container images should your Dockerfile be distributed to other parties. If you have a Dockerfile that you would like to lock to a more reproducible version, Tern can help.
 ```
-$ tern lock Dockerfile
+tern lock Dockerfile
 ```
 The locked Dockerfile will be created in `Dockerfile.lock` unless an output file is otherwise specified. To specify an output file
 ```
-$ tern lock Dockerfile -o output.txt
+tern lock Dockerfile -o output.txt
 ```
 If the packages are not pinned in the resulting `Dockerfile.lock` or output file that gets produced, it is because 1) Tern does not know the version of the packages to pin (i.e. unable to get this information from the package manager) or 2) your Dockerfile failed to build. In the case of a failed Dockerfile build, Tern only builds the base image and tries to pin what it can. If you encounter any errors, please file an issue.
 
@@ -295,7 +295,7 @@ The default report Tern produces is a human readable, high-level overview. The o
 
 While the packages found in each layer and their associated version and license are listed on a per layer basis, there is also a summary of licenses found in the container printed at the bottom of the report which is unique to the default human readable format.
 ```
-$ tern report -i golang:1.12-alpine -o output.txt
+tern report -i golang:1.12-alpine -o output.txt
 ```
 
 ## JSON Format<a name="report-json">
@@ -303,19 +303,19 @@ You can get the results in a JSON file to pass around in a network. The JSON rep
 
 In terms of general container information, the JSON report provides detailed "created by" information including docker container config information, layer `created_by` information and layer creation time stamps. It also provides the `diff_id` and tar file information for each layer, including each layer's unique package set and the packages metadata. The JSON report will also provide more detailed package metadata (if found) including the project URL information, files found in each package when run with scancode and package licenses (`pkg_licenses`) for containers based on Debian OSes where license information is parsed from Copyright text instead of declared by the package manager (`pkg_license`).
 ```
-$ tern report -f json -i golang:1.12-alpine
+tern report -f json -i golang:1.12-alpine
 ```
 
 ## HTML Format<a name="report-html">
 You can get an html rendering of the JSON results. An output file with `.html` suffix should be provided in order to properly view the report in your browser. The HTML report will include all of the same information found in a JSON report. See above for details about the JSON report.
 ```
-$ tern report -f html -i golang:1.12-alpine -o report.html
+tern report -f html -i golang:1.12-alpine -o report.html
 ```
 
 ## YAML Format<a name="report-yaml">
 You can get the results in a YAML file to be consumed by a downstream tool or script. The YAML information will be the same information found in the JSON report. See above for details about the JSON report.
 ```
-$ tern report -f yaml -i golang:1.12-alpine -o output.yaml
+tern report -f yaml -i golang:1.12-alpine -o output.yaml
 ```
 
 ## SPDX tag-value Format<a name="report-spdxtagvalue">
@@ -323,13 +323,13 @@ $ tern report -f yaml -i golang:1.12-alpine -o output.yaml
 
 Many compliance tools are compatible with SPDX. Tern follows the [SPDX specifications](https://spdx.org/specifications). The tag-value format is most compatible with the toolkit the organization provides. There are conversion tools available [here](https://github.com/spdx/tools) (some still in development). You can read an overview of the SPDX tag-value specification [here](./docs/spdx-tag-value-overview) and about how Tern maps its properties to the keys mandated by the spec [here](./docs/spdx-tag-value-mapping.md).
 ```
-$ tern report -f spdxtagvalue -i golang:1.12-alpine -o spdx.txt
+tern report -f spdxtagvalue -i golang:1.12-alpine -o spdx.txt
 ```
 
 ## SPDX JSON Format<a name="report-spdxjson">
 The SPDX JSON format contains the same information that an SPDX Tag-value document does. The only difference between these two formats is the way the information is represented. The 'spdxjson' format represents the container information as a collection of key-value pairs. In some cases, the SPDX JSON format may be more interoperable between cloud native compliance tools.
 ```
-$ tern report -f spdxjson -i golang:1.12-alpine -o spdx.json
+tern report -f spdxjson -i golang:1.12-alpine -o spdx.json
 ```
 
 ## CycloneDX JSON Format<a name="report-cyclonedxjson">
@@ -337,7 +337,7 @@ $ tern report -f spdxjson -i golang:1.12-alpine -o spdx.json
 
 Many tools for producing and consuming CycloneDX SBOMs are listed in the [CycloneDX Tool Center](https://cyclonedx.org/tool-center/).
 ```
-$ tern report -f cyclonedxjson -i golang:1.12-alpine -o bom.json
+tern report -f cyclonedxjson -i golang:1.12-alpine -o bom.json
 ```
 
 # Extensions<a name="extensions">
@@ -354,21 +354,21 @@ NOTE: Neither the Docker container nor the Vagrant image has any of the extensio
 
 2. Setup a python virtual environment
 ```
-$ python3 -m venv scanenv
-$ cd scanenv
-$ source bin/activate
+python3 -m venv scanenv
+cd scanenv
+source bin/activate
 ```
 3. Install tern and scancode
 ```
-$ pip install tern scancode-toolkit
+pip install tern scancode-toolkit
 ```
 <br> If you are using macOS on M1 or Linux on ARM, run:</br>
 ```
-$ pip install tern scancode-toolkit-mini
+pip install tern scancode-toolkit-mini
 ```
 4. Run tern with scancode
 ```
-$ tern report -x scancode -i golang:1.12-alpine
+tern report -x scancode -i golang:1.12-alpine
 ```
 
 If you are running Scancode for the first time, depending on the size of the container image, it takes anywhere between 10 minutes to a few hours to run due to the number of files needed to be analyzed. Once completed, subsequent runs will be much faster as the data will be cached for future use.
@@ -380,23 +380,23 @@ If you are running Scancode for the first time, depending on the size of the con
 
 2. Setup a python virtual environment
 ```
-$ python3 -m venv scanenv
-$ cd scanenv
-$ source bin/activate
+python3 -m venv scanenv
+cd scanenv
+source bin/activate
 ```
 3. Install tern and cve-bin-tool
 ```
-$ pip install tern cve-bin-tool
+pip install tern cve-bin-tool
 ```
 4. Run tern with cve-bin-tool
 ```
-$ tern report -x cve_bin_tool -i golang:1.12-alpine
+tern report -x cve_bin_tool -i golang:1.12-alpine
 ```
  
 # Running tests<a name="running-tests">
 WARNING: The `test_util_*` tests are not up to date. We are working on it :). From the Tern repository root directory run:
 ```
-$ python tests/<test file>.py
+python tests/<test file>.py
 ```
 
 ## Project Status<a name="project-status"/>
