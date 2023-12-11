@@ -98,17 +98,29 @@ test_suite = {
         'tern report -f json -i photon:3.0',
         'tern report -f spdxtagvalue -i photon:3.0',
         'tern report -f spdxjson -i photon:3.0',
+        'tern report -f spdxyaml -i photon:3.0',
+        'tern report -f spdxxml -i photon:3.0',
+        'tern report -f spdxrdf -i photon:3.0',
         'tern report -d samples/alpine_python/Dockerfile',
         'tern report -f html -i photon:3.0',
         'tern report -f cyclonedxjson -i photon:3.0'],
     # tern/formats/spdx
     re.compile('tern/formats/spdx'): [
-        'tern report -f spdxtagvalue -i photon:3.0 -o spdx.spdx && ' \
-        'java -jar tools-java/target/tools-java-*-jar-with-dependencies.jar '\
+        'tern report -f spdxtagvalue -i photon:3.0 -o spdx.spdx && '
+        'java -jar tools-java/target/tools-java-*-jar-with-dependencies.jar '
         'Verify spdx.spdx',
-        'tern report -f spdxjson -i photon:3.0 -o spdx.json && ' \
-        'java -jar tools-java/target/tools-java-*-jar-with-dependencies.jar '\
-        'Verify spdx.json'],
+        'tern report -f spdxjson -i photon:3.0 -o spdx.json && '
+        'java -jar tools-java/target/tools-java-*-jar-with-dependencies.jar '
+        'Verify spdx.json',
+        'tern report -f spdxyaml -i photon:3.0 -o spdx.yaml && '
+        'java -jar tools-java/target/tools-java-*-jar-with-dependencies.jar '
+        'Verify spdx.yaml',
+        'tern report -f spdxxml -i photon:3.0 -o spdx.xml && '
+        'java -jar tools-java/target/tools-java-*-jar-with-dependencies.jar '
+        'Verify spdx.xml',
+        'tern report -f spdxrdf -i photon:3.0 -o spdx.rdf.xml && '
+        'java -jar tools-java/target/tools-java-*-jar-with-dependencies.jar '
+        'Verify spdx.rdf.xml'],
     # tern/tools
     re.compile('tern/tools'):
     ['tern report -i golang:alpine'],

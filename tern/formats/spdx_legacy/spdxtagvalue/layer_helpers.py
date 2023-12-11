@@ -10,10 +10,10 @@ Layers for SPDX act like a Package
 import logging
 import os
 
-from tern.formats.spdx import spdx_common
-from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
+from tern.formats.spdx_legacy import spdx_common
+from tern.formats.spdx_legacy.spdxtagvalue import formats as spdx_formats
 from tern.utils import constants
-from tern.formats.spdx.spdxtagvalue import file_helpers as fhelpers
+from tern.formats.spdx_legacy.spdxtagvalue import file_helpers as fhelpers
 from tern.report import content
 
 # global logger

@@ -7,8 +7,8 @@
 Helper functions for packages in SPDX document
 """
 
-from tern.formats.spdx.spdxtagvalue import formats as spdx_formats
-from tern.formats.spdx import spdx_common
+from tern.formats.spdx_legacy.spdxtagvalue import formats as spdx_formats
+from tern.formats.spdx_legacy import spdx_common
 from tern.report import content
 
 

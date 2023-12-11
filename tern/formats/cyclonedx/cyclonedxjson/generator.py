@@ -50,12 +50,14 @@ def get_document_dict(image_obj_list):
 
 
 class CycloneDXJSON(generator.Generate):
-    def generate(self, image_obj_list, print_inclusive=False):
+    def generate(self, image_obj_list, spdx_version, print_inclusive=False):
         ''' Generate a CycloneDX document
         The whole document should be stored in a dictionary which can be
         converted to JSON and dumped to a file using the write_report function
         in report.py. '''
         logger.debug('Generating CycloneDX JSON document...')
+        if spdx_version is not None:
+            logger.warning("The SPDX version parameter is not supported for CycloneDX JSON.")
 
         report = get_document_dict(image_obj_list)
 
