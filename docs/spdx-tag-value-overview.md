@@ -4,7 +4,7 @@ SPDX-License-Identifier: BSD-2-Clause
 
 This file provides an overview of the [SPDX](https://spdx.org/) tag-value format, with focus on the particular aspects that are relevant to Tern.
 
-Currently, SPDX has two official formats: RDF and tag-value. These formats are interchangeable using the official [SPDX tools for Java](https://github.com/spdx/tools/]). Other formats, such as JSON, are under consideration by the SPDX project.
+Currently, SPDX has two official formats: RDF and tag-value. These formats are interchangeable using the official [SPDX tools for Java](https://github.com/spdx/tools/). Other formats, such as JSON, are under consideration by the SPDX project.
 
 The present document will only address the tag-value format.
 
