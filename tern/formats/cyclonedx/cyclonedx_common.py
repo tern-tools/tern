@@ -10,6 +10,7 @@ Common functions that are useful for CycloneDX document creation
 import datetime
 import uuid
 from tern.utils import general
+import re
 
 
 ###################
@@ -91,4 +92,16 @@ def get_os_guess(image_obj):
 
 
 def get_license_from_name(name):
+    if name.isupper() is False:
+        name = name.split("-")
+        name = [n.title() if not n.isupper() else n for n in name]
+        name = "-".join(name)
+
+    if "GPLv" in name:
+        name = name.replace("GPLv", "GPL-")
+    
+    if re.search("GPL-[0-9][^\+\.]", name) or re.search("GPL-[0-9]$", name):
+        name2 = re.sub(r"GPL-(\d)",r"GPL-\1.0", name)
+        name = name2
+
     return {'license': {'id': name}}
