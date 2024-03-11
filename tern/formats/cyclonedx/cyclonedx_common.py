@@ -10,7 +10,8 @@ Common functions that are useful for CycloneDX document creation
 import datetime
 import uuid
 from tern.utils import general
-
+import spdx_license_list
+sll = spdx_license_list.LICENSES
 
 ###################
 # General Helpers #
@@ -91,4 +92,7 @@ def get_os_guess(image_obj):
 
 
 def get_license_from_name(name):
-    return {'license': {'id': name}}
+    if sll.get(name) is None:
+        return {'license': {'name': name}}
+    else:
+        return {'license': {'id': name}}
