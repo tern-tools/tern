@@ -18,4 +18,5 @@ GitPython~=3.1
 prettytable~=3.8
 packageurl-python>=0.11.1
 license-expression>=30.1
+spdx-license-list>=3.23
 
