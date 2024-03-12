@@ -10,8 +10,7 @@ Common functions that are useful for CycloneDX document creation
 import datetime
 import uuid
 from tern.utils import general
-
-
+from cyclonedx.spdx import fixup_id as spdx_id_validate
 ###################
 # General Helpers #
 ###################
@@ -91,4 +90,9 @@ def get_os_guess(image_obj):
 
 
 def get_license_from_name(name):
-    return {'license': {'id': name}}
+        spdx_id = spdx_id_validate(name)
+        if spdx_id:
+            return {'license': {'id': spdx_id}}
+        else:
+            return {'license': {'name': name}}
+        
